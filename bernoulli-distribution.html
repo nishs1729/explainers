@@ -80,6 +80,7 @@ section{padding-top:56px}
 .widget-title{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);margin:0 0 12px;font-weight:600}
 .controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:12px 0}
 .ctrl{display:flex;align-items:center;gap:10px;font-size:15px}
+@media (max-width:600px){.ctrl{flex-wrap:wrap;gap:4px 10px}}
 .ctrl output{font-family:var(--mono);font-size:14px;min-width:3.2em;color:var(--ink)}
 input[type=range]{accent-color:var(--accent);width:180px;max-width:100%}
 .btn{font:inherit;font-size:14px;line-height:1.2;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;transition:background .15s,transform .1s}
@@ -94,6 +95,8 @@ canvas{display:block;width:100%}
 .callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:20px 0}
 .callout p:last-child{margin-bottom:0}
 .katex-display{overflow-x:auto;overflow-y:hidden;padding:4px 0}
+/* if an equation still doesn't fit, fade its right edge so it's clear it scrolls */
+.katex-display.ovf,.mathbox.ovf{-webkit-mask-image:linear-gradient(to right,#000 82%,transparent);mask-image:linear-gradient(to right,#000 82%,transparent)}
 .mathbox{overflow-x:auto;padding:6px 0}
 details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:14px 0;background:var(--surface)}
 details summary{cursor:pointer;font-weight:600;font-size:15px;color:var(--ink-2)}
@@ -159,7 +162,7 @@ details[open] summary{margin-bottom:8px}
 .sw.acc{height:0;border-top:2px dashed var(--accent)}
 
 /* seesaw */
-#seesaw{width:100%;height:auto;display:block}
+#seesaw{width:100%;height:auto;display:block;overflow:visible}
 .ss-beam{fill:var(--ink-2)}
 .ss-ground{stroke:var(--line);stroke-width:2}
 .ss-fulcrum{fill:var(--surface-2);stroke:var(--ink-3);stroke-width:2}
@@ -169,6 +172,11 @@ details[open] summary{margin-bottom:8px}
 .ss-wlab{fill:var(--ink);font:600 13px var(--mono);text-anchor:middle}
 .ss-pmark{fill:var(--accent)}
 .ss-plab{fill:var(--accent);font:600 13px var(--sans);text-anchor:middle}
+/* the SVG scales down on narrow screens, so scale its text up to stay ~12px on screen */
+@media (max-width:600px){
+  .ss-ticklab{font-size:24px}
+  .ss-wlab,.ss-plab{font-size:26px}
+}
 .status{font-weight:600;min-height:1.6em}
 .status.ok{color:var(--one)}
 
@@ -311,7 +319,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
     <div class="small muted" style="text-align:center">The bar above is the full 1 unit of probability. Moving the slider moves sand between buckets, but the total never changes.</div>
   </div>
 
-  $$P(X=1) = p, \qquad P(X=0) = 1-p, \qquad 0 \le p \le 1$$
+  $$\begin{gathered} P(X=1) = p, \quad P(X=0) = 1-p, \\ 0 \le p \le 1 \end{gathered}$$
   <p>We write this as \(X \sim \text{Bernoulli}(p)\), read as “\(X\) follows a Bernoulli distribution with parameter \(p\).” A fair coin is \(\text{Bernoulli}(0.5)\). The free-throw shooter is \(\text{Bernoulli}(0.7)\). “Roll a six” is \(\text{Bernoulli}(1/6)\).</p>
   <p class="muted">Move the slider all the way to 0 or 1. Then one bucket holds everything and the outcome is certain. These are the <em>degenerate</em> cases: technically still Bernoulli distributions, but with no randomness left.</p>
 </section>
@@ -336,7 +344,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
   </div>
 
   <p>Why use this form? When we look at <em>many</em> independent trials together, their probabilities get multiplied, and with this notation the exponents simply <strong>add up</strong>. For example, the probability of the specific sequence \(1, 0, 1\) is</p>
-  $$p^1(1-p)^0 \cdot p^0(1-p)^1 \cdot p^1(1-p)^0 \;=\; p^{1+0+1}\,(1-p)^{0+1+0} \;=\; p^2(1-p)^1.$$
+  $$\begin{aligned} &p^1(1-p)^0 \cdot p^0(1-p)^1 \cdot p^1(1-p)^0 \\ &\quad= p^{1+0+1}\,(1-p)^{0+1+0} \;=\; p^2(1-p)^1. \end{aligned}$$
   <p>Only the number of 1s and the number of 0s matter, not the order they came in. We will use this in sections 8 and 9.</p>
 </section>
 
@@ -346,7 +354,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
   <h2>Let the computer flip</h2>
   <p>What does “\(P(X=1) = 0.3\)” actually mean? You can’t check it with one trial, because one trial gives you a 0 or a 1, never 0.3. The <em>frequentist</em> interpretation is this: <strong>if you repeat the trial many times, the fraction of 1s settles down near 0.3.</strong></p>
   <p>Below is a coin with an adjustable bias. Flip it and watch the running fraction of 1s:</p>
-  $$\hat p_n = \frac{x_1 + x_2 + \cdots + x_n}{n} = \frac{\text{number of 1s}}{n}$$
+  $$\begin{aligned} \hat p_n &= \frac{x_1 + x_2 + \cdots + x_n}{n} \\ &= \frac{\text{number of 1s}}{n} \end{aligned}$$
   <p class="small muted">The hat on \(\hat p\) means “estimated from data”, as opposed to the true but unknown \(p\).</p>
 
   <div class="widget">
@@ -361,7 +369,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
       <button class="btn primary" id="labAuto">▶ Auto-flip</button>
       <button class="btn" id="labReset">Reset</button>
     </div>
-    <canvas id="labStrip" style="height:46px" aria-label="Most recent flips"></canvas>
+    <canvas role="img" id="labStrip" style="height:46px" aria-label="Most recent flips"></canvas>
     <div class="lab-grid">
       <div>
         <div class="bars2">
@@ -371,7 +379,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
         <div class="legend" style="justify-content:center"><span><i class="sw dash"></i>theory</span><span><i class="sw" style="background:var(--ink-3)"></i>observed</span></div>
       </div>
       <div>
-        <canvas id="labChart" style="height:240px" aria-label="Running proportion of ones"></canvas>
+        <canvas role="img" id="labChart" style="height:240px" aria-label="Running proportion of ones"></canvas>
         <div class="legend"><span><i class="sw line"></i>running fraction \(\hat p_n\)</span><span><i class="sw acc"></i>true \(p\)</span><span><i class="sw band"></i>typical range \(p \pm 2\sqrt{p(1-p)/n}\)</span></div>
       </div>
     </div>
@@ -391,7 +399,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
   <div class="secnum">06</div>
   <h2>Expected value: the balance point</h2>
   <p>The <em class="term">expected value</em> (or <em>mean</em>) of a random variable is a weighted average: multiply each possible value by its probability, then add the results.</p>
-  $$E[X] = \sum_x x \cdot P(X=x) = 0\cdot(1-p) + 1\cdot p = p$$
+  $$\begin{aligned} E[X] &= \sum_x x \cdot P(X=x) \\ &= 0\cdot(1-p) + 1\cdot p = p \end{aligned}$$
   <p>So the mean of a Bernoulli variable is just \(p\). There is a nice physical way to picture this. Put a weight of size \(1-p\) at position 0 and a weight of size \(p\) at position 1 on a seesaw. The mean is the point where the seesaw <strong>balances</strong>, also known as the center of mass.</p>
 
   <div class="widget">
@@ -401,7 +409,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
       <label class="ctrl">Fulcrum at <input type="range" id="ssF" min="0" max="1" step="0.01" value="0.7"><output id="ssFOut"></output></label>
       <button class="btn primary" id="ssGo">Balance it</button>
     </div>
-    <svg id="seesaw" viewBox="0 0 640 270" role="img" aria-label="A seesaw with weights 1-p at 0 and p at 1">
+    <svg id="seesaw" viewBox="0 -50 640 320" role="img" aria-label="A seesaw with weights 1-p at 0 and p at 1">
       <line class="ss-ground" x1="20" y1="252" x2="620" y2="252"/>
       <polygon class="ss-fulcrum" id="ssFul" points="0,0 0,0 0,0"/>
       <g id="ssBeam">
@@ -430,9 +438,9 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
   <div class="secnum">07</div>
   <h2>Variance: how unpredictable?</h2>
   <p>The mean tells you where the balance point is. The <em class="term">variance</em> tells you how <strong>spread out</strong> the values are around it. It is defined as the expected squared distance from the mean:</p>
-  $$\operatorname{Var}(X) = E\big[(X - \mu)^2\big], \qquad \mu = E[X] = p$$
+  $$\begin{gathered} \operatorname{Var}(X) = E\big[(X - \mu)^2\big], \\ \text{where } \mu = E[X] = p \end{gathered}$$
   <p>A Bernoulli variable has only two values, so there are only two distances to consider. The value 0 is at distance \(p\) from the mean, and the value 1 is at distance \(1-p\). Square each distance and weight it by its probability:</p>
-  $$\operatorname{Var}(X) = \underbrace{(1-p)}_{P(X=0)}\,(0-p)^2 + \underbrace{p}_{P(X=1)}\,(1-p)^2 = p(1-p)\big[\,p + (1-p)\,\big] = p(1-p)$$
+  $$\begin{aligned} \operatorname{Var}(X) &= \underbrace{(1-p)}_{P(X=0)}\,(0-p)^2 \\ &\quad+ \underbrace{p}_{P(X=1)}\,(1-p)^2 \\ &= p(1-p)\big[\,p + (1-p)\,\big] \\ &= p(1-p) \end{aligned}$$
   <p>In the left picture below, each squared distance is drawn as an actual square. The variance is the probability-weighted average of the two square areas.</p>
 
   <div class="widget">
@@ -441,15 +449,15 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
       <label class="ctrl">\(p\) <input type="range" id="vP" min="0" max="1" step="0.01" value="0.3"><output id="vPOut"></output></label>
     </div>
     <div class="grid2">
-      <canvas id="vSquares" style="height:270px" aria-label="Squared deviations drawn as squares"></canvas>
-      <canvas id="vCurve" style="height:270px" aria-label="Variance p(1-p) as a function of p"></canvas>
+      <canvas role="img" id="vSquares" style="height:270px" aria-label="Squared deviations drawn as squares"></canvas>
+      <canvas role="img" id="vCurve" style="height:270px" aria-label="Variance p(1-p) as a function of p"></canvas>
     </div>
     <div class="mathbox" id="vCalc"></div>
   </div>
 
   <h3>A shortcut</h3>
   <p>Variance can also be computed as \(\operatorname{Var}(X) = E[X^2] - (E[X])^2\). For a Bernoulli variable, \(0^2 = 0\) and \(1^2 = 1\), so <strong>\(X^2 = X\)</strong>. That means \(E[X^2] = E[X] = p\), and</p>
-  $$\operatorname{Var}(X) = p - p^2 = p(1-p), \qquad \sigma = \sqrt{p(1-p)}$$
+  $$\begin{gathered} \operatorname{Var}(X) = p - p^2 = p(1-p), \\ \sigma = \sqrt{p(1-p)} \end{gathered}$$
   <p>Here \(\sigma\) is the <em class="term">standard deviation</em>, the square root of the variance. It is measured in the same units as \(X\).</p>
 
   <h3>When is it largest?</h3>
@@ -462,7 +470,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
   <div class="secnum">08</div>
   <h2>Stacking Bernoullis</h2>
   <p>Now run \(n\) independent Bernoulli trials with the same \(p\) and <strong>add up</strong> the results:</p>
-  $$Y = X_1 + X_2 + \cdots + X_n = \text{number of successes}$$
+  $$\begin{aligned} Y &= X_1 + X_2 + \cdots + X_n \\ &= \text{number of successes} \end{aligned}$$
   <p>The sum \(Y\) is a new random variable that can be anything from \(0\) to \(n\). Its distribution is called the <em class="term">Binomial distribution</em>, \(\text{Binomial}(n, p)\). Run the machine to watch it build up one trial at a time:</p>
 
   <div class="widget">
@@ -477,8 +485,8 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
       <button class="btn" id="bRun1000">Run 1000×</button>
       <button class="btn" id="bReset">Reset</button>
     </div>
-    <canvas id="bCoins" style="height:64px" aria-label="The n Bernoulli trials of the latest run"></canvas>
-    <canvas id="bHist" style="height:250px" aria-label="Histogram of the number of successes"></canvas>
+    <canvas id="bCoins" style="height:64px" role="img" aria-label="The n Bernoulli trials of the latest run"></canvas>
+    <canvas role="img" id="bHist" style="height:250px" aria-label="Histogram of the number of successes"></canvas>
     <div class="legend"><span><i class="sw" style="background:var(--accent)"></i>observed share of runs</span><span><i class="sw" style="background:var(--gold);height:8px;width:8px;border-radius:50%"></i>Binomial formula</span></div>
     <div class="readout" id="bStats" style="margin-top:8px"></div>
   </div>
@@ -486,8 +494,9 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
   <p>The formula comes directly from the PMF in section 4. Any <em>specific</em> sequence containing \(k\) ones and \(n-k\) zeros has probability \(p^k(1-p)^{n-k}\), because the exponents add up. There are \(\binom{n}{k}\) such sequences (ways to choose which \(k\) positions are the 1s), so</p>
   $$P(Y = k) = \binom{n}{k}\, p^{k}\,(1-p)^{n-k}.$$
   <p>The mean and variance follow from the Bernoulli ones. Expected values always add, and variances add when the trials are independent:</p>
-  $$E[Y] = \sum_{i=1}^n E[X_i] = np, \qquad \operatorname{Var}(Y) = \sum_{i=1}^n \operatorname{Var}(X_i) = np(1-p).$$
+  $$\begin{aligned} E[Y] &= \sum_{i=1}^n E[X_i] = np, \\ \operatorname{Var}(Y) &= \sum_{i=1}^n \operatorname{Var}(X_i) = np(1-p). \end{aligned}$$
   <p class="muted">Set \(n\) to 30 and run 1000×. The histogram starts to look like a bell curve, which is an early sign of the Central Limit Theorem. The Bernoulli distribution is the single building block underneath all of this.</p>
+  <p>The Binomial distribution has its own explainer, which picks up where this section stops: <a href="binomial-distribution.html">The Binomial Distribution</a>.</p>
 </section>
 
 <!-- 9 -->
@@ -496,7 +505,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
   <h2>Going backwards: guessing p</h2>
   <p>So far we have assumed we <em>know</em> \(p\) and predicted the data. In real life it is usually the other way around. You see the data (clicks, cures, defects) and want to work out \(p\).</p>
   <p>Below is a coin with a <strong>secret</strong> bias. Flip it a few times. The curve shows, for every possible \(p\), how well that value explains what you have seen. This is called the <em class="term">likelihood</em>:</p>
-  $$L(p) = \prod_{i=1}^{n} p^{x_i}(1-p)^{1-x_i} = p^{k}(1-p)^{n-k}, \qquad k = \text{number of 1s}$$
+  $$\begin{aligned} L(p) &= \prod_{i=1}^{n} p^{x_i}(1-p)^{1-x_i} \\ &= p^{k}(1-p)^{n-k}, \\ &\phantom{=}\;\; \text{where } k = \text{number of 1s} \end{aligned}$$
 
   <div class="widget">
     <p class="widget-title">The mystery coin</p>
@@ -507,13 +516,14 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
       <button class="btn primary" id="mReveal">Reveal the true p</button>
       <button class="btn" id="mNew">New mystery coin</button>
     </div>
-    <canvas id="mChart" style="height:250px" aria-label="Likelihood of each value of p"></canvas>
+    <canvas role="img" id="mChart" style="height:250px" aria-label="Likelihood of each value of p"></canvas>
     <div class="readout" id="mStats" style="margin-top:8px"></div>
   </div>
 
   <p>The peak of the curve is the <em class="term">maximum likelihood estimate</em>. To find it, take the logarithm (which turns the product into a sum) and set the derivative to zero:</p>
-  $$\ell(p) = k\ln p + (n-k)\ln(1-p), \qquad \ell'(p) = \frac{k}{p} - \frac{n-k}{1-p} = 0 \;\;\Longrightarrow\;\; \hat p = \frac{k}{n}.$$
+  $$\begin{aligned} \ell(p) &= k\ln p + (n-k)\ln(1-p), \\ \ell'(p) &= \frac{k}{p} - \frac{n-k}{1-p} = 0 \\ &\Longrightarrow\;\; \hat p = \frac{k}{n}. \end{aligned}$$
   <p>The best guess for \(p\) is simply <strong>the fraction of 1s you observed</strong>, which is what you would probably have guessed anyway. More importantly, the curve gets <strong>narrower</strong> as you flip more. Its width is roughly \(\sqrt{\hat p(1-\hat p)/n}\), the same quantity that controlled the funnel in section 5.</p>
+  <div class="callout"><p><strong>A trap at the edges.</strong> Flip three times and get three 0s. Then \(\hat p = 0\) and \(\sqrt{\hat p(1-\hat p)/n} = 0\), which would suggest you know \(p\) exactly after three flips. You don't: the curve above is still wide. The readout therefore uses the <em>Wilson interval</em>, which gives an honest range even when every flip came up the same way.</p></div>
 </section>
 
 <!-- 10 -->
@@ -527,9 +537,9 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
   </div>
 
   <div class="minis" style="margin-top:16px">
-    <div class="mini"><div class="cap">PMF</div><canvas id="miniPMF" style="height:150px"></canvas></div>
-    <div class="mini"><div class="cap">CDF</div><canvas id="miniCDF" style="height:150px"></canvas></div>
-    <div class="mini"><div class="cap">Entropy (bits) vs p</div><canvas id="miniEnt" style="height:150px"></canvas></div>
+    <div class="mini"><div class="cap">PMF</div><canvas role="img" id="miniPMF" style="height:150px" aria-label="Probability mass function bars for X = 0 and X = 1"></canvas></div>
+    <div class="mini"><div class="cap">CDF</div><canvas role="img" id="miniCDF" style="height:150px" aria-label="Step-shaped cumulative distribution function"></canvas></div>
+    <div class="mini"><div class="cap">Entropy (bits) vs p</div><canvas role="img" id="miniEnt" style="height:150px" aria-label="Entropy in bits as a function of p"></canvas></div>
   </div>
 
   <h3>The numbers</h3>
@@ -561,27 +571,27 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
   <details>
     <summary>Skewness: which way is it lopsided?</summary>
     <p>Skewness is the third central moment divided by \(\sigma^3\). The third central moment is</p>
-    $$E[(X-p)^3] = q(-p)^3 + p(q)^3 = pq\,(q^2 - p^2) = pq\,(q-p)(q+p) = pq\,(q-p).$$
+    $$\begin{aligned} E[(X-p)^3] &= q(-p)^3 + p(q)^3 = pq\,(q^2 - p^2) \\ &= pq\,(q-p)(q+p) = pq\,(q-p). \end{aligned}$$
     $$\gamma_1 = \frac{pq(q-p)}{(pq)^{3/2}} = \frac{q-p}{\sqrt{pq}}.$$
     <p>At \(p=\tfrac12\) the distribution is symmetric and \(\gamma_1 = 0\). When \(p\) is small, \(X\) is usually 0 with a rare jump up to 1, which gives a long right tail and positive skew. As \(p \to 0\), the skewness grows without bound.</p>
   </details>
   <details>
     <summary>Kurtosis: how heavy are the tails?</summary>
     <p>The fourth central moment uses \(p^3 + q^3 = (p+q)^3 - 3pq(p+q) = 1 - 3pq\):</p>
-    $$E[(X-p)^4] = q\,p^4 + p\,q^4 = pq\,(p^3 + q^3) = pq\,(1 - 3pq).$$
-    $$\text{Kurt} = \frac{pq(1-3pq)}{(pq)^2} = \frac{1-3pq}{pq}, \qquad \gamma_2 = \text{Kurt} - 3 = \frac{1-6pq}{pq}.$$
+    $$\begin{aligned} E[(X-p)^4] &= q\,p^4 + p\,q^4 \\ &= pq\,(p^3 + q^3) = pq\,(1 - 3pq). \end{aligned}$$
+    $$\begin{aligned} \text{Kurt} &= \frac{pq(1-3pq)}{(pq)^2} = \frac{1-3pq}{pq}, \\ \gamma_2 &= \text{Kurt} - 3 = \frac{1-6pq}{pq}. \end{aligned}$$
     <p>At \(p = \tfrac12\), \(\gamma_2 = -2\). That is the <em>smallest excess kurtosis any distribution can have</em>: a fair coin has no tails at all, just two equal spikes. Rare-event Bernoullis (small \(p\)) have very large kurtosis because almost all of their variance comes from one rare outcome.</p>
   </details>
   <details>
     <summary>Moments and the moment generating function</summary>
     <p>Since \(0^k = 0\) and \(1^k = 1\), we have \(X^k = X\) for every \(k \ge 1\), so <strong>every raw moment equals \(p\)</strong>. The MGF shows the same thing:</p>
-    $$M_X(t) = E[e^{tX}] = q\,e^{0} + p\,e^{t} = q + pe^t, \qquad M_X^{(k)}(t) = pe^t \;\Rightarrow\; M_X^{(k)}(0) = p.$$
+    $$\begin{aligned} M_X(t) &= E[e^{tX}] = q\,e^{0} + p\,e^{t} = q + pe^t, \\ M_X^{(k)}(t) &= pe^t \;\Rightarrow\; M_X^{(k)}(0) = p. \end{aligned}$$
     <p>The MGF of a sum of independent variables is the product of their MGFs. So the sum of \(n\) independent Bernoulli(\(p\)) variables has MGF \((q+pe^t)^n\), which is exactly the Binomial MGF.</p>
   </details>
   <details>
     <summary>Entropy: how many bits of surprise?</summary>
     <p>Entropy measures, in bits, how much information you gain on average when you see the outcome:</p>
-    $$H(p) = -p\log_2 p - q\log_2 q, \qquad (0\log_2 0 := 0).$$
+    $$\begin{gathered} H(p) = -p\log_2 p - q\log_2 q, \\ \text{with } 0\log_2 0 := 0. \end{gathered}$$
     <p>It is \(0\) when \(p\) is 0 or 1 (no surprise at all) and reaches its maximum of exactly <strong>1 bit</strong> at \(p = \tfrac12\). A fair coin flip is the standard definition of one bit of information. Among all distributions on \(\{0,1\}\), the fair coin is the most uncertain, both by entropy and by variance.</p>
   </details>
   <details>
@@ -634,7 +644,6 @@ const root = document.documentElement;
 const C = n => getComputedStyle(root).getPropertyValue(n).trim();
 const clamp = (x,a,b) => Math.max(a, Math.min(b, x));
 const f2 = x => x.toFixed(2), f3 = x => x.toFixed(3);
-const TEAL = '#1aa38b', CORAL = '#e0623f';
 const SANS = 'system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';
 const MONO = 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
 
@@ -646,9 +655,21 @@ if (window.renderMathInElement) {
 }
 function tex(el, s, display){
   if (!el) return;
-  if (window.katex) { try { katex.render(s, el, {throwOnError:false, displayMode:!!display}); return; } catch(e){} }
+  if (window.katex) { try { katex.render(s, el, {throwOnError:false, displayMode:!!display}); markOverflow(el.querySelector('.katex-display')); return; } catch(e){} }
   el.textContent = s;
 }
+// Equations that are wider than the screen scroll sideways; fade the right edge until
+// the reader has scrolled to the end, so it's obvious there is more.
+function markOverflow(el){
+  if (!el) return;
+  el.classList.toggle('ovf', el.scrollWidth - el.clientWidth - el.scrollLeft > 2);
+}
+function markAllOverflow(){ $$('.katex-display').forEach(markOverflow); }
+document.addEventListener('scroll', e => {
+  if (e.target.classList && e.target.classList.contains('katex-display')) markOverflow(e.target);
+}, true);
+markAllOverflow();
+window.addEventListener('load', markAllOverflow);   // KaTeX web fonts can change widths
 function fit(c){
   const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
   const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
@@ -657,7 +678,7 @@ function fit(c){
   return {ctx, w, h};
 }
 const redraws = [];
-function redrawAll(){ redraws.forEach(f => f()); }
+function redrawAll(){ redraws.forEach(f => f()); markAllOverflow(); }
 let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(redrawAll, 80); });
 const mq = window.matchMedia('(prefers-color-scheme: dark)');
 if (mq.addEventListener) mq.addEventListener('change', redrawAll);
@@ -719,10 +740,11 @@ function roundRect(ctx, x, y, w, h, r){
     mail: {icon:'📧', p:.3,  desc:'An email arrives. Suppose 30% of all mail is spam. Success = spam, so p = 0.3.', yes:'Spam', no:'Not spam', m1:'Spam', m0:'Not spam'},
     die:  {icon:'🎲', p:1/6, desc:'Roll a die, but only ask “is it a six?”. Six possible faces collapse into two outcomes, and p = 1/6.', die:true, m1:'rolled a 6', m0:'rolled 1, 2, 3, 4 or 5'}
   };
-  let cur = 'coin', busy = false, hist = [];
+  const SHOW = 60;
+  let cur = 'coin', busy = false, hist = [], total = 0, ones = 0;
   const icon = $('#rvIcon'), label = $('#rvLabel'), box = $('#rvOutcome'), b1 = $('#rvBox1'), b0 = $('#rvBox0'), arrow = $('#rvArrow');
   function setScenario(k){
-    cur = k; hist = [];
+    cur = k; hist = []; total = 0; ones = 0;
     $$('#rvTabs .btn').forEach(b => b.classList.toggle('on', b.dataset.s === k));
     const s = S[k];
     $('#rvDesc').textContent = s.desc; icon.textContent = s.icon; label.textContent = 'press run';
@@ -737,8 +759,9 @@ function roundRect(ctx, x, y, w, h, r){
   function renderChips(){
     const el = $('#rvChips'); el.innerHTML = '';
     hist.forEach(v => { const c = document.createElement('span'); c.className = 'chip c' + v; c.textContent = v; el.appendChild(c); });
-    const ones = hist.filter(v => v === 1).length;
-    $('#rvCount').textContent = hist.length ? `${hist.length} runs · ${ones} ones · fraction ${f2(ones / hist.length)}` : '';
+    $('#rvCount').textContent = total
+      ? `${total} runs · ${ones} ones · fraction ${f2(ones / total)}` + (total > SHOW ? ` (showing the last ${SHOW})` : '')
+      : '';
   }
   function run(times){
     if (busy) return; busy = true;
@@ -747,12 +770,12 @@ function roundRect(ctx, x, y, w, h, r){
     box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake');
     let i = 0;
     const iv = setInterval(() => {
-      label.textContent = outcomeLabel(s, Math.random() < .5);
+      label.textContent = outcomeLabel(s, Math.random() < s.p);
       if (++i >= 7) {
         clearInterval(iv);
         let last;
-        for (let t = 0; t < times; t++) { last = Math.random() < s.p ? 1 : 0; hist.push(last); }
-        if (hist.length > 60) hist = hist.slice(hist.length - 60);
+        for (let t = 0; t < times; t++) { last = Math.random() < s.p ? 1 : 0; hist.push(last); total++; ones += last; }
+        if (hist.length > SHOW) hist = hist.slice(hist.length - SHOW);
         label.textContent = outcomeLabel(s, last === 1) + (times > 1 ? `  (last of ${times})` : '');
         arrow.classList.add('go');
         (last ? b1 : b0).classList.add('hit');
@@ -769,12 +792,12 @@ function roundRect(ctx, x, y, w, h, r){
 /* ---------- 3 + 4. jars & PMF explorer ---------- */
 let pmfX = 1, jarP = 0.3;
 function renderPMF(){
-  const p = jarP, q = 1 - p;
+  const p = jarP, q = 1 - p, ONE = C('--one'), ZERO = C('--zero');
   $('#pmfPNote').textContent = 'p = ' + f2(p);
   let s;
   if (pmfX === 1) {
     s = String.raw`\begin{aligned}
-P(X=\textcolor{${TEAL}}{1}) &= p^{\textcolor{${TEAL}}{1}}\,(1-p)^{\,1-\textcolor{${TEAL}}{1}} \\
+P(X=\textcolor{${ONE}}{1}) &= p^{\textcolor{${ONE}}{1}}\,(1-p)^{\,1-\textcolor{${ONE}}{1}} \\
 &= p^{1}\,(1-p)^{0} \\
 &= p\cdot 1 \;=\; p \\
 &= ${f2(p)}
@@ -782,7 +805,7 @@ P(X=\textcolor{${TEAL}}{1}) &= p^{\textcolor{${TEAL}}{1}}\,(1-p)^{\,1-\textcolor
     $('#pmfNote').textContent = 'The (1−p) factor is raised to the power 0, so it turns into 1 and drops out.';
   } else {
     s = String.raw`\begin{aligned}
-P(X=\textcolor{${CORAL}}{0}) &= p^{\textcolor{${CORAL}}{0}}\,(1-p)^{\,1-\textcolor{${CORAL}}{0}} \\
+P(X=\textcolor{${ZERO}}{0}) &= p^{\textcolor{${ZERO}}{0}}\,(1-p)^{\,1-\textcolor{${ZERO}}{0}} \\
 &= p^{0}\,(1-p)^{1} \\
 &= 1\cdot(1-p) \;=\; 1-p \\
 &= ${f2(q)}
@@ -801,6 +824,7 @@ bindRange($('#pJar'), $('#pJarOut'), p => {
   $('#bud0').textContent = q >= .12 ? '1−p = ' + f2(q) : ''; $('#bud1').textContent = p >= .12 ? 'p = ' + f2(p) : '';
   renderPMF();
 });
+redraws.push(renderPMF);
 
 /* ---------- 5. simulation lab ---------- */
 (function(){
@@ -827,6 +851,7 @@ bindRange($('#pJar'), $('#pJarOut'), p => {
     $('#labStats').innerHTML = n
       ? `flips <b>n = ${n.toLocaleString()}</b> · ones <b>${k.toLocaleString()}</b> · p̂ = <b>${f3(ph)}</b> · true p = ${f2(p)} · error |p̂ − p| = <b>${f3(Math.abs(ph - p))}</b> · typical error ≈ ${f3(Math.sqrt(p*(1-p)/n))}`
       : 'No flips yet. Press a button.';
+    if (n >= MAXN) $('#labStats').innerHTML += ` · <b>limit of ${MAXN.toLocaleString()} flips reached, press Reset to start over</b>`;
   }
   function drawStrip(){
     const {ctx, w, h} = fit(strip);
@@ -1003,7 +1028,7 @@ bindRange($('#pJar'), $('#pJarOut'), p => {
   }
   function calc(){
     const q = 1 - p;
-    tex($('#vCalc'), String.raw`\operatorname{Var}(X) = \underbrace{${f2(q)}}_{1-p}\cdot\underbrace{${f3(p*p)}}_{p^2} + \underbrace{${f2(p)}}_{p}\cdot\underbrace{${f3(q*q)}}_{(1-p)^2} = ${f3(q*p*p)} + ${f3(p*q*q)} = \mathbf{${f3(p*q)}}, \quad \sigma = ${f3(Math.sqrt(p*q))}`, true);
+    tex($('#vCalc'), String.raw`\begin{aligned} \operatorname{Var}(X) &= \underbrace{${f2(q)}}_{1-p}\cdot\underbrace{${f3(p*p)}}_{p^2} \\ &\quad+ \underbrace{${f2(p)}}_{p}\cdot\underbrace{${f3(q*q)}}_{(1-p)^2} \\ &= ${f3(q*p*p)} + ${f3(p*q*q)} = \mathbf{${f3(p*q)}} \\ \sigma &= \sqrt{\operatorname{Var}(X)} = ${f3(Math.sqrt(p*q))} \end{aligned}`, true);
   }
   function draw(){ drawSquares(); drawCurve(); }
   bindRange($('#vP'), $('#vPOut'), v => { p = v; draw(); calc(); });
@@ -1026,23 +1051,34 @@ bindRange($('#pJar'), $('#pJarOut'), p => {
     const v = m2 - m * m;
     $('#bStats').innerHTML = `runs <b>${trials.toLocaleString()}</b> · average Y = <b>${f3(m)}</b> (theory np = ${f3(n * p)}) · variance of Y = <b>${f3(v)}</b> (theory np(1−p) = ${f3(n * p * (1 - p))})`;
   }
+  // One row of coins when they fit at a readable size; otherwise wrap onto several rows
+  // and grow the canvas, so coins never shrink to dots (or to a negative radius).
+  function coinLayout(w){
+    const avail = Math.max(60, w - 84);
+    const single = (avail / n - 6) / 2;
+    if (single >= 7) { const r = Math.min(13, single); return {r, sp: 2 * r + 6, perRow: n, rows: 1}; }
+    const r = 9, sp = 2 * r + 5, perRow = Math.max(1, Math.floor(avail / sp));
+    return {r, sp, perRow, rows: Math.ceil(n / perRow)};
+  }
   function drawCoins(t){
+    const L = coinLayout(coinsC.getBoundingClientRect().width);
+    const wantH = Math.max(64, L.rows * L.sp + 14) + 'px';
+    if (coinsC.style.height !== wantH) coinsC.style.height = wantH;
     const {ctx, w, h} = fit(coinsC);
     const xs = anim ? anim.xs : last;
-    const sumW = 110;
-    const sp = Math.min(34, (w - sumW - 10) / n), r = Math.min(13, sp / 2 - 2), cy = h / 2;
-    const startX = 6 + r;
+    const {r, sp, perRow, rows} = L, cy = h / 2;
+    const startX = 6 + r, top = cy - (rows - 1) * sp / 2;
     let shown = xs ? (anim ? Math.min(n, Math.floor(t / per()) + 1) : n) : 0;
     let s = 0;
     for (let i = 0; i < n; i++) {
-      const x = startX + i * sp;
+      const x = startX + (i % perRow) * sp, y = top + Math.floor(i / perRow) * sp;
       if (i < shown) {
         const v = xs[i]; s += v;
         ctx.fillStyle = v ? C('--one') : C('--zero');
-        ctx.beginPath(); ctx.arc(x, cy, r, 0, Math.PI * 2); ctx.fill();
-        if (r >= 7) { ctx.fillStyle = '#fff'; ctx.font = `600 ${Math.round(r * 1.05)}px ${MONO}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(v, x, cy + 1); }
+        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.font = `600 ${Math.max(10, Math.round(r * 1.05))}px ${MONO}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(v, x, y + 1);
       } else {
-        ctx.strokeStyle = C('--line'); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, cy, r, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = C('--line'); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
       }
     }
     ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillStyle = C('--ink'); ctx.font = '600 15px ' + MONO;
@@ -1099,12 +1135,19 @@ bindRange($('#pJar'), $('#pJarOut'), p => {
 /* ---------- 9. mystery coin ---------- */
 (function(){
   let truth, n, k, revealed;
+  // Wilson 95% interval. Unlike p̂ ± 2√(p̂(1−p̂)/n), it doesn't collapse to zero width
+  // when every flip so far has come up the same way.
+  function wilson(k, n, z = 1.96){
+    const ph = k / n, z2 = z * z, d = 1 + z2 / n;
+    const c = (ph + z2 / (2 * n)) / d, hw = (z / d) * Math.sqrt(ph * (1 - ph) / n + z2 / (4 * n * n));
+    return [Math.max(0, c - hw), Math.min(1, c + hw)];
+  }
   function newCoin(){ truth = Math.round((0.05 + Math.random() * 0.9) * 100) / 100; n = 0; k = 0; revealed = false; $('#mReveal').textContent = 'Reveal the true p'; update(); }
   function flip(m){ for (let i = 0; i < m; i++) { if (Math.random() < truth) k++; n++; } update(); }
   function update(){
     const ph = n ? k / n : null;
     let s = n
-      ? `flips <b>n = ${n}</b> · ones <b>k = ${k}</b> · best guess p̂ = k/n = <b>${f3(ph)}</b> · uncertainty ≈ ±${f3(2 * Math.sqrt(Math.max(ph * (1 - ph), 1e-9) / n))}`
+      ? `flips <b>n = ${n}</b> · ones <b>k = ${k}</b> · best guess p̂ = k/n = <b>${f3(ph)}</b> · plausible range (95%) ≈ <b>[${wilson(k, n).map(f2).join(', ')}]</b>`
       : 'No data yet, so every p from 0 to 1 is equally plausible. Flip the coin.';
     if (revealed) s += ` · <b style="color:var(--gold)">true p = ${f2(truth)}</b>`;
     $('#mStats').innerHTML = s; draw();

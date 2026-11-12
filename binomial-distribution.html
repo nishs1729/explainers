@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Binomial Distribution — a visual introduction</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<style>
+:root{
+  --bg:#faf8f4; --surface:#ffffff; --surface-2:#f2efe8; --ink:#1c1c1e; --ink-2:#4c4e55; --ink-3:#8b8d93; --line:#e3dfd5;
+  --one:#16917c; --one-soft:rgba(22,145,124,.15);
+  --zero:#d9573a; --zero-soft:rgba(217,87,58,.15);
+  --accent:#3654c9; --accent-soft:rgba(54,84,201,.11);
+  --gold:#b98317; --gold-soft:rgba(185,131,23,.22);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+    --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+    --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+    --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+    --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+  --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+  --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+  --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+  --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.68 var(--sans);-webkit-font-smoothing:antialiased}
+main{max-width:820px;margin:0 auto;padding:0 20px 80px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;letter-spacing:-.01em}
+h1{font-size:clamp(2.2rem,6vw,3.4rem);margin:.2em 0 .3em}
+h2{font-size:clamp(1.6rem,4vw,2.1rem);margin:0 0 .5em}
+h3{font-size:1.2rem;margin:1.6em 0 .4em}
+p{margin:0 0 1em}
+a{color:var(--accent)}
+strong{font-weight:650}
+em.term{font-style:normal;font-weight:650;color:var(--accent)}
+.one-c{color:var(--one);font-weight:650}
+.zero-c{color:var(--zero);font-weight:650}
+.muted{color:var(--ink-2)}
+small,.small{font-size:14px}
+
+/* hero */
+.hero{text-align:center;padding:64px 0 24px}
+.kicker{text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--ink-3);margin:0}
+.lede{font-size:1.2rem;color:var(--ink-2);max-width:620px;margin:0 auto}
+.hero-play{max-width:520px;margin:30px auto 0}
+.hero-play .controls{justify-content:center}
+.hint{font-size:15px;color:var(--ink-2);min-height:3.2em;margin:6px 0 0}
+
+.toc{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;margin:28px 0 8px}
+.toc ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 20px;counter-reset:t}
+.toc li{counter-increment:t;font-size:15px}
+.toc li::before{content:counter(t,decimal-leading-zero);font-family:var(--mono);color:var(--ink-3);margin-right:10px;font-size:13px}
+.toc a{color:var(--ink);text-decoration:none}
+.toc a:hover{color:var(--accent)}
+
+section{padding-top:56px}
+.secnum{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.08em;margin-bottom:4px}
+
+.widget{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin:26px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.widget-title{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);margin:0 0 12px;font-weight:600}
+.controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:12px 0}
+.ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:15px}
+.ctrl output{font-family:var(--mono);font-size:14px;min-width:3.2em;color:var(--ink)}
+input[type=range]{accent-color:var(--accent);width:170px;max-width:100%}
+.btn{font:inherit;font-size:14px;line-height:1.2;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;transition:background .15s,transform .1s}
+.btn:hover{border-color:var(--ink-3)}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn.right{background:var(--one-soft);border-color:var(--one);color:var(--one)}
+.btn.wrong{background:var(--zero-soft);border-color:var(--zero);color:var(--zero)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.readout{font-family:var(--mono);font-size:14px;color:var(--ink-2);line-height:1.6}
+.readout b{color:var(--ink);font-weight:600}
+.readout .ok{color:var(--one);font-weight:600}
+.readout .warn{color:var(--zero);font-weight:600}
+canvas{display:block;width:100%}
+canvas.pick{cursor:pointer;touch-action:pan-y}
+.cap{font-size:13px;color:var(--ink-3);margin:2px 0 6px}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:20px 0}
+.callout p:last-child{margin-bottom:0}
+.katex-display{overflow-x:auto;overflow-y:hidden;padding:4px 0}
+.mathbox{overflow-x:auto;padding:6px 0}
+details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:14px 0;background:var(--surface)}
+details summary{cursor:pointer;font-weight:600;font-size:15px;color:var(--ink-2)}
+details[open] summary{margin-bottom:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:680px){.grid2{grid-template-columns:1fr}}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin-top:8px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{display:inline-block;width:16px;height:10px;border-radius:2px}
+.sw.dot{width:8px;height:8px;border-radius:50%}
+.sw.dash{height:0;border-top:2px dashed var(--ink)}
+.sw.line{height:0;border-top:2px solid var(--ink)}
+.sw.band{background:var(--accent-soft);border:1px solid var(--accent)}
+.sw.outline{background:transparent;border:1.5px solid var(--zero)}
+
+/* quiz */
+.quiz{display:grid;gap:10px}
+.qitem{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg)}
+.qitem p{margin:0 0 8px;font-size:16px}
+.qbtns{display:flex;flex-wrap:wrap;gap:8px}
+.qexp{font-size:15px;color:var(--ink-2);margin:10px 0 0!important}
+
+/* paths */
+.prows{display:flex;flex-direction:column;gap:8px}
+.prow{display:grid;grid-template-columns:180px 1fr;gap:12px;align-items:start;border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;background:var(--bg)}
+.prow.sel{border-color:var(--one);box-shadow:inset 0 0 0 1px var(--one)}
+.prow:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.phead{font-size:14px;line-height:1.5}
+.phead .readout{font-size:13px}
+.pseqs{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.seq{display:inline-flex;gap:2px;padding:4px 5px;border-radius:6px;background:var(--surface-2)}
+.seq i{width:8px;height:8px;border-radius:50%;display:block}
+.seq i.d1{background:var(--one)} .seq i.d0{background:var(--zero)}
+.pbar{height:6px;border-radius:3px;background:var(--surface-2);margin-top:6px;overflow:hidden}
+.pbar i{display:block;height:100%;background:var(--one);transition:width .2s}
+@media (max-width:560px){.prow{grid-template-columns:1fr;gap:8px}}
+.pascal{display:flex;flex-direction:column;align-items:center;gap:3px;margin:14px 0 8px}
+.pascal div{display:flex;gap:2px}
+.pc{min-width:30px;height:26px;padding:0 2px;display:grid;place-items:center;font:13px var(--mono);color:var(--ink-3);border-radius:6px}
+.pascal .cur .pc{color:var(--ink);background:var(--surface-2)}
+.pascal .pc.hit{background:var(--one);color:#fff}
+.pascal .pc.par{box-shadow:inset 0 0 0 2px var(--one);color:var(--ink)}
+
+/* properties */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:18px 0}
+.card{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
+.card h4{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+.card .f{overflow-x:auto;overflow-y:hidden;font-size:15px;min-height:1.8em}
+.card .v{font:600 15px var(--mono);color:var(--accent);margin-top:6px}
+.card p{font-size:15px;margin:0;color:var(--ink-2)}
+.sticky-ctrl{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:6px 22px}
+.minis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:640px){.minis{grid-template-columns:1fr}}
+.mini{border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--surface)}
+.mini .mcap{font-size:13px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.facts{counter-reset:f;list-style:none;padding:0;margin:18px 0}
+.facts li{counter-increment:f;position:relative;padding:12px 0 12px 44px;border-bottom:1px solid var(--line)}
+.facts li::before{content:counter(f);position:absolute;left:0;top:12px;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:600 13px var(--mono)}
+.facts li strong{display:block}
+.facts.letters li::before{content:attr(data-l);font-family:var(--serif);font-size:15px}
+.table-wrap{overflow-x:auto}
+table.summary{border-collapse:collapse;width:100%;font-size:15px;margin:14px 0}
+table.summary td,table.summary th{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:middle}
+table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3)}
+footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60px;border-top:1px solid var(--line);margin-top:60px}
+
+@media (max-width:480px){
+  main{padding:0 16px 80px}
+  .widget{padding:14px}
+  .katex-display{font-size:.92em}
+  input[type=range]{width:150px}
+}
+</style>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <p class="kicker">A visual introduction</p>
+  <h1>The Binomial Distribution</h1>
+  <p class="lede">Repeat a yes/no experiment a fixed number of times and count the yeses. That count follows the binomial distribution, one of the most widely used patterns in all of probability.</p>
+  <div class="hero-play">
+    <canvas id="heroCoins" style="height:64px" role="img" aria-label="Ten coins, showing the result of the latest round of flips"></canvas>
+    <div class="controls">
+      <button class="btn primary" id="heroFlip">Flip 10 coins</button>
+      <button class="btn" id="heroMany">Do it 100 more times</button>
+    </div>
+    <canvas id="heroTally" style="height:130px" role="img" aria-label="Tally of how many heads each round produced"></canvas>
+    <p class="hint" id="heroHint" aria-live="polite">Each round, flip 10 fair coins and count the heads. The tally below records the count from every round.</p>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#many">From one trial to many</a></li>
+    <li><a href="#paths">Counting the paths</a></li>
+    <li><a href="#pmf">The formula</a></li>
+    <li><a href="#shape">How n and p set the shape</a></li>
+    <li><a href="#mv">Mean and variance, the easy way</a></li>
+    <li><a href="#galton">The bean machine</a></li>
+    <li><a href="#normal">The bell curve appears</a></li>
+    <li><a href="#poisson">Rare events: the Poisson limit</a></li>
+    <li><a href="#infer">Going backwards: what is p?</a></li>
+    <li><a href="#props">All the properties</a></li>
+    <li><a href="#uses">Where you will meet it</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<section id="many">
+  <div class="secnum">01</div>
+  <h2>From one trial to many</h2>
+  <p>The <a href="bernoulli-distribution.html">Bernoulli distribution</a> describes a single yes/no trial. Its outcome \(X\) is \(1\) (a “success”) with probability \(p\), and \(0\) (a “failure”) with probability \(1-p\). Throughout this page we write \(q = 1 - p\) for the probability of failure.</p>
+  <p>Most real questions involve many trials, not one:</p>
+  <ul>
+    <li>How many of 20 free throws will a player make?</li>
+    <li>How many of 500 website visitors will click “Buy”?</li>
+    <li>How many of 100 light bulbs from a batch are defective?</li>
+  </ul>
+  <p>In each case you repeat a Bernoulli trial \(n\) times and <strong>count the successes</strong>:</p>
+  $$Y = X_1 + X_2 + \cdots + X_n$$
+  <p>Each \(X_i\) is 0 or 1, so adding them up counts the 1s. The count \(Y\) can be any whole number from \(0\) to \(n\). This is the payoff of encoding outcomes as 0 and 1 that the Bernoulli tutorial promised.</p>
+  <p>The count \(Y\) follows a <em class="term">binomial distribution</em> when four conditions hold. A common memory aid is <strong>BINS</strong>:</p>
+  <ol class="facts letters">
+    <li data-l="B"><strong>Binary outcomes.</strong> Each trial ends in one of two ways: success or failure.</li>
+    <li data-l="I"><strong>Independent trials.</strong> The result of one trial does not change the chances of any other.</li>
+    <li data-l="N"><strong>Number of trials is fixed.</strong> \(n\) is decided in advance, not by what happens along the way.</li>
+    <li data-l="S"><strong>Same probability.</strong> Every trial has the same success probability \(p\).</li>
+  </ol>
+  <p>We then write \(Y \sim \text{Binomial}(n, p)\). The two numbers \(n\) and \(p\) are its <em class="term">parameters</em>. A single Bernoulli trial is the special case \(n = 1\).</p>
+
+  <div class="widget">
+    <p class="widget-title">Binomial or not?</p>
+    <div class="quiz" id="quiz"></div>
+    <div class="readout" id="quizScore" style="margin-top:10px" aria-live="polite"></div>
+  </div>
+
+  <div class="callout"><p>Drawing <strong>without replacement</strong> is the most common way to break the rules. Each draw changes what is left, so \(p\) shifts from trial to trial. The exact count then follows the <em>hypergeometric</em> distribution. When the population is much larger than the sample, such as polling 1,000 people out of millions, the shift is tiny and the binomial is an excellent approximation.</p></div>
+</section>
+
+<!-- 2 -->
+<section id="paths">
+  <div class="secnum">02</div>
+  <h2>Counting the paths</h2>
+  <p>Toss a coin 4 times. Which sequences give exactly two heads? Writing 1 for heads: 1100, 1010, 1001, 0110, 0101, 0011. That is six sequences.</p>
+  <p>The Bernoulli tutorial showed that the probability of one <em>specific</em> sequence depends only on how many 1s and 0s it contains. A sequence with \(k\) ones and \(n-k\) zeros has probability \(p^k q^{n-k}\), whatever the order. So the only remaining question is: <strong>how many sequences have exactly \(k\) ones?</strong></p>
+  <p>That number is the <em class="term">binomial coefficient</em> \(\binom{n}{k}\), read “\(n\) choose \(k\)” and also written \(C(n,k)\). It counts the ways to choose which \(k\) of the \(n\) positions hold the 1s:</p>
+  $$\binom{n}{k} = \frac{n!}{k!\,(n-k)!}$$
+  <p>Here \(n! = n \times (n-1) \times \cdots \times 2 \times 1\) is “\(n\) factorial”, with \(0! = 1\). For example, \(\binom{4}{2} = \frac{24}{2 \cdot 2} = 6\), matching the list above.</p>
+
+  <div class="widget">
+    <p class="widget-title">Every possible sequence, grouped by its number of 1s</p>
+    <div class="controls">
+      <label class="ctrl">trials \(n\) <input type="range" id="paN" min="1" max="8" step="1" value="4"><output id="paNOut"></output></label>
+      <label class="ctrl">\(p\) <input type="range" id="paP" min="0" max="1" step="0.01" value="0.3"><output id="paPOut"></output></label>
+    </div>
+    <div class="prows" id="paRows"></div>
+    <div class="readout" id="paSum" style="margin-top:10px"></div>
+    <div class="small muted">Click a group to highlight it in Pascal’s triangle below. <span class="one-c">●</span> = 1 (success), <span class="zero-c">●</span> = 0 (failure).</div>
+  </div>
+
+  <h3>Pascal’s triangle</h3>
+  <p>Write the counts \(\binom{n}{0}, \binom{n}{1}, \dots, \binom{n}{n}\) in a row for \(n = 0, 1, 2, \dots\) and you get <em class="term">Pascal’s triangle</em>, known centuries before Pascal in India, Persia and China. Each number is the sum of the two numbers above it:</p>
+  $$\binom{n}{k} = \binom{n-1}{k-1} + \binom{n-1}{k}$$
+  <p>The reason is simple. A sequence of length \(n\) with \(k\) ones either ends in a 1 (and the first \(n-1\) positions hold \(k-1\) ones) or ends in a 0 (and the first \(n-1\) positions hold all \(k\) ones).</p>
+  <div class="widget">
+    <p class="widget-title">Pascal’s triangle, rows 0 to 8</p>
+    <div class="pascal" id="pascal" aria-label="Pascal's triangle"></div>
+    <div class="readout" id="pascalEq" style="text-align:center"></div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="pmf">
+  <div class="secnum">03</div>
+  <h2>The formula: paths × probability per path</h2>
+  <p>Put the two pieces together. There are \(\binom{n}{k}\) sequences with exactly \(k\) ones, and each one has probability \(p^k q^{n-k}\). So</p>
+  $$P(Y=k) = \binom{n}{k}\,p^{k}\,q^{\,n-k}$$
+  <p>for \(k = 0, 1, \dots, n\). Read it from left to right as <strong>number of paths × probability of each path</strong>. This is the <em class="term">probability mass function</em> (PMF) of the binomial distribution.</p>
+  <p>Do these probabilities add up to 1? Yes. The <em>binomial theorem</em> from algebra says that expanding \((p+q)^n\) gives exactly these terms, so</p>
+  $$\sum_{k=0}^{n}\binom{n}{k}p^kq^{n-k} = (p+q)^n = 1$$
+  <p>because \(p + q = 1\). That is where the distribution gets its name.</p>
+
+  <div class="widget">
+    <p class="widget-title">Pick a bar</p>
+    <div class="controls">
+      <label class="ctrl">\(n\) <input type="range" id="pmN" min="1" max="60" step="1" value="10"><output id="pmNOut"></output></label>
+      <label class="ctrl">\(p\) <input type="range" id="pmP" min="0.01" max="0.99" step="0.01" value="0.3"><output id="pmPOut"></output></label>
+      <label class="ctrl">\(k\) <input type="range" id="pmK" min="0" max="10" step="1" value="3"><output id="pmKOut"></output></label>
+    </div>
+    <canvas id="pmChart" class="pick" style="height:240px" role="img" aria-label="Bar chart of the binomial probabilities P(Y = k); the selected bar is highlighted"></canvas>
+    <div class="cap">Tap or drag across the bars to pick \(k\). Horizontal axis: \(k\), the number of successes.</div>
+    <div class="mathbox" id="pmMath"></div>
+    <div class="readout" id="pmRead"></div>
+  </div>
+
+  <p>Two things to try:</p>
+  <ul>
+    <li>Set \(n = 60\) and look at the tallest bar. Even the most likely count has a probability of only about 0.1. With many trials the probability is spread over many possible counts, so no single count is very likely.</li>
+    <li>Pick \(k = 0\). The probability of no successes at all is \(q^n\): there is only one such path (all zeros). It shrinks quickly as \(n\) grows.</li>
+  </ul>
+</section>
+
+<!-- 4 -->
+<section id="shape">
+  <div class="secnum">04</div>
+  <h2>How \(n\) and \(p\) set the shape</h2>
+  <p>Every binomial distribution is a row of bars. The two parameters decide where the bars pile up and how wide the pile is.</p>
+
+  <div class="widget">
+    <p class="widget-title">Shape explorer</p>
+    <div class="controls">
+      <label class="ctrl">\(n\) <input type="range" id="shN" min="1" max="100" step="1" value="20"><output id="shNOut"></output></label>
+      <label class="ctrl">\(p\) <input type="range" id="shP" min="0" max="1" step="0.01" value="0.2"><output id="shPOut"></output></label>
+    </div>
+    <div class="controls">
+      <button class="btn" data-sh="20,0.5">Symmetric: p = 0.5</button>
+      <button class="btn" data-sh="20,0.05">Rare successes: p = 0.05</button>
+      <button class="btn" data-sh="100,0.1">Many trials: n = 100</button>
+      <button class="btn" id="shMirror" aria-pressed="false">Overlay Binomial(n, 1−p)</button>
+    </div>
+    <canvas id="shChart" style="height:260px" role="img" aria-label="Binomial probabilities with the mean, one standard deviation band and the most likely count marked"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i>P(Y = k)</span><span><i class="sw" style="background:var(--gold)"></i>most likely count (mode)</span><span><i class="sw dash"></i>mean \(np\)</span><span><i class="sw band"></i>mean ± 1 standard deviation</span><span id="shMirLeg" hidden><i class="sw outline"></i>Binomial(n, 1−p)</span></div>
+    <div class="readout" id="shRead" style="margin-top:8px"></div>
+  </div>
+
+  <ul>
+    <li><strong>Center.</strong> The bars balance at the mean, \(np\). With 20 trials at \(p = 0.2\) you expect about 4 successes.</li>
+    <li><strong>Peak.</strong> The most likely count, the <em class="term">mode</em>, is \(\lfloor (n+1)p \rfloor\), the whole-number part of \((n+1)p\). When \((n+1)p\) is itself a whole number there is a tie: \((n+1)p - 1\) and \((n+1)p\) are equally likely. Try \(n = 9\), \(p = 0.5\).</li>
+    <li><strong>Symmetry.</strong> At \(p = \tfrac12\) the bars are symmetric. For \(p < \tfrac12\) they bunch up on the left with a longer tail to the right (<em>right-skewed</em>), and for \(p > \tfrac12\) it is the mirror image. Counting failures instead of successes turns \(\text{Binomial}(n, p)\) into \(\text{Binomial}(n, 1-p)\). Use the overlay button to see the mirror.</li>
+    <li><strong>More trials.</strong> As \(n\) grows the skew fades. Skewness is \((q-p)/\sqrt{npq}\), which shrinks like \(1/\sqrt n\). Even with \(p = 0.1\), at \(n = 100\) the shape is nearly symmetric.</li>
+  </ul>
+  <details>
+    <summary>Why the mode is \(\lfloor (n+1)p \rfloor\)</summary>
+    <p>Compare each bar with the one before it. Most of the factorials cancel:</p>
+    $$\frac{P(Y=k+1)}{P(Y=k)} = \frac{n-k}{k+1}\cdot\frac{p}{q}$$
+    <p>The next bar is taller when this ratio is greater than 1, that is when \((n-k)p > (k+1)q\). Expanding and using \(p + q = 1\), this simplifies to \(k + 1 < (n+1)p\). So the bars rise as long as \(k+1\) stays below \((n+1)p\) and fall after that. The peak is the largest whole number not exceeding \((n+1)p\). If \((n+1)p\) is a whole number \(m\), the ratio at \(k + 1 = m\) is exactly 1, and bars \(m-1\) and \(m\) tie.</p>
+  </details>
+</section>
+
+<!-- 5 -->
+<section id="mv">
+  <div class="secnum">05</div>
+  <h2>Mean and variance, the easy way</h2>
+  <p>You could compute the mean as \(\sum_k k\,P(Y=k)\) straight from the formula, but there is a much quicker route. \(Y\) is a sum of \(n\) Bernoulli variables, and each one has mean \(p\) and variance \(pq\).</p>
+  <p>Expected values always add, so</p>
+  $$E[Y] = \sum_{i=1}^{n} E[X_i] = np$$
+  <p>Variances add when the variables are independent, so</p>
+  $$\operatorname{Var}(Y) = \sum_{i=1}^{n} \operatorname{Var}(X_i) = npq$$
+  <p>and the standard deviation is \(\sigma_Y = \sqrt{npq}\). For example, in 60 rolls of a die you expect \(60 \times \tfrac16 = 10\) sixes, give or take \(\sqrt{60 \cdot \tfrac16 \cdot \tfrac56} \approx 2.9\).</p>
+
+  <h3>More trials: a bigger spread in the count, a smaller spread in the fraction</h3>
+  <p>\(\sigma_Y = \sqrt{npq}\) grows with \(n\). With more trials, the count wanders further from \(np\) in absolute terms. But divide by \(n\) to get the <em>fraction</em> of successes, \(\hat p = Y/n\), and its standard deviation shrinks:</p>
+  $$\sigma_{\hat p} = \frac{\sqrt{npq}}{n} = \sqrt{\frac{pq}{n}}$$
+  <p>This is the same \(\sqrt{p(1-p)/n}\) funnel from the Bernoulli coin laboratory. Multiply \(n\) by 4 and the spread of the count doubles while the spread of the fraction halves.</p>
+
+  <div class="widget">
+    <p class="widget-title">Count versus fraction</p>
+    <div class="controls">
+      <label class="ctrl">\(n\) <input type="range" id="mvN" min="1" max="400" step="1" value="16"><output id="mvNOut"></output></label>
+      <button class="btn" id="mvDiv">÷ 4</button>
+      <button class="btn" id="mvMul">× 4</button>
+      <label class="ctrl">\(p\) <input type="range" id="mvP" min="0.05" max="0.95" step="0.01" value="0.5"><output id="mvPOut"></output></label>
+    </div>
+    <div class="grid2">
+      <div><div class="cap">Count minus its mean, \(Y - np\)</div><canvas id="mvL" style="height:200px" role="img" aria-label="Distribution of the count minus its mean, on a fixed axis from minus 30 to 30"></canvas></div>
+      <div><div class="cap">Fraction of successes, \(Y/n\)</div><canvas id="mvR" style="height:200px" role="img" aria-label="Distribution of the fraction of successes on the interval from 0 to 1"></canvas></div>
+    </div>
+    <div class="small muted" style="margin-top:6px">Bar heights are rescaled so the tallest bar always reaches the top; the point here is the width. Dashed lines mark ±1 standard deviation.</div>
+    <div class="readout" id="mvRead" style="margin-top:6px"></div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section id="galton">
+  <div class="secnum">06</div>
+  <h2>The bean machine</h2>
+  <p>In the 1870s Francis Galton built a board to show this distribution in action. A ball drops through \(n\) rows of pegs. At each peg it bounces right with probability \(p\) or left with probability \(q\). Its final bin is the number of right bounces: a sum of \(n\) Bernoulli trials. So the bins fill up in the shape of \(\text{Binomial}(n, p)\).</p>
+
+  <div class="widget">
+    <p class="widget-title">Galton board</p>
+    <div class="controls">
+      <label class="ctrl">rows of pegs \(n\) <input type="range" id="gaN" min="2" max="16" step="1" value="10"><output id="gaNOut"></output></label>
+      <label class="ctrl">chance of bouncing right \(p\) <input type="range" id="gaP" min="0.05" max="0.95" step="0.01" value="0.5"><output id="gaPOut"></output></label>
+    </div>
+    <div class="controls">
+      <button class="btn" id="ga1">Drop 1</button>
+      <button class="btn" id="ga50">Drop 50</button>
+      <button class="btn primary" id="gaAuto">▶ Auto</button>
+      <button class="btn" id="ga1000">+1,000 instantly</button>
+      <button class="btn" id="gaReset">Reset</button>
+    </div>
+    <canvas id="gaCanvas" style="height:440px" role="img" aria-label="Galton board: balls bounce through rows of pegs and pile up in bins numbered by how many times they bounced right"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i>balls landed in each bin</span><span><i class="sw dot" style="background:var(--gold)"></i>expected: total × P(Y = k)</span></div>
+    <div class="readout" id="gaRead" style="margin-top:8px" aria-live="off"></div>
+  </div>
+
+  <p>Nothing pushes balls toward the middle. The middle bins fill up because <strong>many more paths lead there</strong>. With 10 rows there is exactly one path to bin 0 (left every time) but \(\binom{10}{5} = 252\) paths to bin 5. Each path is one of the sequences from section 2.</p>
+  <p class="muted">Tilt the board with \(p\) and the pile slides and becomes lopsided, just as in the shape explorer.</p>
+</section>
+
+<!-- 7 -->
+<section id="normal">
+  <div class="secnum">07</div>
+  <h2>The bell curve appears</h2>
+  <p>With many rows the bean-machine pile looks like a bell. That is no accident. The <em class="term">Central Limit Theorem</em> says that a sum of many independent random variables is approximately normally distributed, and \(Y\) is exactly such a sum. For large \(n\):</p>
+  $$Y \approx \mathcal{N}(np,\; npq)$$
+  <p>Here \(\mathcal N(\mu, \sigma^2)\) is the <em class="term">normal distribution</em> with mean \(\mu\) and variance \(\sigma^2\), the famous bell curve. Abraham de Moivre found this special case for coin tossing in 1733, long before the general theorem, and it is known as the de Moivre–Laplace theorem.</p>
+
+  <h3>The continuity correction</h3>
+  <p>The binomial lives on whole numbers; the normal curve lives on the whole number line. Draw each bar with width 1, centered on its value \(k\). Bar \(k\) then covers the stretch from \(k - \tfrac12\) to \(k + \tfrac12\). To approximate \(P(Y \le k)\) with the area under the curve, you should take the area up to \(k + \tfrac12\), not up to \(k\), or you cut bar \(k\) in half. This half-unit shift is called the <em class="term">continuity correction</em>:</p>
+  $$P(Y \le k) \approx \Phi\!\left(\frac{k + \frac12 - np}{\sqrt{npq}}\right)$$
+  <p>where \(\Phi\) is the cumulative distribution function of the standard normal distribution: \(\Phi(z)\) is the area under the standard bell curve to the left of \(z\).</p>
+
+  <div class="widget">
+    <p class="widget-title">Binomial versus normal</p>
+    <div class="controls">
+      <label class="ctrl">\(n\) <input type="range" id="noN" min="1" max="200" step="1" value="20"><output id="noNOut"></output></label>
+      <label class="ctrl">\(p\) <input type="range" id="noP" min="0.01" max="0.99" step="0.01" value="0.3"><output id="noPOut"></output></label>
+      <label class="ctrl">\(P(Y \le k)\) for \(k\) = <input type="range" id="noK" min="0" max="20" step="1" value="4"><output id="noKOut"></output></label>
+    </div>
+    <div class="controls">
+      <button class="btn on" id="noCC" aria-pressed="true">Continuity correction: on</button>
+      <button class="btn" data-no="10,0.5,3">n = 10, p = 0.5</button>
+      <button class="btn" data-no="20,0.05,0">n = 20, p = 0.05</button>
+      <button class="btn" data-no="100,0.3,25">n = 100, p = 0.3</button>
+    </div>
+    <canvas id="noChart" style="height:270px" role="img" aria-label="Binomial bars with the matching normal curve; the area for P(Y at most k) is shaded"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i>bars counted in \(P(Y\le k)\)</span><span><i class="sw" style="background:var(--gold-soft);border:1px solid var(--gold)"></i>normal-curve area used as the approximation</span><span><i class="sw" style="background:var(--zero-soft)"></i>impossible counts</span></div>
+    <div class="readout" id="noRead" style="margin-top:8px"></div>
+  </div>
+
+  <p><strong>When it fails.</strong> If \(p\) is close to 0 or 1, the binomial is lopsided and squashed against the wall at 0 (or at \(n\)). The normal curve is symmetric and spills over into impossible negative counts. A common rule of thumb asks for \(np \ge 10\) and \(n(1-p) \ge 10\) before trusting the normal approximation (some textbooks use 5). For small \(p\) and large \(n\) there is a better approximation, which is the next section.</p>
+</section>
+
+<!-- 8 -->
+<section id="poisson">
+  <div class="secnum">08</div>
+  <h2>Rare events: the Poisson limit</h2>
+  <p>Sometimes \(n\) is huge and \(p\) is tiny, but the expected count \(\lambda = np\) is moderate. Think of the number of typos in a 2,000-word essay, the number of calls to a help line in a minute, or the number of houses on a street hit by lightning this year. Let \(n \to \infty\) while keeping \(np = \lambda\) fixed, and the binomial PMF turns into something simpler:</p>
+  $$\binom{n}{k}p^kq^{n-k} \;\to\; \frac{\lambda^k e^{-\lambda}}{k!}$$
+  <p>The right-hand side is the <em class="term">Poisson distribution</em> with mean \(\lambda\). It needs only one number, \(\lambda\), instead of two, and you don’t need to know \(n\) at all.</p>
+
+  <div class="widget">
+    <p class="widget-title">Binomial(n, λ/n) versus Poisson(λ)</p>
+    <div class="controls">
+      <label class="ctrl">\(\lambda = np\) <input type="range" id="poL" min="0.5" max="8" step="0.1" value="2"><output id="poLOut"></output></label>
+      <label class="ctrl">\(n\) <input type="range" id="poN" min="0" max="7" step="1" value="1"><output id="poNOut"></output></label>
+    </div>
+    <canvas id="poChart" style="height:240px" role="img" aria-label="Binomial bars with Poisson probabilities overlaid as dots"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i>Binomial(n, λ/n)</span><span><i class="sw dot" style="background:var(--gold)"></i>Poisson(λ)</span></div>
+    <div class="readout" id="poRead" style="margin-top:8px"></div>
+  </div>
+
+  <p>The readout gives the <em class="term">total variation distance</em> between the two distributions: the largest difference between the probabilities they give to any event. Le Cam’s inequality guarantees it is at most \(np^2 = \lambda p\). So what makes the Poisson approximation good is that <strong>\(p\) is small</strong>, not merely that \(n\) is large. The variances tell the same story: the binomial’s \(npq = \lambda(1-p)\) approaches the Poisson’s \(\lambda\) as \(p \to 0\).</p>
+  <details>
+    <summary>Why the limit holds</summary>
+    <p>Substitute \(p = \lambda/n\) and look at the pieces one at a time. First,</p>
+    $$\binom{n}{k}p^k = \frac{\lambda^k}{k!}\cdot r_n$$
+    <p>where</p>
+    $$r_n = \frac{n(n-1)\cdots(n-k+1)}{n^k}$$
+    <p>is a product of \(k\) factors \(\frac{n}{n}, \frac{n-1}{n}, \dots, \frac{n-k+1}{n}\), each of which tends to 1 when \(k\) is fixed and \(n\) grows. So \(r_n \to 1\). Second,</p>
+    $$q^{n-k} = \left(1 - \frac{\lambda}{n}\right)^{n-k} \to e^{-\lambda}$$
+    <p>using the classic limit \((1 - \lambda/n)^n \to e^{-\lambda}\); the extra \(-k\) in the exponent does not matter in the limit. Multiply the two pieces to get \(\lambda^k e^{-\lambda}/k!\).</p>
+  </details>
+</section>
+
+<!-- 9 -->
+<section id="infer">
+  <div class="secnum">09</div>
+  <h2>Going backwards: what is \(p\)?</h2>
+  <p>So far we knew \(p\) and predicted the count. In practice it is usually the other way around: you see \(k\) successes in \(n\) trials and want to learn \(p\). As in the Bernoulli tutorial, the best single guess is the observed fraction \(\hat p = k/n\). It is unbiased, and from section 5 its standard deviation is \(\sqrt{pq/n}\).</p>
+
+  <h3>How sure can you be? Confidence intervals</h3>
+  <p>A <em class="term">95% confidence interval</em> is a range computed from the data by a recipe that captures the true \(p\) in 95% of experiments. The textbook recipe, the <em>Wald interval</em>, plugs \(\hat p\) into the standard deviation formula:</p>
+  $$\hat p \pm 1.96\sqrt{\frac{\hat p(1-\hat p)}{n}}$$
+  <p>The 1.96 comes from the normal approximation: 95% of a normal distribution lies within 1.96 standard deviations of its mean.</p>
+  <p>The trouble starts at the edges. When \(k = 0\) or \(k = n\), \(\hat p(1-\hat p) = 0\) and the interval shrinks to a single point. See 0 defects in 5 items and the Wald interval says the defect rate is exactly 0, with no uncertainty at all. That is clearly wrong: a 20% defect rate produces 0 defects in 5 items about a third of the time, since \(0.8^5 \approx 0.33\).</p>
+  <p>The <em class="term">Wilson interval</em> fixes this by asking a better question: which values of \(p\) would make the observed \(\hat p\) unsurprising? Solving that for \(p\) gives an interval centered at</p>
+  $$\tilde p = \frac{\hat p + z^2/(2n)}{1 + z^2/n}$$
+  <p>with half-width</p>
+  $$h = \frac{z}{1 + z^2/n}\sqrt{\frac{\hat p(1-\hat p)}{n} + \frac{z^2}{4n^2}}$$
+  <p>where \(z = 1.96\). The extra \(z^2\) terms keep the interval from collapsing, and they matter less and less as \(n\) grows.</p>
+
+  <div class="widget">
+    <p class="widget-title">Two intervals for the same data</p>
+    <div class="controls">
+      <label class="ctrl">trials \(n\) <input type="range" id="ciN" min="1" max="200" step="1" value="20"><output id="ciNOut"></output></label>
+      <label class="ctrl">successes \(k\) <input type="range" id="ciK" min="0" max="20" step="1" value="3"><output id="ciKOut"></output></label>
+      <button class="btn" id="ciZero">k = 0</button>
+      <button class="btn" id="ciAll">k = n</button>
+    </div>
+    <canvas id="ciLine" style="height:120px" role="img" aria-label="The Wald and Wilson 95% intervals drawn on a line from 0 to 1"></canvas>
+    <div class="readout" id="ciRead" style="margin:6px 0 14px"></div>
+    <div class="cap">How often does each recipe actually capture the true \(p\)? For this \(n\), across every possible true \(p\):</div>
+    <canvas id="ciCov" style="height:230px" role="img" aria-label="Actual coverage of the Wald and Wilson intervals as a function of the true p, compared with the 95 percent target"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--zero)"></i>Wald</span><span><i class="sw" style="background:var(--accent)"></i>Wilson</span><span><i class="sw dash"></i>target 95%</span></div>
+    <div class="readout" id="ciCovRead" style="margin-top:6px"></div>
+  </div>
+  <p>The coverage chart is computed exactly: for each true \(p\), it adds up the probabilities of every \(k\) whose interval contains \(p\). The Wald curve sags far below 95% near the edges and is jagged everywhere. Wilson stays close to the target. Statisticians Brown, Cai and DasGupta made this point forcefully in 2001, and Wilson (or a similar method) is now the standard recommendation.</p>
+  <p class="muted">A handy shortcut: if you see 0 successes in \(n\) trials, a rough 95% upper bound for \(p\) is \(3/n\), the “rule of three”.</p>
+
+  <h3>Is this coin fair? A hypothesis test</h3>
+  <p>Flip a coin 100 times and get 60 heads. Is the coin biased, or was that luck? Start from the boring explanation, the <em class="term">null hypothesis</em> \(p = p_0\), here \(p_0 = 0.5\). Then ask: if that were true, how often would a count land at least as far from the expected \(np_0\) as ours did? That probability is the <em class="term">p-value</em>.</p>
+
+  <div class="widget">
+    <p class="widget-title">The p-value, shaded</p>
+    <div class="controls">
+      <label class="ctrl">flips \(n\) <input type="range" id="htN" min="1" max="200" step="1" value="100"><output id="htNOut"></output></label>
+      <label class="ctrl">heads \(k\) <input type="range" id="htK" min="0" max="100" step="1" value="60"><output id="htKOut"></output></label>
+      <label class="ctrl">null \(p_0\) <input type="range" id="htP" min="0.05" max="0.95" step="0.01" value="0.5"><output id="htPOut"></output></label>
+    </div>
+    <div class="controls">
+      <button class="btn" id="htSim0">Simulate a coin with p = p₀</button>
+      <button class="btn" id="htSim1">Simulate a coin with p = p₀ + 0.1</button>
+    </div>
+    <canvas id="htChart" style="height:240px" role="img" aria-label="Distribution of the count under the null hypothesis, with the counts at least as extreme as the observed one shaded"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--zero)"></i>at least as far from \(np_0\) as the observed count</span><span><i class="sw" style="background:var(--ink-3)"></i>closer to \(np_0\)</span></div>
+    <div class="readout" id="htRead" style="margin-top:8px"></div>
+  </div>
+  <p>With 60 heads in 100 flips the p-value is about 0.057: a fair coin does something this lopsided roughly one time in 18. That is suggestive but not conclusive. The same 60% rate over 200 flips (120 heads) gives about 0.006, and over 1,000 flips about \(3 \times 10^{-10}\). The same fraction becomes more convincing with more data, because the spread of \(\hat p\) shrinks like \(1/\sqrt n\).</p>
+  <div class="callout"><p>A p-value is <strong>not</strong> the probability that the coin is fair. It is the probability of data at least this extreme <em>if</em> the coin were fair. A small p-value says the data would be surprising under \(p_0\). Press “Simulate a coin with p = p₀” a few times: even for a perfectly fair coin, a few runs in every hundred give a p-value below 0.05. (With whole-number counts the rate is a bit under the nominal one in 20.)</p></div>
+</section>
+
+<!-- 10 -->
+<section id="props">
+  <div class="secnum">10</div>
+  <h2>All the properties</h2>
+  <p>Here are the main facts about \(Y \sim \text{Binomial}(n, p)\) in one place, with \(q = 1-p\) throughout. Drag the sliders to update every value at once.</p>
+
+  <div class="sticky-ctrl">
+    <label class="ctrl">\(n\) <input type="range" id="prN" min="1" max="100" step="1" value="20"><output id="prNOut"></output></label>
+    <label class="ctrl">\(p\) <input type="range" id="prP" min="0" max="1" step="0.01" value="0.3"><output id="prPOut"></output></label>
+  </div>
+
+  <div class="minis" style="margin-top:16px">
+    <div class="mini"><div class="mcap">PMF</div><canvas id="miniPMF" style="height:150px" role="img" aria-label="Probability mass function for the current n and p"></canvas></div>
+    <div class="mini"><div class="mcap">CDF</div><canvas id="miniCDF" style="height:150px" role="img" aria-label="Cumulative distribution function for the current n and p"></canvas></div>
+    <div class="mini"><div class="mcap">Variance npq vs p</div><canvas id="miniVar" style="height:150px" role="img" aria-label="Variance as a function of p for the current n, with the current p marked"></canvas></div>
+  </div>
+
+  <h3>The numbers</h3>
+  <div class="cards">
+    <div class="card"><h4>Support</h4><div class="f">\(k \in \{0, 1, \dots, n\}\)</div><div class="v" id="cSup"></div></div>
+    <div class="card"><h4>Parameters</h4><div class="f">\(n \ge 1,\; 0 \le p \le 1\)</div><div class="v" id="cPar"></div></div>
+    <div class="card"><h4>PMF</h4><div class="f">\(\binom{n}{k}p^k q^{n-k}\)</div><div class="v" id="cPMF"></div></div>
+    <div class="card"><h4>CDF</h4><div class="f">\(F(k) = \sum_{i=0}^{k}\binom{n}{i}p^i q^{n-i}\)</div><div class="v" id="cCDF"></div></div>
+    <div class="card"><h4>Mean</h4><div class="f">\(E[Y] = np\)</div><div class="v" id="cMean"></div></div>
+    <div class="card"><h4>Variance</h4><div class="f">\(\operatorname{Var}(Y) = npq\)</div><div class="v" id="cVar"></div></div>
+    <div class="card"><h4>Standard deviation</h4><div class="f">\(\sigma = \sqrt{npq}\)</div><div class="v" id="cSD"></div></div>
+    <div class="card"><h4>Mode</h4><div class="f">\(\lfloor (n+1)p \rfloor\)</div><div class="v" id="cMode"></div></div>
+    <div class="card"><h4>Median</h4><div class="f">\(\lfloor np \rfloor\) or \(\lceil np \rceil\)</div><div class="v" id="cMed"></div></div>
+    <div class="card"><h4>Skewness</h4><div class="f">\(\gamma_1 = \dfrac{q-p}{\sqrt{npq}}\)</div><div class="v" id="cSkew"></div></div>
+    <div class="card"><h4>Excess kurtosis</h4><div class="f">\(\gamma_2 = \dfrac{1-6pq}{npq}\)</div><div class="v" id="cKurt"></div></div>
+    <div class="card"><h4>Entropy (bits)</h4><div class="f">\(H \approx \tfrac12\log_2(2\pi e\,npq)\)</div><div class="v" id="cEnt"></div></div>
+    <div class="card"><h4>MGF</h4><div class="f">\(M_Y(t) = (q + pe^t)^n\)</div><div class="v" id="cMGF"></div></div>
+    <div class="card"><h4>PGF</h4><div class="f">\(G_Y(z) = (q + pz)^n\)</div><div class="v" id="cPGF"></div></div>
+    <div class="card"><h4>Fisher information</h4><div class="f">\(I(p) = \dfrac{n}{pq}\)</div><div class="v" id="cFish"></div></div>
+    <div class="card"><h4>Maximum likelihood</h4><div class="f">\(\hat p = k/n\)</div><div class="v" id="cMLE"></div></div>
+  </div>
+
+  <h3>Where the formulas come from</h3>
+  <details>
+    <summary>Mean and variance, through indicators</summary>
+    <p>Write \(Y = X_1 + \cdots + X_n\), where \(X_i\) is 1 if trial \(i\) succeeds. Each \(X_i\) is an <em>indicator</em> with \(E[X_i] = p\) and \(\operatorname{Var}(X_i) = pq\). Expectation is linear, so \(E[Y] = np\) with no conditions at all. For the variance, the variance of a sum is the sum of the variances plus twice the sum of all pairwise covariances. Independent trials have zero covariance, which leaves</p>
+    $$\operatorname{Var}(Y) = n \cdot pq$$
+    <p>The same indicator trick works far beyond the binomial: whenever you need the expected value of a count, write the count as a sum of indicators.</p>
+  </details>
+  <details>
+    <summary>Median, mode and mean are always close</summary>
+    <p>The mode \(m = \lfloor (n+1)p \rfloor\) satisfies \((n+1)p - 1 < m \le (n+1)p\), which rearranges to \(np - q < m \le np + p\). So the mode is always within 1 of the mean \(np\). The median is always \(\lfloor np \rfloor\) or \(\lceil np \rceil\); when \(np\) is a whole number, mean, median and mode all equal \(np\). One special case: when \(F(m) = \tfrac12\) exactly (for example \(n\) odd and \(p = \tfrac12\)), every number between \(m\) and \(m+1\) is a median.</p>
+  </details>
+  <details>
+    <summary>Skewness and kurtosis, via cumulants</summary>
+    <p><em>Cumulants</em> \(\kappa_r\) are a sequence of numbers describing a distribution: \(\kappa_1\) is the mean, \(\kappa_2\) the variance, and \(\kappa_3\), \(\kappa_4\) are the third and fourth central-moment-like quantities. Their key property is that <strong>cumulants of independent variables add</strong>. A single Bernoulli has \(\kappa_2 = pq\), \(\kappa_3 = pq(q-p)\) and \(\kappa_4 = pq(1-6pq)\), so the binomial has \(n\) times each. Then</p>
+    $$\begin{aligned}\gamma_1 &= \frac{\kappa_3}{\kappa_2^{3/2}} = \frac{npq(q-p)}{(npq)^{3/2}} \\ &= \frac{q-p}{\sqrt{npq}}\end{aligned}$$
+    $$\begin{aligned}\gamma_2 &= \frac{\kappa_4}{\kappa_2^{2}} = \frac{npq(1-6pq)}{(npq)^2} \\ &= \frac{1-6pq}{npq}\end{aligned}$$
+    <p>Both shrink as \(n\) grows (like \(1/\sqrt n\) and \(1/n\)). The normal distribution has skewness 0 and excess kurtosis 0, so this is another view of the bell curve taking over.</p>
+  </details>
+  <details>
+    <summary>MGF and PGF</summary>
+    <p>The moment generating function of a sum of independent variables is the product of their MGFs. Each Bernoulli has \(M_X(t) = q + pe^t\), so</p>
+    $$M_Y(t) = \big(M_X(t)\big)^n = (q + pe^t)^n$$
+    <p>The probability generating function \(G_Y(z) = E[z^Y] = (q + pz)^n\) works the same way. Expanding it with the binomial theorem gives \(\sum_k \binom{n}{k}p^kq^{n-k}z^k\): the coefficient of \(z^k\) is exactly \(P(Y = k)\). For example \(G_Y(0) = q^n = P(Y=0)\). Multiplying PGFs also proves that \(\text{Binomial}(n_1, p) + \text{Binomial}(n_2, p) = \text{Binomial}(n_1+n_2, p)\) for independent counts.</p>
+  </details>
+  <details>
+    <summary>The CDF and the incomplete beta function</summary>
+    <p>There is no simpler closed form for \(F(k) = P(Y \le k)\) than the sum, but it equals a <em>regularized incomplete beta function</em>:</p>
+    $$P(Y \le k) = I_{q}(n-k,\; k+1)$$
+    <p>One way to see it: generate each trial by drawing a uniform random number \(U_i\) between 0 and 1 and calling it a success if \(U_i \le p\). Then \(Y \le k\) means that fewer than \(k+1\) of the \(U_i\) fall below \(p\), i.e. the \((k+1)\)-th smallest \(U_i\) is above \(p\). That order statistic has a Beta distribution, which gives the formula. In practice this is how software computes binomial tails for large \(n\), and it is the basis of the exact Clopper–Pearson confidence interval.</p>
+  </details>
+  <details>
+    <summary>Fisher information and the best estimate</summary>
+    <p>Each trial carries Fisher information \(1/(pq)\) about \(p\) (see the Bernoulli tutorial), and information from independent trials adds, so \(I(p) = n/(pq)\). The estimate \(\hat p = k/n\) has variance \(pq/n = 1/I(p)\), which is the Cramér–Rao lower bound. No unbiased estimator can do better. The likelihood depends on the data only through \(k\), which is why the count alone is a <em>sufficient statistic</em>: once you know how many successes there were, their order tells you nothing more about \(p\).</p>
+  </details>
+  <details>
+    <summary>Entropy</summary>
+    <p>The exact entropy \(H = -\sum_k P(Y=k)\log_2 P(Y=k)\) has no closed form. For large \(n\) the binomial is close to a normal distribution with variance \(npq\), whose entropy is \(\tfrac12\log_2(2\pi e\,\sigma^2)\). The card shows both the exact value and this approximation. Note that it grows only like \(\tfrac12\log_2 n\): doubling the number of trials adds just half a bit of uncertainty about the count.</p>
+  </details>
+
+  <h3>Structural facts worth remembering</h3>
+  <ol class="facts">
+    <li><strong>Bernoulli is the case \(n = 1\).</strong> \(\text{Binomial}(1, p) = \text{Bernoulli}(p)\), and every binomial is a sum of \(n\) independent Bernoullis.</li>
+    <li><strong>Counts with the same \(p\) add.</strong> If \(Y_1 \sim \text{Bin}(n_1, p)\) and \(Y_2 \sim \text{Bin}(n_2, p)\) are independent, then \(Y_1 + Y_2 \sim \text{Bin}(n_1 + n_2, p)\). With different \(p\)s the sum is <em>not</em> binomial; it is called a Poisson binomial distribution.</li>
+    <li><strong>Failures are binomial too.</strong> \(n - Y \sim \text{Bin}(n, q)\). This is the mirror image from section 4.</li>
+    <li><strong>Thinning keeps it binomial.</strong> If each success is independently kept with probability \(r\), the kept count is \(\text{Bin}(n, pr)\).</li>
+    <li><strong>The pieces of a Poisson total are binomial.</strong> If \(A \sim \text{Poisson}(\lambda_1)\) and \(B \sim \text{Poisson}(\lambda_2)\) are independent, then given \(A + B = m\), \(A \sim \text{Bin}\big(m, \lambda_1/(\lambda_1+\lambda_2)\big)\).</li>
+    <li><strong>Large \(n\): normal.</strong> \(Y \approx \mathcal N(np, npq)\) when \(np\) and \(nq\) are both reasonably large (section 7).</li>
+    <li><strong>Small \(p\): Poisson.</strong> \(\text{Bin}(n, \lambda/n) \to \text{Poisson}(\lambda)\) (section 8).</li>
+    <li><strong>Without replacement: hypergeometric.</strong> Sampling from a finite population without replacement gives the hypergeometric distribution, which approaches the binomial when the population is large.</li>
+    <li><strong>Fix the successes instead: negative binomial.</strong> Count trials until the \(r\)-th success and you get the negative binomial distribution (the geometric for \(r = 1\)). The two are linked: at least \(r\) successes in \(n\) trials means the \(r\)-th success came by trial \(n\).</li>
+    <li><strong>Conjugate prior: Beta.</strong> If your uncertainty about \(p\) is a \(\text{Beta}(a, b)\) distribution, then after \(k\) successes in \(n\) trials it becomes \(\text{Beta}(a+k,\; b+n-k)\).</li>
+    <li><strong>A recurrence for computing it.</strong> \(P(Y=k+1) = P(Y=k)\cdot\frac{n-k}{k+1}\cdot\frac{p}{q}\). Starting from \(P(Y=0) = q^n\), you can get every bar without computing a single factorial.</li>
+  </ol>
+
+  <h3>Binomial in one table</h3>
+  <div class="table-wrap">
+    <table class="summary">
+      <tr><th>Idea</th><th>Formula</th><th>In words</th></tr>
+      <tr><td>Model</td><td>\(Y = X_1 + \cdots + X_n\)</td><td>count successes in \(n\) independent trials with the same \(p\)</td></tr>
+      <tr><td>PMF</td><td>\(\binom{n}{k}p^kq^{n-k}\)</td><td>number of paths × probability of each path</td></tr>
+      <tr><td>Mean</td><td>\(np\)</td><td>trials × success rate</td></tr>
+      <tr><td>Variance</td><td>\(npq\)</td><td>Bernoulli variances add up</td></tr>
+      <tr><td>Fraction</td><td>\(\sigma_{\hat p} = \sqrt{pq/n}\)</td><td>error of \(\hat p\) shrinks like \(1/\sqrt n\)</td></tr>
+      <tr><td>Large \(n\)</td><td>\(\mathcal N(np, npq)\)</td><td>bell curve; use the continuity correction</td></tr>
+      <tr><td>Rare events</td><td>\(\text{Poisson}(np)\)</td><td>good when \(p\) is small</td></tr>
+      <tr><td>Estimate</td><td>\(\hat p = k/n\)</td><td>use a Wilson interval, not Wald, near 0 or 1</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- 11 -->
+<section id="uses">
+  <div class="secnum">11</div>
+  <h2>Where you will meet it</h2>
+  <div class="cards">
+    <div class="card"><h4>A/B tests</h4><p>Each visitor clicks or doesn’t, so the clicks on each version of a page are binomial. Deciding whether a new design is really better means comparing two binomial proportions.</p></div>
+    <div class="card"><h4>Polls</h4><p>Ask \(n\) random people a yes/no question. The margin of error is about \(1.96\sqrt{0.25/n} \approx 1/\sqrt n\): roughly ±3 points for 1,000 people. Halving it takes four times as many people.</p></div>
+    <div class="card"><h4>Quality control</h4><p>Inspect 50 items from a large batch and count defects. Acceptance sampling rejects the batch when the count exceeds a threshold chosen from the binomial tail.</p></div>
+    <div class="card"><h4>Genetics</h4><p>When both parents carry one copy of a recessive gene, each child has the trait with probability ¼. Among 4 children, the number with the trait is \(\text{Bin}(4, \tfrac14)\). In Mendel’s pea crosses, the number of plants showing the dominant trait was \(\text{Bin}(n, \tfrac34)\), which is why his counts hovered around 3 : 1.</p></div>
+    <div class="card"><h4>Reliability</h4><p>A system of 5 independent parts keeps working if at least 3 of them do. If each part works with probability \(r\), the system works with probability \(P(Y \ge 3)\) for \(Y \sim \text{Bin}(5, r)\).</p></div>
+    <div class="card"><h4>Machine learning</h4><p>A classifier’s number of correct answers on \(n\) test examples is binomial. An accuracy of 0.92 on 200 examples carries an uncertainty of about ±0.04, which is often larger than the gap between two models being compared.</p></div>
+  </div>
+</section>
+
+</main>
+<footer>A single-file interactive explainer and a companion to <a href="bernoulli-distribution.html">The Bernoulli Distribution</a>. Math typeset with KaTeX. Every simulation runs live in your browser using <code>Math.random()</code>.</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script>
+(function(){
+'use strict';
+/* ---------- helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const root = document.documentElement;
+const C = n => getComputedStyle(root).getPropertyValue(n).trim();
+const clamp = (x,a,b) => Math.max(a, Math.min(b, x));
+const f1 = x => x.toFixed(1), f2 = x => x.toFixed(2), f3 = x => x.toFixed(3), f4 = x => x.toFixed(4);
+const SANS = 'system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';
+const MONO = 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
+const RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+const TAU = Math.PI * 2;
+
+if (window.renderMathInElement) {
+  renderMathInElement(document.body, {
+    delimiters: [{left:'$$', right:'$$', display:true}, {left:'\\(', right:'\\)', display:false}],
+    throwOnError: false
+  });
+}
+function tex(el, s, display){
+  if (!el) return;
+  if (window.katex) { try { katex.render(s, el, {throwOnError:false, displayMode:!!display}); return; } catch(e){} }
+  el.textContent = s;
+}
+function fit(c){
+  const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+  if (c.width !== w*dpr || c.height !== h*dpr) { c.width = w*dpr; c.height = h*dpr; }
+  const ctx = c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  return {ctx, w, h};
+}
+const redraws = [];
+function redrawAll(){ redraws.forEach(f => f()); }
+let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(redrawAll, 80); });
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+if (mq.addEventListener) mq.addEventListener('change', redrawAll);
+new MutationObserver(redrawAll).observe(root, {attributes:true, attributeFilter:['data-theme']});
+
+const fInt = v => String(Math.round(v));
+function bindRange(input, out, cb, fmt){
+  fmt = fmt || f2;
+  const f = () => { const v = parseFloat(input.value); if (out) out.textContent = fmt(v); cb(v); };
+  input.addEventListener('input', f); f();
+}
+function setRange(input, v){ input.value = v; input.dispatchEvent(new Event('input')); }
+function niceTicks(max, count){
+  const raw = max / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const step = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag;
+  const t = []; for (let v = 0; v <= max + 1e-9; v += step) t.push(v); return t;
+}
+function intStep(px, minPx){
+  for (const s of [1,2,5,10,20,25,50,100,200,250,500,1000]) if (s * px >= minPx) return s;
+  return 1000;
+}
+function yGrid(ctx, X0, X1, ys, ticks, fmt){
+  ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ticks.forEach(v => {
+    const y = Math.round(ys(v)) + .5;
+    ctx.strokeStyle = C('--line'); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X0, y); ctx.lineTo(X1, y); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.fillText(fmt(v), X0 - 6, y);
+  });
+}
+function stepFmt(ticks){ const st = ticks.length > 1 ? ticks[1] - ticks[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9)); return v => v.toFixed(d); }
+function roundRect(ctx, x, y, w, h, r){
+  r = Math.max(0, Math.min(r, w/2, Math.abs(h)/2));
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+function dot(ctx, x, y, r){ ctx.beginPath(); ctx.arc(x, y, Math.max(0.5, r), 0, TAU); ctx.fill(); }
+
+/* ---------- probability ---------- */
+const LF = [0];
+function lf(n){ while (LF.length <= n) { const i = LF.length; LF.push(LF[i-1] + Math.log(i)); } return LF[n]; }
+function lchoose(n, k){ return lf(n) - lf(k) - lf(n - k); }
+function pmf(n, k, p){
+  if (k < 0 || k > n) return 0;
+  if (p <= 0) return k === 0 ? 1 : 0;
+  if (p >= 1) return k === n ? 1 : 0;
+  return Math.exp(lchoose(n, k) + k * Math.log(p) + (n - k) * Math.log1p(-p));
+}
+function pmfArr(n, p){ const a = new Array(n + 1); for (let k = 0; k <= n; k++) a[k] = pmf(n, k, p); return a; }
+function cdf(n, k, p){ if (k < 0) return 0; if (k >= n) return 1; let s = 0; for (let i = 0; i <= k; i++) s += pmf(n, i, p); return Math.min(1, s); }
+function chooseSmall(n, k){ if (k < 0 || k > n) return 0; let c = 1; for (let i = 1; i <= k; i++) c = c * (n - k + i) / i; return Math.round(c); }
+function chooseBig(n, k){ let c = 1n; for (let i = 1; i <= k; i++) c = c * BigInt(n - k + i) / BigInt(i); return c; }
+function poisPMF(l, k){ return Math.exp(-l + k * Math.log(l) - lf(k)); }
+function erfc(x){
+  const z = Math.abs(x), t = 1 / (1 + 0.5 * z);
+  const r = t * Math.exp(-z*z - 1.26551223 + t*(1.00002368 + t*(0.37409196 + t*(0.09678418 + t*(-0.18628806 + t*(0.27886807 + t*(-1.13520398 + t*(1.48851587 + t*(-0.82215223 + t*0.17087277)))))))));
+  return x >= 0 ? r : 2 - r;
+}
+const Phi = z => 0.5 * erfc(-z / Math.SQRT2);
+const npdf = (x, m, s) => Math.exp(-0.5 * ((x - m) / s) ** 2) / (s * Math.sqrt(TAU));
+function sampleBinom(n, p){ let s = 0; for (let i = 0; i < n; i++) if (Math.random() < p) s++; return s; }
+
+/* ---------- number formatting ---------- */
+const SUP = {'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','+':''};
+function sciParts(x, sig){ const [m, e] = x.toExponential(sig - 1).split('e'); return [m, parseInt(e, 10)]; }
+function fmtP(x){ // probabilities, plain text
+  if (x === 0) return '0';
+  if (x >= 1e-4) return f4(x);
+  const [m, e] = sciParts(x, 2); return m + '×10' + String(e).replace(/./g, c => SUP[c]);
+}
+function fmtBig(x){ // large positive numbers, plain text
+  if (!isFinite(x)) return '∞';
+  if (Math.abs(x) < 1e6) return f3(x);
+  const [m, e] = sciParts(x, 3); return m + '×10' + String(e).replace(/./g, c => SUP[c]);
+}
+function texNum(x){
+  if (x === 0) return '0';
+  if (x >= 1e-4) return String(parseFloat(x.toPrecision(4)));
+  const [m, e] = sciParts(x, 3); return m + '\\times10^{' + e + '}';
+}
+function texInt(b){
+  const s = b.toString();
+  if (s.length > 12) { const m = (s[0] + '.' + s.slice(1, 3)); return m + '\\times10^{' + (s.length - 1) + '}'; }
+  return s.replace(/\B(?=(\d{3})+(?!\d))/g, '{,}');
+}
+
+/* ---------- chart frame for integer-valued bars ---------- */
+function frame(ctx, w, h, o){
+  const X0 = o.left != null ? o.left : 44, X1 = w - 10, Y0 = h - 24, Y1 = o.top != null ? o.top : 12;
+  const span = o.hi - o.lo + 1, bw = (X1 - X0) / span;
+  const xc = k => X0 + bw * (k - o.lo + .5), ys = v => Y0 - (v / o.ymax) * (Y0 - Y1);
+  const xr = x => X0 + bw * (x - o.lo + .5);
+  if (o.grid !== false) { const t = niceTicks(o.ymax, 4).filter(v => v <= o.ymax * 1.0001); yGrid(ctx, X0, X1, ys, t, o.yfmt || stepFmt(t)); }
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  const st = intStep(bw, o.minLabel || 26), l0 = o.lmin != null ? o.lmin : o.lo, l1 = o.lmax != null ? o.lmax : o.hi;
+  for (let k = Math.ceil(l0 / st) * st; k <= l1; k += st) ctx.fillText(k, xc(k), Y0 + 6);
+  return {X0, X1, Y0, Y1, bw, xc, xr, ys, lo:o.lo, hi:o.hi};
+}
+function drawBars(ctx, F, lo, hi, val, color, frac){
+  frac = frac == null ? .8 : frac;
+  const bwid = Math.max(1, F.bw * frac);
+  for (let k = lo; k <= hi; k++) {
+    const v = val(k); if (!(v > 0)) continue;
+    const y = F.ys(v), hh = F.Y0 - y; if (hh < 0.2) continue;
+    const x = F.xc(k) - bwid / 2;
+    ctx.fillStyle = typeof color === 'function' ? color(k) : color;
+    if (bwid >= 6 && hh >= 3) { roundRect(ctx, x, y, bwid, hh, Math.min(3, bwid / 4)); ctx.fill(); }
+    else ctx.fillRect(x, y, bwid, hh);
+  }
+}
+
+/* ---------- 0. hero ---------- */
+(function(){
+  const cc = $('#heroCoins'), tc = $('#heroTally'), hint = $('#heroHint');
+  const N = 10, DUR = 650, STAG = 45;
+  let res = null, t0 = 0, raf = 0, pending = false, tally = new Array(N + 1).fill(0), rounds = 0, lastY = -1;
+  function drawCoins(now){
+    const {ctx, w, h} = fit(cc);
+    const sp = w / N, r = clamp(sp / 2 - 4, 3, 22), cy = h / 2;
+    for (let i = 0; i < N; i++) {
+      const x = sp * (i + .5);
+      if (!res) { ctx.strokeStyle = C('--line'); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, cy, r, 0, TAU); ctx.stroke(); continue; }
+      const local = pending && !RM ? clamp((now - t0 - i * STAG) / DUR, 0, 1) : 1;
+      if (local < 1) {
+        const a = local * Math.PI * 6, sy = Math.max(.08, Math.abs(Math.cos(a)));
+        ctx.fillStyle = C('--gold'); ctx.beginPath(); ctx.ellipse(x, cy, r, r * sy, 0, 0, TAU); ctx.fill();
+      } else {
+        const v = res[i];
+        ctx.fillStyle = v ? C('--one') : C('--zero'); dot(ctx, x, cy, r);
+        if (r >= 8) { ctx.fillStyle = '#fff'; ctx.font = `700 ${Math.round(r * .9)}px ${SANS}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(v ? 'H' : 'T', x, cy + 1); }
+      }
+    }
+  }
+  function drawTally(){
+    const {ctx, w, h} = fit(tc);
+    const X0 = 6, X1 = w - 6, Y0 = h - 20, Y1 = 6;
+    const cw = (X1 - X0) / (N + 1), r = clamp(cw / 2 - 2, 1.5, 6), pitch = 2 * r + 1.5;
+    const mx = Math.max(1, ...tally), avail = Y0 - Y1, asBars = mx * pitch > avail;
+    ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+    ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    for (let k = 0; k <= N; k++) {
+      const x = X0 + cw * (k + .5);
+      ctx.fillStyle = C('--ink-3'); ctx.fillText(k, x, Y0 + 5);
+      if (asBars) {
+        const hh = tally[k] / mx * avail;
+        ctx.fillStyle = k === lastY ? C('--gold') : C('--accent');
+        if (hh > 0) ctx.fillRect(x - r, Y0 - hh, 2 * r, hh);
+      } else {
+        for (let i = 0; i < tally[k]; i++) {
+          ctx.fillStyle = (k === lastY && i === tally[k] - 1) ? C('--gold') : C('--accent');
+          dot(ctx, x, Y0 - r - 1 - i * pitch, r);
+        }
+      }
+    }
+  }
+  function setHint(){
+    if (!rounds) return;
+    let s = `<b>${lastY} heads</b> out of 10 in the latest round · ${rounds.toLocaleString()} round${rounds === 1 ? '' : 's'} so far.`;
+    if (rounds >= 20) s += ' Most rounds land near 5, and 0 or 10 almost never happen. The shape of this pile is the binomial distribution.';
+    hint.innerHTML = s;
+  }
+  function finish(){ if (!pending) return; pending = false; tally[lastY]++; rounds++; setHint(); drawTally(); }
+  function frameFn(now){
+    raf = 0;
+    if (pending && (RM || now - t0 > DUR + STAG * N)) finish();
+    drawCoins(now);
+    if (pending) raf = requestAnimationFrame(frameFn);
+  }
+  function flip(){
+    finish();
+    res = []; for (let i = 0; i < N; i++) res.push(Math.random() < .5 ? 1 : 0);
+    lastY = res.reduce((a, b) => a + b, 0);
+    pending = true; t0 = performance.now();
+    if (!raf) raf = requestAnimationFrame(frameFn);
+  }
+  $('#heroFlip').addEventListener('click', flip);
+  $('#heroMany').addEventListener('click', () => {
+    finish();
+    for (let r = 0; r < 100; r++) { res = []; for (let i = 0; i < N; i++) res.push(Math.random() < .5 ? 1 : 0); lastY = res.reduce((a, b) => a + b, 0); tally[lastY]++; rounds++; }
+    setHint(); drawCoins(performance.now()); drawTally();
+  });
+  const draw = () => { drawCoins(performance.now()); drawTally(); };
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 1. quiz ---------- */
+(function(){
+  const Q = [
+    {s:'Flip a fair coin 20 times and count the heads.', a:true,
+     e:'All four BINS conditions hold: two outcomes, independent flips, n = 20 fixed in advance, and p = 0.5 every time. Y ~ Binomial(20, 0.5).'},
+    {s:'Roll a die 12 times and count how many sixes come up.', a:true,
+     e:'Each roll is “six” or “not six”, just like the die example in the Bernoulli tutorial. So p = 1/6, n = 12, and Y ~ Binomial(12, 1/6).'},
+    {s:'Deal 5 cards from a shuffled deck and count the hearts.', a:false,
+     e:'The cards are drawn without replacement. If the first card is a heart, only 12 of the remaining 51 cards are hearts, so p changes from draw to draw and the draws are not independent. The count is hypergeometric.'},
+    {s:'Roll a die until the first six appears, and count the rolls.', a:false,
+     e:'The number of trials is not fixed in advance; it depends on the results. This count follows the geometric distribution.'},
+    {s:'Poll 1,000 randomly chosen adults in a country of 50 million and count how many say “yes”.', a:true,
+     e:'Strictly speaking this is sampling without replacement, so it is hypergeometric. But removing 1,000 people from 50 million changes p by a negligible amount, so Binomial(1000, p) is an excellent approximation. This is how polls are analyzed.'},
+    {s:'Roll a die 30 times and record how often each face from 1 to 6 comes up.', a:false,
+     e:'Each roll has six outcomes, not two. The six counts together follow the multinomial distribution, the many-outcome generalization of the binomial. (The count of any single face on its own is binomial, though.)'},
+    {s:'Count how many of the 30 days in June have rain.', a:false,
+     e:'Days are not independent (rainy days tend to come in runs), and the chance of rain can change through the month. Treating this as binomial would understate how much the count varies from year to year.'}
+  ];
+  const box = $('#quiz'); let answered = 0, right = 0;
+  Q.forEach((q, i) => {
+    const d = document.createElement('div'); d.className = 'qitem';
+    d.innerHTML = `<p>${q.s}</p><div class="qbtns"><button class="btn" data-a="1">Binomial</button><button class="btn" data-a="0">Not binomial</button></div><p class="qexp" hidden></p>`;
+    const exp = d.querySelector('.qexp');
+    d.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      const pick = b.dataset.a === '1', ok = pick === q.a;
+      if (!d.dataset.done) { d.dataset.done = '1'; answered++; if (ok) right++; }
+      d.querySelectorAll('button').forEach(x => x.classList.remove('right', 'wrong'));
+      b.classList.add(ok ? 'right' : 'wrong');
+      exp.hidden = false; exp.innerHTML = `<b>${ok ? '✓ Right.' : '✗ Not quite.'}</b> ${q.e}`;
+      $('#quizScore').textContent = `${answered} of ${Q.length} answered · ${right} right on the first try`;
+    }));
+    box.appendChild(d);
+  });
+})();
+
+/* ---------- 2. paths + Pascal ---------- */
+(function(){
+  let n = 4, p = .3, selK = 2;
+  const rows = $('#paRows');
+  const pop = m => { let c = 0; while (m) { c += m & 1; m >>= 1; } return c; };
+  function render(){
+    const q = 1 - p, probs = [];
+    for (let k = 0; k <= n; k++) probs.push(chooseSmall(n, k) * Math.pow(p, k) * Math.pow(q, n - k));
+    const pmax = Math.max(...probs) || 1;
+    let html = '';
+    for (let k = 0; k <= n; k++) {
+      const c = chooseSmall(n, k), each = Math.pow(p, k) * Math.pow(q, n - k);
+      let seqs = '';
+      for (let m = (1 << n) - 1; m >= 0; m--) {
+        if (pop(m) !== k) continue;
+        let s = '<span class="seq">';
+        for (let b = n - 1; b >= 0; b--) s += ((m >> b) & 1) ? '<i class="d1"></i>' : '<i class="d0"></i>';
+        seqs += s + '</span>';
+      }
+      html += `<div class="prow${k === selK ? ' sel' : ''}" data-k="${k}" role="button" tabindex="0" aria-pressed="${k === selK}">
+        <div class="phead"><div><b>k = ${k}</b> <span class="muted">(${c} sequence${c === 1 ? '' : 's'})</span></div>
+        <div class="readout">each: p<sup>${k}</sup>q<sup>${n - k}</sup> = ${fmtP(each)}</div>
+        <div class="readout">all ${c}: <b>${fmtP(probs[k])}</b></div>
+        <div class="pbar"><i style="width:${(probs[k] / pmax * 100).toFixed(1)}%"></i></div></div>
+        <div class="pseqs" aria-label="${c} sequences with ${k} ones">${seqs}</div></div>`;
+    }
+    rows.innerHTML = html;
+    const tot = probs.reduce((a, b) => a + b, 0);
+    $('#paSum').innerHTML = `2<sup>${n}</sup> = <b>${1 << n}</b> sequences in total, split into groups of ${probs.map((_, k) => chooseSmall(n, k)).join(' + ')}. The group probabilities add up to <b>${f4(tot)}</b>.`;
+    renderPascal();
+  }
+  function renderPascal(){
+    let h = '';
+    for (let r = 0; r <= 8; r++) {
+      h += `<div class="${r === n ? 'cur' : ''}">`;
+      for (let k = 0; k <= r; k++) {
+        let cls = 'pc';
+        if (r === n && k === selK) cls += ' hit';
+        if (r === n - 1 && (k === selK || k === selK - 1)) cls += ' par';
+        h += `<span class="${cls}">${chooseSmall(r, k)}</span>`;
+      }
+      h += '</div>';
+    }
+    $('#pascal').innerHTML = h;
+    const a = chooseSmall(n - 1, selK - 1), b = chooseSmall(n - 1, selK);
+    $('#pascalEq').innerHTML = `C(${n},${selK}) = C(${n - 1},${selK - 1}) + C(${n - 1},${selK}) = ${a} + ${b} = <b>${chooseSmall(n, selK)}</b>` +
+      ((selK === 0 || selK === n) ? '<br><span class="small">(a position outside the triangle counts as 0)</span>' : '');
+  }
+  function choose(k){ selK = k; $$('.prow', rows).forEach(r => { const on = +r.dataset.k === k; r.classList.toggle('sel', on); r.setAttribute('aria-pressed', on); }); renderPascal(); }
+  rows.addEventListener('click', e => { const r = e.target.closest('.prow'); if (r) choose(+r.dataset.k); });
+  rows.addEventListener('keydown', e => { if (e.key !== 'Enter' && e.key !== ' ') return; const r = e.target.closest('.prow'); if (r) { e.preventDefault(); choose(+r.dataset.k); } });
+  bindRange($('#paN'), $('#paNOut'), v => { n = v; selK = Math.min(selK, n); render(); }, fInt);
+  bindRange($('#paP'), $('#paPOut'), v => { p = v; render(); });
+})();
+
+/* ---------- 3. PMF with decomposition ---------- */
+(function(){
+  const cv = $('#pmChart'), kIn = $('#pmK');
+  let n = 10, p = .3, k = 3, F = null;
+  function draw(){
+    const {ctx, w, h} = fit(cv);
+    const P = pmfArr(n, p), ymax = Math.max(...P) * 1.18;
+    F = frame(ctx, w, h, {lo:0, hi:n, ymax});
+    drawBars(ctx, F, 0, n, i => P[i], i => i === k ? C('--one') : C('--accent'));
+    ctx.fillStyle = C('--ink'); ctx.font = '600 12px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.fillText(fmtP(P[k]), clamp(F.xc(k), F.X0 + 30, F.X1 - 30), Math.max(F.Y1 + 12, F.ys(P[k]) - 4));
+    ctx.strokeStyle = C('--one'); ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(F.xc(k) - 5, F.Y0 + 22); ctx.lineTo(F.xc(k), F.Y0 + 17); ctx.lineTo(F.xc(k) + 5, F.Y0 + 22); ctx.stroke();
+  }
+  function math(){
+    const q = 1 - p, each = Math.exp(k * Math.log(p) + (n - k) * Math.log(q)), P = pmf(n, k, p);
+    tex($('#pmMath'), String.raw`\begin{aligned}
+P(Y=${k}) &= \binom{${n}}{${k}}\,(${f2(p)})^{${k}}\,(${f2(q)})^{${n - k}} \\
+&= \underbrace{${texInt(chooseBig(n, k))}}_{\text{paths}} \times \underbrace{${texNum(each)}}_{\text{each path}} \\
+&= ${texNum(P)}
+\end{aligned}`, true);
+    const le = cdf(n, k, p), ge = 1 - cdf(n, k - 1, p);
+    $('#pmRead').innerHTML = `P(Y ≤ ${k}) = <b>${fmtP(le)}</b> · P(Y ≥ ${k}) = <b>${fmtP(Math.max(0, ge))}</b>`;
+  }
+  function update(){ kIn.max = n; if (k > n) k = n; kIn.value = k; $('#pmKOut').textContent = k; draw(); math(); }
+  function pick(e){
+    if (!F) return;
+    const r = cv.getBoundingClientRect(), x = e.clientX - r.left;
+    const nk = clamp(Math.floor((x - F.X0) / F.bw), 0, n);
+    if (nk !== k) { k = nk; update(); }
+  }
+  cv.addEventListener('pointerdown', e => { pick(e); });
+  cv.addEventListener('pointermove', e => { if (e.buttons) pick(e); });
+  bindRange($('#pmN'), $('#pmNOut'), v => { n = v; update(); }, fInt);
+  bindRange($('#pmP'), $('#pmPOut'), v => { p = v; update(); });
+  bindRange(kIn, null, v => { k = v; update(); });
+  redraws.push(draw);
+})();
+
+/* ---------- 4. shape explorer ---------- */
+(function(){
+  const cv = $('#shChart'), nIn = $('#shN'), pIn = $('#shP');
+  let n = 20, p = .2, mirror = false;
+  function modes(P){ const mx = Math.max(...P); const out = []; P.forEach((v, i) => { if (v >= mx * (1 - 1e-9)) out.push(i); }); return out; }
+  function draw(){
+    const {ctx, w, h} = fit(cv);
+    const q = 1 - p, P = pmfArr(n, p), Q = mirror ? pmfArr(n, q) : null;
+    const ymax = Math.max(...P, ...(Q || [0])) * 1.2;
+    const F = frame(ctx, w, h, {lo:0, hi:n, ymax, top:22});
+    const mu = n * p, sd = Math.sqrt(n * p * q), M = modes(P);
+    if (sd > 0) {
+      const xa = clamp(F.xr(mu - sd), F.X0, F.X1), xb = clamp(F.xr(mu + sd), F.X0, F.X1);
+      ctx.fillStyle = C('--accent-soft'); ctx.fillRect(xa, F.Y1, Math.max(1, xb - xa), F.Y0 - F.Y1);
+    }
+    drawBars(ctx, F, 0, n, i => P[i], i => M.includes(i) ? C('--gold') : C('--accent'));
+    if (Q) {
+      ctx.strokeStyle = C('--zero'); ctx.lineWidth = 1.5; const bwid = Math.max(1, F.bw * .8);
+      for (let i = 0; i <= n; i++) { if (Q[i] <= 0) continue; const y = F.ys(Q[i]); if (F.Y0 - y < .5) continue; ctx.strokeRect(F.xc(i) - bwid / 2, y, bwid, F.Y0 - y); }
+    }
+    const xm = F.xr(mu);
+    ctx.strokeStyle = C('--ink'); ctx.setLineDash([5, 4]); ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(xm, F.Y0); ctx.lineTo(xm, F.Y1 - 6); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = C('--ink'); ctx.font = '600 12px ' + MONO; ctx.textBaseline = 'bottom';
+    const right = xm < F.X0 + (F.X1 - F.X0) * .6;
+    ctx.textAlign = right ? 'left' : 'right';
+    ctx.fillText('np = ' + f2(mu), xm + (right ? 6 : -6), F.Y1 + 4);
+  }
+  function read(){
+    const q = 1 - p, mu = n * p, sd = Math.sqrt(n * p * q), M = modes(pmfArr(n, p));
+    let skew = '';
+    if (sd === 0) skew = 'no spread: the count is certain';
+    else {
+      const g = (q - p) / sd;
+      const dir = Math.abs(p - .5) < 1e-9 ? 'perfectly symmetric' : Math.abs(g) < .1 ? 'nearly symmetric' : g > 0 ? 'right-skewed: longer tail toward large counts' : 'left-skewed: longer tail toward small counts';
+      skew = `skewness <b>${f3(g)}</b> (${dir})`;
+    }
+    $('#shRead').innerHTML = `mean np = <b>${f2(mu)}</b> · σ = √(npq) = <b>${f3(sd)}</b> · most likely count: <b>${M.join(' and ')}</b>${M.length > 1 ? ' (a tie)' : ''} · ${skew}`;
+  }
+  const up = () => { draw(); read(); };
+  bindRange(nIn, $('#shNOut'), v => { n = v; up(); }, fInt);
+  bindRange(pIn, $('#shPOut'), v => { p = v; up(); });
+  $$('[data-sh]').forEach(b => b.addEventListener('click', () => { const [a, c] = b.dataset.sh.split(',').map(Number); nIn.value = a; setRange(pIn, c); setRange(nIn, a); }));
+  $('#shMirror').addEventListener('click', e => { mirror = !mirror; e.currentTarget.classList.toggle('on', mirror); e.currentTarget.setAttribute('aria-pressed', mirror); $('#shMirLeg').hidden = !mirror; draw(); });
+  redraws.push(draw);
+})();
+
+/* ---------- 5. count vs fraction ---------- */
+(function(){
+  const L = $('#mvL'), Rc = $('#mvR'), nIn = $('#mvN');
+  const RANGE = 30;
+  let n = 16, p = .5;
+  function axis(ctx, X0, X1, Y0, ticks, xs, fmt){
+    ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ticks.forEach(v => ctx.fillText(fmt(v), xs(v), Y0 + 6));
+  }
+  function sdLines(ctx, xs, c, s, Y0, Y1, label, X0, X1){
+    ctx.strokeStyle = C('--accent'); ctx.setLineDash([4, 4]); ctx.lineWidth = 1.5;
+    [c - s, c + s].forEach(v => { const x = xs(v); if (x < X0 - 1 || x > X1 + 1) return; ctx.beginPath(); ctx.moveTo(x, Y0); ctx.lineTo(x, Y1); ctx.stroke(); });
+    ctx.setLineDash([]);
+    ctx.fillStyle = C('--accent'); ctx.font = '600 12px ' + MONO; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    ctx.fillText(label, X0, 0);
+  }
+  function drawL(){
+    const {ctx, w, h} = fit(L);
+    const X0 = 14, X1 = w - 14, Y0 = h - 24, Y1 = 22, xs = v => X0 + (v + RANGE) / (2 * RANGE) * (X1 - X0);
+    const P = pmfArr(n, p), mx = Math.max(...P), bwid = clamp((X1 - X0) / (2 * RANGE) * .8, 1, 14);
+    ctx.fillStyle = C('--accent');
+    for (let k = 0; k <= n; k++) {
+      const d = k - n * p; if (Math.abs(d) > RANGE + .5) continue;
+      const hh = P[k] / mx * (Y0 - Y1); if (hh < .3) continue;
+      ctx.fillRect(xs(d) - bwid / 2, Y0 - hh, bwid, hh);
+    }
+    axis(ctx, X0, X1, Y0, [-30, -20, -10, 0, 10, 20, 30], xs, v => v);
+    const sd = Math.sqrt(n * p * (1 - p));
+    sdLines(ctx, xs, 0, sd, Y0, Y1, 'σ = ' + f2(sd), X0, X1);
+  }
+  function drawR(){
+    const {ctx, w, h} = fit(Rc);
+    const X0 = 14, X1 = w - 14, Y0 = h - 24, Y1 = 22, xs = v => X0 + v * (X1 - X0);
+    const P = pmfArr(n, p), mx = Math.max(...P), bwid = clamp((X1 - X0) / (n + 1) * .8, 1, 14);
+    ctx.fillStyle = C('--accent');
+    for (let k = 0; k <= n; k++) {
+      const hh = P[k] / mx * (Y0 - Y1); if (hh < .3) continue;
+      ctx.fillRect(xs(k / n) - bwid / 2, Y0 - hh, bwid, hh);
+    }
+    axis(ctx, X0, X1, Y0, [0, .25, .5, .75, 1], xs, v => v === 0 || v === 1 ? String(v) : v.toFixed(2));
+    const sd = Math.sqrt(p * (1 - p) / n);
+    sdLines(ctx, xs, p, sd, Y0, Y1, 'σ = ' + f3(sd), X0, X1);
+  }
+  function update(){
+    drawL(); drawR();
+    const q = 1 - p;
+    $('#mvRead').innerHTML = `n = <b>${n}</b> · spread of the count √(npq) = <b>${f2(Math.sqrt(n * p * q))}</b> · spread of the fraction √(pq/n) = <b>${f3(Math.sqrt(p * q / n))}</b>`;
+  }
+  bindRange(nIn, $('#mvNOut'), v => { n = v; update(); }, fInt);
+  bindRange($('#mvP'), $('#mvPOut'), v => { p = v; update(); });
+  $('#mvDiv').addEventListener('click', () => setRange(nIn, clamp(Math.round(n / 4), 1, 400)));
+  $('#mvMul').addEventListener('click', () => setRange(nIn, clamp(n * 4, 1, 400)));
+  redraws.push(() => { drawL(); drawR(); });
+})();
+
+/* ---------- 6. Galton board ---------- */
+(function(){
+  const cv = $('#gaCanvas');
+  const CAP = 160, AUTO_RATE = 6, SPAWN_RATE = 14, FALL = 1;
+  let R = 10, p = .5, counts = [], total = 0, balls = [], queue = 0, auto = false, raf = 0, lastT = 0, spawnAcc = 1, autoAcc = 0, P = [];
+  function reset(){ counts = new Array(R + 1).fill(0); total = 0; balls = []; queue = 0; P = pmfArr(R, p); stats(); draw(); }
+  function makeBall(){ const path = [0]; let j = 0; for (let r = 0; r < R; r++) { if (Math.random() < p) j++; path.push(j); } return {path, s:0, j}; }
+  function geom(w, h){
+    const binBottom = h - 22, binsH = Math.min(190, h * .42), binTop = binBottom - binsH;
+    const pegTop = 18, dy = (binTop - 18 - pegTop) / R;
+    const dx = Math.min((w - 16) / (R + 1), dy * 1.7, 46);
+    return {binBottom, binsH, binTop, pegTop, dy, dx, cx:w / 2, br:clamp(dx * .17, 1.6, 5.5), pr:clamp(dx * .07, 1, 3), sc:1};
+  }
+  const pegX = (G, row, j) => G.cx + (j - row / 2) * G.dx;
+  function ballXY(b, G){
+    const py = row => G.pegTop + row * G.dy - G.pr - G.br;
+    const r = Math.floor(b.s), f = b.s - r;
+    if (r < R) {
+      const e = f * f * (3 - 2 * f), xa = pegX(G, r, b.path[r]), xb = pegX(G, r + 1, b.path[r + 1]);
+      return [xa + (xb - xa) * e, py(r) + (py(r + 1) - py(r)) * f - G.dy * .45 * Math.sin(Math.PI * f)];
+    }
+    const u = Math.min(1, (b.s - R) / FALL), y0 = py(R), y1 = G.binBottom - counts[b.j] * G.sc - G.br;
+    return [pegX(G, R, b.j), y0 + (Math.max(y0, y1) - y0) * u * u];
+  }
+  function draw(){
+    const {ctx, w, h} = fit(cv), G = geom(w, h);
+    const pm = Math.max(...P), maxv = Math.max(4, ...counts, total * pm);
+    G.sc = (G.binsH - 10) / maxv;
+    ctx.fillStyle = C('--ink-3');
+    for (let r = 0; r < R; r++) for (let i = 0; i <= r; i++) dot(ctx, pegX(G, r, i), G.pegTop + r * G.dy, G.pr);
+    ctx.strokeStyle = C('--line'); ctx.lineWidth = 1;
+    for (let j = 0; j <= R + 1; j++) { const x = Math.round(pegX(G, R, j - .5)) + .5; ctx.beginPath(); ctx.moveTo(x, G.binTop); ctx.lineTo(x, G.binBottom); ctx.stroke(); }
+    ctx.strokeStyle = C('--ink-3'); ctx.beginPath(); ctx.moveTo(pegX(G, R, -.5), G.binBottom + .5); ctx.lineTo(pegX(G, R, R + .5), G.binBottom + .5); ctx.stroke();
+    ctx.fillStyle = C('--accent');
+    for (let j = 0; j <= R; j++) { const hh = counts[j] * G.sc; if (hh > 0) ctx.fillRect(pegX(G, R, j) - G.dx * .4, G.binBottom - hh, G.dx * .8, hh); }
+    if (total) {
+      ctx.strokeStyle = C('--gold'); ctx.lineWidth = 1.5; ctx.beginPath();
+      for (let j = 0; j <= R; j++) { const x = pegX(G, R, j), y = G.binBottom - total * P[j] * G.sc; j ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+      ctx.stroke(); ctx.fillStyle = C('--gold');
+      for (let j = 0; j <= R; j++) dot(ctx, pegX(G, R, j), G.binBottom - total * P[j] * G.sc, clamp(G.dx * .12, 2, 4));
+    }
+    ctx.fillStyle = C('--ink');
+    for (const b of balls) { const [x, y] = ballXY(b, G); dot(ctx, x, y, G.br); }
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    const st = G.dx < 18 ? 2 : 1;
+    for (let j = 0; j <= R; j += st) ctx.fillText(j, pegX(G, R, j), G.binBottom + 6);
+  }
+  function stats(){
+    let s = 0; counts.forEach((c, k) => s += c * k);
+    $('#gaRead').innerHTML = total || balls.length || queue
+      ? `landed <b>${total.toLocaleString()}</b> · in flight ${balls.length} · waiting ${queue.toLocaleString()} · average bin <b>${total ? f2(s / total) : '–'}</b> (theory np = ${f2(R * p)})`
+      : `Each ball makes ${R} left/right choices with P(right) = ${f2(p)}. Its bin number is the count of right bounces.`;
+  }
+  function tick(now){
+    raf = 0;
+    const dt = lastT ? Math.min(.05, (now - lastT) / 1000) : 0; lastT = now;
+    if (auto) { autoAcc += dt * AUTO_RATE; const m = Math.floor(autoAcc); autoAcc -= m; queue += m; }
+    spawnAcc = Math.min(spawnAcc + dt * SPAWN_RATE, 2);
+    while (queue > 0 && spawnAcc >= 1 && balls.length < CAP) { balls.push(makeBall()); queue--; spawnAcc -= 1; }
+    const speed = 6 + Math.min(10, queue / 15);
+    let landed = false;
+    for (const b of balls) b.s += dt * speed;
+    balls = balls.filter(b => { if (b.s >= R + FALL) { counts[b.j]++; total++; landed = true; return false; } return true; });
+    stats(); draw();
+    if (balls.length || queue || auto) kick(); else lastT = 0;
+  }
+  function kick(){ if (!raf) raf = requestAnimationFrame(tick); }
+  function drop(m){
+    if (RM) { for (let i = 0; i < m; i++) counts[sampleBinom(R, p)]++; total += m; stats(); draw(); return; }
+    queue += m; kick();
+  }
+  function setAuto(on){
+    auto = on; $('#gaAuto').textContent = on ? '❚❚ Pause' : '▶ Auto';
+    if (on && RM) { auto = false; $('#gaAuto').textContent = '▶ Auto'; drop(50); return; }
+    if (on) kick();
+  }
+  $('#ga1').addEventListener('click', () => drop(1));
+  $('#ga50').addEventListener('click', () => drop(50));
+  $('#gaAuto').addEventListener('click', () => setAuto(!auto));
+  $('#ga1000').addEventListener('click', () => { for (let i = 0; i < 1000; i++) counts[sampleBinom(R, p)]++; total += 1000; stats(); draw(); });
+  $('#gaReset').addEventListener('click', () => { setAuto(false); reset(); });
+  bindRange($('#gaN'), $('#gaNOut'), v => { R = v; reset(); if (auto) kick(); }, fInt);
+  bindRange($('#gaP'), $('#gaPOut'), v => { p = v; reset(); if (auto) kick(); });
+  redraws.push(draw);
+})();
+
+/* ---------- 7. normal approximation ---------- */
+(function(){
+  const cv = $('#noChart'), nIn = $('#noN'), pIn = $('#noP'), kIn = $('#noK');
+  let n = 20, p = .3, k = 4, cc = true;
+  function draw(){
+    const {ctx, w, h} = fit(cv);
+    const q = 1 - p, mu = n * p, sd = Math.sqrt(n * p * q);
+    // show about ±4σ of real counts; extend past 0 or n only as far as the curve visibly spills
+    const lo = Math.min(Math.max(0, Math.floor(mu - 4 * sd)), Math.floor(mu - 3.5 * sd), k);
+    const hi = Math.max(Math.min(n, Math.ceil(mu + 4 * sd)), Math.ceil(mu + 3.5 * sd), k);
+    const P = pmfArr(n, p), ymax = Math.max(...P, npdf(mu, mu, sd)) * 1.12;
+    const F = frame(ctx, w, h, {lo, hi, ymax});
+    // impossible regions
+    ctx.fillStyle = C('--zero-soft');
+    if (lo < 0) ctx.fillRect(F.X0, F.Y1, F.xr(-.5) - F.X0, F.Y0 - F.Y1);
+    if (hi > n) ctx.fillRect(F.xr(n + .5), F.Y1, F.X1 - F.xr(n + .5), F.Y0 - F.Y1);
+    // bars
+    drawBars(ctx, F, Math.max(0, lo), Math.min(n, hi), i => P[i], i => i <= k ? C('--accent') : C('--accent-soft'), .94);
+    // shaded normal area
+    const cut = cc ? k + .5 : k, x0 = lo - .5, x1 = Math.min(cut, hi + .5), steps = 160;
+    ctx.beginPath(); ctx.moveTo(F.xr(x0), F.Y0);
+    for (let i = 0; i <= steps; i++) { const x = x0 + (x1 - x0) * i / steps; ctx.lineTo(F.xr(x), F.ys(npdf(x, mu, sd))); }
+    ctx.lineTo(F.xr(x1), F.Y0); ctx.closePath(); ctx.fillStyle = C('--gold-soft'); ctx.fill();
+    // curve
+    ctx.strokeStyle = C('--gold'); ctx.lineWidth = 2.2; ctx.beginPath();
+    for (let i = 0; i <= 300; i++) { const x = lo - .5 + (hi - lo + 1) * i / 300, y = F.ys(npdf(x, mu, sd)); i ? ctx.lineTo(F.xr(x), y) : ctx.moveTo(F.xr(x), y); }
+    ctx.stroke();
+    // cut line
+    const xc = F.xr(cut);
+    ctx.strokeStyle = C('--ink'); ctx.setLineDash([5, 4]); ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(xc, F.Y0); ctx.lineTo(xc, F.Y1); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = C('--ink'); ctx.font = '600 12px ' + MONO; ctx.textBaseline = 'top';
+    const right = xc < F.X0 + (F.X1 - F.X0) * .7; ctx.textAlign = right ? 'left' : 'right';
+    ctx.fillText(cc ? `cut at k + ½ = ${f1(cut)}` : `cut at k = ${k}`, xc + (right ? 6 : -6), F.Y1);
+    if (lo < 0 && F.xr(-.5) - F.X0 > 60) { ctx.fillStyle = C('--zero'); ctx.font = '11px ' + SANS; ctx.textAlign = 'left'; ctx.fillText('Y < 0 is impossible', F.X0 + 4, F.Y1 + 18); }
+  }
+  function read(){
+    const q = 1 - p, mu = n * p, sd = Math.sqrt(n * p * q);
+    const ex = cdf(n, k, p), a = Phi((k + .5 - mu) / sd), b = Phi((k - mu) / sd);
+    const good = mu >= 10 && n * q >= 10;
+    const why = good ? '<span class="ok">Both are at least 10, so the normal approximation should work well.</span>'
+      : `<span class="warn">${mu < 10 ? 'np' : 'n(1−p)'} is below 10: the bars are too lopsided for a symmetric bell curve, so expect visible errors.</span>`;
+    $('#noRead').innerHTML =
+      `exact P(Y ≤ ${k}) = <b>${f4(ex)}</b><br>` +
+      `normal with continuity correction ≈ <b>${f4(a)}</b> (off by ${f4(Math.abs(a - ex))})<br>` +
+      `normal without it ≈ <b>${f4(b)}</b> (off by ${f4(Math.abs(b - ex))})<br>` +
+      `np = ${f2(mu)}, n(1−p) = ${f2(n * q)}. ${why}`;
+  }
+  function update(){ kIn.max = n; if (k > n) k = n; kIn.value = k; $('#noKOut').textContent = k; draw(); read(); }
+  bindRange(nIn, $('#noNOut'), v => { n = v; update(); }, fInt);
+  bindRange(pIn, $('#noPOut'), v => { p = v; update(); });
+  bindRange(kIn, null, v => { k = v; update(); });
+  $('#noCC').addEventListener('click', e => { cc = !cc; const b = e.currentTarget; b.classList.toggle('on', cc); b.setAttribute('aria-pressed', cc); b.textContent = 'Continuity correction: ' + (cc ? 'on' : 'off'); update(); });
+  $$('[data-no]').forEach(b => b.addEventListener('click', () => { const [a, c, d] = b.dataset.no.split(',').map(Number); nIn.value = a; n = a; p = c; k = d; pIn.value = c; $('#noNOut').textContent = a; $('#noPOut').textContent = f2(c); update(); }));
+  redraws.push(draw);
+})();
+
+/* ---------- 8. Poisson limit ---------- */
+(function(){
+  const cv = $('#poChart'), NS = [10, 20, 50, 100, 200, 500, 1000, 10000];
+  let lam = 2, n = 20;
+  function draw(){
+    const {ctx, w, h} = fit(cv);
+    const p = lam / n, kmax = Math.max(8, Math.ceil(lam + 4 * Math.sqrt(lam) + 1));
+    const B = [], Po = [];
+    for (let k = 0; k <= kmax; k++) { B.push(pmf(n, k, p)); Po.push(poisPMF(lam, k)); }
+    const ymax = Math.max(...B, ...Po) * 1.15;
+    const F = frame(ctx, w, h, {lo:0, hi:kmax, ymax});
+    drawBars(ctx, F, 0, kmax, i => B[i], C('--accent'), .7);
+    ctx.fillStyle = C('--gold'); const r = clamp(F.bw * .14, 2.5, 4.5);
+    for (let k = 0; k <= kmax; k++) dot(ctx, F.xc(k), F.ys(Po[k]), r);
+    // stats
+    let tv = 0; const K = Math.max(kmax, Math.ceil(lam + 12 * Math.sqrt(lam) + 20));
+    for (let k = 0; k <= K; k++) tv += Math.abs(pmf(n, k, p) - poisPMF(lam, k));
+    tv /= 2;
+    $('#poRead').innerHTML = `p = λ/n = <b>${p < .001 ? p.toExponential(1) : f4(p)}</b> · variance: binomial λ(1−p) = <b>${f3(lam * (1 - p))}</b>, Poisson λ = <b>${f3(lam)}</b><br>total variation distance = <b>${tv < 1e-4 ? tv.toExponential(1) : f4(tv)}</b> · Le Cam’s bound np² = ${(lam * p) < 1e-4 ? (lam * p).toExponential(1) : f4(lam * p)}`;
+  }
+  bindRange($('#poL'), $('#poLOut'), v => { lam = v; draw(); }, f1);
+  bindRange($('#poN'), $('#poNOut'), v => { n = NS[v]; draw(); }, v => NS[v].toLocaleString());
+  redraws.push(draw);
+})();
+
+/* ---------- 9a. confidence intervals ---------- */
+(function(){
+  const line = $('#ciLine'), cov = $('#ciCov'), nIn = $('#ciN'), kIn = $('#ciK');
+  const Z = 1.96;
+  let n = 20, k = 3, covN = -1, covW = [], covS = [];
+  const GRID = 400, PS = Array.from({length:GRID}, (_, i) => (i + .5) / GRID);
+  function wald(k, n){ const ph = k / n, hw = Z * Math.sqrt(ph * (1 - ph) / n); return [ph - hw, ph + hw]; }
+  function wilson(k, n){ const z2 = Z * Z, ph = k / n, d = 1 + z2 / n, c = (ph + z2 / (2 * n)) / d, hw = Z / d * Math.sqrt(ph * (1 - ph) / n + z2 / (4 * n * n)); return [Math.max(0, c - hw), Math.min(1, c + hw)]; }
+  function computeCov(){
+    if (covN === n) return; covN = n;
+    const IW = [], IS = []; for (let j = 0; j <= n; j++) { IW.push(wald(j, n)); IS.push(wilson(j, n)); }
+    covW = []; covS = [];
+    PS.forEach(p => {
+      let a = 0, b = 0;
+      for (let j = 0; j <= n; j++) { const pr = pmf(n, j, p); if (IW[j][0] <= p && p <= IW[j][1]) a += pr; if (IS[j][0] <= p && p <= IS[j][1]) b += pr; }
+      covW.push(a); covS.push(b);
+    });
+  }
+  function drawLine(){
+    const {ctx, w, h} = fit(line);
+    const X0 = 64, X1 = w - 14, xs = v => X0 + v * (X1 - X0), Y0 = h - 24;
+    ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    [0, .25, .5, .75, 1].forEach(v => { ctx.fillText(v === 0 || v === 1 ? v : v.toFixed(2), xs(v), Y0 + 6); ctx.fillRect(xs(v) - .5, Y0 - 3, 1, 6); });
+    const ph = k / n;
+    const rows = [['Wald', wald(k, n), C('--zero'), 26], ['Wilson', wilson(k, n), C('--accent'), 60]];
+    rows.forEach(([name, [a, b], col, y]) => {
+      ctx.fillStyle = C('--ink-2'); ctx.font = '600 12px ' + SANS; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(name, 6, y);
+      const xa = xs(clamp(a, 0, 1)), xb = xs(clamp(b, 0, 1));
+      ctx.fillStyle = col;
+      if (xb - xa < 2) {
+        dot(ctx, xa, y, 5);
+        ctx.font = '600 11px ' + SANS; ctx.textAlign = xa > (X0 + X1) / 2 ? 'right' : 'left';
+        ctx.fillText('zero width!', xa + (xa > (X0 + X1) / 2 ? -10 : 10), y);
+      } else { roundRect(ctx, xa, y - 6, xb - xa, 12, 4); ctx.fill(); }
+    });
+    ctx.strokeStyle = C('--ink'); ctx.setLineDash([3, 3]); ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(xs(ph), 10); ctx.lineTo(xs(ph), Y0); ctx.stroke(); ctx.setLineDash([]);
+  }
+  function drawCov(){
+    computeCov();
+    const {ctx, w, h} = fit(cov);
+    const X0 = 40, X1 = w - 10, Y0 = h - 24, Y1 = 10, LO = .5;
+    const xs = v => X0 + v * (X1 - X0), ys = v => Y0 - (v - LO) / (1 - LO) * (Y0 - Y1);
+    yGrid(ctx, X0, X1, ys, [.5, .6, .7, .8, .9, 1], v => v.toFixed(1));
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    [0, .2, .4, .6, .8, 1].forEach(v => ctx.fillText(v === 0 || v === 1 ? v : v.toFixed(1), xs(v), Y0 + 6));
+    ctx.save(); ctx.beginPath(); ctx.rect(X0, Y1 - 2, X1 - X0, Y0 - Y1 + 3); ctx.clip();
+    [[covW, C('--zero')], [covS, C('--accent')]].forEach(([arr, col]) => {
+      ctx.strokeStyle = col; ctx.lineWidth = 1.6; ctx.beginPath();
+      arr.forEach((v, i) => { const x = xs(PS[i]), y = ys(Math.max(v, LO - .02)); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+      ctx.stroke();
+    });
+    ctx.restore();
+    ctx.strokeStyle = C('--ink'); ctx.setLineDash([5, 4]); ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(X0, ys(.95)); ctx.lineTo(X1, ys(.95)); ctx.stroke(); ctx.setLineDash([]);
+    const avg = a => a.reduce((s, v) => s + v, 0) / a.length;
+    const minW = Math.min(...covW.slice(Math.floor(GRID * .1), Math.ceil(GRID * .9)));
+    $('#ciCovRead').innerHTML = `true p on the horizontal axis, actual coverage on the vertical axis (the chart bottoms out at 0.5)<br>average coverage: Wald <b>${f3(avg(covW))}</b>, Wilson <b>${f3(avg(covS))}</b> · worst Wald coverage for p between 0.1 and 0.9: <b>${f3(minW)}</b>`;
+  }
+  function read(){
+    const [a, b] = wald(k, n), [c, d] = wilson(k, n);
+    const clip = (a < 0 || b > 1) ? ` <span class="small">(clipped from [${f3(a)}, ${f3(b)}])</span>` : '';
+    const zero = (b - a) < 1e-12 ? ' <span class="warn">zero width: claims p is known exactly</span>' : '';
+    $('#ciRead').innerHTML = `p̂ = ${k}/${n} = <b>${f3(k / n)}</b><br>Wald: [${f3(clamp(a, 0, 1))}, ${f3(clamp(b, 0, 1))}]${clip}${zero}<br>Wilson: [${f3(c)}, ${f3(d)}]`;
+  }
+  function update(){ kIn.max = n; if (k > n) k = n; kIn.value = k; $('#ciKOut').textContent = k; drawLine(); read(); drawCov(); }
+  bindRange(nIn, $('#ciNOut'), v => { n = v; update(); }, fInt);
+  bindRange(kIn, null, v => { k = v; update(); });
+  $('#ciZero').addEventListener('click', () => setRange(kIn, 0));
+  $('#ciAll').addEventListener('click', () => setRange(kIn, n));
+  redraws.push(() => { drawLine(); drawCov(); });
+})();
+
+/* ---------- 9b. hypothesis test ---------- */
+(function(){
+  const cv = $('#htChart'), nIn = $('#htN'), kIn = $('#htK'), pIn = $('#htP');
+  let n = 100, k = 60, p0 = .5;
+  const extreme = (j, d) => Math.abs(j - n * p0) >= d - 1e-9;
+  function draw(){
+    const {ctx, w, h} = fit(cv);
+    const P = pmfArr(n, p0), sd = Math.sqrt(n * p0 * (1 - p0)), d = Math.abs(k - n * p0);
+    const lo = Math.max(0, Math.min(k, Math.floor(n * p0 - 4.5 * sd))), hi = Math.min(n, Math.max(k, Math.ceil(n * p0 + 4.5 * sd)));
+    const ymax = Math.max(...P) * 1.18;
+    const F = frame(ctx, w, h, {lo, hi, ymax, top:20});
+    drawBars(ctx, F, lo, hi, i => P[i], i => extreme(i, d) ? C('--zero') : C('--ink-3'), .86);
+    const x = F.xc(k);
+    ctx.strokeStyle = C('--ink'); ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]);
+    ctx.beginPath(); ctx.moveTo(x, F.Y0); ctx.lineTo(x, F.Y1); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = C('--ink'); ctx.font = '600 12px ' + MONO; ctx.textBaseline = 'bottom';
+    const right = x < F.X0 + (F.X1 - F.X0) * .6; ctx.textAlign = right ? 'left' : 'right';
+    ctx.fillText(`observed k = ${k}`, x + (right ? 5 : -5), F.Y1 + 2);
+  }
+  const fmtN = x => Math.abs(x - Math.round(x)) < 1e-9 ? String(Math.round(x)) : String(+x.toFixed(2));
+  function read(){
+    const d = Math.abs(k - n * p0); let pv = 0;
+    for (let j = 0; j <= n; j++) if (extreme(j, d)) pv += pmf(n, j, p0);
+    pv = Math.min(1, pv);
+    const pct = pv >= .001 ? (pv * 100).toFixed(pv >= .1 ? 0 : 1) + '%' : fmtP(pv);
+    const verdict = pv < .05
+      ? 'That is rare enough that most analysts would call the result <span class="warn">statistically significant at the 5% level</span>.'
+      : pv < .1 ? 'That is uncommon but, by the usual 5% convention, <span class="ok">not rare enough to call significant</span>.'
+      : 'That is not unusual, so these data give <span class="ok">no strong evidence</span> against p = ' + f2(p0) + '.';
+    $('#htRead').innerHTML = `p-value = <b>${fmtP(pv)}</b><br>If p really were ${f2(p0)}, a count at least ${fmtN(d)} away from np₀ = ${fmtN(n * p0)} would happen in about ${pct} of experiments. ${verdict}`;
+  }
+  function update(){ kIn.max = n; if (k > n) k = n; kIn.value = k; $('#htKOut').textContent = k; draw(); read(); }
+  bindRange(nIn, $('#htNOut'), v => { n = v; update(); }, fInt);
+  bindRange(kIn, null, v => { k = v; update(); });
+  bindRange(pIn, $('#htPOut'), v => { p0 = v; update(); });
+  $('#htSim0').addEventListener('click', () => setRange(kIn, sampleBinom(n, p0)));
+  $('#htSim1').addEventListener('click', () => setRange(kIn, sampleBinom(n, Math.min(.99, p0 + .1))));
+  redraws.push(draw);
+})();
+
+/* ---------- 10. properties ---------- */
+(function(){
+  let n = 20, p = .3;
+  function values(){
+    const q = 1 - p, npq = n * p * q, P = pmfArr(n, p);
+    const mx = Math.max(...P), modes = []; P.forEach((v, i) => { if (v >= mx * (1 - 1e-9)) modes.push(i); });
+    let acc = 0, med = 0; for (let i = 0; i <= n; i++) { acc += P[i]; if (acc >= .5 - 1e-12) { med = i; break; } }
+    const medTie = Math.abs(acc - .5) < 1e-9 && med < n;
+    let H = 0; P.forEach(v => { if (v > 0) H -= v * Math.log2(v); });
+    const kf = Math.floor(n * p + 1e-9);
+    $('#cSup').textContent = `${n + 1} possible values: 0 … ${n}`;
+    $('#cPar').textContent = `n = ${n}, p = ${f2(p)}, q = ${f2(q)}`;
+    $('#cPMF').textContent = `largest: P(Y = ${modes[0]}) = ${fmtP(mx)}`;
+    $('#cCDF').textContent = `F(${kf}) = P(Y ≤ ${kf}) = ${f4(cdf(n, kf, p))}`;
+    $('#cMean').textContent = f3(n * p);
+    $('#cVar').textContent = f3(npq);
+    $('#cSD').textContent = f3(Math.sqrt(npq));
+    $('#cMode').textContent = modes.length > 1 ? `${modes.join(' and ')} (tie)` : String(modes[0]);
+    $('#cMed').textContent = medTie ? `any value in [${med}, ${med + 1}]` : String(med);
+    $('#cSkew').textContent = npq > 0 ? f3((q - p) / Math.sqrt(npq)) : 'undefined (no spread)';
+    $('#cKurt').textContent = npq > 0 ? f3((1 - 6 * p * q) / npq) : 'undefined (no spread)';
+    $('#cEnt').textContent = npq > 0 ? `exact ${f3(H)} · approx ${f3(.5 * Math.log2(TAU * Math.E * npq))}` : 'exact 0 (no uncertainty)';
+    $('#cMGF').textContent = `M(1) = (q + pe)ⁿ = ${fmtBig(Math.pow(q + p * Math.E, n))}`;
+    $('#cPGF').textContent = `G(0) = qⁿ = P(Y = 0) = ${fmtP(Math.pow(q, n))}`;
+    $('#cFish').textContent = npq > 0 ? f3(n / (p * q)) : '∞ (p is certain)';
+    $('#cMLE').textContent = `sd of p̂ = √(pq/n) = ${f3(Math.sqrt(p * q / n))}`;
+  }
+  function miniAxes(cv){ const {ctx, w, h} = fit(cv); return {ctx, w, h}; }
+  function drawPMF(){
+    const {ctx, w, h} = miniAxes($('#miniPMF'));
+    const P = pmfArr(n, p), ymax = Math.max(...P) * 1.15;
+    const F = frame(ctx, w, h, {lo:0, hi:n, ymax, left:36, top:10});
+    drawBars(ctx, F, 0, n, i => P[i], C('--accent'));
+  }
+  function drawCDF(){
+    const {ctx, w, h} = miniAxes($('#miniCDF'));
+    const F = frame(ctx, w, h, {lo:-1, hi:n + 1, lmin:0, lmax:n, ymax:1, left:36, top:10, yfmt:v => v.toFixed(1)});
+    let acc = 0; ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2;
+    const seg = (a, b, y) => { ctx.beginPath(); ctx.moveTo(F.xc(a), F.ys(y)); ctx.lineTo(F.xc(b), F.ys(y)); ctx.stroke(); };
+    seg(-1, 0, 0);
+    for (let k = 0; k <= n; k++) { acc += pmf(n, k, p); seg(k, k + 1, Math.min(1, acc)); }
+    ctx.fillStyle = C('--accent'); acc = 0;
+    if (F.bw >= 5) for (let k = 0; k <= n; k++) { acc += pmf(n, k, p); dot(ctx, F.xc(k), F.ys(Math.min(1, acc)), 2.5); }
+  }
+  function drawVar(){
+    const {ctx, w, h} = miniAxes($('#miniVar'));
+    const X0 = 36, X1 = w - 10, Y0 = h - 24, Y1 = 10, ymax = n / 4 * 1.1;
+    const xs = v => X0 + v * (X1 - X0), ys = v => Y0 - v / ymax * (Y0 - Y1);
+    { const t = niceTicks(ymax, 3); yGrid(ctx, X0, X1, ys, t, stepFmt(t)); }
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    [0, .5, 1].forEach(v => ctx.fillText(v, xs(v), Y0 + 6));
+    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2; ctx.beginPath();
+    for (let i = 0; i <= 100; i++) { const v = i / 100, y = ys(n * v * (1 - v)); i ? ctx.lineTo(xs(v), y) : ctx.moveTo(xs(v), y); }
+    ctx.stroke();
+    ctx.fillStyle = C('--ink'); dot(ctx, xs(p), ys(n * p * (1 - p)), 4.5);
+  }
+  const draw = () => { drawPMF(); drawCDF(); drawVar(); };
+  bindRange($('#prN'), $('#prNOut'), v => { n = v; values(); draw(); }, fInt);
+  bindRange($('#prP'), $('#prPOut'), v => { p = v; values(); draw(); });
+  redraws.push(draw);
+})();
+
+})();
+</script>
+</body>
+</html>
