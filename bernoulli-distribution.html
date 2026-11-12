@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Bernoulli Distribution — a visual introduction</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<style>
+:root{
+  --bg:#faf8f4; --surface:#ffffff; --surface-2:#f2efe8; --ink:#1c1c1e; --ink-2:#4c4e55; --ink-3:#8b8d93; --line:#e3dfd5;
+  --one:#16917c; --one-soft:rgba(22,145,124,.15);
+  --zero:#d9573a; --zero-soft:rgba(217,87,58,.15);
+  --accent:#3654c9; --accent-soft:rgba(54,84,201,.11);
+  --gold:#b98317;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+    --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+    --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+    --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+    --gold:#e2b04a;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+  --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+  --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+  --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+  --gold:#e2b04a;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.68 var(--sans);-webkit-font-smoothing:antialiased}
+main{max-width:820px;margin:0 auto;padding:0 20px 80px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;letter-spacing:-.01em}
+h1{font-size:clamp(2.2rem,6vw,3.4rem);margin:.2em 0 .3em}
+h2{font-size:clamp(1.6rem,4vw,2.1rem);margin:0 0 .5em}
+h3{font-size:1.2rem;margin:1.6em 0 .4em}
+p{margin:0 0 1em}
+a{color:var(--accent)}
+strong{font-weight:650}
+em.term{font-style:normal;font-weight:650;color:var(--accent)}
+.one-c{color:var(--one);font-weight:650}
+.zero-c{color:var(--zero);font-weight:650}
+.muted{color:var(--ink-2)}
+small,.small{font-size:14px}
+
+/* hero */
+.hero{text-align:center;padding:64px 0 24px}
+.kicker{text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--ink-3);margin:0}
+.lede{font-size:1.2rem;color:var(--ink-2);max-width:600px;margin:0 auto}
+.coin-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;margin:36px 0 0}
+.coin-toss{perspective:700px;padding-top:30px}
+.coin-toss.toss{animation:toss 1.1s cubic-bezier(.3,.6,.4,1)}
+@keyframes toss{0%{transform:translateY(0)}45%{transform:translateY(-100px)}100%{transform:translateY(0)}}
+.coin{position:relative;width:116px;height:116px;border:0;padding:0;background:transparent;cursor:pointer;transform-style:preserve-3d;transition:transform 1.1s cubic-bezier(.2,.65,.25,1);border-radius:50%}
+.coin:focus-visible{outline:2px solid var(--accent);outline-offset:6px}
+.face{position:absolute;inset:0;border-radius:50%;display:grid;place-items:center;font:700 48px/1 var(--serif);backface-visibility:hidden;-webkit-backface-visibility:hidden;color:#5a3d06;background:radial-gradient(circle at 35% 30%,#fff0bd,#e6bb52 55%,#b8861f);box-shadow:inset 0 0 0 7px rgba(255,255,255,.28),inset 0 0 0 9px rgba(120,80,10,.35),0 6px 18px rgba(0,0,0,.18)}
+.face.back{transform:rotateX(180deg)}
+.hint{font-size:15px;color:var(--ink-2);min-height:1.6em}
+
+.toc{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;margin:28px 0 8px}
+.toc ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 20px;counter-reset:t}
+.toc li{counter-increment:t;font-size:15px}
+.toc li::before{content:counter(t,decimal-leading-zero);font-family:var(--mono);color:var(--ink-3);margin-right:10px;font-size:13px}
+.toc a{color:var(--ink);text-decoration:none}
+.toc a:hover{color:var(--accent)}
+
+section{padding-top:56px}
+.secnum{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.08em;margin-bottom:4px}
+
+.widget{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin:26px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.widget-title{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);margin:0 0 12px;font-weight:600}
+.controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:12px 0}
+.ctrl{display:flex;align-items:center;gap:10px;font-size:15px}
+.ctrl output{font-family:var(--mono);font-size:14px;min-width:3.2em;color:var(--ink)}
+input[type=range]{accent-color:var(--accent);width:180px;max-width:100%}
+.btn{font:inherit;font-size:14px;line-height:1.2;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;transition:background .15s,transform .1s}
+.btn:hover{border-color:var(--ink-3)}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.readout{font-family:var(--mono);font-size:14px;color:var(--ink-2);line-height:1.6}
+.readout b{color:var(--ink);font-weight:600}
+canvas{display:block;width:100%}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:20px 0}
+.callout p:last-child{margin-bottom:0}
+.katex-display{overflow-x:auto;overflow-y:hidden;padding:4px 0}
+.mathbox{overflow-x:auto;padding:6px 0}
+details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:14px 0;background:var(--surface)}
+details summary{cursor:pointer;font-weight:600;font-size:15px;color:var(--ink-2)}
+details[open] summary{margin-bottom:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:680px){.grid2{grid-template-columns:1fr}}
+
+/* random variable machine */
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.rv-desc{font-size:15px;color:var(--ink-2);margin-bottom:12px}
+.rv-stage{display:grid;grid-template-columns:1fr 70px 1fr;align-items:center;gap:8px}
+.rv-outcome{border:1px dashed var(--line);border-radius:12px;padding:16px;text-align:center;min-height:132px;display:flex;flex-direction:column;justify-content:center;background:var(--surface-2)}
+.rv-icon{font-size:44px;line-height:1.1}
+.rv-label{font-weight:600;margin-top:6px;min-height:1.6em}
+.rv-outcome.shake .rv-icon{animation:shake .5s}
+@keyframes shake{0%,100%{transform:rotate(0)}20%{transform:rotate(-16deg) scale(1.1)}40%{transform:rotate(14deg)}60%{transform:rotate(-10deg) scale(1.05)}80%{transform:rotate(6deg)}}
+.rv-arrow{width:100%;height:40px;stroke:var(--ink-3);stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.rv-arrow.go{stroke:var(--accent)}
+.rv-values{display:flex;flex-direction:column;gap:10px}
+.vbox{display:flex;align-items:center;gap:12px;border:2px solid var(--line);border-radius:12px;padding:8px 12px;transition:all .25s}
+.vnum{font:700 30px/1 var(--mono);width:36px;text-align:center}
+.vbox.one .vnum{color:var(--one)} .vbox.zero .vnum{color:var(--zero)}
+.vmap{font-size:14px;color:var(--ink-2)}
+.vbox.one.hit{border-color:var(--one);background:var(--one-soft);animation:pop .35s}
+.vbox.zero.hit{border-color:var(--zero);background:var(--zero-soft);animation:pop .35s}
+@keyframes pop{50%{transform:scale(1.05)}}
+.chips{display:flex;flex-wrap:wrap;gap:5px;min-height:30px;margin-top:14px;align-items:center}
+.chip{font:600 13px/1 var(--mono);width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:#fff;animation:chipin .3s}
+.chip.c1{background:var(--one)} .chip.c0{background:var(--zero)}
+@keyframes chipin{from{transform:scale(0)}}
+@media (max-width:600px){.rv-stage{grid-template-columns:1fr}.rv-arrow{transform:rotate(90deg);height:36px}}
+
+/* jars */
+.jars{display:flex;justify-content:center;gap:clamp(24px,8vw,80px);align-items:flex-end;margin:10px 0 6px}
+.jar-col{display:flex;flex-direction:column;align-items:center;gap:8px}
+.jar{position:relative;width:110px;height:180px;border:3px solid var(--ink-3);border-top:none;border-radius:0 0 18px 18px;overflow:hidden;background:var(--surface-2)}
+.jar .fill{position:absolute;left:0;right:0;bottom:0;transition:height .35s cubic-bezier(.3,.8,.3,1)}
+.jar .fill::before{content:"";position:absolute;left:0;right:0;top:-5px;height:10px;border-radius:50%;background:inherit;filter:brightness(1.15)}
+.jar.j1 .fill{background:var(--one)} .jar.j0 .fill{background:var(--zero)}
+.jar-val{font:600 22px/1 var(--mono)}
+.jar-name{font-size:14px;color:var(--ink-2)}
+.budget{display:flex;height:30px;border-radius:8px;overflow:hidden;margin:18px 0 6px;border:1px solid var(--line)}
+.budget div{transition:width .35s cubic-bezier(.3,.8,.3,1);display:flex;align-items:center;justify-content:center;color:#fff;font:600 13px var(--mono);white-space:nowrap;overflow:hidden}
+.budget .b0{background:var(--zero)} .budget .b1{background:var(--one)}
+
+/* sim lab */
+.lab-grid{display:grid;grid-template-columns:200px 1fr;gap:18px;margin-top:12px}
+@media (max-width:640px){.lab-grid{grid-template-columns:1fr}}
+.bars2{display:flex;justify-content:center;gap:22px}
+.bcol{display:flex;flex-direction:column;align-items:center;gap:6px}
+.btrack{position:relative;width:56px;height:170px;background:var(--surface-2);border-radius:8px 8px 0 0;border-bottom:2px solid var(--ink-3)}
+.bfill{position:absolute;left:0;right:0;bottom:0;border-radius:6px 6px 0 0;transition:height .2s}
+.bfill.f1{background:var(--one)} .bfill.f0{background:var(--zero)}
+.btheory{position:absolute;left:-6px;right:-6px;height:0;border-top:2px dashed var(--ink);transition:bottom .3s}
+.blabel{font:600 14px var(--mono)}
+.bval{font:13px var(--mono);color:var(--ink-2)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin-top:8px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{display:inline-block;width:16px;height:10px;border-radius:2px}
+.sw.dash{height:0;border-top:2px dashed var(--ink)}
+.sw.line{height:0;border-top:2px solid var(--ink)}
+.sw.band{background:var(--accent-soft);border:1px solid var(--accent)}
+.sw.acc{height:0;border-top:2px dashed var(--accent)}
+
+/* seesaw */
+#seesaw{width:100%;height:auto;display:block}
+.ss-beam{fill:var(--ink-2)}
+.ss-ground{stroke:var(--line);stroke-width:2}
+.ss-fulcrum{fill:var(--surface-2);stroke:var(--ink-3);stroke-width:2}
+.ss-w0{fill:var(--zero)} .ss-w1{fill:var(--one)}
+.ss-tick{stroke:var(--ink-3);stroke-width:1.5}
+.ss-ticklab{fill:var(--ink-3);font:12px var(--mono);text-anchor:middle}
+.ss-wlab{fill:var(--ink);font:600 13px var(--mono);text-anchor:middle}
+.ss-pmark{fill:var(--accent)}
+.ss-plab{fill:var(--accent);font:600 13px var(--sans);text-anchor:middle}
+.status{font-weight:600;min-height:1.6em}
+.status.ok{color:var(--one)}
+
+/* properties */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:18px 0}
+.card{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
+.card h4{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+.card .f{overflow-x:auto;overflow-y:hidden;font-size:15px;min-height:1.8em}
+.card .v{font:600 15px var(--mono);color:var(--accent);margin-top:6px}
+.sticky-ctrl{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line)}
+.minis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:640px){.minis{grid-template-columns:1fr}}
+.mini{border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--surface)}
+.mini .cap{font-size:13px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.facts{counter-reset:f;list-style:none;padding:0;margin:18px 0}
+.facts li{counter-increment:f;position:relative;padding:12px 0 12px 44px;border-bottom:1px solid var(--line)}
+.facts li::before{content:counter(f);position:absolute;left:0;top:12px;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:600 13px var(--mono)}
+.facts li strong{display:block}
+.table-wrap{overflow-x:auto}
+table.summary{border-collapse:collapse;width:100%;font-size:15px;margin:14px 0}
+table.summary td,table.summary th{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:middle}
+table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3)}
+footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60px;border-top:1px solid var(--line);margin-top:60px}
+@media (prefers-reduced-motion:reduce){.coin,.coin-toss.toss,.jar .fill,.budget div{transition:none;animation:none}}
+</style>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <p class="kicker">A visual introduction</p>
+  <h1>The Bernoulli Distribution</h1>
+  <p class="lede">One try. Two possible outcomes. It is the simplest random experiment there is, and much of probability theory is built on top of it.</p>
+  <div class="coin-wrap">
+    <div class="coin-toss" id="coinToss">
+      <button class="coin" id="heroCoin" aria-label="Flip the coin"><span class="face front">H</span><span class="face back">T</span></button>
+    </div>
+    <p class="hint" id="heroResult" aria-live="polite">Tap the coin to flip it.</p>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#two">One try, two outcomes</a></li>
+    <li><a href="#rv">Turning outcomes into numbers</a></li>
+    <li><a href="#dist">What is a distribution?</a></li>
+    <li><a href="#pmf">One formula for both cases</a></li>
+    <li><a href="#sim">Let the computer flip</a></li>
+    <li><a href="#mean">Expected value: the balance point</a></li>
+    <li><a href="#var">Variance: how unpredictable?</a></li>
+    <li><a href="#binom">Stacking Bernoullis</a></li>
+    <li><a href="#est">Going backwards: guessing p</a></li>
+    <li><a href="#props">All the properties</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<section id="two">
+  <div class="secnum">01</div>
+  <h2>One try, two outcomes</h2>
+  <p>Look at these questions:</p>
+  <ul>
+    <li>Will this coin land <strong>heads</strong>?</li>
+    <li>Will a basketball player <strong>make</strong> this free throw?</li>
+    <li>Is the next email in your inbox <strong>spam</strong>?</li>
+    <li>Will a visitor <strong>click</strong> the “Buy” button?</li>
+    <li>Will a die show a <strong>six</strong>?</li>
+  </ul>
+  <p>They are about different things, but they have the same structure:</p>
+  <ol>
+    <li>You do something <strong>once</strong>. This is called a <em class="term">trial</em>.</li>
+    <li>The trial ends in exactly <strong>one of two ways</strong>: yes or no.</li>
+    <li>You <strong>can’t know in advance</strong> which way it will go, though one answer may be more likely than the other.</li>
+  </ol>
+  <p>A random experiment like this is called a <em class="term">Bernoulli trial</em>. It is named after the Swiss mathematician Jacob Bernoulli (1655–1705). His book <i>Ars Conjectandi</i> (“The Art of Conjecturing”), published in 1713 after his death, studied repeated yes/no experiments like these.</p>
+  <div class="callout"><p>The die example shows that the experiment itself doesn’t have to have only two outcomes. A die has six faces. If the only question you ask is “six or not six?”, though, you get a Bernoulli trial.</p></div>
+</section>
+
+<!-- 2 -->
+<section id="rv">
+  <div class="secnum">02</div>
+  <h2>Turning outcomes into numbers</h2>
+  <p>Mathematics works with numbers, not with words like “heads” or “spam”. So the first step is to agree on a rule that turns each outcome into a number. For a yes/no experiment, the natural choice is:</p>
+  $$X = \begin{cases} 1 & \text{if the outcome is a “success”} \\ 0 & \text{if the outcome is a “failure”} \end{cases}$$
+  <p>A rule that assigns a number to each outcome of a random experiment is called a <em class="term">random variable</em>. By convention it is written with a capital letter, here \(X\). A specific value it takes is written in lowercase, \(x\).</p>
+  <p>“Success” doesn’t have to mean something good. It only labels the outcome you are counting. For a spam filter, spam is the success.</p>
+
+  <div class="widget">
+    <p class="widget-title">The random-variable machine</p>
+    <div class="tabs" id="rvTabs">
+      <button class="btn on" data-s="coin">🪙 Coin</button>
+      <button class="btn" data-s="shot">🏀 Free throw</button>
+      <button class="btn" data-s="mail">📧 Email</button>
+      <button class="btn" data-s="die">🎲 Die</button>
+    </div>
+    <div class="rv-desc" id="rvDesc"></div>
+    <div class="rv-stage">
+      <div class="rv-outcome" id="rvOutcome"><div class="rv-icon" id="rvIcon">🪙</div><div class="rv-label" id="rvLabel">press run</div></div>
+      <svg class="rv-arrow" id="rvArrow" viewBox="0 0 80 40" aria-hidden="true"><path d="M6 20 H70"/><path d="M60 10 L72 20 L60 30"/></svg>
+      <div class="rv-values">
+        <div class="vbox one" id="rvBox1"><span class="vnum">1</span><span class="vmap" id="rvMap1"></span></div>
+        <div class="vbox zero" id="rvBox0"><span class="vnum">0</span><span class="vmap" id="rvMap0"></span></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="btn primary" id="rvRun">Run the experiment</button>
+      <button class="btn" id="rvRun10">Run 10 times</button>
+      <span class="readout" id="rvCount"></span>
+    </div>
+    <div class="small muted">Values of \(X\) so far:</div>
+    <div class="chips" id="rvChips"></div>
+  </div>
+
+  <p>Every scenario produces the same kind of output: a sequence of 0s and 1s. Once outcomes are turned into numbers, a coin, a basketball shot, and an email filter can all be analyzed with the same mathematics. The only thing that differs between them is how often the 1s show up.</p>
+  <p>Using 0 and 1 specifically has a big advantage. If you <strong>add up</strong> the values you get the <strong>number of successes</strong>, and if you <strong>average</strong> them you get the <strong>fraction of successes</strong>. That will matter later.</p>
+</section>
+
+<!-- 3 -->
+<section id="dist">
+  <div class="secnum">03</div>
+  <h2>What is a distribution?</h2>
+  <p>A random variable can take several values. A <em class="term">probability distribution</em> answers one question: <strong>how likely is each of those values?</strong></p>
+  <p>Think of probability as a fixed amount of sand, exactly <strong>1 unit</strong>, that has to be poured into buckets. There is one bucket for each value the variable can take. A distribution is a particular way of splitting the sand. Two rules always apply:</p>
+  <ul>
+    <li>No bucket can hold a negative amount: every probability is \(\ge 0\).</li>
+    <li>All the sand gets used: the probabilities add up to exactly \(1\).</li>
+  </ul>
+  <p>A Bernoulli variable has only <strong>two</strong> buckets, \(X=0\) and \(X=1\). If a fraction \(p\) of the sand goes into bucket 1, the remaining \(1-p\) must go into bucket 0. So <strong>a single number \(p\) fully describes the distribution.</strong> That number is called the <em class="term">parameter</em>.</p>
+
+  <div class="widget">
+    <p class="widget-title">Pour the probability</p>
+    <div class="controls" style="justify-content:center">
+      <label class="ctrl">Probability of success \(p\) <input type="range" id="pJar" min="0" max="1" step="0.01" value="0.3"><output id="pJarOut"></output></label>
+    </div>
+    <div class="jars">
+      <div class="jar-col"><div class="jar-val zero-c" id="jar0v"></div><div class="jar j0"><div class="fill" id="jar0"></div></div><div class="jar-name">bucket \(X = 0\)</div></div>
+      <div class="jar-col"><div class="jar-val one-c" id="jar1v"></div><div class="jar j1"><div class="fill" id="jar1"></div></div><div class="jar-name">bucket \(X = 1\)</div></div>
+    </div>
+    <div class="budget" aria-hidden="true"><div class="b0" id="bud0"></div><div class="b1" id="bud1"></div></div>
+    <div class="small muted" style="text-align:center">The bar above is the full 1 unit of probability. Moving the slider moves sand between buckets, but the total never changes.</div>
+  </div>
+
+  $$P(X=1) = p, \qquad P(X=0) = 1-p, \qquad 0 \le p \le 1$$
+  <p>We write this as \(X \sim \text{Bernoulli}(p)\), read as “\(X\) follows a Bernoulli distribution with parameter \(p\).” A fair coin is \(\text{Bernoulli}(0.5)\). The free-throw shooter is \(\text{Bernoulli}(0.7)\). “Roll a six” is \(\text{Bernoulli}(1/6)\).</p>
+  <p class="muted">Move the slider all the way to 0 or 1. Then one bucket holds everything and the outcome is certain. These are the <em>degenerate</em> cases: technically still Bernoulli distributions, but with no randomness left.</p>
+</section>
+
+<!-- 4 -->
+<section id="pmf">
+  <div class="secnum">04</div>
+  <h2>One formula for both cases</h2>
+  <p>The function that gives the probability of each value is called the <em class="term">probability mass function</em>, or <em class="term">PMF</em>. For a Bernoulli variable you could just list the two cases, as above. There is also a compact single formula:</p>
+  $$P(X = x) \;=\; p^{\,x}\,(1-p)^{\,1-x}, \qquad x \in \{0, 1\}$$
+  <p>At first glance this looks unnecessarily complicated, but it relies on one simple fact: <strong>any number raised to the power 0 equals 1</strong>. The exponent works like an on/off switch. Choose a value of \(x\) to see what happens:</p>
+
+  <div class="widget">
+    <p class="widget-title">Plug in a value</p>
+    <div class="controls">
+      <button class="btn on" id="pmfX1">x = 1</button>
+      <button class="btn" id="pmfX0">x = 0</button>
+      <span class="small muted">(uses the \(p\) from the slider above: <span id="pmfPNote" class="readout"></span>)</span>
+    </div>
+    <div class="mathbox" id="pmfSteps"></div>
+    <div class="small muted" id="pmfNote"></div>
+  </div>
+
+  <p>Why use this form? When we look at <em>many</em> independent trials together, their probabilities get multiplied, and with this notation the exponents simply <strong>add up</strong>. For example, the probability of the specific sequence \(1, 0, 1\) is</p>
+  $$p^1(1-p)^0 \cdot p^0(1-p)^1 \cdot p^1(1-p)^0 \;=\; p^{1+0+1}\,(1-p)^{0+1+0} \;=\; p^2(1-p)^1.$$
+  <p>Only the number of 1s and the number of 0s matter, not the order they came in. We will use this in sections 8 and 9.</p>
+</section>
+
+<!-- 5 -->
+<section id="sim">
+  <div class="secnum">05</div>
+  <h2>Let the computer flip</h2>
+  <p>What does “\(P(X=1) = 0.3\)” actually mean? You can’t check it with one trial, because one trial gives you a 0 or a 1, never 0.3. The <em>frequentist</em> interpretation is this: <strong>if you repeat the trial many times, the fraction of 1s settles down near 0.3.</strong></p>
+  <p>Below is a coin with an adjustable bias. Flip it and watch the running fraction of 1s:</p>
+  $$\hat p_n = \frac{x_1 + x_2 + \cdots + x_n}{n} = \frac{\text{number of 1s}}{n}$$
+  <p class="small muted">The hat on \(\hat p\) means “estimated from data”, as opposed to the true but unknown \(p\).</p>
+
+  <div class="widget">
+    <p class="widget-title">Biased-coin laboratory</p>
+    <div class="controls">
+      <label class="ctrl">True \(p\) <input type="range" id="labP" min="0.01" max="0.99" step="0.01" value="0.3"><output id="labPOut"></output></label>
+    </div>
+    <div class="controls">
+      <button class="btn" id="lab1">Flip 1</button>
+      <button class="btn" id="lab10">Flip 10</button>
+      <button class="btn" id="lab100">Flip 100</button>
+      <button class="btn primary" id="labAuto">▶ Auto-flip</button>
+      <button class="btn" id="labReset">Reset</button>
+    </div>
+    <canvas id="labStrip" style="height:46px" aria-label="Most recent flips"></canvas>
+    <div class="lab-grid">
+      <div>
+        <div class="bars2">
+          <div class="bcol"><div class="btrack"><div class="bfill f0" id="labB0"></div><div class="btheory" id="labT0"></div></div><div class="blabel zero-c">X = 0</div><div class="bval" id="labV0">–</div></div>
+          <div class="bcol"><div class="btrack"><div class="bfill f1" id="labB1"></div><div class="btheory" id="labT1"></div></div><div class="blabel one-c">X = 1</div><div class="bval" id="labV1">–</div></div>
+        </div>
+        <div class="legend" style="justify-content:center"><span><i class="sw dash"></i>theory</span><span><i class="sw" style="background:var(--ink-3)"></i>observed</span></div>
+      </div>
+      <div>
+        <canvas id="labChart" style="height:240px" aria-label="Running proportion of ones"></canvas>
+        <div class="legend"><span><i class="sw line"></i>running fraction \(\hat p_n\)</span><span><i class="sw acc"></i>true \(p\)</span><span><i class="sw band"></i>typical range \(p \pm 2\sqrt{p(1-p)/n}\)</span></div>
+      </div>
+    </div>
+    <div class="readout" id="labStats" style="margin-top:10px"></div>
+  </div>
+
+  <p>Notice that:</p>
+  <ul>
+    <li>Early on the running fraction jumps around a lot. After 5 flips, \(\hat p\) can only be 0, 0.2, 0.4, …</li>
+    <li>As \(n\) grows, the line gets pulled toward the true \(p\) and stays near it. This is the <em class="term">Law of Large Numbers</em>: \(\hat p_n \to p\) as \(n \to \infty\).</li>
+    <li>The shaded funnel narrows like \(1/\sqrt{n}\). To make the typical error <strong>half</strong> as big, you need <strong>four times</strong> as many flips. We will see where the \(\sqrt{p(1-p)}\) comes from in section 7.</li>
+  </ul>
+</section>
+
+<!-- 6 -->
+<section id="mean">
+  <div class="secnum">06</div>
+  <h2>Expected value: the balance point</h2>
+  <p>The <em class="term">expected value</em> (or <em>mean</em>) of a random variable is a weighted average: multiply each possible value by its probability, then add the results.</p>
+  $$E[X] = \sum_x x \cdot P(X=x) = 0\cdot(1-p) + 1\cdot p = p$$
+  <p>So the mean of a Bernoulli variable is just \(p\). There is a nice physical way to picture this. Put a weight of size \(1-p\) at position 0 and a weight of size \(p\) at position 1 on a seesaw. The mean is the point where the seesaw <strong>balances</strong>, also known as the center of mass.</p>
+
+  <div class="widget">
+    <p class="widget-title">Find the balance point</p>
+    <div class="controls">
+      <label class="ctrl">\(p\) <input type="range" id="ssP" min="0" max="1" step="0.01" value="0.3"><output id="ssPOut"></output></label>
+      <label class="ctrl">Fulcrum at <input type="range" id="ssF" min="0" max="1" step="0.01" value="0.7"><output id="ssFOut"></output></label>
+      <button class="btn primary" id="ssGo">Balance it</button>
+    </div>
+    <svg id="seesaw" viewBox="0 0 640 270" role="img" aria-label="A seesaw with weights 1-p at 0 and p at 1">
+      <line class="ss-ground" x1="20" y1="252" x2="620" y2="252"/>
+      <polygon class="ss-fulcrum" id="ssFul" points="0,0 0,0 0,0"/>
+      <g id="ssBeam">
+        <rect class="ss-beam" x="80" y="120" width="480" height="12" rx="6"/>
+        <g id="ssTicks"></g>
+        <circle class="ss-w0" id="ssW0" cx="80" cy="90" r="20"/>
+        <circle class="ss-w1" id="ssW1" cx="560" cy="90" r="20"/>
+        <text class="ss-wlab" id="ssL0" x="80" y="40"></text>
+        <text class="ss-wlab" id="ssL1" x="560" y="40"></text>
+        <polygon class="ss-pmark" id="ssPM" points="0,0 0,0 0,0"/>
+        <text class="ss-plab" id="ssPL" x="0" y="100">E[X]</text>
+      </g>
+    </svg>
+    <div class="status" id="ssStatus" aria-live="polite"></div>
+  </div>
+
+  <p>Two things are worth noticing:</p>
+  <ul>
+    <li><strong>The mean is usually not a value \(X\) can take.</strong> If \(p = 0.3\), then \(E[X] = 0.3\), but \(X\) is always 0 or 1. The expected value is a <em>long-run average</em>, not a prediction for a single trial.</li>
+    <li><strong>The average of the \(X\)s equals the fraction of 1s.</strong> This is the payoff from encoding outcomes as 0 and 1. The running fraction in the laboratory above was really a running <em>average</em> of \(X\), and the Law of Large Numbers says that average approaches \(E[X] = p\).</li>
+  </ul>
+</section>
+
+<!-- 7 -->
+<section id="var">
+  <div class="secnum">07</div>
+  <h2>Variance: how unpredictable?</h2>
+  <p>The mean tells you where the balance point is. The <em class="term">variance</em> tells you how <strong>spread out</strong> the values are around it. It is defined as the expected squared distance from the mean:</p>
+  $$\operatorname{Var}(X) = E\big[(X - \mu)^2\big], \qquad \mu = E[X] = p$$
+  <p>A Bernoulli variable has only two values, so there are only two distances to consider. The value 0 is at distance \(p\) from the mean, and the value 1 is at distance \(1-p\). Square each distance and weight it by its probability:</p>
+  $$\operatorname{Var}(X) = \underbrace{(1-p)}_{P(X=0)}\,(0-p)^2 + \underbrace{p}_{P(X=1)}\,(1-p)^2 = p(1-p)\big[\,p + (1-p)\,\big] = p(1-p)$$
+  <p>In the left picture below, each squared distance is drawn as an actual square. The variance is the probability-weighted average of the two square areas.</p>
+
+  <div class="widget">
+    <p class="widget-title">Squared deviations</p>
+    <div class="controls">
+      <label class="ctrl">\(p\) <input type="range" id="vP" min="0" max="1" step="0.01" value="0.3"><output id="vPOut"></output></label>
+    </div>
+    <div class="grid2">
+      <canvas id="vSquares" style="height:270px" aria-label="Squared deviations drawn as squares"></canvas>
+      <canvas id="vCurve" style="height:270px" aria-label="Variance p(1-p) as a function of p"></canvas>
+    </div>
+    <div class="mathbox" id="vCalc"></div>
+  </div>
+
+  <h3>A shortcut</h3>
+  <p>Variance can also be computed as \(\operatorname{Var}(X) = E[X^2] - (E[X])^2\). For a Bernoulli variable, \(0^2 = 0\) and \(1^2 = 1\), so <strong>\(X^2 = X\)</strong>. That means \(E[X^2] = E[X] = p\), and</p>
+  $$\operatorname{Var}(X) = p - p^2 = p(1-p), \qquad \sigma = \sqrt{p(1-p)}$$
+  <p>Here \(\sigma\) is the <em class="term">standard deviation</em>, the square root of the variance. It is measured in the same units as \(X\).</p>
+
+  <h3>When is it largest?</h3>
+  <p>Look at the curve on the right. Setting the derivative to zero gives \(\frac{d}{dp}(p - p^2) = 1 - 2p = 0\), so the maximum is at \(p = \tfrac12\), where \(\operatorname{Var} = \tfrac14\) and \(\sigma = \tfrac12\).</p>
+  <div class="callout"><p>A <strong>fair coin is the hardest Bernoulli trial to predict</strong>. As \(p\) moves toward 0 or 1, one outcome becomes nearly certain and the variance shrinks toward 0. This is also where the funnel in section 5 comes from: the average of \(n\) independent trials has variance \(p(1-p)/n\), so its standard deviation is \(\sqrt{p(1-p)/n}\).</p></div>
+</section>
+
+<!-- 8 -->
+<section id="binom">
+  <div class="secnum">08</div>
+  <h2>Stacking Bernoullis</h2>
+  <p>Now run \(n\) independent Bernoulli trials with the same \(p\) and <strong>add up</strong> the results:</p>
+  $$Y = X_1 + X_2 + \cdots + X_n = \text{number of successes}$$
+  <p>The sum \(Y\) is a new random variable that can be anything from \(0\) to \(n\). Its distribution is called the <em class="term">Binomial distribution</em>, \(\text{Binomial}(n, p)\). Run the machine to watch it build up one trial at a time:</p>
+
+  <div class="widget">
+    <p class="widget-title">The Bernoulli → Binomial machine</p>
+    <div class="controls">
+      <label class="ctrl">trials per run \(n\) <input type="range" id="bN" min="1" max="30" step="1" value="10"><output id="bNOut"></output></label>
+      <label class="ctrl">\(p\) <input type="range" id="bP" min="0.01" max="0.99" step="0.01" value="0.3"><output id="bPOut"></output></label>
+    </div>
+    <div class="controls">
+      <button class="btn primary" id="bRun1">Run once</button>
+      <button class="btn" id="bRun100">Run 100×</button>
+      <button class="btn" id="bRun1000">Run 1000×</button>
+      <button class="btn" id="bReset">Reset</button>
+    </div>
+    <canvas id="bCoins" style="height:64px" aria-label="The n Bernoulli trials of the latest run"></canvas>
+    <canvas id="bHist" style="height:250px" aria-label="Histogram of the number of successes"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i>observed share of runs</span><span><i class="sw" style="background:var(--gold);height:8px;width:8px;border-radius:50%"></i>Binomial formula</span></div>
+    <div class="readout" id="bStats" style="margin-top:8px"></div>
+  </div>
+
+  <p>The formula comes directly from the PMF in section 4. Any <em>specific</em> sequence containing \(k\) ones and \(n-k\) zeros has probability \(p^k(1-p)^{n-k}\), because the exponents add up. There are \(\binom{n}{k}\) such sequences (ways to choose which \(k\) positions are the 1s), so</p>
+  $$P(Y = k) = \binom{n}{k}\, p^{k}\,(1-p)^{n-k}.$$
+  <p>The mean and variance follow from the Bernoulli ones. Expected values always add, and variances add when the trials are independent:</p>
+  $$E[Y] = \sum_{i=1}^n E[X_i] = np, \qquad \operatorname{Var}(Y) = \sum_{i=1}^n \operatorname{Var}(X_i) = np(1-p).$$
+  <p class="muted">Set \(n\) to 30 and run 1000×. The histogram starts to look like a bell curve, which is an early sign of the Central Limit Theorem. The Bernoulli distribution is the single building block underneath all of this.</p>
+</section>
+
+<!-- 9 -->
+<section id="est">
+  <div class="secnum">09</div>
+  <h2>Going backwards: guessing p</h2>
+  <p>So far we have assumed we <em>know</em> \(p\) and predicted the data. In real life it is usually the other way around. You see the data (clicks, cures, defects) and want to work out \(p\).</p>
+  <p>Below is a coin with a <strong>secret</strong> bias. Flip it a few times. The curve shows, for every possible \(p\), how well that value explains what you have seen. This is called the <em class="term">likelihood</em>:</p>
+  $$L(p) = \prod_{i=1}^{n} p^{x_i}(1-p)^{1-x_i} = p^{k}(1-p)^{n-k}, \qquad k = \text{number of 1s}$$
+
+  <div class="widget">
+    <p class="widget-title">The mystery coin</p>
+    <div class="controls">
+      <button class="btn" id="mFlip1">Flip 1</button>
+      <button class="btn" id="mFlip10">Flip 10</button>
+      <button class="btn" id="mFlip100">Flip 100</button>
+      <button class="btn primary" id="mReveal">Reveal the true p</button>
+      <button class="btn" id="mNew">New mystery coin</button>
+    </div>
+    <canvas id="mChart" style="height:250px" aria-label="Likelihood of each value of p"></canvas>
+    <div class="readout" id="mStats" style="margin-top:8px"></div>
+  </div>
+
+  <p>The peak of the curve is the <em class="term">maximum likelihood estimate</em>. To find it, take the logarithm (which turns the product into a sum) and set the derivative to zero:</p>
+  $$\ell(p) = k\ln p + (n-k)\ln(1-p), \qquad \ell'(p) = \frac{k}{p} - \frac{n-k}{1-p} = 0 \;\;\Longrightarrow\;\; \hat p = \frac{k}{n}.$$
+  <p>The best guess for \(p\) is simply <strong>the fraction of 1s you observed</strong>, which is what you would probably have guessed anyway. More importantly, the curve gets <strong>narrower</strong> as you flip more. Its width is roughly \(\sqrt{\hat p(1-\hat p)/n}\), the same quantity that controlled the funnel in section 5.</p>
+</section>
+
+<!-- 10 -->
+<section id="props">
+  <div class="secnum">10</div>
+  <h2>All the properties</h2>
+  <p>Here are the main facts about \(X \sim \text{Bernoulli}(p)\) in one place. Throughout this section, \(q = 1 - p\). Drag the slider to update every value at once.</p>
+
+  <div class="sticky-ctrl">
+    <label class="ctrl">\(p\) <input type="range" id="prP" min="0" max="1" step="0.01" value="0.3"><output id="prPOut"></output> <span class="small muted">&nbsp;\(q = 1-p\) = <span id="prQ" class="readout"></span></span></label>
+  </div>
+
+  <div class="minis" style="margin-top:16px">
+    <div class="mini"><div class="cap">PMF</div><canvas id="miniPMF" style="height:150px"></canvas></div>
+    <div class="mini"><div class="cap">CDF</div><canvas id="miniCDF" style="height:150px"></canvas></div>
+    <div class="mini"><div class="cap">Entropy (bits) vs p</div><canvas id="miniEnt" style="height:150px"></canvas></div>
+  </div>
+
+  <h3>The numbers</h3>
+  <div class="cards">
+    <div class="card"><h4>Support</h4><div class="f">\(x \in \{0, 1\}\)</div><div class="v">two values only</div></div>
+    <div class="card"><h4>Parameter</h4><div class="f">\(0 \le p \le 1\)</div><div class="v" id="cP"></div></div>
+    <div class="card"><h4>PMF</h4><div class="f">\(P(X=x) = p^x q^{1-x}\)</div><div class="v" id="cPMF"></div></div>
+    <div class="card"><h4>CDF</h4><div class="f">\(F(x) = \begin{cases}0 & x<0\\ q & 0\le x<1\\ 1 & x\ge 1\end{cases}\)</div><div class="v" id="cCDF"></div></div>
+    <div class="card"><h4>Mean</h4><div class="f">\(E[X] = p\)</div><div class="v" id="cMean"></div></div>
+    <div class="card"><h4>Variance</h4><div class="f">\(\operatorname{Var}(X) = pq\)</div><div class="v" id="cVar"></div></div>
+    <div class="card"><h4>Standard deviation</h4><div class="f">\(\sigma = \sqrt{pq}\)</div><div class="v" id="cSD"></div></div>
+    <div class="card"><h4>Mode</h4><div class="f">\(\begin{cases}0 & p<\tfrac12\\ 0,1 & p=\tfrac12\\ 1 & p>\tfrac12\end{cases}\)</div><div class="v" id="cMode"></div></div>
+    <div class="card"><h4>Median</h4><div class="f">\(\begin{cases}0 & p<\tfrac12\\ [0,1] & p=\tfrac12\\ 1 & p>\tfrac12\end{cases}\)</div><div class="v" id="cMed"></div></div>
+    <div class="card"><h4>Skewness</h4><div class="f">\(\gamma_1 = \dfrac{q-p}{\sqrt{pq}}\)</div><div class="v" id="cSkew"></div></div>
+    <div class="card"><h4>Excess kurtosis</h4><div class="f">\(\gamma_2 = \dfrac{1-6pq}{pq}\)</div><div class="v" id="cKurt"></div></div>
+    <div class="card"><h4>Entropy</h4><div class="f">\(H = -q\log_2 q - p\log_2 p\)</div><div class="v" id="cEnt"></div></div>
+    <div class="card"><h4>Raw moments</h4><div class="f">\(E[X^k] = p \;\;(k \ge 1)\)</div><div class="v" id="cMom"></div></div>
+    <div class="card"><h4>MGF</h4><div class="f">\(M_X(t) = E[e^{tX}] = q + pe^{t}\)</div><div class="v" id="cMGF"></div></div>
+    <div class="card"><h4>PGF</h4><div class="f">\(G_X(z) = E[z^X] = q + pz\)</div><div class="v" id="cPGF"></div></div>
+    <div class="card"><h4>Fisher information</h4><div class="f">\(I(p) = \dfrac{1}{pq}\)</div><div class="v" id="cFish"></div></div>
+  </div>
+
+  <h3>Where the formulas come from</h3>
+  <details>
+    <summary>Mode and median</summary>
+    <p>The <strong>mode</strong> is the most probable value. You compare \(P(X=1) = p\) with \(P(X=0) = q\), and whichever is bigger wins. At \(p = \tfrac12\) they tie.</p>
+    <p>The <strong>median</strong> \(m\) is a value with at least half the probability on each side: \(P(X \le m) \ge \tfrac12\) and \(P(X \ge m) \ge \tfrac12\). If \(q > \tfrac12\), then \(0\) already holds more than half the probability, so \(m = 0\). If \(p > \tfrac12\), \(m = 1\). At exactly \(p = \tfrac12\), every number between 0 and 1 satisfies the definition.</p>
+  </details>
+  <details>
+    <summary>Skewness: which way is it lopsided?</summary>
+    <p>Skewness is the third central moment divided by \(\sigma^3\). The third central moment is</p>
+    $$E[(X-p)^3] = q(-p)^3 + p(q)^3 = pq\,(q^2 - p^2) = pq\,(q-p)(q+p) = pq\,(q-p).$$
+    $$\gamma_1 = \frac{pq(q-p)}{(pq)^{3/2}} = \frac{q-p}{\sqrt{pq}}.$$
+    <p>At \(p=\tfrac12\) the distribution is symmetric and \(\gamma_1 = 0\). When \(p\) is small, \(X\) is usually 0 with a rare jump up to 1, which gives a long right tail and positive skew. As \(p \to 0\), the skewness grows without bound.</p>
+  </details>
+  <details>
+    <summary>Kurtosis: how heavy are the tails?</summary>
+    <p>The fourth central moment uses \(p^3 + q^3 = (p+q)^3 - 3pq(p+q) = 1 - 3pq\):</p>
+    $$E[(X-p)^4] = q\,p^4 + p\,q^4 = pq\,(p^3 + q^3) = pq\,(1 - 3pq).$$
+    $$\text{Kurt} = \frac{pq(1-3pq)}{(pq)^2} = \frac{1-3pq}{pq}, \qquad \gamma_2 = \text{Kurt} - 3 = \frac{1-6pq}{pq}.$$
+    <p>At \(p = \tfrac12\), \(\gamma_2 = -2\). That is the <em>smallest excess kurtosis any distribution can have</em>: a fair coin has no tails at all, just two equal spikes. Rare-event Bernoullis (small \(p\)) have very large kurtosis because almost all of their variance comes from one rare outcome.</p>
+  </details>
+  <details>
+    <summary>Moments and the moment generating function</summary>
+    <p>Since \(0^k = 0\) and \(1^k = 1\), we have \(X^k = X\) for every \(k \ge 1\), so <strong>every raw moment equals \(p\)</strong>. The MGF shows the same thing:</p>
+    $$M_X(t) = E[e^{tX}] = q\,e^{0} + p\,e^{t} = q + pe^t, \qquad M_X^{(k)}(t) = pe^t \;\Rightarrow\; M_X^{(k)}(0) = p.$$
+    <p>The MGF of a sum of independent variables is the product of their MGFs. So the sum of \(n\) independent Bernoulli(\(p\)) variables has MGF \((q+pe^t)^n\), which is exactly the Binomial MGF.</p>
+  </details>
+  <details>
+    <summary>Entropy: how many bits of surprise?</summary>
+    <p>Entropy measures, in bits, how much information you gain on average when you see the outcome:</p>
+    $$H(p) = -p\log_2 p - q\log_2 q, \qquad (0\log_2 0 := 0).$$
+    <p>It is \(0\) when \(p\) is 0 or 1 (no surprise at all) and reaches its maximum of exactly <strong>1 bit</strong> at \(p = \tfrac12\). A fair coin flip is the standard definition of one bit of information. Among all distributions on \(\{0,1\}\), the fair coin is the most uncertain, both by entropy and by variance.</p>
+  </details>
+  <details>
+    <summary>Fisher information and the precision of \(\hat p\)</summary>
+    <p>Fisher information measures how much a single observation tells you about \(p\):</p>
+    $$I(p) = E\!\left[\left(\tfrac{\partial}{\partial p}\ln f(X;p)\right)^{2}\right] = \frac{1}{pq}.$$
+    <p>The estimate \(\hat p = k/n\) has variance \(\operatorname{Var}(\hat p) = pq/n = 1/(n\,I(p))\). That is the smallest variance any unbiased estimator can achieve (the Cramér–Rao bound), so the simple fraction of 1s is the best possible unbiased estimate.</p>
+  </details>
+
+  <h3>Structural facts worth remembering</h3>
+  <ol class="facts">
+    <li><strong>It is a special case of the Binomial.</strong> \(\text{Bernoulli}(p) = \text{Binomial}(1, p)\). Going the other way, the sum of \(n\) independent Bernoulli(\(p\)) variables is \(\text{Binomial}(n,p)\).</li>
+    <li><strong>Powers do nothing.</strong> \(X^k = X\) for any \(k\ge1\), so \(E[X^k] = p\), and \(\operatorname{Var}(X) = E[X]-E[X]^2\) simplifies to \(p(1-p)\).</li>
+    <li><strong>Swapping labels gives another Bernoulli.</strong> \(1 - X \sim \text{Bernoulli}(1-p)\). Calling “tails” the success just swaps \(p\) and \(q\). The variance \(pq\) stays the same and the skewness changes sign.</li>
+    <li><strong>AND and OR stay Bernoulli.</strong> For independent \(X\sim\text{Bern}(p_1)\) and \(Y\sim\text{Bern}(p_2)\), the product \(XY\) (“both happen”) is \(\text{Bern}(p_1p_2)\), and \(\max(X,Y)\) (“at least one happens”) is \(\text{Bern}(1-q_1q_2)\).</li>
+    <li><strong>Indicators link probability and expectation.</strong> For any event \(A\), the indicator \(\mathbf 1_A\) (1 if \(A\) happens, 0 if not) is Bernoulli with \(p = P(A)\), so \(E[\mathbf 1_A] = P(A)\). This is a very common trick: write a count as a sum of indicators, then use linearity of expectation.</li>
+    <li><strong>Waiting for a success gives the Geometric distribution.</strong> If you repeat Bernoulli(\(p\)) trials until the first 1, the number of trials needed follows a Geometric distribution with \(P(N=k) = q^{k-1}p\) and mean \(1/p\). With \(p = 1/6\), you wait 6 rolls on average for a six.</li>
+    <li><strong>The fraction of 1s is the best estimate.</strong> \(\hat p = k/n\) is the maximum-likelihood estimate. It is unbiased (\(E[\hat p] = p\)), has variance \(pq/n\), and reaches the Cramér–Rao bound.</li>
+    <li><strong>Maximum uncertainty is at \(p = \tfrac12\).</strong> Variance peaks at \(\tfrac14\), entropy peaks at 1 bit, skewness is 0, and excess kurtosis reaches its smallest possible value of −2.</li>
+    <li><strong>The edge cases are degenerate.</strong> At \(p=0\) or \(p=1\), \(X\) is a constant and the variance is 0. Skewness, kurtosis and Fisher information are then undefined or infinite, because there is no spread to divide by.</li>
+    <li><strong>It has a conjugate prior (Bayesian view).</strong> If your uncertainty about \(p\) is described by a \(\text{Beta}(a,b)\) distribution, then after seeing \(k\) ones in \(n\) trials it becomes \(\text{Beta}(a+k,\; b+n-k)\). Each 1 adds to \(a\) and each 0 adds to \(b\).</li>
+  </ol>
+
+  <h3>Bernoulli in one table</h3>
+  <div class="table-wrap">
+    <table class="summary">
+      <tr><th>Idea</th><th>Formula</th><th>In words</th></tr>
+      <tr><td>Distribution</td><td>\(P(X{=}1)=p,\;P(X{=}0)=1-p\)</td><td>one trial, two outcomes, one number describes it</td></tr>
+      <tr><td>PMF</td><td>\(p^x(1-p)^{1-x}\)</td><td>exponents act as on/off switches</td></tr>
+      <tr><td>Mean</td><td>\(p\)</td><td>balance point; long-run fraction of 1s</td></tr>
+      <tr><td>Variance</td><td>\(p(1-p)\)</td><td>largest for a fair coin (¼)</td></tr>
+      <tr><td>Sum of \(n\)</td><td>\(\text{Binomial}(n,p)\)</td><td>counts the successes</td></tr>
+      <tr><td>Estimate</td><td>\(\hat p = k/n\)</td><td>fraction of 1s; error shrinks like \(1/\sqrt n\)</td></tr>
+    </table>
+  </div>
+</section>
+
+</main>
+<footer>A single-file interactive explainer. Math typeset with KaTeX. Every simulation runs live in your browser using <code>Math.random()</code>.</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script>
+(function(){
+'use strict';
+/* ---------- helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const root = document.documentElement;
+const C = n => getComputedStyle(root).getPropertyValue(n).trim();
+const clamp = (x,a,b) => Math.max(a, Math.min(b, x));
+const f2 = x => x.toFixed(2), f3 = x => x.toFixed(3);
+const TEAL = '#1aa38b', CORAL = '#e0623f';
+const SANS = 'system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';
+const MONO = 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
+
+if (window.renderMathInElement) {
+  renderMathInElement(document.body, {
+    delimiters: [{left:'$$', right:'$$', display:true}, {left:'\\(', right:'\\)', display:false}],
+    throwOnError: false
+  });
+}
+function tex(el, s, display){
+  if (!el) return;
+  if (window.katex) { try { katex.render(s, el, {throwOnError:false, displayMode:!!display}); return; } catch(e){} }
+  el.textContent = s;
+}
+function fit(c){
+  const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+  if (c.width !== w*dpr || c.height !== h*dpr) { c.width = w*dpr; c.height = h*dpr; }
+  const ctx = c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  return {ctx, w, h};
+}
+const redraws = [];
+function redrawAll(){ redraws.forEach(f => f()); }
+let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(redrawAll, 80); });
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+if (mq.addEventListener) mq.addEventListener('change', redrawAll);
+new MutationObserver(redrawAll).observe(root, {attributes:true, attributeFilter:['data-theme']});
+
+function bindRange(input, out, cb, d=2){
+  const f = () => { const v = parseFloat(input.value); if (out) out.textContent = v.toFixed(d); cb(v); };
+  input.addEventListener('input', f); f();
+}
+function niceTicks(max, count){
+  const raw = max / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const step = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag;
+  const t = []; for (let v = 0; v <= max + 1e-9; v += step) t.push(v); return t;
+}
+function yGrid(ctx, X0, X1, ys, ticks, fmt){
+  ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ticks.forEach(v => {
+    const y = Math.round(ys(v)) + .5;
+    ctx.strokeStyle = C('--line'); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X0, y); ctx.lineTo(X1, y); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.fillText(fmt(v), X0 - 6, y);
+  });
+}
+function binomPMF(n, k, p){
+  let c = 1; for (let i = 1; i <= k; i++) c = c * (n - k + i) / i;
+  return c * Math.pow(p, k) * Math.pow(1 - p, n - k);
+}
+function roundRect(ctx, x, y, w, h, r){
+  r = Math.min(r, w/2, Math.abs(h)/2);
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+
+/* ---------- 0. hero coin ---------- */
+(function(){
+  const coin = $('#heroCoin'), wrap = $('#coinToss'), out = $('#heroResult');
+  let rot = 0, H = 0, T = 0, busy = false;
+  coin.addEventListener('click', () => {
+    if (busy) return; busy = true;
+    const heads = Math.random() < 0.5;
+    const base = rot - (((rot % 360) + 360) % 360);
+    rot = base + 360 * 5 + (heads ? 0 : 180);
+    coin.style.transform = `rotateX(${rot}deg)`;
+    wrap.classList.remove('toss'); void wrap.offsetWidth; wrap.classList.add('toss');
+    out.textContent = 'flipping…';
+    setTimeout(() => {
+      heads ? H++ : T++;
+      out.innerHTML = `<b>${heads ? 'Heads' : 'Tails'}!</b> &nbsp; Heads ${H} · Tails ${T}. You can’t predict a single flip, but you can describe how often each outcome happens.`;
+      busy = false;
+    }, 1100);
+  });
+})();
+
+/* ---------- 2. random variable machine ---------- */
+(function(){
+  const S = {
+    coin: {icon:'🪙', p:.5,  desc:'Flip a fair coin. “Success” = Heads, so p = 0.5.', yes:'Heads', no:'Tails', m1:'Heads', m0:'Tails'},
+    shot: {icon:'🏀', p:.7,  desc:'A player who makes 70% of free throws takes one shot. Success = basket, so p = 0.7.', yes:'Swish! Made it', no:'Missed', m1:'Made', m0:'Missed'},
+    mail: {icon:'📧', p:.3,  desc:'An email arrives. Suppose 30% of all mail is spam. Success = spam, so p = 0.3.', yes:'Spam', no:'Not spam', m1:'Spam', m0:'Not spam'},
+    die:  {icon:'🎲', p:1/6, desc:'Roll a die, but only ask “is it a six?”. Six possible faces collapse into two outcomes, and p = 1/6.', die:true, m1:'rolled a 6', m0:'rolled 1, 2, 3, 4 or 5'}
+  };
+  let cur = 'coin', busy = false, hist = [];
+  const icon = $('#rvIcon'), label = $('#rvLabel'), box = $('#rvOutcome'), b1 = $('#rvBox1'), b0 = $('#rvBox0'), arrow = $('#rvArrow');
+  function setScenario(k){
+    cur = k; hist = [];
+    $$('#rvTabs .btn').forEach(b => b.classList.toggle('on', b.dataset.s === k));
+    const s = S[k];
+    $('#rvDesc').textContent = s.desc; icon.textContent = s.icon; label.textContent = 'press run';
+    $('#rvMap1').textContent = '← ' + s.m1; $('#rvMap0').textContent = '← ' + s.m0;
+    b1.classList.remove('hit'); b0.classList.remove('hit'); arrow.classList.remove('go');
+    renderChips();
+  }
+  function outcomeLabel(s, success){
+    if (s.die) { const face = success ? 6 : 1 + Math.floor(Math.random() * 5); return 'Rolled a ' + face; }
+    return success ? s.yes : s.no;
+  }
+  function renderChips(){
+    const el = $('#rvChips'); el.innerHTML = '';
+    hist.forEach(v => { const c = document.createElement('span'); c.className = 'chip c' + v; c.textContent = v; el.appendChild(c); });
+    const ones = hist.filter(v => v === 1).length;
+    $('#rvCount').textContent = hist.length ? `${hist.length} runs · ${ones} ones · fraction ${f2(ones / hist.length)}` : '';
+  }
+  function run(times){
+    if (busy) return; busy = true;
+    const s = S[cur];
+    b1.classList.remove('hit'); b0.classList.remove('hit'); arrow.classList.remove('go');
+    box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake');
+    let i = 0;
+    const iv = setInterval(() => {
+      label.textContent = outcomeLabel(s, Math.random() < .5);
+      if (++i >= 7) {
+        clearInterval(iv);
+        let last;
+        for (let t = 0; t < times; t++) { last = Math.random() < s.p ? 1 : 0; hist.push(last); }
+        if (hist.length > 60) hist = hist.slice(hist.length - 60);
+        label.textContent = outcomeLabel(s, last === 1) + (times > 1 ? `  (last of ${times})` : '');
+        arrow.classList.add('go');
+        (last ? b1 : b0).classList.add('hit');
+        renderChips(); busy = false;
+      }
+    }, 70);
+  }
+  $$('#rvTabs .btn').forEach(b => b.addEventListener('click', () => setScenario(b.dataset.s)));
+  $('#rvRun').addEventListener('click', () => run(1));
+  $('#rvRun10').addEventListener('click', () => run(10));
+  setScenario('coin');
+})();
+
+/* ---------- 3 + 4. jars & PMF explorer ---------- */
+let pmfX = 1, jarP = 0.3;
+function renderPMF(){
+  const p = jarP, q = 1 - p;
+  $('#pmfPNote').textContent = 'p = ' + f2(p);
+  let s;
+  if (pmfX === 1) {
+    s = String.raw`\begin{aligned}
+P(X=\textcolor{${TEAL}}{1}) &= p^{\textcolor{${TEAL}}{1}}\,(1-p)^{\,1-\textcolor{${TEAL}}{1}} \\
+&= p^{1}\,(1-p)^{0} \\
+&= p\cdot 1 \;=\; p \\
+&= ${f2(p)}
+\end{aligned}`;
+    $('#pmfNote').textContent = 'The (1−p) factor is raised to the power 0, so it turns into 1 and drops out.';
+  } else {
+    s = String.raw`\begin{aligned}
+P(X=\textcolor{${CORAL}}{0}) &= p^{\textcolor{${CORAL}}{0}}\,(1-p)^{\,1-\textcolor{${CORAL}}{0}} \\
+&= p^{0}\,(1-p)^{1} \\
+&= 1\cdot(1-p) \;=\; 1-p \\
+&= ${f2(q)}
+\end{aligned}`;
+    $('#pmfNote').textContent = 'The p factor is raised to the power 0, so it turns into 1 and drops out.';
+  }
+  tex($('#pmfSteps'), s, true);
+}
+$('#pmfX1').addEventListener('click', () => { pmfX = 1; $('#pmfX1').classList.add('on'); $('#pmfX0').classList.remove('on'); renderPMF(); });
+$('#pmfX0').addEventListener('click', () => { pmfX = 0; $('#pmfX0').classList.add('on'); $('#pmfX1').classList.remove('on'); renderPMF(); });
+bindRange($('#pJar'), $('#pJarOut'), p => {
+  jarP = p; const q = 1 - p;
+  $('#jar1').style.height = (p * 100) + '%'; $('#jar0').style.height = (q * 100) + '%';
+  $('#jar1v').textContent = f2(p); $('#jar0v').textContent = f2(q);
+  $('#bud0').style.width = (q * 100) + '%'; $('#bud1').style.width = (p * 100) + '%';
+  $('#bud0').textContent = q >= .12 ? '1−p = ' + f2(q) : ''; $('#bud1').textContent = p >= .12 ? 'p = ' + f2(p) : '';
+  renderPMF();
+});
+
+/* ---------- 5. simulation lab ---------- */
+(function(){
+  const strip = $('#labStrip'), chart = $('#labChart');
+  const MAXN = 20000;
+  let p = .3, n = 0, k = 0, run = [], recent = [], shift = 0, auto = false, raf = 0, acc = 0, lastT = 0;
+  function reset(){ n = 0; k = 0; run = []; recent = []; shift = 0; acc = 0; update(); draw(); }
+  function flip(m){
+    let added = 0;
+    for (let i = 0; i < m && n < MAXN; i++) {
+      const x = Math.random() < p ? 1 : 0; n++; k += x; run.push(k / n); recent.unshift(x); added++;
+    }
+    if (recent.length > 80) recent.length = 80;
+    shift = Math.min(shift + added, 4);
+    update(); kick();
+    if (n >= MAXN && auto) setAuto(false);
+  }
+  function update(){
+    const ph = n ? k / n : 0;
+    $('#labB1').style.height = (n ? ph * 100 : 0) + '%';
+    $('#labB0').style.height = (n ? (1 - ph) * 100 : 0) + '%';
+    $('#labT1').style.bottom = (p * 100) + '%'; $('#labT0').style.bottom = ((1 - p) * 100) + '%';
+    $('#labV1').textContent = n ? f3(ph) : '–'; $('#labV0').textContent = n ? f3(1 - ph) : '–';
+    $('#labStats').innerHTML = n
+      ? `flips <b>n = ${n.toLocaleString()}</b> · ones <b>${k.toLocaleString()}</b> · p̂ = <b>${f3(ph)}</b> · true p = ${f2(p)} · error |p̂ − p| = <b>${f3(Math.abs(ph - p))}</b> · typical error ≈ ${f3(Math.sqrt(p*(1-p)/n))}`
+      : 'No flips yet. Press a button.';
+  }
+  function drawStrip(){
+    const {ctx, w, h} = fit(strip);
+    const r = Math.min(13, h / 2 - 4), sp = 2 * r + 6, xr = w - r - 6, cy = h / 2;
+    ctx.font = `600 ${Math.round(r)}px ${MONO}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const one = C('--one'), zero = C('--zero');
+    for (let i = 0; i < recent.length; i++) {
+      const x = xr - (i - shift) * sp;
+      if (x < -r) break;
+      ctx.globalAlpha = clamp(x / 80, 0, 1);
+      ctx.fillStyle = recent[i] ? one : zero;
+      ctx.beginPath(); ctx.arc(x, cy, r, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.fillText(recent[i], x, cy + 1);
+    }
+    ctx.globalAlpha = 1;
+    if (!recent.length) { ctx.fillStyle = C('--ink-3'); ctx.font = '13px ' + SANS; ctx.textAlign = 'left'; ctx.fillText('Recent flips appear here (newest on the right)', 4, cy); }
+  }
+  function drawChart(){
+    const {ctx, w, h} = fit(chart);
+    const X0 = 40, X1 = w - 12, Y0 = h - 26, Y1 = 10;
+    const xmax = Math.max(20, n);
+    const xs = i => X0 + (i / xmax) * (X1 - X0), ys = v => Y0 - v * (Y0 - Y1);
+    yGrid(ctx, X0, X1, ys, [0, .25, .5, .75, 1], v => v.toFixed(2));
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    niceTicks(xmax, 4).forEach(v => ctx.fillText(v >= 1000 ? (v / 1000) + 'k' : v, xs(v), Y0 + 6));
+    // band
+    const q = 1 - p; ctx.beginPath();
+    const N = 200, pts = [];
+    for (let j = 0; j <= N; j++) { const i = 1 + (xmax - 1) * Math.pow(j / N, 2); pts.push([i, 2 * Math.sqrt(p * q / i)]); }
+    pts.forEach(([i, e], j) => { const x = xs(i), y = ys(clamp(p + e, 0, 1)); j ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+    for (let j = pts.length - 1; j >= 0; j--) { const [i, e] = pts[j]; ctx.lineTo(xs(i), ys(clamp(p - e, 0, 1))); }
+    ctx.closePath(); ctx.fillStyle = C('--accent-soft'); ctx.fill();
+    // true p
+    ctx.setLineDash([6, 5]); ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(X0, ys(p)); ctx.lineTo(X1, ys(p)); ctx.stroke(); ctx.setLineDash([]);
+    // running proportion
+    if (n) {
+      ctx.strokeStyle = C('--ink'); ctx.lineWidth = 1.8; ctx.lineJoin = 'round'; ctx.beginPath();
+      const step = Math.max(1, Math.floor(n / ((X1 - X0) * 2)));
+      ctx.moveTo(xs(1), ys(run[0]));
+      for (let i = step; i <= n; i += step) ctx.lineTo(xs(i), ys(run[i - 1]));
+      ctx.lineTo(xs(n), ys(run[n - 1])); ctx.stroke();
+      ctx.fillStyle = C('--ink'); ctx.beginPath(); ctx.arc(xs(n), ys(run[n - 1]), 3.5, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + SANS; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+    ctx.fillText('number of flips →', X1, Y0 - 4);
+  }
+  function draw(){ drawStrip(); drawChart(); }
+  function frame(t){
+    raf = 0;
+    const dt = lastT ? Math.min(.1, (t - lastT) / 1000) : 0; lastT = t;
+    if (auto) {
+      const rate = 4 + n * 0.9;
+      acc += dt * rate; const m = Math.floor(acc); acc -= m;
+      if (m > 0) flip(m);
+    }
+    shift *= 0.8; if (shift < 0.01) shift = 0;
+    draw();
+    if (auto || shift > 0) kick(); else lastT = 0;
+  }
+  function kick(){ if (!raf) raf = requestAnimationFrame(frame); }
+  function setAuto(on){
+    auto = on; $('#labAuto').textContent = on ? '❚❚ Pause' : '▶ Auto-flip';
+    if (on) { if (n >= MAXN) reset(); lastT = 0; kick(); }
+  }
+  $('#lab1').addEventListener('click', () => flip(1));
+  $('#lab10').addEventListener('click', () => flip(10));
+  $('#lab100').addEventListener('click', () => flip(100));
+  $('#labAuto').addEventListener('click', () => setAuto(!auto));
+  $('#labReset').addEventListener('click', () => { setAuto(false); reset(); });
+  bindRange($('#labP'), $('#labPOut'), v => { p = v; reset(); });
+  redraws.push(draw);
+})();
+
+/* ---------- 6. seesaw ---------- */
+(function(){
+  const XL = 80, LEN = 480, BY = 120, PIV = 132;
+  const beam = $('#ssBeam'), ful = $('#ssFul');
+  let p = .3, f = .7, a = 0, va = 0, raf = 0, tween = null;
+  const ticks = $('#ssTicks'); const NS = 'http://www.w3.org/2000/svg';
+  [0, .25, .5, .75, 1].forEach(v => {
+    const x = XL + LEN * v;
+    const l = document.createElementNS(NS, 'line'); l.setAttribute('class', 'ss-tick');
+    l.setAttribute('x1', x); l.setAttribute('x2', x); l.setAttribute('y1', 134); l.setAttribute('y2', 141); ticks.appendChild(l);
+    const t = document.createElementNS(NS, 'text'); t.setAttribute('class', 'ss-ticklab');
+    t.setAttribute('x', x); t.setAttribute('y', 156); t.textContent = v === 0 ? '0' : v === 1 ? '1' : v; ticks.appendChild(t);
+  });
+  function layout(){
+    const q = 1 - p;
+    const r0 = 6 + 40 * Math.sqrt(q), r1 = 6 + 40 * Math.sqrt(p);
+    $('#ssW0').setAttribute('r', r0); $('#ssW0').setAttribute('cy', BY - r0);
+    $('#ssW1').setAttribute('r', r1); $('#ssW1').setAttribute('cy', BY - r1);
+    $('#ssL0').setAttribute('y', BY - 2 * r0 - 8); $('#ssL0').textContent = '1−p = ' + f2(q);
+    $('#ssL1').setAttribute('y', BY - 2 * r1 - 8); $('#ssL1').textContent = 'p = ' + f2(p);
+    const px = XL + LEN * p;
+    $('#ssPM').setAttribute('points', `${px},${BY - 1} ${px - 7},${BY - 13} ${px + 7},${BY - 13}`);
+    $('#ssPL').setAttribute('x', px); $('#ssPL').setAttribute('y', BY - 18);
+    const fx = XL + LEN * f;
+    ful.setAttribute('points', `${fx},${PIV} ${fx - 26},252 ${fx + 26},252`);
+    const d = p - f;
+    const st = $('#ssStatus');
+    if (Math.abs(d) < 0.005) { st.textContent = `Balanced! The fulcrum sits at ${f2(f)} = p = E[X].`; st.className = 'status ok'; }
+    else { st.textContent = d > 0 ? 'Tips right: the weight at 1 wins. Move the fulcrum right.' : 'Tips left: the weight at 0 wins. Move the fulcrum left.'; st.className = 'status'; }
+  }
+  function frame(){
+    raf = 0;
+    if (tween) {
+      const t = clamp((performance.now() - tween.t0) / 700, 0, 1), e = 1 - Math.pow(1 - t, 3);
+      f = tween.from + (tween.to - tween.from) * e;
+      $('#ssF').value = f; $('#ssFOut').textContent = f2(f);
+      if (t >= 1) { f = tween.to; tween = null; }
+      layout();
+    }
+    // torque = (1-p)(0-f) + p(1-f) = p - f  → positive tips right (clockwise)
+    const target = clamp((p - f) * 40, -13, 13);
+    va += (target - a) * 0.06; va *= 0.82; a += va;
+    const fx = XL + LEN * f;
+    beam.setAttribute('transform', `rotate(${a.toFixed(3)} ${fx} ${PIV})`);
+    if (tween || Math.abs(va) > 0.002 || Math.abs(target - a) > 0.01) kick();
+  }
+  function kick(){ if (!raf) raf = requestAnimationFrame(frame); }
+  bindRange($('#ssP'), $('#ssPOut'), v => { p = v; layout(); kick(); });
+  bindRange($('#ssF'), $('#ssFOut'), v => { if (!tween) { f = v; layout(); kick(); } });
+  $('#ssGo').addEventListener('click', () => { tween = {from: f, to: p, t0: performance.now()}; kick(); });
+})();
+
+/* ---------- 7. variance ---------- */
+(function(){
+  let p = .3;
+  function drawSquares(){
+    const {ctx, w, h} = fit($('#vSquares'));
+    const q = 1 - p;
+    const unit = Math.min(w - 50, h - 80), ox = (w - unit) / 2, base = h - 46;
+    const X = v => ox + v * unit;
+    // squares
+    const one = C('--one'), zero = C('--zero');
+    ctx.globalAlpha = .25 + .6 * q; ctx.fillStyle = zero; ctx.fillRect(X(0), base - p * unit, p * unit, p * unit);
+    ctx.globalAlpha = .25 + .6 * p; ctx.fillStyle = one;  ctx.fillRect(X(p), base - q * unit, q * unit, q * unit);
+    ctx.globalAlpha = 1;
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = zero; ctx.strokeRect(X(0), base - p * unit, p * unit, p * unit);
+    ctx.strokeStyle = one;  ctx.strokeRect(X(p), base - q * unit, q * unit, q * unit);
+    // labels inside squares
+    ctx.font = '600 12px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = C('--ink');
+    if (p * unit > 64) { ctx.fillText('p² = ' + f3(p * p), X(p / 2), base - p * unit / 2 - 8); ctx.fillText('weight ' + f2(q), X(p / 2), base - p * unit / 2 + 9); }
+    if (q * unit > 64) { ctx.fillText('(1−p)² = ' + f3(q * q), X(p + q / 2), base - q * unit / 2 - 8); ctx.fillText('weight ' + f2(p), X(p + q / 2), base - q * unit / 2 + 9); }
+    // number line
+    ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(X(0) - 10, base); ctx.lineTo(X(1) + 10, base); ctx.stroke();
+    [[0, zero], [1, one]].forEach(([v, c]) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(X(v), base, 6, 0, Math.PI * 2); ctx.fill(); });
+    ctx.font = '12px ' + MONO; ctx.fillStyle = C('--ink-2'); ctx.textBaseline = 'top';
+    ctx.fillText('0', X(0), base + 10); ctx.fillText('1', X(1), base + 10);
+    // mean marker
+    ctx.strokeStyle = C('--accent'); ctx.setLineDash([4, 4]); ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(X(p), base + 8); ctx.lineTo(X(p), base - Math.max(p, q) * unit - 8); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = C('--accent'); ctx.font = '600 12px ' + SANS; ctx.fillText('μ = p', X(p), base + 24);
+  }
+  function drawCurve(){
+    const {ctx, w, h} = fit($('#vCurve'));
+    const X0 = 44, X1 = w - 14, Y0 = h - 30, Y1 = 14, ymax = .3;
+    const xs = v => X0 + v * (X1 - X0), ys = v => Y0 - (v / ymax) * (Y0 - Y1);
+    yGrid(ctx, X0, X1, ys, [0, .1, .2, .25, .3].filter(v => v !== .3), v => v.toFixed(2));
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    [0, .25, .5, .75, 1].forEach(v => ctx.fillText(v, xs(v), Y0 + 6));
+    ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.font = '12px ' + SANS; ctx.fillText('Var(X) = p(1−p)', X0 + 6, Y1);
+    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2.2; ctx.beginPath();
+    for (let i = 0; i <= 200; i++) { const v = i / 200, y = ys(v * (1 - v)); i ? ctx.lineTo(xs(v), y) : ctx.moveTo(xs(v), y); }
+    ctx.stroke();
+    const vv = p * (1 - p);
+    ctx.strokeStyle = C('--ink-3'); ctx.setLineDash([3, 4]); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(xs(p), Y0); ctx.lineTo(xs(p), ys(vv)); ctx.lineTo(X0, ys(vv)); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = C('--ink'); ctx.beginPath(); ctx.arc(xs(p), ys(vv), 5.5, 0, Math.PI * 2); ctx.fill();
+    ctx.font = '600 12px ' + MONO; ctx.textAlign = p > .6 ? 'right' : 'left'; ctx.textBaseline = 'bottom';
+    ctx.fillText(f3(vv), xs(p) + (p > .6 ? -9 : 9), ys(vv) - 6);
+  }
+  function calc(){
+    const q = 1 - p;
+    tex($('#vCalc'), String.raw`\operatorname{Var}(X) = \underbrace{${f2(q)}}_{1-p}\cdot\underbrace{${f3(p*p)}}_{p^2} + \underbrace{${f2(p)}}_{p}\cdot\underbrace{${f3(q*q)}}_{(1-p)^2} = ${f3(q*p*p)} + ${f3(p*q*q)} = \mathbf{${f3(p*q)}}, \quad \sigma = ${f3(Math.sqrt(p*q))}`, true);
+  }
+  function draw(){ drawSquares(); drawCurve(); }
+  bindRange($('#vP'), $('#vPOut'), v => { p = v; draw(); calc(); });
+  redraws.push(draw);
+})();
+
+/* ---------- 8. binomial machine ---------- */
+(function(){
+  const coinsC = $('#bCoins'), histC = $('#bHist');
+  let n = 10, p = .3, counts = [], trials = 0, last = null, anim = null, raf = 0;
+  function reset(){ counts = new Array(n + 1).fill(0); trials = 0; last = null; anim = null; stats(); draw(); }
+  function trial(){ const xs = []; for (let i = 0; i < n; i++) xs.push(Math.random() < p ? 1 : 0); return xs; }
+  const sum = xs => xs.reduce((a, b) => a + b, 0);
+  function commit(xs){ counts[sum(xs)]++; trials++; }
+  function finishAnim(){ if (anim) { commit(anim.xs); anim = null; } }
+  function per(){ return Math.min(80, 900 / n); }
+  function stats(){
+    if (!trials) { $('#bStats').innerHTML = `Each run makes ${n} Bernoulli(${f2(p)}) trials and records Y = the number of 1s.`; return; }
+    let m = 0, m2 = 0; counts.forEach((c, k) => { m += k * c; m2 += k * k * c; }); m /= trials; m2 /= trials;
+    const v = m2 - m * m;
+    $('#bStats').innerHTML = `runs <b>${trials.toLocaleString()}</b> · average Y = <b>${f3(m)}</b> (theory np = ${f3(n * p)}) · variance of Y = <b>${f3(v)}</b> (theory np(1−p) = ${f3(n * p * (1 - p))})`;
+  }
+  function drawCoins(t){
+    const {ctx, w, h} = fit(coinsC);
+    const xs = anim ? anim.xs : last;
+    const sumW = 110;
+    const sp = Math.min(34, (w - sumW - 10) / n), r = Math.min(13, sp / 2 - 2), cy = h / 2;
+    const startX = 6 + r;
+    let shown = xs ? (anim ? Math.min(n, Math.floor(t / per()) + 1) : n) : 0;
+    let s = 0;
+    for (let i = 0; i < n; i++) {
+      const x = startX + i * sp;
+      if (i < shown) {
+        const v = xs[i]; s += v;
+        ctx.fillStyle = v ? C('--one') : C('--zero');
+        ctx.beginPath(); ctx.arc(x, cy, r, 0, Math.PI * 2); ctx.fill();
+        if (r >= 7) { ctx.fillStyle = '#fff'; ctx.font = `600 ${Math.round(r * 1.05)}px ${MONO}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(v, x, cy + 1); }
+      } else {
+        ctx.strokeStyle = C('--line'); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, cy, r, 0, Math.PI * 2); ctx.stroke();
+      }
+    }
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillStyle = C('--ink'); ctx.font = '600 15px ' + MONO;
+    ctx.fillText(xs ? `Y = ${s}` : 'Y = ?', w - 8, cy);
+  }
+  function drawHist(t){
+    const {ctx, w, h} = fit(histC);
+    const X0 = 42, X1 = w - 10, Y0 = h - 26, Y1 = 10;
+    const pmf = []; for (let k = 0; k <= n; k++) pmf.push(binomPMF(n, k, p));
+    const obs = counts.map(c => trials ? c / trials : 0);
+    const ymax = Math.max(.05, ...pmf, ...obs) * 1.12;
+    const bw = (X1 - X0) / (n + 1);
+    const xc = k => X0 + bw * (k + .5), ys = v => Y0 - (v / ymax) * (Y0 - Y1);
+    yGrid(ctx, X0, X1, ys, niceTicks(ymax, 4), v => v.toFixed(2));
+    ctx.fillStyle = C('--accent');
+    obs.forEach((o, k) => { if (o > 0) { const y = ys(o); roundRect(ctx, xc(k) - bw * .38, y, bw * .76, Y0 - y, 3); ctx.fill(); } });
+    ctx.strokeStyle = C('--gold'); ctx.lineWidth = 1.5; ctx.beginPath();
+    pmf.forEach((v, k) => { k ? ctx.lineTo(xc(k), ys(v)) : ctx.moveTo(xc(k), ys(v)); }); ctx.stroke();
+    ctx.fillStyle = C('--gold');
+    pmf.forEach((v, k) => { ctx.beginPath(); ctx.arc(xc(k), ys(v), 3.5, 0, Math.PI * 2); ctx.fill(); });
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    const every = n > 20 ? 5 : n > 10 ? 2 : 1;
+    for (let k = 0; k <= n; k++) if (k % every === 0 || k === n) ctx.fillText(k, xc(k), Y0 + 6);
+    ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.font = '11px ' + SANS; ctx.fillText('Y = number of 1s →', X1, Y0 - 4);
+    // falling ball
+    if (anim) {
+      const rt = n * per();
+      if (t > rt) {
+        const u = clamp((t - rt) / 380, 0, 1), s = sum(anim.xs);
+        const top = ys((counts[s] + 1) / (trials + 1));
+        const y = Y1 + (top - Y1) * u * u;
+        ctx.fillStyle = C('--ink'); ctx.beginPath(); ctx.arc(xc(s), y - 7, 7, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+  }
+  function draw(t){ drawCoins(t || 0); drawHist(t || 0); }
+  function frame(now){
+    raf = 0; if (!anim) { draw(); return; }
+    const t = now - anim.t0;
+    if (t > n * per() + 400) { finishAnim(); stats(); draw(); return; }
+    draw(t); kick();
+  }
+  function kick(){ if (!raf) raf = requestAnimationFrame(frame); }
+  $('#bRun1').addEventListener('click', () => { finishAnim(); const xs = trial(); last = xs; anim = {xs, t0: performance.now()}; stats(); kick(); });
+  const many = m => () => { finishAnim(); for (let i = 0; i < m; i++) { const xs = trial(); commit(xs); last = xs; } stats(); draw(); };
+  $('#bRun100').addEventListener('click', many(100));
+  $('#bRun1000').addEventListener('click', many(1000));
+  $('#bReset').addEventListener('click', reset);
+  bindRange($('#bN'), $('#bNOut'), v => { n = v; reset(); }, 0);
+  bindRange($('#bP'), $('#bPOut'), v => { p = v; reset(); });
+  redraws.push(() => draw());
+})();
+
+/* ---------- 9. mystery coin ---------- */
+(function(){
+  let truth, n, k, revealed;
+  function newCoin(){ truth = Math.round((0.05 + Math.random() * 0.9) * 100) / 100; n = 0; k = 0; revealed = false; $('#mReveal').textContent = 'Reveal the true p'; update(); }
+  function flip(m){ for (let i = 0; i < m; i++) { if (Math.random() < truth) k++; n++; } update(); }
+  function update(){
+    const ph = n ? k / n : null;
+    let s = n
+      ? `flips <b>n = ${n}</b> · ones <b>k = ${k}</b> · best guess p̂ = k/n = <b>${f3(ph)}</b> · uncertainty ≈ ±${f3(2 * Math.sqrt(Math.max(ph * (1 - ph), 1e-9) / n))}`
+      : 'No data yet, so every p from 0 to 1 is equally plausible. Flip the coin.';
+    if (revealed) s += ` · <b style="color:var(--gold)">true p = ${f2(truth)}</b>`;
+    $('#mStats').innerHTML = s; draw();
+  }
+  function draw(){
+    const {ctx, w, h} = fit($('#mChart'));
+    const X0 = 40, X1 = w - 12, Y0 = h - 26, Y1 = 14;
+    const xs = v => X0 + v * (X1 - X0), ys = v => Y0 - v * (Y0 - Y1);
+    yGrid(ctx, X0, X1, ys, [0, .5, 1], v => v.toFixed(1));
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    [0, .2, .4, .6, .8, 1].forEach(v => ctx.fillText(v.toFixed(1), xs(v), Y0 + 6));
+    const N = 400, ll = []; let mx = -Infinity;
+    for (let j = 0; j <= N; j++) {
+      const pp = j / N;
+      const v = (k > 0 ? k * Math.log(pp) : 0) + (n - k > 0 ? (n - k) * Math.log(1 - pp) : 0);
+      ll.push(v); if (v > mx) mx = v;
+    }
+    ctx.beginPath(); ctx.moveTo(xs(0), Y0);
+    ll.forEach((v, j) => ctx.lineTo(xs(j / N), ys(Math.exp(v - mx))));
+    ctx.lineTo(xs(1), Y0); ctx.closePath(); ctx.fillStyle = C('--accent-soft'); ctx.fill();
+    ctx.beginPath(); ll.forEach((v, j) => { const x = xs(j / N), y = ys(Math.exp(v - mx)); j ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2.2; ctx.stroke();
+    ctx.font = '600 12px ' + SANS; ctx.textBaseline = 'bottom';
+    if (n) {
+      const ph = k / n;
+      ctx.strokeStyle = C('--ink'); ctx.setLineDash([5, 4]); ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(xs(ph), Y0); ctx.lineTo(xs(ph), Y1); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C('--ink'); ctx.textAlign = ph > .8 ? 'right' : 'left';
+      ctx.fillText('p̂ = ' + f3(ph), xs(ph) + (ph > .8 ? -6 : 6), Y1 + 14);
+    }
+    if (revealed) {
+      ctx.strokeStyle = C('--gold'); ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.moveTo(xs(truth), Y0); ctx.lineTo(xs(truth), Y1); ctx.stroke();
+      // put the label on the side away from p̂ so the two never collide
+      const ph = n ? k / n : .5;
+      let left = n ? truth < ph : truth > .5;
+      if (truth < .2) left = false; if (truth > .8) left = true;
+      ctx.fillStyle = C('--gold'); ctx.textAlign = left ? 'right' : 'left';
+      ctx.fillText('true p = ' + f2(truth), xs(truth) + (left ? -6 : 6), Y1 + 34);
+    }
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + SANS; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    ctx.fillText('relative likelihood', X0 + 4, 0);
+  }
+  $('#mFlip1').addEventListener('click', () => flip(1));
+  $('#mFlip10').addEventListener('click', () => flip(10));
+  $('#mFlip100').addEventListener('click', () => flip(100));
+  $('#mReveal').addEventListener('click', () => { revealed = !revealed; $('#mReveal').textContent = revealed ? 'Hide the true p' : 'Reveal the true p'; update(); });
+  $('#mNew').addEventListener('click', newCoin);
+  newCoin();
+  redraws.push(draw);
+})();
+
+/* ---------- 10. properties dashboard ---------- */
+(function(){
+  let p = .3;
+  const half = () => Math.abs(p - .5) < 1e-9;
+  function values(){
+    const q = 1 - p, pq = p * q;
+    const lg = x => x > 0 ? x * Math.log2(x) : 0;
+    $('#prQ').textContent = f2(q);
+    $('#cP').textContent = `p = ${f2(p)}, q = ${f2(q)}`;
+    $('#cPMF').textContent = `P(0) = ${f2(q)}, P(1) = ${f2(p)}`;
+    $('#cCDF').textContent = `F(0) = ${f2(q)}, F(1) = 1`;
+    $('#cMean').textContent = f3(p);
+    $('#cVar').textContent = f3(pq);
+    $('#cSD').textContent = f3(Math.sqrt(pq));
+    $('#cMode').textContent = half() ? '0 and 1 (tie)' : p < .5 ? '0' : '1';
+    $('#cMed').textContent = half() ? 'any value in [0, 1]' : p < .5 ? '0' : '1';
+    $('#cSkew').textContent = pq > 0 ? f3((q - p) / Math.sqrt(pq)) : 'undefined (no spread)';
+    $('#cKurt').textContent = pq > 0 ? f3((1 - 6 * pq) / pq) : 'undefined (no spread)';
+    $('#cEnt').textContent = f3(-lg(p) - lg(q)) + ' bits';
+    $('#cMom').textContent = `E[X] = E[X²] = E[X³] = ${f2(p)}`;
+    $('#cMGF').textContent = `M(1) = q + pe = ${f3(q + p * Math.E)}`;
+    $('#cPGF').textContent = `G(1) = 1, G′(1) = p = ${f2(p)}`;
+    $('#cFish').textContent = pq > 0 ? f3(1 / pq) : '∞ (p is certain)';
+  }
+  function axesX(ctx, X0, X1, Y0, labels, xs){
+    ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    labels.forEach(v => ctx.fillText(v, xs(v), Y0 + 5));
+  }
+  function drawPMF(){
+    const {ctx, w, h} = fit($('#miniPMF'));
+    const X0 = 30, X1 = w - 10, Y0 = h - 22, Y1 = 16, q = 1 - p;
+    const xs = v => X0 + (X1 - X0) * (.25 + .5 * v), ys = v => Y0 - v * (Y0 - Y1);
+    yGrid(ctx, X0, X1, ys, [0, .5, 1], v => v.toFixed(1));
+    const bw = Math.min(50, (X1 - X0) * .25);
+    [[0, q, C('--zero')], [1, p, C('--one')]].forEach(([x, v, c]) => {
+      ctx.fillStyle = c; if (v > 0) { roundRect(ctx, xs(x) - bw / 2, ys(v), bw, Y0 - ys(v), 4); ctx.fill(); }
+      ctx.fillStyle = C('--ink'); ctx.font = '600 11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      ctx.fillText(f2(v), xs(x), ys(v) - 3);
+    });
+    axesX(ctx, X0, X1, Y0, [0, 1], xs);
+  }
+  function drawCDF(){
+    const {ctx, w, h} = fit($('#miniCDF'));
+    const X0 = 30, X1 = w - 10, Y0 = h - 22, Y1 = 16, q = 1 - p;
+    const xs = v => X0 + (X1 - X0) * ((v + .6) / 2.2), ys = v => Y0 - v * (Y0 - Y1);
+    yGrid(ctx, X0, X1, ys, [0, .5, 1], v => v.toFixed(1));
+    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2.5;
+    const seg = (a, b, y) => { ctx.beginPath(); ctx.moveTo(xs(a), ys(y)); ctx.lineTo(xs(b), ys(y)); ctx.stroke(); };
+    seg(-.6, 0, 0); seg(0, 1, q); seg(1, 1.6, 1);
+    ctx.setLineDash([2, 3]); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(xs(0), ys(0)); ctx.lineTo(xs(0), ys(q)); ctx.moveTo(xs(1), ys(q)); ctx.lineTo(xs(1), ys(1)); ctx.stroke(); ctx.setLineDash([]);
+    const dot = (x, y, filled) => { ctx.beginPath(); ctx.arc(xs(x), ys(y), 4, 0, Math.PI * 2); if (filled) { ctx.fillStyle = C('--accent'); ctx.fill(); } else { ctx.fillStyle = C('--surface'); ctx.fill(); ctx.lineWidth = 1.8; ctx.strokeStyle = C('--accent'); ctx.stroke(); } };
+    dot(0, 0, false); dot(0, q, true); dot(1, q, false); dot(1, 1, true);
+    axesX(ctx, X0, X1, Y0, [0, 1], xs);
+  }
+  function drawEnt(){
+    const {ctx, w, h} = fit($('#miniEnt'));
+    const X0 = 30, X1 = w - 10, Y0 = h - 22, Y1 = 16;
+    const xs = v => X0 + v * (X1 - X0), ys = v => Y0 - v * (Y0 - Y1);
+    yGrid(ctx, X0, X1, ys, [0, .5, 1], v => v.toFixed(1));
+    const H = x => { const lg = t => t > 0 ? t * Math.log2(t) : 0; return -lg(x) - lg(1 - x); };
+    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2; ctx.beginPath();
+    for (let i = 0; i <= 200; i++) { const v = i / 200; i ? ctx.lineTo(xs(v), ys(H(v))) : ctx.moveTo(xs(v), ys(H(v))); }
+    ctx.stroke();
+    ctx.strokeStyle = C('--ink-3'); ctx.setLineDash([3, 3]); ctx.lineWidth = 1; ctx.beginPath();
+    for (let i = 0; i <= 200; i++) { const v = i / 200; i ? ctx.lineTo(xs(v), ys(4 * v * (1 - v))) : ctx.moveTo(xs(v), ys(0)); }
+    ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = C('--ink'); ctx.beginPath(); ctx.arc(xs(p), ys(H(p)), 4.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = C('--ink-3'); ctx.font = '10px ' + SANS; ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+    ctx.fillText('dashed: 4·Var, for comparison', X1, 0);
+    axesX(ctx, X0, X1, Y0, [0, .5, 1], xs);
+  }
+  function draw(){ drawPMF(); drawCDF(); drawEnt(); }
+  bindRange($('#prP'), $('#prPOut'), v => { p = v; values(); draw(); });
+  redraws.push(draw);
+})();
+
+})();
+</script>
+</body>
+</html>
