@@ -81,6 +81,7 @@ input[type=range]{accent-color:var(--accent);width:170px;max-width:100%}
 .btn.primary{background:var(--accent);color:#fff;border-color:transparent}
 .btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 .btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.lh{font-family:var(--serif);font-style:italic;font-size:1.08em}
 .readout{font-family:var(--mono);font-size:14px;color:var(--ink-2);line-height:1.6}
 .readout b{color:var(--ink);font-weight:600}
 .readout .ok{color:var(--one);font-weight:600}
@@ -239,7 +240,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
   <div class="secnum">03</div>
   <h2>No memory</h2>
   <p>You have already waited \(s\) minutes for something whose waiting time is exponential. How much longer will you wait? Intuition says it must be “due” by now. The exponential distribution says: <strong>exactly as long as if you had just started</strong>. The proof takes one line:</p>
-  $$\begin{aligned} P(T > s + t \mid T > s) &= \frac{P(T > s + t)}{P(T > s)} \\ &= \frac{e^{-\lambda(s+t)}}{e^{-\lambda s}} \\ &= e^{-\lambda t} = P(T > t) \end{aligned}$$
+  $$\begin{aligned} &P(T > s + t \mid T > s) \\ &\quad= \frac{P(T > s + t)}{P(T > s)} = \frac{e^{-\lambda(s+t)}}{e^{-\lambda s}} \\ &\quad= e^{-\lambda t} = P(T > t) \end{aligned}$$
   <p>Given that nothing has happened by time \(s\), the remaining wait \(T - s\) has the same \(\text{Exp}(\lambda)\) distribution as a fresh wait. This is called <em class="term">memorylessness</em>. A quiet Geiger counter has no idea how long it has been quiet.</p>
 
   <div class="widget">
@@ -348,7 +349,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
       <button class="btn" id="pxReset">Reset</button>
     </div>
     <canvas id="pxLine" style="height:130px" role="img" aria-label="One hour of bus arrivals; each passenger is a dot with an arrow to the next bus, and the latest passenger's gap is highlighted"></canvas>
-    <div class="cap">One hour of buses. Each dot is a passenger; the gold arrow is their wait. The latest passenger’s gap is shaded.</div>
+    <div class="cap">One hour of buses. Each dot is a passenger; the gold arrow is their wait (a double arrowhead means the bus comes after the hour shown). The latest passenger’s gap is shaded.</div>
     <canvas id="pxHist" style="height:190px" role="img" aria-label="Histogram of the lengths of the gaps that passengers landed in"></canvas>
     <div class="legend"><span><i class="sw" style="background:var(--accent)"></i>length of the gap each passenger landed in (minutes)</span><span id="pxLeg1"><i class="sw dash" style="border-color:var(--ink-3)"></i>all gaps: \(\lambda e^{-\lambda t}\)</span><span id="pxLeg2"><i class="sw line" style="border-color:var(--gold)"></i>gaps passengers land in: \(\lambda^2 t e^{-\lambda t}\)</span></div>
     <div class="readout" id="pxRead" style="margin-top:8px"></div>
@@ -380,20 +381,17 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
     </div>
     <canvas id="raLane" style="height:140px" role="img" aria-label="Three lanes; each clock's bar grows until its random ringing time, and the first to ring is marked"></canvas>
     <canvas id="raBars" style="height:170px;margin-top:10px" role="img" aria-label="Share of races won by each clock compared with its share of the total rate"></canvas>
-    <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i>share of races won</span><span><i class="sw line"></i>theory: \(\lambda_i / \sum \lambda\)</span></div>
+    <div class="legend"><span><i class="sw" style="background:linear-gradient(90deg,var(--one) 0 33%,var(--zero) 33% 67%,var(--gold) 67%)"></i>share of races won</span><span><i class="sw line"></i>theory: \(\lambda_i / \sum \lambda\)</span></div>
     <div class="readout" id="raRead" style="margin-top:8px"></div>
   </div>
   <p>After the first ring, the other clocks have no memory of the time that passed, so the race starts afresh among the rest. Chaining these two facts is how computers simulate chemical reactions and queues: draw one exponential with the total rate to find <em>when</em> the next event happens, then pick <em>which</em> event in proportion to its rate. This is the Gillespie algorithm.</p>
   <details>
     <summary>Why the winning chance is \(\lambda_A / \sum\lambda\)</summary>
     <p>Write \(\Lambda = \lambda_A + \lambda_B + \lambda_C\). Clock A rings in a short interval around \(t\) with probability \(\lambda_A e^{-\lambda_A t}\,dt\), and the other two are both still silent then with probability \(e^{-(\lambda_B + \lambda_C)t}\). Add up over all \(t\):</p>
-    $$\begin{aligned} P(A \text{ first}) &= \int_0^\infty \lambda_A e^{-\lambda_A t}\,e^{-(\lambda_B+\lambda_C)t}\,dt \\ &= \lambda_A \int_0^\infty e^{-\Lambda t}\,dt = \frac{\lambda_A}{\Lambda} \end{aligned}$$
+    $$\begin{aligned} &P(A \text{ first}) \\ &\quad= \int_0^\infty \lambda_A e^{-\lambda_A t}\,e^{-(\lambda_B+\lambda_C)t}\,dt \\ &\quad= \lambda_A \int_0^\infty e^{-\Lambda t}\,dt = \frac{\lambda_A}{\Lambda} \end{aligned}$$
     <p>The same calculation shows that <em>which</em> clock wins is independent of <em>when</em> the first ring happens.</p>
   </details>
-  <h3>Adding waits instead of racing them</h3>
-  <p>The time until the \(k\)-th event of a Poisson process is a sum of \(k\) independent \(\text{Exp}(\lambda)\) gaps. It follows the <em class="term">gamma distribution</em> with shape \(k\), also called the <em class="term">Erlang distribution</em>:</p>
-  $$f_k(t) = \frac{\lambda^k t^{k-1} e^{-\lambda t}}{(k-1)!}$$
-  <p>It has mean \(k/\lambda\) and variance \(k/\lambda^2\). The wear-out curve in section 3 was this with \(k = 3\). As \(k\) grows, the central limit theorem pulls it toward a bell curve.</p>
+  <p><strong>Adding waits instead of racing them.</strong> The time until the \(k\)-th event of a Poisson process is a sum of \(k\) independent \(\text{Exp}(\lambda)\) gaps. It follows the <em class="term">gamma distribution</em> with shape \(k\), also called the <em class="term">Erlang distribution</em>, with density \(\lambda^k t^{k-1} e^{-\lambda t}/(k-1)!\), mean \(k/\lambda\) and variance \(k/\lambda^2\). The wear-out curve in section 3 was this with \(k = 3\).</p>
 </section>
 
 <!-- 8 -->
@@ -468,9 +466,9 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
   </div>
 
   <div class="minis" style="margin-top:16px">
-    <div class="mini"><div class="mcap">PDF</div><canvas id="miniPDF" style="height:150px" role="img" aria-label="Density for the current rate on the interval 0 to 5"></canvas></div>
-    <div class="mini"><div class="mcap">CDF</div><canvas id="miniCDF" style="height:150px" role="img" aria-label="Cumulative distribution function for the current rate"></canvas></div>
-    <div class="mini"><div class="mcap">Hazard rate</div><canvas id="miniHaz" style="height:150px" role="img" aria-label="Hazard rate for the current rate: a flat line at height lambda"></canvas></div>
+    <div class="mini"><div class="mcap">PDF</div><canvas id="miniPDF" style="height:130px" role="img" aria-label="Density for the current rate on the interval 0 to 5"></canvas></div>
+    <div class="mini"><div class="mcap">CDF</div><canvas id="miniCDF" style="height:130px" role="img" aria-label="Cumulative distribution function for the current rate"></canvas></div>
+    <div class="mini"><div class="mcap">Hazard rate</div><canvas id="miniHaz" style="height:130px" role="img" aria-label="Hazard rate for the current rate: a flat line at height lambda"></canvas></div>
   </div>
 
   <h3>The numbers</h3>
@@ -514,12 +512,11 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
 
   <h3>Structural facts worth remembering</h3>
   <ol class="facts">
-    <li><strong>Memoryless, and the only one.</strong> \(P(T > s+t \mid T > s) = P(T > t)\). No other continuous distribution has this property (section 3).</li>
+    <li><strong>Memoryless, and the only one.</strong> No other continuous distribution satisfies \(P(T > s+t \mid T > s) = P(T > t)\) for all \(s, t\) (section 3).</li>
     <li><strong>Its discrete twin is the geometric.</strong> Rounding up, \(\lceil T \rceil\) is geometric with success probability \(1 - e^{-\lambda}\). The exponential is the geometric with infinitely fine slices (section 1).</li>
     <li><strong>Scaling.</strong> \(cT \sim \text{Exp}(\lambda/c)\) for \(c > 0\). Every exponential is a stretched \(\text{Exp}(1)\): \(T = E/\lambda\) with \(E \sim \text{Exp}(1)\).</li>
     <li><strong>Sums: gamma.</strong> The sum of \(k\) independent \(\text{Exp}(\lambda)\) waits is \(\text{Gamma}(k, \lambda)\), the Erlang distribution.</li>
     <li><strong>Special case of bigger families.</strong> \(\text{Exp}(\lambda)\) is the gamma distribution with shape 1 and the Weibull distribution with shape 1. Also, \(2\lambda T \sim \chi^2_2\).</li>
-    <li><strong>Differences: Laplace.</strong> The difference of two independent \(\text{Exp}(\lambda)\) waits has the Laplace (“double exponential”) distribution, with density \(\tfrac{\lambda}{2}e^{-\lambda|x|}\).</li>
     <li><strong>Conjugate prior: gamma.</strong> If your uncertainty about \(\lambda\) is \(\text{Gamma}(\alpha, \beta)\) (shape \(\alpha\), rate \(\beta\)), then after observing \(n\) waits it becomes \(\text{Gamma}(\alpha + n,\; \beta + \sum t_i)\).</li>
   </ol>
 
@@ -1146,9 +1143,15 @@ window.__expo = {gammaP, gammaQuantile, lgam};   // exposed for testing
   const hist = new Array(NB).fill(0);
   function gen(a, b){
     const out = [];
-    if (mode === 'sched') { for (let t = a + Math.random() * 10; t < b; t += 10) out.push(t); }
-    else { let t = a + expS(LAM); while (t < b) { out.push(t); t += expS(LAM); } }
-    for (let i = 1; i < out.length; i++) { nG++; sumG += out[i] - out[i - 1]; }
+    if (mode === 'sched') {
+      for (let t = a + Math.random() * 10; t < b; t += 10) out.push(t);
+      for (let i = 1; i < out.length; i++) { nG++; sumG += out[i] - out[i - 1]; }
+    } else {
+      // count every gap drawn, including the one that crosses b: keeping only the gaps
+      // that fit inside [a, b] would favor short ones
+      let t = a + expS(LAM);
+      while (t < b) { out.push(t); const g = expS(LAM); nG++; sumG += g; t += g; }
+    }
     return out;
   }
   function firstAfter(arr, u){ let lo = 0, hi = arr.length; while (lo < hi) { const m = (lo + hi) >> 1; if (arr[m] > u) hi = m; else lo = m + 1; } return lo; }
@@ -1169,9 +1172,10 @@ window.__expo = {gammaP, gammaQuantile, lgam};   // exposed for testing
       const y = yL - 14 - (pas.length - 1 - i) * 13, latest = i === pas.length - 1;
       ctx.globalAlpha = latest ? 1 : .55;
       ctx.strokeStyle = C('--gold'); ctx.lineWidth = latest ? 2.5 : 1.5;
-      const xa = xs(p.u), xb = xs(p.next);
+      const off = p.next > VIS, xa = xs(p.u), xb = off ? X1 : xs(p.next);
       ctx.beginPath(); ctx.moveTo(xa, y); ctx.lineTo(xb - 3, y); ctx.stroke();
-      ctx.fillStyle = C('--gold'); ctx.beginPath(); ctx.moveTo(xb, y); ctx.lineTo(xb - 6, y - 4); ctx.lineTo(xb - 6, y + 4); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = C('--gold');
+      for (const dx of off ? [0, -7] : [0]) { ctx.beginPath(); ctx.moveTo(xb + dx, y); ctx.lineTo(xb + dx - 6, y - 4); ctx.lineTo(xb + dx - 6, y + 4); ctx.closePath(); ctx.fill(); }
       ctx.fillStyle = C('--zero'); dot(ctx, xa, y, latest ? 4.5 : 3.5);
       ctx.globalAlpha = 1;
     });
@@ -1420,7 +1424,7 @@ window.__expo = {gammaP, gammaQuantile, lgam};   // exposed for testing
     vline(ctx, A.xs(lam), A.Y0, A.Y1, C('--gold'), [6, 4], 2);
     vline(ctx, A.xs(hat), A.Y0, A.ys(1), C('--accent'), null, 1.5);
     ctx.fillStyle = C('--accent'); dot(ctx, A.xs(hat), A.ys(1), 4.5);
-    ctx.font = '11px ' + MONO; ctx.textBaseline = 'bottom'; ctx.fillStyle = C('--ink');
+    ctx.font = 'italic 14px ' + C('--serif'); ctx.textBaseline = 'bottom'; ctx.fillStyle = C('--ink');
     const lx = A.xs(hat); ctx.textAlign = lx > A.X1 - 40 ? 'right' : 'left'; ctx.fillText('λ̂', lx + (ctx.textAlign === 'left' ? 6 : -6), A.ys(1) - 2);
   }
   function readout(){
@@ -1428,7 +1432,7 @@ window.__expo = {gammaP, gammaQuantile, lgam};   // exposed for testing
     if (!n) { $('#esRead').innerHTML = `True rate λ = <b>${fmtN(lam)}</b>, so the average wait is ${f3(1 / lam)}. Pretend you don’t know it, and estimate it from the waits.`; return; }
     const hat = n / sum, [lo, hi] = ci(n, sum), inside = lo <= lam && lam <= hi;
     let s = `waits n = <b>${n.toLocaleString()}</b> · total time Σt = <b>${f3(sum)}</b> · average t̄ = <b>${f3(sum / n)}</b><br>` +
-      `estimate λ̂ = n/Σt = <b>${f3(hat)}</b> · exact 95% interval [<b>${f3(lo)}</b>, <b>${f3(hi)}</b>] · ` +
+      `estimate <span class="lh">λ̂</span> = n/Σt = <b>${f3(hat)}</b> · exact 95% interval [<b>${f3(lo)}</b>, <b>${f3(hi)}</b>] · ` +
       (inside ? `<span class="ok">contains the true λ = ${fmtN(lam)}</span>` : `<span class="warn">misses the true λ = ${fmtN(lam)}</span>`);
     if (n >= MAXN) s += `<br><span class="warn">limit of ${MAXN.toLocaleString()} waits reached, press Reset to start over</span>`;
     $('#esRead').innerHTML = s;
@@ -1447,8 +1451,8 @@ window.__expo = {gammaP, gammaQuantile, lgam};   // exposed for testing
       if (q[0] / s <= lam && lam <= q[1] / s) hits++;
       sumHat += n / s;
     }
-    $('#esCovRead').innerHTML = `1,000 fresh experiments with n = ${n}: the interval contained λ in <b>${pct(hits / R)}</b> of them (target 95%) · average λ̂ = <b>${f3(sumHat / R)}</b>` +
-      (n > 1 ? ` (theory nλ/(n − 1) = ${f3(n * lam / (n - 1))})` : ' (with n = 1 the theoretical average of λ̂ is infinite)');
+    $('#esCovRead').innerHTML = `1,000 fresh experiments with n = ${n}: the interval contained λ in <b>${pct(hits / R)}</b> of them (target 95%) · average <span class="lh">λ̂</span> = <b>${f3(sumHat / R)}</b>` +
+      (n > 1 ? ` (theory nλ/(n − 1) = ${f3(n * lam / (n - 1))})` : ' (with n = 1 the theoretical average of <span class="lh">λ̂</span> is infinite)');
   });
   const draw = () => { drawRug(); drawLik(); };
   bindRange($('#esL'), $('#esLOut'), v => { lam = v; reset(); });
@@ -1474,7 +1478,7 @@ window.__expo = {gammaP, gammaQuantile, lgam};   // exposed for testing
     const sg = x => (x < 0 ? '−' : '') + f3(Math.abs(x));
     $('#cEnt').textContent = `${sg(H)} nats = ${sg(H / Math.LN2)} bits`;
     $('#cMGF').textContent = `E[T²] = 2/λ² = ${f3(2 * m * m)}`;
-    $('#cMLE').textContent = `with 100 waits, sd of λ̂ ≈ λ/10 = ${f3(lam / 10)}`;
+    $('#cMLE').innerHTML = `with 100 waits, sd of <span class="lh">λ̂</span> ≈ λ/10 = ${f3(lam / 10)}`;
   }
   function mini(id, fn, ymax, yt){
     const {ctx, w, h} = fit($(id));
