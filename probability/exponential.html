@@ -134,6 +134,10 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
   input[type=range]{width:150px}
 }
 </style>
+<script>try{var t=localStorage.getItem('xp-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/catalog.js" defer></script>
+<script src="../assets/site.js" defer></script>
 </head>
 <body>
 <main>
@@ -174,11 +178,11 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
 <section id="slices">
   <div class="secnum">01</div>
   <h2>From coin flips to waiting times</h2>
-  <p>The <a href="binomial-distribution.html">binomial distribution</a> fixes the number of trials and counts the successes. Turn the question around: keep trying until the first success, and ask <strong>how long that took</strong>.</p>
+  <p>The <a href="binomial.html">binomial distribution</a> fixes the number of trials and counts the successes. Turn the question around: keep trying until the first success, and ask <strong>how long that took</strong>.</p>
   <p>With separate trials this is easy. Roll a die until the first six. The six arrives on roll \(k\) when the first \(k-1\) rolls fail and roll \(k\) succeeds. With success probability \(p\) and \(q = 1 - p\) as before,</p>
   $$P(K = k) = q^{\,k-1}p, \quad k = 1, 2, \dots$$
   <p>This is the <em class="term">geometric distribution</em>. On average you need \(1/p\) tries: 6 rolls for a six.</p>
-  <p>Now let time flow continuously. A Geiger counter clicks at random moments, on average \(\lambda\) times per second. The Greek letter \(\lambda\) (lambda) is the <em class="term">rate</em>. To reuse what we know, chop time into thin slices of width \(\Delta t\). In each slice, flip a coin that comes up “click” with probability \(p = \lambda\Delta t\). Each slice is a <a href="bernoulli-distribution.html">Bernoulli trial</a>, and waiting for the first click is waiting for the first success.</p>
+  <p>Now let time flow continuously. A Geiger counter clicks at random moments, on average \(\lambda\) times per second. The Greek letter \(\lambda\) (lambda) is the <em class="term">rate</em>. To reuse what we know, chop time into thin slices of width \(\Delta t\). In each slice, flip a coin that comes up “click” with probability \(p = \lambda\Delta t\). Each slice is a <a href="bernoulli.html">Bernoulli trial</a>, and waiting for the first click is waiting for the first success.</p>
   <p>The wait \(T\) is longer than \(t\) exactly when the first \(t/\Delta t\) slices all fail:</p>
   $$P(T > t) = (1 - \lambda\Delta t)^{t/\Delta t}$$
   <p>Let the slices shrink. The right-hand side tends to a limit you may know from compound interest:</p>
@@ -304,7 +308,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
   <div class="secnum">05</div>
   <h2>The Poisson process</h2>
   <p>Keep the clock running. After each event, start a fresh \(\text{Exp}(\lambda)\) wait for the next one. The events form a <em class="term">Poisson process</em> with rate \(\lambda\). This is the counter from the top of the page.</p>
-  <p>It is the same object we built from slices in section 1. Each thin slice holds an event with probability \(\lambda\Delta t\), independently of the others. So the number of events in a window of length \(t\) counts successes among \(n = t/\Delta t\) slices. That count is \(\text{Binomial}(n, \lambda\Delta t)\) with mean \(np = \lambda t\). As the slices shrink, \(n\) grows with \(np\) fixed, which is exactly the <a href="binomial-distribution.html#poisson">Poisson limit</a> from the Binomial tutorial:</p>
+  <p>It is the same object we built from slices in section 1. Each thin slice holds an event with probability \(\lambda\Delta t\), independently of the others. So the number of events in a window of length \(t\) counts successes among \(n = t/\Delta t\) slices. That count is \(\text{Binomial}(n, \lambda\Delta t)\) with mean \(np = \lambda t\). As the slices shrink, \(n\) grows with \(np\) fixed, which is exactly the <a href="binomial.html#poisson">Poisson limit</a> from the Binomial tutorial:</p>
   $$\begin{gathered} N(t) \sim \text{Poisson}(\lambda t) \\ P(N(t) = k) = \frac{(\lambda t)^k e^{-\lambda t}}{k!} \end{gathered}$$
   <p>One process, two descriptions: the <strong>gaps are exponential</strong> and the <strong>counts are Poisson</strong>. They fit together exactly. No events by time \(t\) means the first wait is longer than \(t\), and both descriptions give \(P(N(t) = 0) = P(T > t) = e^{-\lambda t}\).</p>
 
@@ -325,7 +329,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
     <div class="legend"><span><i class="sw" style="background:var(--accent)"></i>share of windows with \(k\) events</span><span><i class="sw dot" style="background:var(--gold)"></i>\(\text{Poisson}(\lambda t)\)</span></div>
     <div class="readout" id="ppRead" style="margin-top:8px"></div>
   </div>
-  <p>Nothing in the simulation mentions the Poisson distribution. It only draws exponential gaps. The Poisson counts appear on their own, with mean and variance both equal to \(\lambda t\). The counts get a tutorial of their own in <a href="poisson-distribution.html">The Poisson Distribution</a>.</p>
+  <p>Nothing in the simulation mentions the Poisson distribution. It only draws exponential gaps. The Poisson counts appear on their own, with mean and variance both equal to \(\lambda t\). The counts get a tutorial of their own in <a href="poisson.html">The Poisson Distribution</a>.</p>
 </section>
 
 <!-- 6 -->
@@ -538,7 +542,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
 </section>
 
 </main>
-<footer>A single-file interactive explainer, following <a href="bernoulli-distribution.html">The Bernoulli Distribution</a> and <a href="binomial-distribution.html">The Binomial Distribution</a>. Math typeset with KaTeX. Every simulation runs live in your browser using <code>Math.random()</code>.</footer>
+<footer>A single-file interactive explainer, following <a href="bernoulli.html">The Bernoulli Distribution</a> and <a href="binomial.html">The Binomial Distribution</a>. Math typeset with KaTeX. Every simulation runs live in your browser using <code>Math.random()</code>.</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>

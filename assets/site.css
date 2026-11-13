@@ -1,0 +1,53 @@
+/*
+ * Styles for the site-wide pieces added by site.js (top bar, theme switch,
+ * series navigation). Colors come from the theme tokens each page defines
+ * (--bg, --ink, --accent, ...), so these pieces follow light and dark mode.
+ * Everything here is prefixed .xs- to stay clear of page styles.
+ */
+.xs-bar{border-bottom:1px solid var(--line,#e3dfd5);background:var(--bg,#faf8f4);font:14px/1.4 var(--sans,system-ui,sans-serif)}
+.xs-in{max-width:820px;margin:0 auto;padding:0 20px}
+.xs-bar .xs-in{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px}
+.xs-crumbs{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px;min-width:0;color:var(--ink-3,#8b8d93)}
+.xs-crumbs a{color:var(--ink-2,#4c4e55);text-decoration:none}
+.xs-crumbs a:hover{color:var(--accent,#3654c9);text-decoration:underline}
+.xs-crumbs .xs-home{font-family:var(--serif,Georgia,serif);font-weight:600;font-size:16px;color:var(--ink,#1c1c1e)}
+.xs-step{margin-left:10px;padding-left:12px;border-left:1px solid var(--line,#e3dfd5);font-size:13px;color:var(--ink-3,#8b8d93)}
+
+.xs-theme{display:inline-flex;flex:none;border:1px solid var(--line,#e3dfd5);border-radius:999px;padding:2px;background:var(--surface,#fff)}
+.xs-theme button{all:unset;box-sizing:border-box;width:30px;height:26px;display:grid;place-items:center;border-radius:999px;color:var(--ink-3,#8b8d93);cursor:pointer}
+.xs-theme button svg{width:15px;height:15px}
+.xs-theme button:hover{color:var(--ink,#1c1c1e)}
+.xs-theme button[aria-pressed="true"]{background:var(--accent-soft,rgba(54,84,201,.11));color:var(--accent,#3654c9)}
+.xs-theme button:focus-visible{outline:2px solid var(--accent,#3654c9);outline-offset:1px}
+
+/* bottom navigation on explainer pages */
+.xs-next{font:15px/1.5 var(--sans,system-ui,sans-serif);color:var(--ink,#1c1c1e);margin-top:20px}
+.xs-next{padding:0 20px}
+.xs-next .xs-in{max-width:780px;padding:36px 0 0;border-top:1px solid var(--line,#e3dfd5)}
+.xs-kick{text-transform:uppercase;letter-spacing:.12em;font-size:12px;font-weight:600;color:var(--ink-3,#8b8d93);margin:0 0 12px}
+.xs-steps{list-style:none;margin:0 0 18px;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.xs-steps li{margin:0}
+.xs-steps a,.xs-steps li.is-current{display:inline-flex;align-items:center;gap:8px;padding:5px 12px 5px 6px;border:1px solid var(--line,#e3dfd5);border-radius:999px;font-size:14px;color:var(--ink-2,#4c4e55);text-decoration:none;background:var(--surface,#fff)}
+.xs-steps a:hover{border-color:var(--accent,#3654c9);color:var(--accent,#3654c9)}
+.xs-steps li.is-current{border-color:var(--accent,#3654c9);color:var(--ink,#1c1c1e);font-weight:600;background:var(--accent-soft,rgba(54,84,201,.11))}
+.xs-n{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--surface-2,#f2efe8);font:600 12px var(--mono,monospace);color:var(--ink-2,#4c4e55)}
+.xs-steps li.is-current .xs-n{background:var(--accent,#3654c9);color:var(--bg,#fff)}
+
+.xs-pn{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:36px}
+.xs-card{display:flex;flex-direction:column;gap:4px;padding:16px 18px;border:1px solid var(--line,#e3dfd5);border-radius:12px;background:var(--surface,#fff);color:var(--ink,#1c1c1e);text-decoration:none;transition:border-color .15s,transform .15s}
+.xs-card:hover{border-color:var(--accent,#3654c9);transform:translateY(-1px)}
+.xs-card strong{font-family:var(--serif,Georgia,serif);font-size:18px;font-weight:600;color:var(--accent,#3654c9)}
+.xs-dir{font-size:13px;color:var(--ink-3,#8b8d93)}
+.xs-sum{font-size:14px;color:var(--ink-2,#4c4e55)}
+.xs-card.xs-c-next{grid-column:2;text-align:right}
+.xs-more{list-style:none;margin:0 0 20px;padding:0}
+.xs-more li{display:flex;flex-direction:column;padding:10px 0;border-bottom:1px solid var(--line,#e3dfd5)}
+.xs-more a{font-weight:600;color:var(--accent,#3654c9);text-decoration:none}
+.xs-more span{font-size:14px;color:var(--ink-2,#4c4e55)}
+
+@media (max-width:600px){
+  .xs-step{display:none}
+  .xs-pn{grid-template-columns:1fr}
+  .xs-card.xs-c-next{grid-column:auto}
+}
+@media (prefers-reduced-motion:reduce){.xs-card{transition:none}.xs-card:hover{transform:none}}

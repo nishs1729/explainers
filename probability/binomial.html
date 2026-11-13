@@ -168,6 +168,10 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
   input[type=range]{width:150px}
 }
 </style>
+<script>try{var t=localStorage.getItem('xp-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/catalog.js" defer></script>
+<script src="../assets/site.js" defer></script>
 </head>
 <body>
 <main>
@@ -207,7 +211,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
 <section id="many">
   <div class="secnum">01</div>
   <h2>From one trial to many</h2>
-  <p>The <a href="bernoulli-distribution.html">Bernoulli distribution</a> describes a single yes/no trial. Its outcome \(X\) is \(1\) (a “success”) with probability \(p\), and \(0\) (a “failure”) with probability \(1-p\). Throughout this page we write \(q = 1 - p\) for the probability of failure.</p>
+  <p>The <a href="bernoulli.html">Bernoulli distribution</a> describes a single yes/no trial. Its outcome \(X\) is \(1\) (a “success”) with probability \(p\), and \(0\) (a “failure”) with probability \(1-p\). Throughout this page we write \(q = 1 - p\) for the probability of failure.</p>
   <p>Most real questions involve many trials, not one:</p>
   <ul>
     <li>How many of 20 free throws will a player make?</li>
@@ -450,7 +454,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
   </div>
 
   <p>The readout gives the <em class="term">total variation distance</em> between the two distributions: the largest difference between the probabilities they give to any event. Le Cam’s inequality guarantees it is at most \(np^2 = \lambda p\). So what makes the Poisson approximation good is that <strong>\(p\) is small</strong>, not merely that \(n\) is large. The variances tell the same story: the binomial’s \(npq = \lambda(1-p)\) approaches the Poisson’s \(\lambda\) as \(p \to 0\).</p>
-  <p>The gaps between Poisson events have a distribution of their own, the exponential. It is the subject of the next tutorial, <a href="exponential-distribution.html">The Exponential Distribution</a>. The Poisson count itself, with real data, estimation and what to do when it fails, has a tutorial of its own: <a href="poisson-distribution.html">The Poisson Distribution</a>.</p>
+  <p>The gaps between Poisson events have a distribution of their own, the exponential. It is the subject of the next tutorial, <a href="exponential.html">The Exponential Distribution</a>. The Poisson count itself, with real data, estimation and what to do when it fails, has a tutorial of its own: <a href="poisson.html">The Poisson Distribution</a>.</p>
   <details>
     <summary>Why the limit holds</summary>
     <p>Substitute \(p = \lambda/n\) and look at the pieces one at a time. First,</p>
@@ -642,7 +646,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
 </section>
 
 </main>
-<footer>A single-file interactive explainer and a companion to <a href="bernoulli-distribution.html">The Bernoulli Distribution</a>. Math typeset with KaTeX. Every simulation runs live in your browser using <code>Math.random()</code>.</footer>
+<footer>A single-file interactive explainer and a companion to <a href="bernoulli.html">The Bernoulli Distribution</a>. Math typeset with KaTeX. Every simulation runs live in your browser using <code>Math.random()</code>.</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>

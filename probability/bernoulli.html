@@ -203,6 +203,10 @@ table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;co
 footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60px;border-top:1px solid var(--line);margin-top:60px}
 @media (prefers-reduced-motion:reduce){.coin,.coin-toss.toss,.jar .fill,.budget div{transition:none;animation:none}}
 </style>
+<script>try{var t=localStorage.getItem('xp-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/catalog.js" defer></script>
+<script src="../assets/site.js" defer></script>
 </head>
 <body>
 <main>
@@ -497,7 +501,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
   <p>The mean and variance follow from the Bernoulli ones. Expected values always add, and variances add when the trials are independent:</p>
   $$\begin{aligned} E[Y] &= \sum_{i=1}^n E[X_i] = np, \\ \operatorname{Var}(Y) &= \sum_{i=1}^n \operatorname{Var}(X_i) = np(1-p). \end{aligned}$$
   <p class="muted">Set \(n\) to 30 and run 1000×. The histogram starts to look like a bell curve, which is an early sign of the Central Limit Theorem. The Bernoulli distribution is the single building block underneath all of this.</p>
-  <p>The Binomial distribution has its own explainer, which picks up where this section stops: <a href="binomial-distribution.html">The Binomial Distribution</a>.</p>
+  <p>The Binomial distribution has its own explainer, which picks up where this section stops: <a href="binomial.html">The Binomial Distribution</a>.</p>
 </section>
 
 <!-- 9 -->
