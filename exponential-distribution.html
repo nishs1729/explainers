@@ -98,7 +98,8 @@ details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin
 details summary{cursor:pointer;font-weight:600;font-size:15px;color:var(--ink-2)}
 details[open] summary{margin-bottom:8px}
 .legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin-top:8px}
-.legend > span{display:inline-flex;align-items:center;gap:6px}
+.legend > span{display:inline-block}
+.legend .sw{vertical-align:middle;margin:0 6px 2px 0}
 .sw{display:inline-block;width:16px;height:10px;border-radius:2px}
 .sw.dot{width:8px;height:8px;border-radius:50%}
 .sw.dash{height:0;border-top:2px dashed var(--ink)}
@@ -324,7 +325,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
     <div class="legend"><span><i class="sw" style="background:var(--accent)"></i>share of windows with \(k\) events</span><span><i class="sw dot" style="background:var(--gold)"></i>\(\text{Poisson}(\lambda t)\)</span></div>
     <div class="readout" id="ppRead" style="margin-top:8px"></div>
   </div>
-  <p>Nothing in the simulation mentions the Poisson distribution. It only draws exponential gaps. The Poisson counts appear on their own, with mean and variance both equal to \(\lambda t\).</p>
+  <p>Nothing in the simulation mentions the Poisson distribution. It only draws exponential gaps. The Poisson counts appear on their own, with mean and variance both equal to \(\lambda t\). The counts get a tutorial of their own in <a href="poisson-distribution.html">The Poisson Distribution</a>.</p>
 </section>
 
 <!-- 6 -->

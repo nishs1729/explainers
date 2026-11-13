@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Poisson Distribution — a visual introduction</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<style>
+:root{
+  --bg:#faf8f4; --surface:#ffffff; --surface-2:#f2efe8; --ink:#1c1c1e; --ink-2:#4c4e55; --ink-3:#8b8d93; --line:#e3dfd5;
+  --one:#16917c; --one-soft:rgba(22,145,124,.15);
+  --zero:#d9573a; --zero-soft:rgba(217,87,58,.15);
+  --accent:#3654c9; --accent-soft:rgba(54,84,201,.11);
+  --gold:#b98317; --gold-soft:rgba(185,131,23,.22);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+    --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+    --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+    --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+    --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+  --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+  --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+  --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+  --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.68 var(--sans);-webkit-font-smoothing:antialiased}
+main{max-width:820px;margin:0 auto;padding:0 20px 80px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;letter-spacing:-.01em}
+h1{font-size:clamp(2.2rem,6vw,3.4rem);margin:.2em 0 .3em}
+h2{font-size:clamp(1.6rem,4vw,2.1rem);margin:0 0 .5em}
+h3{font-size:1.2rem;margin:1.6em 0 .4em}
+p{margin:0 0 1em}
+a{color:var(--accent)}
+strong{font-weight:650}
+em.term{font-style:normal;font-weight:650;color:var(--accent)}
+.muted{color:var(--ink-2)}
+small,.small{font-size:14px}
+
+/* hero */
+.hero{text-align:center;padding:64px 0 24px}
+.kicker{text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--ink-3);margin:0}
+.lede{font-size:1.2rem;color:var(--ink-2);max-width:620px;margin:0 auto}
+.hero-play{max-width:600px;margin:30px auto 0;text-align:left}
+.hero-play .controls{justify-content:center}
+.hint{font-size:15px;color:var(--ink-2);min-height:3.2em;margin:6px 0 0;text-align:center}
+
+.toc{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;margin:28px 0 8px}
+.toc ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 20px;counter-reset:t}
+.toc li{counter-increment:t;font-size:15px}
+.toc li::before{content:counter(t,decimal-leading-zero);font-family:var(--mono);color:var(--ink-3);margin-right:10px;font-size:13px}
+.toc a{color:var(--ink);text-decoration:none}
+.toc a:hover{color:var(--accent)}
+
+section{padding-top:56px}
+.secnum{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.08em;margin-bottom:4px}
+
+.widget{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin:26px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.widget-title{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);margin:0 0 12px;font-weight:600}
+.controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:12px 0}
+.ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:15px}
+.ctrl output{font-family:var(--mono);font-size:14px;min-width:3.2em;color:var(--ink)}
+input[type=range]{accent-color:var(--accent);width:170px;max-width:100%}
+.btn{font:inherit;font-size:14px;line-height:1.2;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;transition:background .15s,transform .1s}
+.btn:hover{border-color:var(--ink-3)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.lh{font-family:var(--serif);font-style:italic;font-size:1.08em}
+.readout{font-family:var(--mono);font-size:14px;color:var(--ink-2);line-height:1.6}
+.readout b{color:var(--ink);font-weight:600}
+.readout .ok{color:var(--one);font-weight:600}
+.readout .warn{color:var(--zero);font-weight:600}
+canvas{display:block;width:100%}
+canvas.pick{cursor:ew-resize;touch-action:pan-y}
+.cap{font-size:13px;color:var(--ink-3);margin:2px 0 6px}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:20px 0}
+.callout p:last-child{margin-bottom:0}
+.katex-display{overflow-x:auto;overflow-y:hidden;padding:4px 0}
+.mathbox{overflow-x:auto;padding:6px 0}
+.katex-display.ovf,.mathbox.ovf{-webkit-mask-image:linear-gradient(to right,#000 82%,transparent);mask-image:linear-gradient(to right,#000 82%,transparent)}
+details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:14px 0;background:var(--surface)}
+details summary{cursor:pointer;font-weight:600;font-size:15px;color:var(--ink-2)}
+details[open] summary{margin-bottom:8px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin-top:8px}
+.legend > span{display:inline-block}
+.legend .sw{vertical-align:middle;margin:0 6px 2px 0}
+.sw{display:inline-block;width:16px;height:10px;border-radius:2px}
+.sw.dot{width:8px;height:8px;border-radius:50%}
+.sw.dash{height:0;border-top:2px dashed var(--ink)}
+.sw.line{height:0;border-top:2px solid var(--ink)}
+
+/* properties */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:18px 0}
+.card{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
+.card h4{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+.card .f{overflow-x:auto;overflow-y:hidden;font-size:15px;min-height:1.8em}
+.card .v{font:600 15px var(--mono);color:var(--accent);margin-top:6px}
+.card p{font-size:15px;margin:0;color:var(--ink-2)}
+.sticky-ctrl{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:6px 22px}
+.minis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:640px){.minis{grid-template-columns:1fr}}
+.mini{border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--surface)}
+.mini .mcap{font-size:13px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.facts{counter-reset:f;list-style:none;padding:0;margin:18px 0}
+.facts li{counter-increment:f;position:relative;padding:12px 0 12px 44px;border-bottom:1px solid var(--line)}
+.facts li::before{content:counter(f);position:absolute;left:0;top:12px;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:600 13px var(--mono)}
+.facts li strong{display:block}
+.table-wrap{overflow-x:auto}
+table.summary{border-collapse:collapse;width:100%;font-size:15px;margin:14px 0}
+table.summary td,table.summary th{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:middle}
+table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3)}
+canvas.tap{cursor:pointer}
+@media (max-width:480px){table.summary td,table.summary th{padding:8px 5px}}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+@media (max-width:640px){.pair{grid-template-columns:1fr}}
+.pair .mcap{font-size:13px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+table.summary td:not(:first-child),table.summary th:not(:first-child){text-align:right;font-family:var(--mono);font-size:14px}
+footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60px;border-top:1px solid var(--line);margin-top:60px}
+
+@media (max-width:480px){
+  main{padding:0 16px 80px}
+  .widget{padding:14px}
+  .katex-display{font-size:.92em}
+  input[type=range]{width:150px}
+}
+</style>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <p class="kicker">A visual introduction</p>
+  <h1>The Poisson Distribution</h1>
+  <p class="lede">How many? Raindrops on a paving stone, typos on a page, calls in a minute, stars in a patch of sky. When events are rare, independent and spread at a steady rate, the count in any patch follows the Poisson distribution.</p>
+  <div class="hero-play">
+    <canvas id="heroField" style="height:300px" role="img" aria-label="A field of 60 squares; raindrops land at random and each square shows how many drops it has caught"></canvas>
+    <div class="controls">
+      <button class="btn primary" id="heroGo">❚❚ Pause</button>
+      <button class="btn" id="heroMany">+60 drops</button>
+      <button class="btn" id="heroClear">Clear</button>
+    </div>
+    <canvas id="heroHist" style="height:150px" role="img" aria-label="Share of squares holding 0, 1, 2 and more drops, with the Poisson probabilities as dots"></canvas>
+    <div class="legend" style="justify-content:center"><span><i class="sw" style="background:var(--accent)"></i><span>share of squares with \(k\) drops</span></span><span><i class="sw dot" style="background:var(--gold)"></i><span>Poisson(\(\lambda\)), \(\lambda\) = drops per square</span></span></div>
+    <p class="hint" id="heroHint" aria-live="polite">Rain falls on 60 paving squares. Each drop lands anywhere, independently of every other drop.</p>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#counting">Counting rare events</a></li>
+    <li><a href="#pmf">The formula, bar by bar</a></li>
+    <li><a href="#meanvar">Mean equals variance</a></li>
+    <li><a href="#data">Horse kicks and flying bombs</a></li>
+    <li><a href="#clusters">Random looks clumpy</a></li>
+    <li><a href="#split">Adding and splitting</a></li>
+    <li><a href="#normal">Large λ: the bell and the square root</a></li>
+    <li><a href="#estimate">Going backwards: what is λ?</a></li>
+    <li><a href="#overdispersion">When Poisson fails</a></li>
+    <li><a href="#props">All the properties</a></li>
+    <li><a href="#uses">Where you will meet it</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<section id="counting">
+  <div class="secnum">01</div>
+  <h2>Counting rare events</h2>
+  <p>The <a href="binomial-distribution.html">binomial distribution</a> counts successes out of a known number of trials. Many everyday counts have no such number. How many emails arrive in an hour? How many typos are on this page? How many drops hit one paving stone? There is no “out of \(n\)”, and no ceiling: the count could be 0, 1, 2 or, in principle, anything.</p>
+  <p>What these counts share is a recipe: a huge number of chances for an event, each one tiny, all independent, at a steady average rate. Only one number survives from all that detail, the average count \(\lambda\) (lambda). The count \(X\) then has the <em class="term">Poisson distribution</em>, written \(X \sim \text{Poisson}(\lambda)\), named after Siméon Denis Poisson, who described it in 1837.</p>
+  <p>The earlier tutorials reached it from two directions:</p>
+  <ul>
+    <li><strong>From coin flips.</strong> Split the hour into \(n\) tiny moments, each holding an email with probability \(p = \lambda/n\). The count is \(\text{Binomial}(n, \lambda/n)\), and as \(n \to \infty\) it becomes \(\text{Poisson}(\lambda)\). The <a href="binomial-distribution.html#poisson">Poisson limit</a> section of the Binomial tutorial shows the bars converge.</li>
+    <li><strong>From waiting times.</strong> If the gaps between events are independent \(\text{Exp}(\lambda)\) waits, the number of events in a window of length \(t\) is \(\text{Poisson}(\lambda t)\). The <a href="exponential-distribution.html#process">Poisson process</a> section of the Exponential tutorial builds this from simulated timelines.</li>
+  </ul>
+  <p>This page is about the count itself: its shape, why its mean equals its variance, how to tell genuine Poisson data from impostors, and how to estimate \(\lambda\).</p>
+  <div class="callout">
+    <p><strong>The checklist.</strong> A count is Poisson when (1) events happen one at a time, (2) counts in separate patches of time or space are independent, and (3) the average rate is the same everywhere. When a real count breaks one of these, it usually shows up as a variance that is too big or too small (sections 3 and 9).</p>
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="pmf">
+  <div class="secnum">02</div>
+  <h2>The formula, bar by bar</h2>
+  <p>The probability of exactly \(k\) events is</p>
+  $$P(X = k) = \frac{\lambda^k e^{-\lambda}}{k!}, \qquad k = 0, 1, 2, \dots$$
+  <p>Read it as a recipe. Start with \(P(X = 0) = e^{-\lambda}\), the chance of no events at all. Then each step to the next bar multiplies by \(\lambda\) and divides by the new count:</p>
+  $$P(X = k) = P(X = k-1)\cdot\frac{\lambda}{k}$$
+  <p>While \(k < \lambda\) the factor \(\lambda/k\) is bigger than 1 and the bars climb. Once \(k > \lambda\) it is smaller than 1 and they fall. So the tallest bar, the <em class="term">mode</em>, is at \(\lfloor\lambda\rfloor\), the whole-number part of \(\lambda\). When \(\lambda\) is a whole number the factor at \(k = \lambda\) is exactly 1, and there are two equal tallest bars, at \(\lambda - 1\) and \(\lambda\). The bars add up to 1 because \(\sum_k \lambda^k/k! = e^\lambda\).</p>
+
+  <div class="widget">
+    <p class="widget-title">Shape explorer: tap a bar</p>
+    <div class="controls">
+      <label class="ctrl">\(\lambda\) <input type="range" id="pmL" min="0" max="27" step="1" value="9"><output id="pmLOut"></output></label>
+    </div>
+    <canvas id="pmChart" class="tap" style="height:250px" role="img" aria-label="Poisson probabilities as bars; bars taller than the one before are green, shorter ones coral, and the selected bar is outlined"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--one)"></i><span>taller than the bar before (\(\lambda/k > 1\))</span></span><span><i class="sw" style="background:var(--zero)"></i><span>shorter (\(\lambda/k < 1\))</span></span><span><i class="sw" style="background:var(--gold)"></i><span>equal (\(\lambda/k = 1\))</span></span><span><i class="sw" style="background:var(--accent-soft);border:1px solid var(--accent)"></i><span>mean ± 1 SD</span></span></div>
+    <div class="readout" id="pmRead" style="margin-top:8px"></div>
+  </div>
+  <p>Small \(\lambda\) piles the probability against the wall at 0, with a long tail to the right. As \(\lambda\) grows the bars spread out like \(\sqrt\lambda\), the skew fades, and the shape turns into a bell (section 7). At \(\lambda = 100\) the bars are near-symmetric, and \(P(X = 0) = e^{-100}\) is about \(4 \times 10^{-44}\).</p>
+</section>
+
+<!-- 3 -->
+<section id="meanvar">
+  <div class="secnum">03</div>
+  <h2>Mean equals variance</h2>
+  <p>The average count is \(\lambda\), as it should be. The \(k = 0\) term vanishes, and pulling out one \(\lambda\) leaves the PMF again:</p>
+  $$\begin{aligned} E[X] &= \sum_{k=1}^{\infty} k\,\frac{\lambda^k e^{-\lambda}}{k!} \\ &= \lambda\sum_{k=1}^{\infty}\frac{\lambda^{k-1}e^{-\lambda}}{(k-1)!} = \lambda \end{aligned}$$
+  <p>The same trick twice gives \(E[X(X-1)] = \lambda^2\), and so</p>
+  $$\begin{aligned} \operatorname{Var}(X) &= E[X(X-1)] + E[X] - E[X]^2 \\ &= \lambda^2 + \lambda - \lambda^2 = \lambda \end{aligned}$$
+  <p>The mean and the variance are the same number. The standard deviation is \(\sqrt\lambda\), so the <em>relative</em> spread is \(1/\sqrt\lambda\): counts around 100 typically land within 10% of it, counts around 4 within 50%.</p>
+  <p>That gives a quick test for whether data could be Poisson. Compute the <em class="term">dispersion index</em> \(D = s^2/\bar x\), the sample variance over the sample mean. Poisson data give \(D \approx 1\). \(D > 1\) is <em class="term">overdispersion</em>: events come in clumps, or the rate varies from place to place. \(D < 1\) is <em class="term">underdispersion</em>: events keep apart, as when there is a fixed number of slots to fill.</p>
+
+  <div class="widget">
+    <p class="widget-title">Dispersion check</p>
+    <div class="controls">
+      <button class="btn on" data-ds="pois" aria-pressed="true">Poisson counts</button>
+      <button class="btn" data-ds="clump" aria-pressed="false">Clumpy counts</button>
+      <button class="btn" data-ds="reg" aria-pressed="false">Regular counts</button>
+    </div>
+    <div class="controls">
+      <label class="ctrl">mean \(\lambda\) <input type="range" id="dsL" min="1" max="10" step="1" value="4"><output id="dsLOut"></output></label>
+      <button class="btn" id="ds20">+20 counts</button>
+      <button class="btn primary" id="ds500">+500 counts</button>
+      <button class="btn" id="dsReset">Reset</button>
+    </div>
+    <canvas id="dsChart" style="height:220px" role="img" aria-label="Histogram of the generated counts with the Poisson probabilities for the same mean as dots"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i><span>share of counts equal to \(k\)</span></span><span><i class="sw dot" style="background:var(--gold)"></i><span>Poisson with the same mean</span></span></div>
+    <div class="readout" id="dsRead" style="margin-top:8px"></div>
+  </div>
+  <p>All three sources have the same mean. The <strong>clumpy</strong> counts first draw a rate of their own from a gamma distribution with mean \(\lambda\), then a Poisson count at that rate, so their variance is \(\lambda + \lambda^2/2\). The <strong>regular</strong> counts fill a fixed number of slots, \(m = \lceil 1.5\lambda\rceil\), each with probability \(\lambda/m\). That is a binomial, whose variance \(\lambda(1 - \lambda/m)\) is below its mean. Only the Poisson bars sit on the dots, and only the Poisson’s \(D\) stays near 1. For genuine Poisson data \(D\) wobbles by about \(\sqrt{2/(n-1)}\), so the readout flags values more than twice that from 1.</p>
+</section>
+
+<!-- 4 -->
+<section id="data">
+  <div class="secnum">04</div>
+  <h2>Horse kicks and flying bombs</h2>
+  <p>In 1898 Ladislaus von Bortkiewicz published a small book called <em>The Law of Small Numbers</em>. Its most famous table counts soldiers of the Prussian cavalry killed by horse kicks: 10 army corps watched for 20 years, 1875 to 1894, or 200 “corps-years”. There were 122 deaths, an average of \(\hat\lambda = 0.61\) per corps-year. Every item on the checklist fits: many soldiers, each with a tiny chance of a fatal kick, mostly independent of each other.</p>
+  <p>Half a century later R. D. Clarke asked a sharper question. In 1944 London was hit by V-1 flying bombs. Were they aimed at particular districts, or falling at random? Clarke divided 144 km² of south London into 576 squares of ¼ km² and counted 537 hits. If the bombs were aimed, a few squares would take many hits and many squares would be spared, so the counts would be overdispersed.</p>
+
+  <div class="widget">
+    <p class="widget-title">Observed counts against Poisson</p>
+    <div class="controls">
+      <button class="btn on" data-dt="horse" aria-pressed="true">Horse-kick deaths (1898)</button>
+      <button class="btn" data-dt="bombs" aria-pressed="false">Flying-bomb hits (1946)</button>
+    </div>
+    <canvas id="dtChart" style="height:220px" role="img" aria-label="Observed numbers of units with each count as bars, with the Poisson expected numbers as dots"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i><span>observed</span></span><span><i class="sw dot" style="background:var(--gold)"></i><span>expected under Poisson(\(\hat\lambda\))</span></span></div>
+    <div class="table-wrap"><table class="summary" id="dtTable"></table></div>
+    <div class="readout" id="dtRead"></div>
+  </div>
+  <p>Both fit remarkably well. The <em class="term">chi-square statistic</em> adds up \((\text{observed} - \text{expected})^2/\text{expected}\) over the count classes. Classes expecting fewer than 5 are merged first, because the test is unreliable for tiny expected counts. The <em>p</em>-value is the chance of a fit at least this bad if the counts really were Poisson. One degree of freedom is lost for every class after the first, and one more because \(\lambda\) was estimated from the same data.</p>
+  <p>For the bombs, the counts are just what random scatter would produce. That doesn’t prove the bombs were unaimed. It says that if they were aimed, their guidance was too crude to show at the scale of a quarter of a square kilometer.</p>
+</section>
+
+<!-- 5 -->
+<section id="clusters">
+  <div class="secnum">05</div>
+  <h2>Random looks clumpy</h2>
+  <p>Look back at the rain at the top of the page. Some squares caught 5 or 6 drops while neighbors stayed dry. Random scatter is clumpy. Our eyes expect randomness to look evenly spread, but evenness is a pattern of its own, and it takes something pushing the points apart.</p>
+
+  <div class="widget">
+    <p class="widget-title">108 points on 72 squares</p>
+    <div class="controls">
+      <button class="btn on" data-cl="rand" aria-pressed="true">Random</button>
+      <button class="btn" data-cl="even" aria-pressed="false">Evenly spread</button>
+      <button class="btn" data-cl="clust" aria-pressed="false">Clustered</button>
+    </div>
+    <div class="controls">
+      <button class="btn primary" id="clNew">New scatter</button>
+      <button class="btn" id="clGrid" aria-pressed="true">Hide squares</button>
+    </div>
+    <canvas id="clField" style="height:260px" role="img" aria-label="108 points scattered over a 12 by 6 grid of squares, with each square's count"></canvas>
+    <canvas id="clHist" style="height:150px" role="img" aria-label="Share of squares holding each number of points, with Poisson probabilities for 1.5 points per square as dots"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i><span>share of squares with \(k\) points</span></span><span><i class="sw dot" style="background:var(--gold)"></i><span>Poisson(1.5)</span></span></div>
+    <div class="readout" id="clRead" style="margin-top:8px"></div>
+  </div>
+  <p>Hide the squares and ask which picture looks random. Most people pick the evenly spread one. With 1.5 points per square, a truly random scatter leaves about 22% of the squares empty (\(e^{-1.5}\)) and puts 4 or more points in about 1 square in 15. The even scatter has almost no empty squares and \(D\) well below 1. The clustered one has too many empty squares <em>and</em> too many crowded ones, so \(D\) is well above 1.</p>
+  <div class="callout">
+    <p><strong>Clusters on a map.</strong> Draw a circle around the densest patch of cancer cases in a country and it will look alarming, even if everyone has the same risk. With thousands of towns, some will have several times the expected count by chance alone. Drawing the circle <em>after</em> seeing the dots is the “Texas sharpshooter” fallacy: firing at a barn, then painting the target around the tightest group of holes. The fair question is not “is this square crowded?” but “are there more crowded squares than the Poisson predicts?”</p>
+  </div>
+</section>
+
+<!-- 6 -->
+<section id="split">
+  <div class="secnum">06</div>
+  <h2>Adding and splitting</h2>
+  <p><strong>Adding.</strong> If \(X \sim \text{Poisson}(\lambda_1)\) and \(Y \sim \text{Poisson}(\lambda_2)\) are independent, then</p>
+  $$X + Y \sim \text{Poisson}(\lambda_1 + \lambda_2)$$
+  <p>Calls to two help lines, merged, are calls to one busier help line. In the coin-flip picture this is obvious: two streams of tiny chances, merged, are one stream with the rates added.</p>
+  <p><strong>Splitting.</strong> Now run it backwards. Emails arrive at \(\lambda\) per hour, and each one is spam with probability \(p\), independently. Then the spam count is \(\text{Poisson}(p\lambda)\) and the real-email count is \(\text{Poisson}((1-p)\lambda)\). This is called <em class="term">thinning</em>. The surprise is that the two counts are <strong>independent</strong>: a heavy hour for spam tells you nothing about how much real email came in that hour.</p>
+
+  <div class="widget">
+    <p class="widget-title">Sort an inbox, hour by hour</p>
+    <div class="controls">
+      <label class="ctrl">emails per hour \(\lambda\) <input type="range" id="spL" min="1" max="20" step="1" value="8"><output id="spLOut"></output></label>
+      <label class="ctrl">spam share \(p\) <input type="range" id="spP" min="0" max="1" step="0.05" value="0.3"><output id="spPOut"></output></label>
+    </div>
+    <div class="controls">
+      <button class="btn" id="sp1">+1 hour</button>
+      <button class="btn primary" id="sp1000">+1,000 hours</button>
+      <button class="btn" id="spReset">Reset</button>
+    </div>
+    <canvas id="spStrip" style="height:64px" role="img" aria-label="The latest hour of email on a 60-minute timeline, spam on the top row and real email on the bottom row"></canvas>
+    <div class="pair">
+      <div><div class="mcap">spam per hour</div><canvas id="spA" style="height:150px" role="img" aria-label="Histogram of hourly spam counts with Poisson(p lambda) dots"></canvas></div>
+      <div><div class="mcap">real email per hour</div><canvas id="spB" style="height:150px" role="img" aria-label="Histogram of hourly real-email counts with Poisson((1 - p) lambda) dots"></canvas></div>
+    </div>
+    <div class="legend"><span><i class="sw" style="background:var(--zero)"></i><span>spam</span></span><span><i class="sw" style="background:var(--one)"></i><span>real email</span></span><span><i class="sw dot" style="background:var(--ink)"></i><span>Poisson with rate \(p\lambda\) or \((1-p)\lambda\)</span></span></div>
+    <div class="readout" id="spRead" style="margin-top:8px"></div>
+  </div>
+  <p>The correlation between the two counts hovers around 0, whatever \(p\) is. This independence is special to the Poisson. If exactly 8 emails arrived every hour, one more spam would mean one fewer real email, a perfect negative correlation. A random Poisson total is exactly the amount of extra randomness that cancels it.</p>
+  <details>
+    <summary>Why the split counts are independent</summary>
+    <p>Spam \(= a\) and real \(= b\) means \(a + b\) emails arrived and \(a\) of them were picked as spam. With \(q = 1 - p\),</p>
+    $$\begin{aligned} P(a, b) &= \frac{\lambda^{a+b}e^{-\lambda}}{(a+b)!}\binom{a+b}{a}p^a q^b \\ &= \frac{(p\lambda)^a e^{-p\lambda}}{a!}\cdot\frac{(q\lambda)^b e^{-q\lambda}}{b!} \end{aligned}$$
+    <p>The joint probability factors into a \(\text{Poisson}(p\lambda)\) PMF times a \(\text{Poisson}(q\lambda)\) PMF, which is exactly what independence means. Read in reverse, it also says that once you know the total \(a + b = m\), the spam count is \(\text{Binomial}(m, p)\).</p>
+  </details>
+</section>
+
+<!-- 7 -->
+<section id="normal">
+  <div class="secnum">07</div>
+  <h2>Large λ: the bell and the square root</h2>
+  <p>A \(\text{Poisson}(100)\) count is the sum of 100 independent \(\text{Poisson}(1)\) counts, by the adding rule. The central limit theorem then says it is close to a normal distribution with the same mean and variance:</p>
+  $$X \approx N(\lambda,\ \lambda) \quad \text{for large } \lambda$$
+  <p>Probabilities of whole-number counts are best approximated with a <em class="term">continuity correction</em>: treat the bar at \(k\) as covering \(k - \tfrac12\) to \(k + \tfrac12\), so that \(P(X \le k) \approx \Phi\big((k + \tfrac12 - \lambda)/\sqrt\lambda\big)\), where \(\Phi\) is the standard normal CDF.</p>
+  <p>Poisson counts have one awkward feature: their spread depends on their size. Big counts wobble more, so a chart of counts has noisy tall bars and calm short ones. Taking square roots fixes this. Near \(\lambda\) the curve \(\sqrt x\) has slope \(1/(2\sqrt\lambda)\), so it shrinks a wobble of size \(\sqrt\lambda\) to about</p>
+  $$\operatorname{sd}\big(\sqrt X\big) \approx \frac{1}{2\sqrt\lambda}\cdot\sqrt\lambda = \frac12$$
+  <p>whatever \(\lambda\) is. This is a <em class="term">variance-stabilizing transform</em>. Anscombe’s version, \(\sqrt{X + 3/8}\), settles to \(\tfrac12\) sooner.</p>
+
+  <div class="widget">
+    <p class="widget-title">The bell, and the square-root trick</p>
+    <div class="controls">
+      <label class="ctrl">\(\lambda\) <input type="range" id="nmL" min="0" max="17" step="1" value="7"><output id="nmLOut"></output></label>
+    </div>
+    <canvas id="nmChart" style="height:220px" role="img" aria-label="Poisson bars with the matching normal curve; bars up to a cut-off are highlighted and the normal area up to the cut-off plus one half is shaded"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i><span>\(P(X = k)\), \(k \le\) cut-off</span></span><span><i class="sw" style="background:var(--ink-3)"></i><span>above the cut-off</span></span><span><i class="sw line" style="border-color:var(--gold)"></i><span>\(N(\lambda, \lambda)\) density</span></span></div>
+    <canvas id="nmSqrt" style="height:190px;margin-top:14px" role="img" aria-label="Standard deviation of the square root of a Poisson count against lambda, approaching one half"></canvas>
+    <div class="legend"><span><i class="sw line" style="border-color:var(--gold)"></i><span>\(\operatorname{sd}(\sqrt X)\)</span></span><span><i class="sw line" style="border-color:var(--accent)"></i><span>\(\operatorname{sd}(\sqrt{X + 3/8})\)</span></span><span><i class="sw dash" style="border-color:var(--ink-3)"></i><span>\(\tfrac12\)</span></span></div>
+    <div class="readout" id="nmRead" style="margin-top:8px"></div>
+  </div>
+  <p>The cut-off is \(\lfloor\lambda + \sqrt\lambda\rfloor\), about one standard deviation above the mean. Without the correction the normal answer is off by several percentage points at small \(\lambda\); with it, the error is usually well under one. Meanwhile \(\operatorname{sd}(X) = \sqrt\lambda\) keeps growing but \(\operatorname{sd}(\sqrt X)\) flattens at \(\tfrac12\). That is why photon-count images and gene-expression counts are often analyzed on a square-root (or log) scale.</p>
+</section>
+
+<!-- 8 -->
+<section id="estimate">
+  <div class="secnum">08</div>
+  <h2>Going backwards: what is λ?</h2>
+  <p>Suppose you count events on \(n\) separate days and get \(x_1, \dots, x_n\), with total \(S\). The best estimate of the daily rate is simply the average:</p>
+  $$\hat\lambda = \bar x = \frac{S}{n}$$
+  <p>It is the maximum-likelihood estimate, it is unbiased, and only the total matters: \(S \sim \text{Poisson}(n\lambda)\) by the adding rule, and once you know \(S\), how it was spread over the days tells you nothing more about \(\lambda\).</p>
+  <p>The quick interval \(\hat\lambda \pm 1.96\sqrt{\hat\lambda/n}\) breaks down for small counts; with zero events it is \([0, 0]\). The <em class="term">exact interval</em> (Garwood, 1936) uses the link between counts and waiting times: at least \(k\) events by time \(\lambda\) means the \(k\)-th arrival came before \(\lambda\), so \(P(X \ge k) = P(\text{Gamma}(k, 1) \le \lambda)\). Writing \(G_a^{-1}\) for the quantile function of \(\text{Gamma}(a, 1)\),</p>
+  $$\begin{gathered} \text{lower} = \tfrac{1}{n}\,G_{S}^{-1}(0.025) \\ \text{upper} = \tfrac{1}{n}\,G_{S+1}^{-1}(0.975) \end{gathered}$$
+  <p>with lower \(= 0\) when \(S = 0\). Tables often state the same thing with chi-square quantiles, \(\chi^2_{2S}(0.025)/2n\) and \(\chi^2_{2S+2}(0.975)/2n\).</p>
+
+  <div class="widget">
+    <p class="widget-title">Estimate a rate from daily counts</p>
+    <div class="controls">
+      <label class="ctrl">true \(\lambda\) per day <input type="range" id="esL" min="0.1" max="10" step="0.1" value="2"><output id="esLOut"></output></label>
+    </div>
+    <div class="controls">
+      <button class="btn" id="es1">+1 day</button>
+      <button class="btn" id="es10">+10</button>
+      <button class="btn primary" id="es100">+100</button>
+      <button class="btn" id="esReset">Reset</button>
+    </div>
+    <canvas id="esLik" style="height:220px" role="img" aria-label="Likelihood of each possible rate, with the estimate, the exact 95 percent interval and the true rate marked"></canvas>
+    <div class="legend"><span><i class="sw line" style="border-color:var(--accent)"></i><span>likelihood (scaled to peak 1)</span></span><span><i class="sw" style="background:var(--accent-soft);border:1px solid var(--accent)"></i><span>exact 95% interval</span></span><span><i class="sw dash" style="border-color:var(--gold)"></i><span>true \(\lambda\)</span></span></div>
+    <div class="readout" id="esRead" style="margin-top:8px"></div>
+    <div class="controls"><button class="btn" id="esCov">Repeat this experiment 1,000 times</button></div>
+    <div class="readout" id="esCovRead"></div>
+  </div>
+  <p>Try a small true rate and a single day. The quick interval often comes out as \([0, 0]\) and covers the truth far less than 95% of the time. The exact interval always covers at least 95%. It is slightly <em>conservative</em>, above 95%, because counts jump in whole steps and it never rounds in the risky direction.</p>
+  <div class="callout">
+    <p><strong>The rule of three.</strong> Watch for \(n\) periods and see nothing. How high could the rate still be? The one-sided 95% upper bound solves \(e^{-n\lambda} = 0.05\), so \(\lambda \le -\ln(0.05)/n \approx 3/n\). A drug given to 300 patients without one serious reaction could still cause one in 100. (The two-sided interval in the widget uses 97.5% at each end, giving \(3.69/n\).)</p>
+  </div>
+  <p><strong>Comparing two rates.</strong> Suppose a clinic sees 12 infections in 1,000 patient-days, and another sees 5 in 1,500. Condition on the total of 17. By the splitting rule, if the rates are equal, the first clinic’s share is \(\text{Binomial}(17,\ 0.4)\), with \(0.4 = 1000/2500\). Seeing 12 or more has probability about 0.011. The comparison has become a <a href="binomial-distribution.html#infer">binomial test</a>.</p>
+</section>
+
+<!-- 9 -->
+<section id="overdispersion">
+  <div class="secnum">09</div>
+  <h2>When Poisson fails</h2>
+  <p>Real counts often have a variance well above their mean. The usual cause is that the rate is not the same for everyone. Some drivers have more accidents than others; some web pages get far more visits. Each unit’s count is Poisson given its own rate \(\Lambda\), but the rates differ. The law of total variance then adds the spread of the rates to the Poisson spread:</p>
+  $$\begin{aligned} \operatorname{Var}(X) &= E[\operatorname{Var}(X \mid \Lambda)] \\ &\quad + \operatorname{Var}(E[X \mid \Lambda]) \\ &= \mu + \operatorname{Var}(\Lambda) \end{aligned}$$
+  <p>where \(\mu = E[\Lambda]\). If the rates follow a gamma distribution with coefficient of variation \(c\) (standard deviation over mean), the counts follow the <em class="term">negative binomial distribution</em>, with variance \(\mu + c^2\mu^2\).</p>
+  <p>A second failure is <em class="term">too many zeros</em>. Some units cannot have events at all: a shop that was closed, a patient who is immune, a sensor that was off. A <em class="term">zero-inflated</em> Poisson mixes a share \(\pi\) of these structural zeros with ordinary Poisson counts.</p>
+
+  <div class="widget">
+    <p class="widget-title">Break the Poisson</p>
+    <div class="controls">
+      <label class="ctrl">mean rate \(\mu\) <input type="range" id="odM" min="0.5" max="20" step="0.5" value="5"><output id="odMOut"></output></label>
+      <label class="ctrl">rate variation \(c\) <input type="range" id="odC" min="0" max="1.5" step="0.05" value="0.5"><output id="odCOut"></output></label>
+      <label class="ctrl">extra zeros \(\pi\) <input type="range" id="odZ" min="0" max="0.5" step="0.05" value="0"><output id="odZOut"></output></label>
+    </div>
+    <canvas id="odChart" style="height:230px" role="img" aria-label="Probabilities of the mixed count as bars, with a Poisson of the same mean as dots"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i><span>mixed count</span></span><span><i class="sw dot" style="background:var(--gold)"></i><span>Poisson with the same mean</span></span></div>
+    <div class="readout" id="odRead" style="margin-top:8px"></div>
+  </div>
+  <p>Both failures stretch the variance past the mean, and both put more weight on 0 than a Poisson with the same mean allows. In practice you check \(D\) first. If it is well above 1, a Poisson model will give intervals that are too narrow and effects that look more significant than they are. The usual fixes are a negative binomial or zero-inflated model, or “quasi-Poisson” standard errors scaled up by \(\sqrt D\).</p>
+</section>
+
+<!-- 10 -->
+<section id="props">
+  <div class="secnum">10</div>
+  <h2>All the properties</h2>
+  <p>Here are the main facts about \(X \sim \text{Poisson}(\lambda)\) in one place. Drag the slider to update every value.</p>
+
+  <div class="sticky-ctrl">
+    <label class="ctrl">\(\lambda\) <input type="range" id="prL" min="0.1" max="30" step="0.1" value="3"><output id="prLOut"></output></label>
+  </div>
+
+  <div class="minis" style="margin-top:16px">
+    <div class="mini"><div class="mcap">PMF</div><canvas id="miniPMF" style="height:130px" role="img" aria-label="Probability mass function for the current lambda"></canvas></div>
+    <div class="mini"><div class="mcap">CDF</div><canvas id="miniCDF" style="height:130px" role="img" aria-label="Cumulative distribution function for the current lambda, with the median marked"></canvas></div>
+    <div class="mini"><div class="mcap">Step factor <span style="text-transform:none">λ/k</span></div><canvas id="miniRat" style="height:130px" role="img" aria-label="The factor lambda over k for each k, crossing 1 at k equal to lambda"></canvas></div>
+  </div>
+
+  <h3>The numbers</h3>
+  <div class="cards">
+    <div class="card"><h4>Support and parameter</h4><div class="f">\(k = 0, 1, 2, \dots\), rate \(\lambda > 0\)</div><div class="v" id="cPar"></div></div>
+    <div class="card"><h4>PMF</h4><div class="f">\(P(k) = \lambda^k e^{-\lambda}/k!\)</div><div class="v" id="cPMF"></div></div>
+    <div class="card"><h4>Mean and variance</h4><div class="f">\(E[X] = \operatorname{Var}(X) = \lambda\)</div><div class="v" id="cMV"></div></div>
+    <div class="card"><h4>Mode</h4><div class="f">\(\lfloor\lambda\rfloor\); also \(\lambda - 1\) if \(\lambda\) is whole</div><div class="v" id="cMode"></div></div>
+    <div class="card"><h4>Median</h4><div class="f">\(\approx \lambda + \tfrac13 - \tfrac{0.02}{\lambda}\)</div><div class="v" id="cMed"></div></div>
+    <div class="card"><h4>Shape</h4><div class="f">skewness \(1/\sqrt\lambda\), excess kurtosis \(1/\lambda\)</div><div class="v" id="cShape"></div></div>
+    <div class="card"><h4>PGF</h4><div class="f">\(G(s) = E[s^X] = e^{\lambda(s-1)}\)</div><div class="v" id="cPGF"></div></div>
+    <div class="card"><h4>MGF</h4><div class="f">\(M(t) = \exp\!\big(\lambda(e^t - 1)\big)\)</div><div class="v" id="cMGF"></div></div>
+    <div class="card"><h4>Factorial moments</h4><div class="f">\(E[X(X-1)\cdots(X-r+1)] = \lambda^r\)</div><div class="v" id="cFact"></div></div>
+    <div class="card"><h4>Link to the gamma</h4><div class="f">\(P(X \ge k) = P(\text{Gamma}(k,1) \le \lambda)\)</div><div class="v" id="cGam"></div></div>
+    <div class="card"><h4>Estimate and information</h4><div class="f">\(\hat\lambda = \bar x,\; I(\lambda) = 1/\lambda\)</div><div class="v" id="cMLE"></div></div>
+  </div>
+
+  <h3>Where the formulas come from</h3>
+  <details>
+    <summary>All the factorial moments, from the PGF</summary>
+    <p>The probability generating function is \(G(s) = \sum_k s^k \lambda^k e^{-\lambda}/k! = e^{-\lambda}e^{\lambda s} = e^{\lambda(s-1)}\). Differentiating \(r\) times and setting \(s = 1\) gives \(G^{(r)}(1) = \lambda^r\), and that derivative is the \(r\)-th factorial moment:</p>
+    $$E[X(X-1)\cdots(X-r+1)] = \lambda^r$$
+    <p>So \(E[X] = \lambda\), \(E[X(X-1)] = \lambda^2\), and \(\operatorname{Var}(X) = \lambda^2 + \lambda - \lambda^2 = \lambda\). Multiplying PGFs also proves the adding rule: \(e^{\lambda_1(s-1)}e^{\lambda_2(s-1)} = e^{(\lambda_1+\lambda_2)(s-1)}\).</p>
+  </details>
+  <details>
+    <summary>Every cumulant is λ</summary>
+    <p>The log of the MGF is \(\lambda(e^t - 1) = \lambda\sum_{r \ge 1} t^r/r!\), so every cumulant equals \(\lambda\): \(\kappa_1 = \kappa_2 = \kappa_3 = \dots = \lambda\). Then</p>
+    $$\gamma_1 = \frac{\kappa_3}{\kappa_2^{3/2}} = \frac{1}{\sqrt\lambda}, \qquad \gamma_2 = \frac{\kappa_4}{\kappa_2^{2}} = \frac{1}{\lambda}$$
+    <p>Both shrink to the normal’s 0 as \(\lambda\) grows, which is the bell of section 7.</p>
+  </details>
+  <details>
+    <summary>Counts and waiting times are two views of one process</summary>
+    <p>Events with independent \(\text{Exp}(1)\) gaps arrive at times \(T_1 < T_2 < \dots\), and \(T_k\) is a sum of \(k\) gaps, so \(T_k \sim \text{Gamma}(k, 1)\). The count by time \(\lambda\) is at least \(k\) exactly when \(T_k \le \lambda\). That identity turns every Poisson tail probability into a gamma one. It is what the exact interval of section 8 uses. See the <a href="exponential-distribution.html#race">Exponential tutorial</a> for more on sums of gaps.</p>
+  </details>
+
+  <h3>Structural facts worth remembering</h3>
+  <ol class="facts">
+    <li><strong>Independent Poissons add.</strong> \(\text{Poisson}(\lambda_1) + \text{Poisson}(\lambda_2) = \text{Poisson}(\lambda_1 + \lambda_2)\) (section 6).</li>
+    <li><strong>Thinning gives independent Poissons.</strong> Keep each event with probability \(p\): kept \(\sim \text{Poisson}(p\lambda)\), dropped \(\sim \text{Poisson}((1-p)\lambda)\), independent (section 6).</li>
+    <li><strong>Given the total, the pieces are binomial.</strong> If \(X_1, \dots, X_m\) are independent Poissons, then given their sum the counts are multinomial with probabilities proportional to the rates.</li>
+    <li><strong>The binomial limit.</strong> \(\text{Binomial}(n, \lambda/n) \to \text{Poisson}(\lambda)\) as \(n \to \infty\) (<a href="binomial-distribution.html#poisson">Binomial tutorial, section 8</a>).</li>
+    <li><strong>Mixing gives the negative binomial.</strong> A Poisson count whose rate is gamma-distributed is negative binomial, the standard model for overdispersed counts (section 9).</li>
+    <li><strong>Conjugate prior: gamma.</strong> If your uncertainty about \(\lambda\) is \(\text{Gamma}(\alpha, \beta)\) (shape \(\alpha\), rate \(\beta\)), then after observing counts \(x_1, \dots, x_n\) it becomes \(\text{Gamma}(\alpha + \sum x_i,\; \beta + n)\).</li>
+  </ol>
+</section>
+
+<!-- 11 -->
+<section id="uses">
+  <div class="secnum">11</div>
+  <h2>Where you will meet it</h2>
+  <div class="cards">
+    <div class="card"><h4>Call centers and queues</h4><p>Calls, customers and requests to a server arrive from many independent people. Counts per minute are close to Poisson, and staffing formulas start from that.</p></div>
+    <div class="card"><h4>Genetics</h4><p>Mutations scattered along a genome, and the number of sequencing reads covering a given base, are classic Poisson counts. Coverage calculations for sequencing runs use them.</p></div>
+    <div class="card"><h4>Light and electronics</h4><p>Photons reach a camera sensor one at a time, at random. The resulting “shot noise” is Poisson, so dim images are noisy in proportion to \(\sqrt{\text{count}}\).</p></div>
+    <div class="card"><h4>Insurance</h4><p>The number of claims in a year from a portfolio of policies is modeled as Poisson, or negative binomial when some policyholders are riskier than others.</p></div>
+    <div class="card"><h4>Football scores</h4><p>Goals are rare and roughly independent, so each team’s goals in a match are approximately Poisson. Betting models start there.</p></div>
+    <div class="card"><h4>Quality control</h4><p>Defects per meter of cable, typos per page, flaws per wafer: when they occur independently at a steady rate, a Poisson count with control limits at \(\lambda \pm 3\sqrt\lambda\) flags unusual batches.</p></div>
+    <div class="card"><h4>When it fails</h4><p>Events that trigger each other (aftershocks, retweets, contagion) cluster, and rates that vary between units inflate the variance. Check \(D\) before trusting a Poisson model.</p></div>
+  </div>
+</section>
+
+</main>
+<footer>A single-file interactive explainer, following <a href="bernoulli-distribution.html">The Bernoulli Distribution</a>, <a href="binomial-distribution.html">The Binomial Distribution</a> and <a href="exponential-distribution.html">The Exponential Distribution</a>. Math typeset with KaTeX. Every simulation runs live in your browser using <code>Math.random()</code>.</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script>
+(function(){
+'use strict';
+/* ---------- helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const root = document.documentElement;
+const C = n => getComputedStyle(root).getPropertyValue(n).trim();
+const clamp = (x,a,b) => Math.max(a, Math.min(b, x));
+const f1 = x => x.toFixed(1), f2 = x => x.toFixed(2), f3 = x => x.toFixed(3), f4 = x => x.toFixed(4);
+const fmtN = x => Math.abs(x - Math.round(x)) < 1e-9 ? String(Math.round(x)) : String(+x.toFixed(2));
+const pct = x => (100 * x).toFixed(1) + '%';
+const SANS = 'system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';
+const MONO = 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
+const RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+const TAU = Math.PI * 2;
+const expS = l => -Math.log(1 - Math.random()) / l;   // 1 - U is in (0, 1], so the log is finite
+
+if (window.renderMathInElement) {
+  renderMathInElement(document.body, {
+    delimiters: [{left:'$$', right:'$$', display:true}, {left:'\\(', right:'\\)', display:false}],
+    throwOnError: false
+  });
+}
+function markOverflow(el){
+  if (!el) return;
+  el.classList.toggle('ovf', el.scrollWidth - el.clientWidth - el.scrollLeft > 2);
+}
+function markAllOverflow(){ $$('.katex-display').forEach(markOverflow); }
+document.addEventListener('scroll', e => {
+  if (e.target.classList && e.target.classList.contains('katex-display')) markOverflow(e.target);
+}, true);
+markAllOverflow();
+window.addEventListener('load', markAllOverflow);   // KaTeX web fonts can change widths
+function fit(c){
+  const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+  if (c.width !== w*dpr || c.height !== h*dpr) { c.width = w*dpr; c.height = h*dpr; }
+  const ctx = c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  return {ctx, w, h};
+}
+const redraws = [];
+function redrawAll(){ redraws.forEach(f => f()); markAllOverflow(); }
+let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(redrawAll, 80); });
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+if (mq.addEventListener) mq.addEventListener('change', redrawAll);
+new MutationObserver(redrawAll).observe(root, {attributes:true, attributeFilter:['data-theme']});
+
+function bindRange(input, out, cb, fmt){
+  fmt = fmt || fmtN;
+  const f = () => { const v = parseFloat(input.value); if (out) out.textContent = fmt(v); cb(v); };
+  input.addEventListener('input', f); f();
+}
+function setRange(input, v){ input.value = v; input.dispatchEvent(new Event('input')); }
+function niceTicks(max, count){
+  const raw = max / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const step = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag;
+  const t = []; for (let v = 0; v <= max + 1e-9; v += step) t.push(v); return t;
+}
+function intStep(px, minPx){
+  for (const s of [1,2,5,10,20,25,50,100,200,250,500,1000]) if (s * px >= minPx) return s;
+  return 1000;
+}
+function yGrid(ctx, X0, X1, ys, ticks, fmt){
+  ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ticks.forEach(v => {
+    const y = Math.round(ys(v)) + .5;
+    ctx.strokeStyle = C('--line'); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X0, y); ctx.lineTo(X1, y); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.fillText(fmt(v), X0 - 6, y);
+  });
+}
+function stepFmt(ticks){ const st = ticks.length > 1 ? ticks[1] - ticks[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9)); return v => v.toFixed(d); }
+function roundRect(ctx, x, y, w, h, r){
+  r = Math.max(0, Math.min(r, w/2, Math.abs(h)/2));
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+function dot(ctx, x, y, r){ ctx.beginPath(); ctx.arc(x, y, Math.max(0.5, r), 0, TAU); ctx.fill(); }
+
+/* continuous axes: x from xmin to xmax, y from 0 to ymax (or a custom y-scale) */
+function cax(ctx, w, h, o){
+  const X0 = o.left != null ? o.left : 44, X1 = w - (o.right != null ? o.right : 12);
+  const Y0 = h - (o.bottom != null ? o.bottom : 24), Y1 = o.top != null ? o.top : 12;
+  const xmin = o.xmin || 0, xmax = o.xmax;
+  const xs = x => X0 + (x - xmin) / (xmax - xmin) * (X1 - X0);
+  const ixs = px => xmin + (px - X0) / (X1 - X0) * (xmax - xmin);
+  const ys = o.yscale ? o.yscale(Y0, Y1) : (v => Y0 - v / o.ymax * (Y0 - Y1));
+  if (o.ygrid !== false) {
+    const t = o.yticks || niceTicks(o.ymax, o.ny || 4).filter(v => v <= o.ymax * 1.0001);
+    yGrid(ctx, X0, X1, ys, t, o.yfmt || stepFmt(t));
+  }
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  if (o.xlabels !== false) {
+    const xt = niceTicks(xmax - xmin, Math.max(2, Math.floor((X1 - X0) / (o.xgap || 58))));
+    const fmt = o.xfmt || stepFmt(xt);
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    xt.forEach(v => ctx.fillText(fmt(v + xmin), xs(v + xmin), Y0 + 6));
+  }
+  return {X0, X1, Y0, Y1, xs, ixs, ys};
+}
+function clipTo(ctx, A){ ctx.save(); ctx.beginPath(); ctx.rect(A.X0, A.Y1 - 4, A.X1 - A.X0 + 1, A.Y0 - A.Y1 + 4.5); ctx.clip(); }
+function pathFn(ctx, A, f, x0, x1, n){
+  n = n || 240; ctx.beginPath(); let on = false;
+  for (let i = 0; i <= n; i++) {
+    const x = x0 + (x1 - x0) * i / n, v = f(x);
+    if (!isFinite(v)) { on = false; continue; }
+    const px = A.xs(x), py = A.ys(v);
+    if (on) ctx.lineTo(px, py); else { ctx.moveTo(px, py); on = true; }
+  }
+}
+function fillFn(ctx, A, f, x0, x1, color, n){
+  if (!(x1 > x0)) return;
+  n = n || 160; ctx.beginPath(); ctx.moveTo(A.xs(x0), A.Y0);
+  for (let i = 0; i <= n; i++) { const x = x0 + (x1 - x0) * i / n; ctx.lineTo(A.xs(x), A.ys(f(x))); }
+  ctx.lineTo(A.xs(x1), A.Y0); ctx.closePath(); ctx.fillStyle = color; ctx.fill();
+}
+function vline(ctx, x, y0, y1, color, dash, lw){
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw || 1.5; if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(Math.round(x) + .5, y0); ctx.lineTo(Math.round(x) + .5, y1); ctx.stroke(); ctx.restore();
+}
+/* integer-valued bar charts (counts) */
+function frame(ctx, w, h, o){
+  const X0 = o.left != null ? o.left : 44, X1 = w - 10, Y0 = h - 24, Y1 = o.top != null ? o.top : 12;
+  const span = o.hi - o.lo + 1, bw = (X1 - X0) / span;
+  const xc = k => X0 + bw * (k - o.lo + .5), ys = v => Y0 - (v / o.ymax) * (Y0 - Y1);
+  const t = niceTicks(o.ymax, 4).filter(v => v <= o.ymax * 1.0001); yGrid(ctx, X0, X1, ys, t, o.yfmt || stepFmt(t));
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  const st = intStep(bw, 22);
+  for (let k = Math.ceil(o.lo / st) * st; k <= o.hi; k += st) ctx.fillText(o.lab ? o.lab(k) : k, xc(k), Y0 + 6);
+  return {X0, X1, Y0, Y1, bw, xc, ys};
+}
+function drawBars(ctx, F, lo, hi, val, color, frac){
+  const bwid = Math.max(1, F.bw * (frac == null ? .8 : frac));
+  for (let k = lo; k <= hi; k++) {
+    const v = val(k); if (!(v > 0)) continue;
+    const y = F.ys(v), hh = F.Y0 - y; if (hh < 0.2) continue;
+    const x = F.xc(k) - bwid / 2;
+    ctx.fillStyle = typeof color === 'function' ? color(k) : color;
+    if (bwid >= 6 && hh >= 3) { roundRect(ctx, x, y, bwid, hh, Math.min(3, bwid / 4)); ctx.fill(); }
+    else ctx.fillRect(x, y, bwid, hh);
+  }
+}
+/* histogram of continuous values, drawn as a density */
+function drawHistDensity(ctx, A, counts, bw, n, color){
+  if (!n) return;
+  ctx.fillStyle = color;
+  for (let b = 0; b < counts.length; b++) {
+    if (!counts[b]) continue;
+    const d = counts[b] / (n * bw), x0 = A.xs(b * bw), x1 = A.xs((b + 1) * bw), y = A.ys(d);
+    const g = x1 - x0 > 5 ? 1 : 0;
+    ctx.fillRect(x0 + g / 2, y, Math.max(1, x1 - x0 - g), A.Y0 - y);
+  }
+}
+function histMax(counts, bw, n){ let m = 0; if (!n) return 0; for (const c of counts) m = Math.max(m, c / (n * bw)); return m; }
+
+/* ---------- special functions ---------- */
+const LF = [0];
+function lf(n){ while (LF.length <= n) { const i = LF.length; LF.push(LF[i-1] + Math.log(i)); } return LF[n]; }
+function poisPMF(l, k){ return l <= 0 ? (k === 0 ? 1 : 0) : Math.exp(-l + k * Math.log(l) - lf(k)); }
+function lgam(x){
+  const g = 7, c = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+  if (x < 0.5) return Math.log(Math.PI / Math.abs(Math.sin(Math.PI * x))) - lgam(1 - x);
+  x -= 1; let a = c[0]; const t = x + g + 0.5;
+  for (let i = 1; i < 9; i++) a += c[i] / (x + i);
+  return 0.5 * Math.log(TAU) + (x + 0.5) * Math.log(t) - t + Math.log(a);
+}
+function gammaP(a, x){   // regularized lower incomplete gamma P(a, x)
+  if (x <= 0) return 0;
+  const lead = Math.exp(-x + a * Math.log(x) - lgam(a));
+  if (x < a + 1) {
+    let ap = a, del = 1 / a, sum = del;
+    for (let i = 0; i < 2000; i++) { ap += 1; del *= x / ap; sum += del; if (Math.abs(del) < Math.abs(sum) * 1e-15) break; }
+    return Math.min(1, sum * lead);
+  }
+  const TINY = 1e-300; let b = x + 1 - a, c = 1 / TINY, d = 1 / b, hh = d;
+  for (let i = 1; i < 2000; i++) {
+    const an = -i * (i - a); b += 2;
+    d = an * d + b; if (Math.abs(d) < TINY) d = TINY;
+    c = b + an / c; if (Math.abs(c) < TINY) c = TINY;
+    d = 1 / d; const del = d * c; hh *= del; if (Math.abs(del - 1) < 1e-15) break;
+  }
+  return Math.max(0, 1 - lead * hh);
+}
+function gammaQuantile(a, p){
+  let lo = 0, hi = Math.max(1, 2 * a);
+  while (gammaP(a, hi) < p) hi *= 2;
+  for (let i = 0; i < 200; i++) { const m = (lo + hi) / 2; if (gammaP(a, m) < p) lo = m; else hi = m; if (hi - lo < 1e-12 * hi) break; }
+  return (lo + hi) / 2;
+}
+
+/* ---------- Poisson helpers ---------- */
+function poisCDF(l, k){ return k < 0 ? 0 : 1 - gammaP(k + 1, l); }
+function poisS(l){   // exact Poisson sampler
+  if (!(l > 0)) return 0;
+  if (l < 30) { let k = 0, s = expS(1); while (s < l) { k++; s += expS(1); } return k; }
+  // inversion, searching outward from the mode: O(sqrt(l)) steps
+  const m = Math.floor(l), u = Math.random();
+  let F = poisCDF(l, m), p = poisPMF(l, m), k = m;
+  if (u <= F) { while (k > 0 && u <= F - p) { F -= p; p = p * k / l; k--; } return k; }
+  while (u > F && p > 0 && k < m + 1e5) { k++; p = p * l / k; F += p; }
+  return k;
+}
+function gaussS(){ let u = 0; while (u === 0) u = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(TAU * Math.random()); }
+function Phi(z){
+  const t = 1 / (1 + 0.2316419 * Math.abs(z)), d = 0.3989422804014327 * Math.exp(-z * z / 2);
+  const p = d * t * (0.319381530 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))));
+  return z > 0 ? 1 - p : p;
+}
+function pRange(l){ const s = Math.sqrt(l); return [Math.max(0, Math.floor(l - 5 * s - 1)), Math.ceil(l + 5 * s + 4)]; }
+function nbPMF(mu, r, k){   // gamma-mixed Poisson with mean mu and gamma shape r; r = Infinity is plain Poisson
+  if (!isFinite(r)) return poisPMF(mu, k);
+  return Math.exp(lgam(k + r) - lf(k) - lgam(r) + r * Math.log(r / (r + mu)) + k * Math.log(mu / (r + mu)));
+}
+const fmtP = p => p >= 1e-3 ? f4(p) : p > 0 ? p.toExponential(2).replace('e-', '×10^-').replace(/\^-(\d+)/, (m, d) => '<sup>−' + d + '</sup>') : '0';
+function modesOf(l){ return Number.isInteger(l) && l >= 1 ? [l - 1, l] : [Math.floor(l)]; }
+function sampleVar(n, s, s2){ return n > 1 ? Math.max(0, (s2 - s * s / n) / (n - 1)) : NaN; }
+function pickBtns(attr, cb){
+  const bs = $$('[data-' + attr + ']');
+  bs.forEach(b => b.addEventListener('click', () => {
+    bs.forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
+    cb(b.dataset[attr]);
+  }));
+}
+function onScreen(el, cb){
+  if ('IntersectionObserver' in window) new IntersectionObserver(es => cb(es[0].isIntersecting)).observe(el);
+}
+/* square canvases: set CSS height from width */
+function sizeTo(c, ratio, maxH){ const w = c.clientWidth || 600; c.style.height = Math.round(Math.min(maxH || 1e9, w * ratio)) + 'px'; }
+window.__pois = {poisS, poisCDF, Phi, nbPMF, gammaP, gammaQuantile, poisPMF};
+
+/* ---------- 0. hero: rain on paving squares ---------- */
+(function(){
+  const fc = $('#heroField'), hc = $('#heroHist'), hint = $('#heroHint'), go = $('#heroGo');
+  const COLS = 10, ROWS = 6, M = COLS * ROWS, RATE = 14, CAP = 300, RIP = 450;
+  let drops = [], counts = new Array(M).fill(0), running = !RM, raf = 0, last = 0, acc = 0, visible = true, hintT = 0;
+  function add(t){
+    if (drops.length >= CAP) return false;
+    const x = Math.random(), y = Math.random();
+    drops.push({x, y, t});
+    counts[Math.min(COLS - 1, Math.floor(x * COLS)) + COLS * Math.min(ROWS - 1, Math.floor(y * ROWS))]++;
+    return true;
+  }
+  function drawField(now){
+    sizeTo(fc, ROWS / COLS);
+    const {ctx, w, h} = fit(fc), cw = w / COLS, ch = h / ROWS;
+    const surf = C('--surface-2'), acc_ = C('--accent'), ink = C('--ink'), ink2 = C('--ink-2');
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+      const n = counts[c + COLS * r], x = c * cw, y = r * ch;
+      ctx.fillStyle = surf; roundRect(ctx, x + 1.5, y + 1.5, cw - 3, ch - 3, 4); ctx.fill();
+      if (n) { ctx.globalAlpha = Math.min(.5, n * .08); ctx.fillStyle = acc_; roundRect(ctx, x + 1.5, y + 1.5, cw - 3, ch - 3, 4); ctx.fill(); ctx.globalAlpha = 1; }
+      ctx.fillStyle = n ? ink : C('--ink-3'); ctx.font = (n >= 5 ? '700 ' : '600 ') + (cw < 40 ? 10 : 12) + 'px ' + MONO;
+      ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(n, x + 6, y + 5);
+    }
+    const r0 = Math.max(1.6, Math.min(3, cw / 18));
+    drops.forEach(d => {
+      const gx = d.x * COLS, gy = d.y * ROWS, cx = Math.min(COLS - 1, Math.floor(gx)), cy = Math.min(ROWS - 1, Math.floor(gy));
+      const x = (cx + .12 + .76 * (gx - cx)) * cw, y = (cy + .12 + .76 * (gy - cy)) * ch, age = now - d.t;
+      ctx.fillStyle = ink2; dot(ctx, x, y, r0);
+      if (!RM && d.t && age < RIP) {
+        ctx.strokeStyle = acc_; ctx.lineWidth = 1.5; ctx.globalAlpha = 1 - age / RIP;
+        ctx.beginPath(); ctx.arc(x, y, r0 + age / RIP * 14, 0, TAU); ctx.stroke(); ctx.globalAlpha = 1;
+      }
+    });
+  }
+  function drawHist(){
+    const {ctx, w, h} = fit(hc), N = drops.length, lam = N / M;
+    let mx = 0; counts.forEach(n => { if (n > mx) mx = n; });
+    const hi = Math.max(8, mx + 1), tally = new Array(hi + 1).fill(0); counts.forEach(n => tally[n]++);
+    let ym = 0; for (let k = 0; k <= hi; k++) ym = Math.max(ym, tally[k] / M, N ? poisPMF(lam, k) : 0);
+    ym = Math.max(.2, ym * 1.12);
+    const F = frame(ctx, w, h, {lo: 0, hi, ymax: ym, left: 36});
+    if (!N) return;
+    drawBars(ctx, F, 0, hi, k => tally[k] / M, C('--accent'), .72);
+    ctx.fillStyle = C('--gold'); for (let k = 0; k <= hi; k++) dot(ctx, F.xc(k), F.ys(poisPMF(lam, k)), 4);
+  }
+  function setHint(){
+    const N = drops.length;
+    if (!N) { hint.innerHTML = 'Rain falls on 60 paving squares. Each drop lands anywhere, independently of every other drop.'; return; }
+    const lam = N / M, empty = counts.filter(n => n === 0).length, mx = Math.max(...counts);
+    let s = `<b>${N}</b> drops on 60 squares: λ = ${N}/60 = <b>${f2(lam)}</b> per square · empty squares <b>${empty}</b> (Poisson predicts ${f1(M * Math.exp(-lam))}) · busiest square <b>${mx}</b>`;
+    if (N >= 60) s += '<br>The gold dots are the Poisson distribution with that λ. Nobody told the rain about it.';
+    if (N >= CAP) s += '<br><span style="color:var(--zero)">The field is full at 300 drops; press Clear to start again.</span>';
+    hint.innerHTML = s;
+  }
+  function tick(ts){
+    raf = 0;
+    const live = running && drops.length < CAP;
+    const rippling = drops.length && ts - drops[drops.length - 1].t < RIP;
+    if (!visible || (!live && !rippling)) { last = 0; if (running && drops.length >= CAP) setRunning(false); drawField(ts); return; }
+    const dt = last ? Math.min(.1, (ts - last) / 1000) : 0; last = ts;
+    let added = false;
+    if (live) { acc += dt * RATE; while (acc >= 1) { acc -= 1; if (add(ts)) added = true; } }
+    drawField(ts);
+    if (added) { drawHist(); if (ts - hintT > 250) { hintT = ts; setHint(); } }
+    raf = requestAnimationFrame(tick);
+  }
+  function kick(){ if (!raf && visible) raf = requestAnimationFrame(tick); }
+  function setRunning(on){
+    running = on && drops.length < CAP;
+    go.textContent = running ? '❚❚ Pause' : '▶ Rain';
+    go.disabled = drops.length >= CAP;
+    if (running) kick(); else setHint();
+  }
+  go.addEventListener('click', () => setRunning(!running));
+  $('#heroMany').addEventListener('click', () => {
+    for (let i = 0; i < 60; i++) add(0);
+    setRunning(running); draw(); setHint();
+  });
+  $('#heroClear').addEventListener('click', () => {
+    drops = []; counts.fill(0); acc = 0; go.disabled = false; setRunning(!RM); draw(); setHint();
+  });
+  onScreen(fc, v => { visible = v; if (v) kick(); });
+  if (RM) for (let i = 0; i < 90; i++) add(0);
+  const draw = () => { drawField(performance.now()); drawHist(); };
+  draw(); setHint(); setRunning(running); redraws.push(draw);
+})();
+
+/* ---------- 2. PMF shape explorer ---------- */
+(function(){
+  const cv = $('#pmChart');
+  const LAMS = [0.1, 0.2, 0.3, 0.5, 0.7, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 6, 7, 8, 9, 10, 12, 15, 20, 25, 30, 40, 50, 75, 100];
+  let lam = 3, sel = 3, F = null, lo = 0, hi = 0;
+  function draw(){
+    const {ctx, w, h} = fit(cv); [lo, hi] = pRange(lam);
+    let ym = 0; for (let k = lo; k <= hi; k++) ym = Math.max(ym, poisPMF(lam, k)); ym *= 1.2;
+    F = frame(ctx, w, h, {lo, hi, ymax: ym, top: 20});
+    const s = Math.sqrt(lam), xa = F.xc(Math.max(lo - .5, lam - s)), xb = F.xc(Math.min(hi + .5, lam + s));
+    ctx.fillStyle = C('--accent-soft'); ctx.fillRect(xa, F.Y1, xb - xa, F.Y0 - F.Y1);
+    const one = C('--one'), zero = C('--zero'), gold = C('--gold'), ink3 = C('--ink-3');
+    drawBars(ctx, F, lo, hi, k => poisPMF(lam, k), k => k === 0 ? ink3 : lam / k > 1 + 1e-12 ? one : lam / k < 1 - 1e-12 ? zero : gold, .78);
+    vline(ctx, F.xc(lam), F.Y1, F.Y0, C('--accent'), [5, 4], 1.5);
+    // mode label(s)
+    ctx.font = '11px ' + MONO; ctx.textBaseline = 'bottom'; ctx.fillStyle = C('--ink-2');
+    const ms = modesOf(lam), xm = (F.xc(ms[0]) + F.xc(ms[ms.length - 1])) / 2;
+    ctx.textAlign = xm < F.X0 + 24 ? 'left' : xm > F.X1 - 24 ? 'right' : 'center';
+    ctx.fillText('mode', ctx.textAlign === 'left' ? F.xc(ms[0]) - F.bw * .4 : xm, F.ys(poisPMF(lam, ms[0])) - 3);
+    // selected bar outline
+    if (sel >= lo && sel <= hi) {
+      const p = poisPMF(lam, sel), bwid = Math.max(3, F.bw * .78), y = Math.min(F.ys(p), F.Y0 - 3);
+      ctx.strokeStyle = C('--ink'); ctx.lineWidth = 2; ctx.strokeRect(F.xc(sel) - bwid / 2 - 1.5, y - 1.5, bwid + 3, F.Y0 - y + 1.5);
+    }
+  }
+  function readout(){
+    const p = poisPMF(lam, sel), s = Math.sqrt(lam), ms = modesOf(lam);
+    let a;
+    if (sel === 0) a = `P(0) = e<sup>−λ</sup> = <b>${fmtP(p)}</b>: the chance of no events at all`;
+    else {
+      const q = poisPMF(lam, sel - 1), r = lam / sel;
+      const cmp = Math.abs(r - 1) < 1e-12 ? 'the same height as' : r > 1 ? 'taller than' : 'shorter than';
+      a = `P(${sel}) = P(${sel - 1}) × λ/${sel} = ${fmtP(q)} × ${f3(r)} = <b>${fmtP(p)}</b>, ${cmp} bar ${sel - 1}`;
+    }
+    $('#pmRead').innerHTML = a + `<br>mode <b>${ms.join(' and ')}</b> · mean λ = <b>${fmtN(lam)}</b> · SD √λ = <b>${f3(s)}</b> · skewness 1/√λ = <b>${f3(1 / s)}</b>`;
+  }
+  function pick(e){
+    if (!F) return;
+    const r = cv.getBoundingClientRect(), x = e.clientX - r.left;
+    sel = clamp(lo + Math.floor((x - F.X0) / F.bw), lo, hi); draw(); readout();
+  }
+  cv.addEventListener('click', pick);
+  bindRange($('#pmL'), $('#pmLOut'), i => { lam = LAMS[i]; sel = Math.floor(lam); draw(); readout(); }, i => fmtN(LAMS[i]));
+  redraws.push(draw);
+})();
+
+/* ---------- 3. dispersion check ---------- */
+(function(){
+  const cv = $('#dsChart'), KMAX = 40, MAXN = 20000;
+  let src = 'pois', lam = 4, n = 0, sum = 0, sum2 = 0, mx = 0, over = 0, tally = new Array(KMAX + 1).fill(0);
+  function sample(){
+    if (src === 'pois') return poisS(lam);
+    if (src === 'clump') return poisS(lam / 2 * (expS(1) + expS(1)));   // gamma(shape 2) rate with mean lam
+    const m = Math.ceil(1.5 * lam), p = lam / m; let k = 0;
+    for (let i = 0; i < m; i++) if (Math.random() < p) k++;
+    return k;
+  }
+  function add(c){
+    for (let i = 0; i < c && n < MAXN; i++) {
+      const x = sample(); n++; sum += x; sum2 += x * x; if (x > mx) mx = x;
+      if (x <= KMAX) tally[x]++; else over++;
+    }
+    draw(); readout();
+  }
+  function reset(){ n = sum = sum2 = mx = over = 0; tally.fill(0); draw(); readout(); }
+  function draw(){
+    const {ctx, w, h} = fit(cv);
+    const hi = Math.min(KMAX, Math.max(mx, Math.ceil(lam + 4 * Math.sqrt(lam) + 2)));
+    let ym = 0; for (let k = 0; k <= hi; k++) ym = Math.max(ym, poisPMF(lam, k), n ? tally[k] / n : 0); ym *= 1.12;
+    const F = frame(ctx, w, h, {lo: 0, hi, ymax: ym});
+    if (n) drawBars(ctx, F, 0, hi, k => tally[k] / n, C('--accent'), .72);
+    ctx.fillStyle = C('--gold'); for (let k = 0; k <= hi; k++) dot(ctx, F.xc(k), F.ys(poisPMF(lam, k)), 3.8);
+  }
+  function readout(){
+    const th = src === 'pois' ? 'Poisson: D = 1' : src === 'clump' ? `clumpy: variance λ + λ²/2, so D = 1 + λ/2 = ${fmtN(1 + lam / 2)}` :
+      (() => { const m = Math.ceil(1.5 * lam), p = lam / m; return `regular: ${m} slots, variance λ(1 − λ/${m}), so D = ${f2(1 - p)}`; })();
+    if (!n) { $('#dsRead').innerHTML = `Generate some counts with mean ${lam}. Theory for this source: ${th}.`; return; }
+    const m = sum / n, v = sampleVar(n, sum, sum2), D = v / m;
+    let s = `counts <b>${n.toLocaleString()}</b> · mean <b>${f3(m)}</b> · variance <b>${isNaN(v) ? '—' : f3(v)}</b>`;
+    if (n > 2 && m > 0) {
+      const band = 2 * Math.sqrt(2 / (n - 1));
+      const verdict = D > 1 + band ? '<span class="warn">overdispersed</span>' : D < 1 - band ? '<span class="warn">underdispersed</span>' : '<span class="ok">consistent with Poisson</span>';
+      s += ` · D = s²/x̄ = <b>${f3(D)}</b>, ${verdict} (Poisson data would usually give 1 ± ${f2(band)})`;
+    }
+    s += `<br>theory for this source: ${th}`;
+    if (over) s += ` · ${over.toLocaleString()} count${over === 1 ? '' : 's'} above ${KMAX} not drawn`;
+    if (n >= MAXN) s += `<br><span class="warn">limit of ${MAXN.toLocaleString()} counts reached, press Reset to start over</span>`;
+    $('#dsRead').innerHTML = s;
+  }
+  pickBtns('ds', v => { src = v; reset(); });
+  $('#ds20').addEventListener('click', () => add(20));
+  $('#ds500').addEventListener('click', () => add(500));
+  $('#dsReset').addEventListener('click', reset);
+  bindRange($('#dsL'), $('#dsLOut'), v => { lam = v; reset(); });
+  add(500);
+  redraws.push(draw);
+})();
+
+/* ---------- 4. historical data ---------- */
+const DATA = {
+  horse: {obs: [109, 65, 22, 3, 1], total: 122, unit: 'corps-years', what: 'deaths'},
+  bombs: {obs: [229, 211, 93, 35, 7, 1], total: 537, unit: 'squares', what: 'hits'}
+};
+function fitData(d){
+  const n = d.obs.reduce((a, b) => a + b, 0), lam = d.total / n, K = d.obs.length - 1;
+  const cells = d.obs.map((o, k) => ({o, e: n * (k < K ? poisPMF(lam, k) : 1 - poisCDF(lam, K - 1)), lab: k < K ? String(k) : K + '+'}));
+  const pooled = cells.map(c => Object.assign({}, c));
+  while (pooled.length > 2 && pooled[pooled.length - 1].e < 5) {
+    const a = pooled.pop(), b = pooled[pooled.length - 1];
+    b.o += a.o; b.e += a.e; b.lab = b.lab.replace('+', '') + '+';
+  }
+  const chi = pooled.reduce((s, c) => s + (c.o - c.e) ** 2 / c.e, 0), df = pooled.length - 2;
+  return {n, lam, cells, pooled, chi, df, p: 1 - gammaP(df / 2, chi / 2)};
+}
+window.__pois.fitData = fitData; window.__pois.DATA = DATA;
+(function(){
+  const cv = $('#dtChart'); let key = 'horse';
+  function draw(){
+    const d = DATA[key], R = fitData(d), K = d.obs.length - 1, {ctx, w, h} = fit(cv);
+    const ym = Math.max(...R.cells.map(c => Math.max(c.o, c.e))) * 1.15;
+    const F = frame(ctx, w, h, {lo: 0, hi: K, ymax: ym, lab: k => R.cells[k].lab});
+    drawBars(ctx, F, 0, K, k => d.obs[k], C('--accent'), .6);
+    ctx.fillStyle = C('--gold'); R.cells.forEach((c, k) => dot(ctx, F.xc(k), F.ys(c.e), 4.5));
+    ctx.fillStyle = C('--ink-2'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    R.cells.forEach((c, k) => ctx.fillText(c.o, F.xc(k), Math.min(F.ys(c.o), F.ys(c.e) - 4) - 3));
+  }
+  function table(){
+    const d = DATA[key], R = fitData(d);
+    $('#dtTable').innerHTML = `<tr><th>${d.what}</th>${R.cells.map(c => `<th>${c.lab}</th>`).join('')}</tr>` +
+      `<tr><td>observed</td>${R.cells.map(c => `<td>${c.o}</td>`).join('')}</tr>` +
+      `<tr><td>expected</td>${R.cells.map(c => `<td>${f1(c.e)}</td>`).join('')}</tr>`;
+    const merged = R.pooled.map(c => c.lab).join(', ');
+    $('#dtRead').innerHTML = `${R.n} ${d.unit}, ${d.total} ${d.what}: <span class="lh">λ̂</span> = ${d.total}/${R.n} = <b>${f3(R.lam)}</b><br>` +
+      `classes after merging: ${merged} · χ² = <b>${f2(R.chi)}</b> on ${R.df} degree${R.df === 1 ? '' : 's'} of freedom · p-value <b>${f2(R.p)}</b> ` +
+      (R.p > .05 ? '<span class="ok">no sign of a misfit</span>' : '<span class="warn">poor fit</span>');
+  }
+  pickBtns('dt', v => { key = v; draw(); table(); });
+  draw(); table(); redraws.push(draw);
+})();
+
+/* ---------- 5. clustering illusion ---------- */
+(function(){
+  const fc = $('#clField'), hc = $('#clHist'), gb = $('#clGrid');
+  const COLS = 12, ROWS = 6, M = COLS * ROWS, N = 108, LAM = N / M;
+  let mode = 'rand', pts = [], counts = [], grid = true;
+  const refl = (v, L) => { v = v < 0 ? -v : v; v = v > L ? 2 * L - v : v; return clamp(v, 0, L - 1e-9); };
+  function gen(){
+    pts = [];
+    if (mode === 'rand') for (let i = 0; i < N; i++) pts.push([Math.random() * COLS, Math.random() * ROWS]);
+    else if (mode === 'even') {
+      const SX = 18, sw = COLS / SX;   // 18 x 6 sub-cells, one point in each
+      for (let r = 0; r < ROWS; r++) for (let c = 0; c < SX; c++) pts.push([(c + .1 + .8 * Math.random()) * sw, r + .1 + .8 * Math.random()]);
+    } else {
+      for (let i = 0; i < N / 4; i++) {
+        const px = Math.random() * COLS, py = Math.random() * ROWS;
+        for (let j = 0; j < 4; j++) pts.push([refl(px + .3 * gaussS(), COLS), refl(py + .3 * gaussS(), ROWS)]);
+      }
+    }
+    counts = new Array(M).fill(0);
+    pts.forEach(([x, y]) => counts[Math.min(COLS - 1, Math.floor(x)) + COLS * Math.min(ROWS - 1, Math.floor(y))]++);
+  }
+  function drawField(){
+    sizeTo(fc, ROWS / COLS, 380);
+    const {ctx, w, h} = fit(fc), cw = w / COLS, ch = h / ROWS;
+    ctx.fillStyle = C('--surface-2'); roundRect(ctx, 0, 0, w, h, 8); ctx.fill();
+    if (grid) {
+      ctx.strokeStyle = C('--line'); ctx.lineWidth = 1;
+      for (let c = 1; c < COLS; c++) { ctx.beginPath(); ctx.moveTo(Math.round(c * cw) + .5, 0); ctx.lineTo(Math.round(c * cw) + .5, h); ctx.stroke(); }
+      for (let r = 1; r < ROWS; r++) { ctx.beginPath(); ctx.moveTo(0, Math.round(r * ch) + .5); ctx.lineTo(w, Math.round(r * ch) + .5); ctx.stroke(); }
+      ctx.font = (cw < 40 ? 9 : 11) + 'px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+      for (let i = 0; i < M; i++) {
+        const n = counts[i]; ctx.fillStyle = n === 0 ? C('--zero') : n >= 4 ? C('--accent') : C('--ink-3');
+        ctx.fillText(n, (i % COLS + 1) * cw - 3, Math.floor(i / COLS) * ch + 2);
+      }
+    }
+    ctx.fillStyle = C('--ink'); const r = Math.max(1.8, Math.min(3.2, cw / 16));
+    pts.forEach(([x, y]) => dot(ctx, x * cw, y * ch, r));
+  }
+  function drawHist(){
+    const {ctx, w, h} = fit(hc), mx = Math.max(...counts), hi = Math.max(7, mx + 1), tally = new Array(hi + 1).fill(0);
+    counts.forEach(n => tally[n]++);
+    let ym = 0; for (let k = 0; k <= hi; k++) ym = Math.max(ym, tally[k] / M, poisPMF(LAM, k)); ym *= 1.12;
+    const F = frame(ctx, w, h, {lo: 0, hi, ymax: ym, left: 36});
+    drawBars(ctx, F, 0, hi, k => tally[k] / M, C('--accent'), .72);
+    ctx.fillStyle = C('--gold'); for (let k = 0; k <= hi; k++) dot(ctx, F.xc(k), F.ys(poisPMF(LAM, k)), 4);
+  }
+  function readout(){
+    const empty = counts.filter(n => n === 0).length, big = counts.filter(n => n >= 4).length, mx = Math.max(...counts);
+    const s2 = counts.reduce((a, n) => a + n * n, 0), D = sampleVar(M, N, s2) / LAM;
+    $('#clRead').innerHTML = `empty squares <b>${empty}</b> (Poisson expects ${f1(M * Math.exp(-LAM))}) · squares with 4 or more <b>${big}</b> (expects ${f1(M * (1 - poisCDF(LAM, 3)))}) · busiest <b>${mx}</b><br>dispersion index D = s²/x̄ = <b>${f2(D)}</b> (about 1 for random scatter; typical range 0.66 to 1.34)`;
+  }
+  const draw = () => { drawField(); drawHist(); };
+  function regen(){ gen(); draw(); readout(); }
+  pickBtns('cl', v => { mode = v; regen(); });
+  $('#clNew').addEventListener('click', regen);
+  gb.addEventListener('click', () => { grid = !grid; gb.textContent = grid ? 'Hide squares' : 'Show squares'; gb.setAttribute('aria-pressed', grid); drawField(); });
+  regen(); redraws.push(draw);
+})();
+
+/* ---------- 6. adding and splitting ---------- */
+(function(){
+  const sc = $('#spStrip'), ac = $('#spA'), bc = $('#spB'), KM = 60, MAXN = 50000;
+  let lam = 8, p = .3, lastHour = null, n = 0, sA = 0, sA2 = 0, sB = 0, sB2 = 0, sAB = 0, sT2 = 0;
+  const tA = new Array(KM + 1).fill(0), tB = new Array(KM + 1).fill(0);
+  function hour(keep){
+    const N = poisS(lam); let a = 0, b = 0; const ev = keep ? [] : null;
+    for (let i = 0; i < N; i++) { const s = Math.random() < p; s ? a++ : b++; if (keep) ev.push({t: Math.random() * 60, s}); }
+    n++; sA += a; sA2 += a * a; sB += b; sB2 += b * b; sAB += a * b; sT2 += (a + b) * (a + b);
+    tA[Math.min(a, KM)]++; tB[Math.min(b, KM)]++;
+    if (keep) lastHour = ev;
+  }
+  function add(c){ for (let i = 0; i < c && n < MAXN; i++) hour(i === c - 1 || n === MAXN - 1); draw(); readout(); }
+  function reset(){ n = sA = sA2 = sB = sB2 = sAB = sT2 = 0; tA.fill(0); tB.fill(0); lastHour = null; draw(); readout(); }
+  function drawStrip(){
+    const {ctx, w, h} = fit(sc), X0 = 44, X1 = w - 12, yA = 14, yB = 34, yL = h - 18, xs = t => X0 + t / 60 * (X1 - X0);
+    ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = C('--zero'); ctx.fillText('spam', X0 - 6, yA);
+    ctx.fillStyle = C('--one'); ctx.fillText('real', X0 - 6, yB);
+    ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, yL + .5); ctx.lineTo(X1, yL + .5); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.textBaseline = 'top';
+    for (let t = 0; t <= 60; t += 15) { ctx.textAlign = t === 0 ? 'left' : t === 60 ? 'right' : 'center'; ctx.fillText(t === 60 ? '60 min' : t, xs(t), yL + 3); }
+    if (!lastHour) return;
+    lastHour.forEach(e => { ctx.fillStyle = e.s ? C('--zero') : C('--one'); dot(ctx, xs(e.t), e.s ? yA : yB, 4.5); });
+  }
+  function drawOne(c, t, rate, color){
+    const {ctx, w, h} = fit(c), hi = Math.min(KM, Math.ceil(lam + 4 * Math.sqrt(lam) + 2));
+    let ym = 0; for (let k = 0; k <= hi; k++) ym = Math.max(ym, poisPMF(rate, k), n ? t[k] / n : 0); ym = Math.max(.1, ym * 1.12);
+    const F = frame(ctx, w, h, {lo: 0, hi, ymax: ym, left: 36});
+    if (n) drawBars(ctx, F, 0, hi, k => t[k] / n, color, .72);
+    ctx.fillStyle = C('--ink'); for (let k = 0; k <= hi; k++) { const v = poisPMF(rate, k); if (v > 1e-4) dot(ctx, F.xc(k), F.ys(v), 3); }
+  }
+  function draw(){ drawStrip(); drawOne(ac, tA, p * lam, C('--zero')); drawOne(bc, tB, (1 - p) * lam, C('--one')); }
+  function readout(){
+    if (!n) { $('#spRead').innerHTML = `Emails arrive at random, ${lam} per hour on average, and each is spam with probability ${fmtN(p)}. Simulate some hours.`; return; }
+    const ma = sA / n, mb = sB / n, va = sampleVar(n, sA, sA2), vb = sampleVar(n, sB, sB2), vt = sampleVar(n, sA + sB, sT2);
+    const cov = n > 1 ? (sAB - sA * sB / n) / (n - 1) : NaN, r = va > 0 && vb > 0 ? cov / Math.sqrt(va * vb) : NaN;
+    const fv = v => isNaN(v) ? '—' : f2(v);
+    let s = `hours <b>${n.toLocaleString()}</b> · spam mean <b>${f2(ma)}</b>, variance <b>${fv(va)}</b> (both should be pλ = ${fmtN(p * lam)}) · real mean <b>${f2(mb)}</b>, variance <b>${fv(vb)}</b> (both (1−p)λ = ${fmtN((1 - p) * lam)})<br>` +
+      `total mean <b>${f2(ma + mb)}</b>, variance <b>${fv(vt)}</b> (λ = ${lam}) · correlation between spam and real <b>${isNaN(r) ? '— (one count never varies)' : f3(r)}</b> (theory 0)`;
+    if (n >= MAXN) s += `<br><span class="warn">limit of ${MAXN.toLocaleString()} hours reached, press Reset to start over</span>`;
+    $('#spRead').innerHTML = s;
+  }
+  $('#sp1').addEventListener('click', () => add(1));
+  $('#sp1000').addEventListener('click', () => add(1000));
+  $('#spReset').addEventListener('click', reset);
+  bindRange($('#spL'), $('#spLOut'), v => { lam = v; reset(); });
+  bindRange($('#spP'), $('#spPOut'), v => { p = v; reset(); });
+  add(1000);
+  redraws.push(draw);
+})();
+
+/* ---------- 7. normal approximation and square roots ---------- */
+(function(){
+  const ac = $('#nmChart'), bc = $('#nmSqrt');
+  const LAMS = [1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50, 60, 80, 100];
+  let lam = 10;
+  function sdOf(l, g){
+    const [lo, hi] = pRange(l); let m = 0, m2 = 0;
+    for (let k = lo; k <= hi; k++) { const p = poisPMF(l, k), v = g(k); m += p * v; m2 += p * v * v; }
+    return Math.sqrt(Math.max(0, m2 - m * m));
+  }
+  const SQ = k => Math.sqrt(k), AN = k => Math.sqrt(k + .375);
+  const curve = []; for (let i = 1; i <= 400; i++) { const l = i / 4; curve.push([l, sdOf(l, SQ), sdOf(l, AN)]); }
+  function drawA(){
+    const {ctx, w, h} = fit(ac), [lo, hi] = pRange(lam), s = Math.sqrt(lam), cut = Math.floor(lam + s);
+    let ym = 0; for (let k = lo; k <= hi; k++) ym = Math.max(ym, poisPMF(lam, k)); ym *= 1.15;
+    const F = frame(ctx, w, h, {lo, hi, ymax: ym});
+    const nd = x => Math.exp(-((x - lam) ** 2) / (2 * lam)) / Math.sqrt(TAU * lam);
+    // shaded normal area up to cut + 1/2
+    ctx.beginPath(); const xL = lo - .5, xR = cut + .5; ctx.moveTo(F.xc(xL), F.Y0);
+    for (let i = 0; i <= 120; i++) { const x = xL + (xR - xL) * i / 120; ctx.lineTo(F.xc(x), F.ys(nd(x))); }
+    ctx.lineTo(F.xc(xR), F.Y0); ctx.closePath(); ctx.fillStyle = C('--gold-soft'); ctx.fill();
+    const acc = C('--accent'), ink3 = C('--ink-3');
+    drawBars(ctx, F, lo, hi, k => poisPMF(lam, k), k => k <= cut ? acc : ink3, .7);
+    ctx.save(); ctx.beginPath(); ctx.rect(F.X0, F.Y1 - 4, F.X1 - F.X0, F.Y0 - F.Y1 + 4); ctx.clip();
+    ctx.strokeStyle = C('--gold'); ctx.lineWidth = 2.5; ctx.beginPath();
+    for (let i = 0; i <= 240; i++) { const x = lo - .5 + (hi - lo + 1) * i / 240, X = F.xc(x), Y = F.ys(nd(x)); i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); }
+    ctx.stroke(); ctx.restore();
+    vline(ctx, F.xc(xR), F.Y1, F.Y0, C('--ink-2'), [4, 3], 1.2);
+    ctx.fillStyle = C('--ink-2'); ctx.font = '11px ' + MONO; ctx.textBaseline = 'top';
+    const lx = F.xc(xR); ctx.textAlign = lx > F.X1 - 70 ? 'right' : 'left';
+    ctx.fillText('cut-off + ½', lx + (ctx.textAlign === 'left' ? 4 : -4), F.Y1);
+  }
+  function drawB(){
+    const {ctx, w, h} = fit(bc);
+    const A = cax(ctx, w, h, {xmax: 100, ymax: .75, left: 44, yticks: [0, .25, .5, .75], yfmt: v => v.toFixed(2)});
+    clipTo(ctx, A);
+    ctx.save(); ctx.setLineDash([5, 4]); ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(A.X0, A.ys(.5)); ctx.lineTo(A.X1, A.ys(.5)); ctx.stroke(); ctx.restore();
+    [[1, C('--gold')], [2, C('--accent')]].forEach(([j, col]) => {
+      ctx.strokeStyle = col; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(A.xs(0), A.ys(0));
+      curve.forEach(c => ctx.lineTo(A.xs(c[0]), A.ys(c[j]))); ctx.stroke();
+    });
+    ctx.restore();
+    vline(ctx, A.xs(lam), A.Y1, A.Y0, C('--ink-2'), [3, 3], 1);
+    ctx.fillStyle = C('--gold'); dot(ctx, A.xs(lam), A.ys(sdOf(lam, SQ)), 4.5);
+    ctx.fillStyle = C('--accent'); dot(ctx, A.xs(lam), A.ys(sdOf(lam, AN)), 4.5);
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+    ctx.fillText('λ →', A.X1, A.Y0 - 3);
+  }
+  function readout(){
+    const s = Math.sqrt(lam), cut = Math.floor(lam + s), ex = poisCDF(lam, cut);
+    const n0 = Phi((cut - lam) / s), n1 = Phi((cut + .5 - lam) / s);
+    const pp = x => (100 * x).toFixed(2) + '%', d = x => (x >= 0 ? '+' : '−') + Math.abs(100 * x).toFixed(2);
+    $('#nmRead').innerHTML = `cut-off ⌊λ + √λ⌋ = <b>${cut}</b> · exact P(X ≤ ${cut}) = <b>${pp(ex)}</b> · normal without correction ${pp(n0)} (${d(n0 - ex)} points) · with correction <b>${pp(n1)}</b> (${d(n1 - ex)} points)<br>` +
+      `SD of X = √λ = <b>${f2(s)}</b> · SD of √X = <b>${f3(sdOf(lam, SQ))}</b> · SD of √(X + 3/8) = <b>${f3(sdOf(lam, AN))}</b>`;
+  }
+  bindRange($('#nmL'), $('#nmLOut'), i => { lam = LAMS[i]; drawA(); drawB(); readout(); }, i => String(LAMS[i]));
+  redraws.push(() => { drawA(); drawB(); });
+})();
+
+/* ---------- 8. estimating lambda ---------- */
+function garwood(S, n){ return [S > 0 ? gammaQuantile(S, .025) / n : 0, gammaQuantile(S + 1, .975) / n]; }
+window.__pois.garwood = garwood;
+(function(){
+  const cv = $('#esLik'), MAXN = 1000, R = 1000;
+  let lam = 2, n = 0, S = 0;
+  function add(c){ for (let i = 0; i < c && n < MAXN; i++) { S += poisS(lam); n++; } draw(); readout(); }
+  function reset(){ n = 0; S = 0; draw(); readout(); $('#esCovRead').innerHTML = ''; }
+  function draw(){
+    const {ctx, w, h} = fit(cv);
+    if (!n) {
+      const A = cax(ctx, w, h, {xmax: Math.max(1, lam * 2), ymax: 1.08, yticks: [0, .5, 1], yfmt: v => fmtN(v), left: 36});
+      vline(ctx, A.xs(lam), A.Y1, A.Y0, C('--gold'), [6, 4], 2);
+      ctx.fillStyle = C('--ink-3'); ctx.font = '13px ' + SANS; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('Add some days to see the likelihood', (A.X0 + A.X1) / 2, (A.Y0 + A.Y1) / 2);
+      return;
+    }
+    const hat = S / n, [lo, hi] = garwood(S, n), xm = Math.max(hi * 1.2, lam * 1.25, hat + 4 * Math.sqrt(Math.max(hat, .5) / n), .5);
+    const A = cax(ctx, w, h, {xmax: xm, ymax: 1.08, yticks: [0, .5, 1], yfmt: v => fmtN(v), left: 36});
+    const L = x => S > 0 ? Math.exp(S * Math.log(x / hat) - n * (x - hat)) : Math.exp(-n * x);
+    clipTo(ctx, A);
+    ctx.fillStyle = C('--accent-soft'); ctx.fillRect(A.xs(lo), A.Y1, A.xs(Math.min(hi, xm)) - A.xs(lo), A.Y0 - A.Y1);
+    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2.5; pathFn(ctx, A, L, xm * 1e-4, xm, 400); ctx.stroke();
+    ctx.restore();
+    vline(ctx, A.xs(lam), A.Y1, A.Y0, C('--gold'), [6, 4], 2);
+    vline(ctx, A.xs(hat), A.Y0, A.ys(1), C('--accent'), null, 1.5);
+    ctx.fillStyle = C('--accent'); dot(ctx, A.xs(hat), A.ys(1), 4.5);
+    ctx.font = 'italic 14px ' + C('--serif'); ctx.textBaseline = 'bottom'; ctx.fillStyle = C('--ink');
+    const lx = A.xs(hat); ctx.textAlign = lx > A.X1 - 40 ? 'right' : 'left'; ctx.fillText('λ̂', lx + (ctx.textAlign === 'left' ? 6 : -6), A.ys(1) - 2);
+  }
+  function readout(){
+    if (!n) { $('#esRead').innerHTML = `True rate λ = <b>${fmtN(lam)}</b> events per day. Pretend you don’t know it, count events day by day, and estimate it.`; return; }
+    const hat = S / n, [lo, hi] = garwood(S, n), se = 1.96 * Math.sqrt(hat / n), inside = lo <= lam && lam <= hi;
+    let s = `days n = <b>${n.toLocaleString()}</b> · total events S = <b>${S.toLocaleString()}</b> · <span class="lh">λ̂</span> = S/n = <b>${f3(hat)}</b><br>` +
+      `exact 95% interval [<b>${f3(lo)}</b>, <b>${f3(hi)}</b>] · ${inside ? '<span class="ok">contains</span>' : '<span class="warn">misses</span>'} the true λ = ${fmtN(lam)}<br>` +
+      `quick interval <span class="lh">λ̂</span> ± 1.96√(<span class="lh">λ̂</span>/n) = [${f3(Math.max(0, hat - se))}, ${f3(hat + se)}]`;
+    if (n >= MAXN) s += `<br><span class="warn">limit of ${MAXN.toLocaleString()} days reached, press Reset to start over</span>`;
+    $('#esRead').innerHTML = s;
+  }
+  $('#es1').addEventListener('click', () => add(1));
+  $('#es10').addEventListener('click', () => add(10));
+  $('#es100').addEventListener('click', () => add(100));
+  $('#esReset').addEventListener('click', reset);
+  $('#esCov').addEventListener('click', () => {
+    const m = Math.max(1, n), mu = m * lam; let gw = 0, wd = 0, zero = 0;
+    for (let r = 0; r < R; r++) {
+      const s = poisS(mu);
+      // exact interval covers lam  <=>  P(Gamma(s) <= mu) >= .025 (lower end)  and  P(Gamma(s+1) <= mu) <= .975 (upper end)
+      if ((s === 0 || gammaP(s, mu) >= .025) && gammaP(s + 1, mu) <= .975) gw++;
+      const hat = s / m, se = 1.96 * Math.sqrt(hat / m);
+      if (hat - se <= lam && lam <= hat + se) wd++;
+      if (s === 0) zero++;
+    }
+    $('#esCovRead').innerHTML = `1,000 fresh experiments of ${m} day${m === 1 ? '' : 's'} at λ = ${fmtN(lam)}: exact interval covered λ in <b>${pct(gw / R)}</b> · quick interval in <b>${pct(wd / R)}</b> (target 95%)` +
+      (zero ? ` · ${zero} experiment${zero === 1 ? '' : 's'} saw no events at all` : '');
+  });
+  bindRange($('#esL'), $('#esLOut'), v => { lam = v; reset(); });
+  add(10);
+  redraws.push(draw);
+})();
+
+/* ---------- 9. overdispersion ---------- */
+function mixPMF(mu, c, pz, k){
+  const r = c > 0 ? 1 / (c * c) : Infinity;
+  return (k === 0 ? pz : 0) + (1 - pz) * nbPMF(mu, r, k);
+}
+function mixMoments(mu, c, pz){
+  const m = (1 - pz) * mu, ex2 = (1 - pz) * (mu + mu * mu * (1 + c * c));
+  return [m, ex2 - m * m];
+}
+window.__pois.mixPMF = mixPMF; window.__pois.mixMoments = mixMoments;
+(function(){
+  const cv = $('#odChart'); let mu = 5, c = .5, pz = 0;
+  function draw(){
+    const {ctx, w, h} = fit(cv), [m] = mixMoments(mu, c, pz);
+    let hi = pRange(m)[1], cum = 0;
+    for (let k = 0; k <= 400; k++) { cum += mixPMF(mu, c, pz, k); if (cum > .995) { hi = Math.max(hi, k); break; } if (k === 400) hi = 400; }
+    hi = Math.min(hi, 80);
+    let ym = 0; for (let k = 0; k <= hi; k++) ym = Math.max(ym, mixPMF(mu, c, pz, k), poisPMF(m, k)); ym *= 1.12;
+    const F = frame(ctx, w, h, {lo: 0, hi, ymax: ym});
+    drawBars(ctx, F, 0, hi, k => mixPMF(mu, c, pz, k), C('--accent'), .72);
+    ctx.fillStyle = C('--gold'); for (let k = 0; k <= hi; k++) { const v = poisPMF(m, k); if (v > 1e-4) dot(ctx, F.xc(k), F.ys(v), Math.min(4, Math.max(2, F.bw * .3))); }
+    let tail = 0; for (let k = 0; k <= hi; k++) tail += mixPMF(mu, c, pz, k); tail = 1 - tail;
+    cv.dataset.tail = tail;
+  }
+  function readout(){
+    const [m, v] = mixMoments(mu, c, pz), p0 = mixPMF(mu, c, pz, 0), tail = parseFloat(cv.dataset.tail || 0);
+    let s = `mean <b>${f2(m)}</b> · variance <b>${f2(v)}</b> · D = variance/mean = <b>${f2(v / m)}</b>${v / m > 1.0001 ? '' : ' <span class="ok">(plain Poisson)</span>'}<br>` +
+      `P(X = 0): mixed <b>${pct(p0)}</b> vs Poisson ${pct(Math.exp(-m))}`;
+    if (tail > 5e-4) s += ` · ${pct(tail)} of the probability lies beyond the right edge`;
+    $('#odRead').innerHTML = s;
+  }
+  const upd = () => { draw(); readout(); };
+  bindRange($('#odM'), $('#odMOut'), v => { mu = v; upd(); });
+  bindRange($('#odC'), $('#odCOut'), v => { c = v; upd(); }, v => v.toFixed(2));
+  bindRange($('#odZ'), $('#odZOut'), v => { pz = v; upd(); }, v => v.toFixed(2));
+  redraws.push(draw);
+})();
+
+/* ---------- 10. properties dashboard ---------- */
+(function(){
+  let lam = 3;
+  function median(l){ let k = 0, F = 0; while (k < 1e5) { F += poisPMF(l, k); if (F >= .5) return k; k++; } return k; }
+  function values(){
+    const s = Math.sqrt(lam), ms = modesOf(lam);
+    $('#cPar').textContent = `λ = ${fmtN(lam)}`;
+    $('#cPMF').innerHTML = `P(0) = e<sup>−λ</sup> = ${fmtP(Math.exp(-lam))}`;
+    $('#cMV').textContent = `${fmtN(lam)}, so SD = √λ = ${f3(s)}`;
+    $('#cMode').textContent = `mode ${ms.join(' and ')}`;
+    $('#cMed').textContent = lam >= 1 ? `exact ${median(lam)}, formula ${f2(lam + 1 / 3 - .02 / lam)}` : `exact ${median(lam)} (formula needs λ ≥ 1)`;
+    $('#cShape').textContent = `skewness ${f3(1 / s)}, kurtosis ${f3(1 / lam)}`;
+    $('#cPGF').innerHTML = `G(0) = P(0) = ${fmtP(Math.exp(-lam))}`;
+    $('#cMGF').textContent = `E[X²] = λ + λ² = ${fmtN(lam + lam * lam)}`;
+    $('#cFact').textContent = `E[X(X−1)] = λ² = ${fmtN(lam * lam)}`;
+    const k = Math.ceil(lam + 2 * s);
+    $('#cGam').textContent = `P(X ≥ ${k}) = ${f4(1 - poisCDF(lam, k - 1))}`;
+    $('#cMLE').innerHTML = `with 100 counts, SD of <span class="lh">λ̂</span> = √(λ/100) = ${f3(Math.sqrt(lam / 100))}`;
+  }
+  function mini(id, o){ const {ctx, w, h} = fit($(id)); return {ctx, F: frame(ctx, w, h, Object.assign({left: 36, top: 10}, o))}; }
+  function draw(){
+    const hi = Math.max(6, Math.ceil(lam + 3.5 * Math.sqrt(lam) + 1)), lo = Math.max(0, Math.floor(lam - 3.5 * Math.sqrt(lam) - 1));
+    let ym = 0; for (let k = lo; k <= hi; k++) ym = Math.max(ym, poisPMF(lam, k));
+    let a = mini('#miniPMF', {lo, hi, ymax: ym * 1.15});
+    drawBars(a.ctx, a.F, lo, hi, k => poisPMF(lam, k), C('--accent'), .75);
+    a = mini('#miniCDF', {lo, hi, ymax: 1.05, yfmt: v => fmtN(v)});
+    drawBars(a.ctx, a.F, lo, hi, k => poisCDF(lam, k), C('--accent'), .75);
+    const md = median(lam);
+    if (md >= lo && md <= hi) { a.ctx.fillStyle = C('--gold'); dot(a.ctx, a.F.xc(md), a.F.ys(poisCDF(lam, md)), 3.5); }
+    a.ctx.save(); a.ctx.setLineDash([3, 3]); a.ctx.strokeStyle = C('--gold'); a.ctx.beginPath(); a.ctx.moveTo(a.F.X0, a.F.ys(.5) + .5); a.ctx.lineTo(a.F.X1, a.F.ys(.5) + .5); a.ctx.stroke(); a.ctx.restore();
+    const lo1 = Math.max(1, lo), rmax = Math.max(2, Math.min(lam / lo1, 6));
+    a = mini('#miniRat', {lo: lo1, hi, ymax: rmax * 1.08});
+    const one = C('--one'), zero = C('--zero'), gold = C('--gold');
+    drawBars(a.ctx, a.F, lo1, hi, k => Math.min(lam / k, rmax * 1.08), k => lam / k > 1 + 1e-12 ? one : lam / k < 1 - 1e-12 ? zero : gold, .75);
+    a.ctx.save(); a.ctx.setLineDash([3, 3]); a.ctx.strokeStyle = C('--ink-2'); a.ctx.beginPath(); a.ctx.moveTo(a.F.X0, a.F.ys(1) + .5); a.ctx.lineTo(a.F.X1, a.F.ys(1) + .5); a.ctx.stroke(); a.ctx.restore();
+  }
+  bindRange($('#prL'), $('#prLOut'), v => { lam = Math.round(v * 10) / 10; values(); draw(); });
+  redraws.push(draw);
+})();
+
+})();
+</script>
+</body>
+</html>
