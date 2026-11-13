@@ -449,6 +449,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
   </div>
 
   <p>The readout gives the <em class="term">total variation distance</em> between the two distributions: the largest difference between the probabilities they give to any event. Le Cam’s inequality guarantees it is at most \(np^2 = \lambda p\). So what makes the Poisson approximation good is that <strong>\(p\) is small</strong>, not merely that \(n\) is large. The variances tell the same story: the binomial’s \(npq = \lambda(1-p)\) approaches the Poisson’s \(\lambda\) as \(p \to 0\).</p>
+  <p>The gaps between Poisson events have a distribution of their own, the exponential. It is the subject of the next tutorial, <a href="exponential-distribution.html">The Exponential Distribution</a>.</p>
   <details>
     <summary>Why the limit holds</summary>
     <p>Substitute \(p = \lambda/n\) and look at the pieces one at a time. First,</p>

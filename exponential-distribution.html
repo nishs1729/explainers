@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Exponential Distribution — a visual introduction</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<style>
+:root{
+  --bg:#faf8f4; --surface:#ffffff; --surface-2:#f2efe8; --ink:#1c1c1e; --ink-2:#4c4e55; --ink-3:#8b8d93; --line:#e3dfd5;
+  --one:#16917c; --one-soft:rgba(22,145,124,.15);
+  --zero:#d9573a; --zero-soft:rgba(217,87,58,.15);
+  --accent:#3654c9; --accent-soft:rgba(54,84,201,.11);
+  --gold:#b98317; --gold-soft:rgba(185,131,23,.22);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+    --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+    --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+    --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+    --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+  --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+  --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+  --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+  --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.68 var(--sans);-webkit-font-smoothing:antialiased}
+main{max-width:820px;margin:0 auto;padding:0 20px 80px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;letter-spacing:-.01em}
+h1{font-size:clamp(2.2rem,6vw,3.4rem);margin:.2em 0 .3em}
+h2{font-size:clamp(1.6rem,4vw,2.1rem);margin:0 0 .5em}
+h3{font-size:1.2rem;margin:1.6em 0 .4em}
+p{margin:0 0 1em}
+a{color:var(--accent)}
+strong{font-weight:650}
+em.term{font-style:normal;font-weight:650;color:var(--accent)}
+.muted{color:var(--ink-2)}
+small,.small{font-size:14px}
+
+/* hero */
+.hero{text-align:center;padding:64px 0 24px}
+.kicker{text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--ink-3);margin:0}
+.lede{font-size:1.2rem;color:var(--ink-2);max-width:620px;margin:0 auto}
+.hero-play{max-width:600px;margin:30px auto 0;text-align:left}
+.hero-play .controls{justify-content:center}
+.hint{font-size:15px;color:var(--ink-2);min-height:3.2em;margin:6px 0 0;text-align:center}
+
+.toc{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;margin:28px 0 8px}
+.toc ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 20px;counter-reset:t}
+.toc li{counter-increment:t;font-size:15px}
+.toc li::before{content:counter(t,decimal-leading-zero);font-family:var(--mono);color:var(--ink-3);margin-right:10px;font-size:13px}
+.toc a{color:var(--ink);text-decoration:none}
+.toc a:hover{color:var(--accent)}
+
+section{padding-top:56px}
+.secnum{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.08em;margin-bottom:4px}
+
+.widget{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin:26px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.widget-title{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);margin:0 0 12px;font-weight:600}
+.controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:12px 0}
+.ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:15px}
+.ctrl output{font-family:var(--mono);font-size:14px;min-width:3.2em;color:var(--ink)}
+input[type=range]{accent-color:var(--accent);width:170px;max-width:100%}
+.btn{font:inherit;font-size:14px;line-height:1.2;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;transition:background .15s,transform .1s}
+.btn:hover{border-color:var(--ink-3)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.readout{font-family:var(--mono);font-size:14px;color:var(--ink-2);line-height:1.6}
+.readout b{color:var(--ink);font-weight:600}
+.readout .ok{color:var(--one);font-weight:600}
+.readout .warn{color:var(--zero);font-weight:600}
+canvas{display:block;width:100%}
+canvas.pick{cursor:ew-resize;touch-action:pan-y}
+.cap{font-size:13px;color:var(--ink-3);margin:2px 0 6px}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:20px 0}
+.callout p:last-child{margin-bottom:0}
+.katex-display{overflow-x:auto;overflow-y:hidden;padding:4px 0}
+.mathbox{overflow-x:auto;padding:6px 0}
+.katex-display.ovf,.mathbox.ovf{-webkit-mask-image:linear-gradient(to right,#000 82%,transparent);mask-image:linear-gradient(to right,#000 82%,transparent)}
+details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:14px 0;background:var(--surface)}
+details summary{cursor:pointer;font-weight:600;font-size:15px;color:var(--ink-2)}
+details[open] summary{margin-bottom:8px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin-top:8px}
+.legend > span{display:inline-flex;align-items:center;gap:6px}
+.sw{display:inline-block;width:16px;height:10px;border-radius:2px}
+.sw.dot{width:8px;height:8px;border-radius:50%}
+.sw.dash{height:0;border-top:2px dashed var(--ink)}
+.sw.line{height:0;border-top:2px solid var(--ink)}
+
+/* properties */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:18px 0}
+.card{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
+.card h4{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+.card .f{overflow-x:auto;overflow-y:hidden;font-size:15px;min-height:1.8em}
+.card .v{font:600 15px var(--mono);color:var(--accent);margin-top:6px}
+.card p{font-size:15px;margin:0;color:var(--ink-2)}
+.sticky-ctrl{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:6px 22px}
+.minis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:640px){.minis{grid-template-columns:1fr}}
+.mini{border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--surface)}
+.mini .mcap{font-size:13px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.facts{counter-reset:f;list-style:none;padding:0;margin:18px 0}
+.facts li{counter-increment:f;position:relative;padding:12px 0 12px 44px;border-bottom:1px solid var(--line)}
+.facts li::before{content:counter(f);position:absolute;left:0;top:12px;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:600 13px var(--mono)}
+.facts li strong{display:block}
+.table-wrap{overflow-x:auto}
+table.summary{border-collapse:collapse;width:100%;font-size:15px;margin:14px 0}
+table.summary td,table.summary th{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:middle}
+table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3)}
+footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60px;border-top:1px solid var(--line);margin-top:60px}
+
+@media (max-width:480px){
+  main{padding:0 16px 80px}
+  .widget{padding:14px}
+  .katex-display{font-size:.92em}
+  input[type=range]{width:150px}
+}
+</style>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <p class="kicker">A visual introduction</p>
+  <h1>The Exponential Distribution</h1>
+  <p class="lede">How long until the next one? The next click of a Geiger counter, the next customer, the next request to a web server. When events happen at random at a steady rate, the waiting time follows the exponential distribution.</p>
+  <div class="hero-play">
+    <canvas id="heroLine" style="height:110px" role="img" aria-label="A timeline scrolling to the left; each tick is a random click, and the shaded bands are the gaps between clicks"></canvas>
+    <div class="controls">
+      <button class="btn primary" id="heroGo">❚❚ Pause</button>
+      <button class="btn" id="heroMany">+500 clicks instantly</button>
+    </div>
+    <canvas id="heroHist" style="height:140px" role="img" aria-label="Histogram of the lengths of the gaps between clicks"></canvas>
+    <div class="legend" style="justify-content:center"><span><i class="sw" style="background:var(--accent)"></i>gap lengths (seconds)</span><span><i class="sw line" style="border-color:var(--gold)"></i>the exponential curve, revealed after 30 gaps</span></div>
+    <p class="hint" id="heroHint" aria-live="polite">A counter clicks at random, about 1.5 times per second on average. Every click is independent of the last.</p>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#slices">From coin flips to waiting times</a></li>
+    <li><a href="#density">Density, CDF and survival</a></li>
+    <li><a href="#memory">No memory</a></li>
+    <li><a href="#mv">Mean and variance</a></li>
+    <li><a href="#process">The Poisson process</a></li>
+    <li><a href="#paradox">The waiting-time paradox</a></li>
+    <li><a href="#race">Races: the first of many clocks</a></li>
+    <li><a href="#sampling">Making exponentials from uniforms</a></li>
+    <li><a href="#estimate">Going backwards: what is λ?</a></li>
+    <li><a href="#props">All the properties</a></li>
+    <li><a href="#uses">Where you will meet it</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<section id="slices">
+  <div class="secnum">01</div>
+  <h2>From coin flips to waiting times</h2>
+  <p>The <a href="binomial-distribution.html">binomial distribution</a> fixes the number of trials and counts the successes. Turn the question around: keep trying until the first success, and ask <strong>how long that took</strong>.</p>
+  <p>With separate trials this is easy. Roll a die until the first six. The six arrives on roll \(k\) when the first \(k-1\) rolls fail and roll \(k\) succeeds. With success probability \(p\) and \(q = 1 - p\) as before,</p>
+  $$P(K = k) = q^{\,k-1}p, \quad k = 1, 2, \dots$$
+  <p>This is the <em class="term">geometric distribution</em>. On average you need \(1/p\) tries: 6 rolls for a six.</p>
+  <p>Now let time flow continuously. A Geiger counter clicks at random moments, on average \(\lambda\) times per second. The Greek letter \(\lambda\) (lambda) is the <em class="term">rate</em>. To reuse what we know, chop time into thin slices of width \(\Delta t\). In each slice, flip a coin that comes up “click” with probability \(p = \lambda\Delta t\). Each slice is a <a href="bernoulli-distribution.html">Bernoulli trial</a>, and waiting for the first click is waiting for the first success.</p>
+  <p>The wait \(T\) is longer than \(t\) exactly when the first \(t/\Delta t\) slices all fail:</p>
+  $$P(T > t) = (1 - \lambda\Delta t)^{t/\Delta t}$$
+  <p>Let the slices shrink. The right-hand side tends to a limit you may know from compound interest:</p>
+  $$\lim_{\Delta t \to 0}\,(1 - \lambda\Delta t)^{t/\Delta t} = e^{-\lambda t}$$
+  <p>That is the whole distribution in one line. A waiting time with \(P(T > t) = e^{-\lambda t}\) has the <em class="term">exponential distribution</em> with rate \(\lambda\), written \(T \sim \text{Exp}(\lambda)\).</p>
+
+  <div class="widget">
+    <p class="widget-title">Shrink the slices</p>
+    <div class="controls">
+      <label class="ctrl">rate \(\lambda\) <input type="range" id="slL" min="0.2" max="2" step="0.1" value="1"><output id="slLOut"></output></label>
+      <label class="ctrl">slice width \(\Delta t\) <input type="range" id="slD" min="0" max="5" step="1" value="1"><output id="slDOut"></output></label>
+      <button class="btn" id="slRun">Flip slice by slice</button>
+    </div>
+    <canvas id="slStrip" style="height:30px" role="img" aria-label="A strip of time slices; failed slices turn gray and the first success turns green"></canvas>
+    <canvas id="slChart" style="height:230px" role="img" aria-label="Geometric bars for the slice where the first click happens, with the exponential density curve on top"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i>first click in this slice (bar area = probability)</span><span><i class="sw line"></i>\(\lambda e^{-\lambda t}\)</span><span><i class="sw" style="background:var(--gold)"></i>your last run</span></div>
+    <div class="readout" id="slRead" style="margin-top:8px"></div>
+  </div>
+  <p>Each bar is the geometric probability that the first click falls in that slice. Bars are divided by \(\Delta t\), so their <em>area</em> is the probability. With wide slices you get a staircase. As \(\Delta t\) shrinks, the staircase melts into the smooth curve \(\lambda e^{-\lambda t}\). The average wait never moves: it is \(\Delta t / p = 1/\lambda\) for every slice width. Shrinking the slices only sharpens the picture.</p>
+</section>
+
+<!-- 2 -->
+<section id="density">
+  <div class="secnum">02</div>
+  <h2>Density, CDF and survival</h2>
+  <p>The curve you just saw is the <em class="term">probability density function</em> (PDF) of the exponential distribution:</p>
+  $$f(t) = \lambda e^{-\lambda t}, \quad t \ge 0$$
+  <p>A density is not a probability. Probabilities are <strong>areas</strong> under it. The chance that the wait lands between \(a\) and \(b\) is the area between them:</p>
+  $$\begin{aligned} P(a \le T \le b) &= \int_a^b \lambda e^{-\lambda t}\,dt \\ &= e^{-\lambda a} - e^{-\lambda b} \end{aligned}$$
+  <p>The curve starts at height \(\lambda\), so when \(\lambda > 1\) the density is above 1 near zero. That is fine. Only the total area must equal 1.</p>
+
+  <div class="widget">
+    <p class="widget-title">Areas under the density</p>
+    <div class="controls">
+      <label class="ctrl">\(\lambda\) <input type="range" id="dnL" min="0.25" max="3" step="0.05" value="1"><output id="dnLOut"></output></label>
+      <label class="ctrl">\(a\) <input type="range" id="dnA" min="0" max="8" step="0.1" value="0.5"><output id="dnAOut"></output></label>
+      <label class="ctrl">\(b\) <input type="range" id="dnB" min="0" max="8" step="0.1" value="2"><output id="dnBOut"></output></label>
+    </div>
+    <canvas id="dnPDF" class="pick" style="height:230px" role="img" aria-label="Exponential density with the area between a and b shaded"></canvas>
+    <div class="cap">Drag across the chart to move the nearer end of the shaded interval. Horizontal axis: time \(t\).</div>
+    <div class="readout" id="dnRead"></div>
+    <div class="controls" style="margin-top:16px">
+      <button class="btn on" data-cm="F" aria-pressed="true">CDF \(F(t)\)</button>
+      <button class="btn" data-cm="S" aria-pressed="false">Survival \(S(t)\)</button>
+      <button class="btn" data-cm="L" aria-pressed="false">Survival, log scale</button>
+    </div>
+    <canvas id="dnCum" style="height:200px" role="img" aria-label="The cumulative distribution function or the survival function for the same rate"></canvas>
+    <div class="readout" id="dnCumRead" style="margin-top:6px"></div>
+  </div>
+
+  <p>Two running totals get their own names. The <em class="term">cumulative distribution function</em> (CDF) says how likely the wait is to be over by time \(t\). The <em class="term">survival function</em> says how likely it is still going:</p>
+  $$\begin{aligned} F(t) &= P(T \le t) = 1 - e^{-\lambda t} \\ S(t) &= P(T > t) = e^{-\lambda t} \end{aligned}$$
+  <p>Set \(S(m) = \tfrac12\) and solve to get the <em class="term">median</em> wait:</p>
+  $$m = \frac{\ln 2}{\lambda} \approx \frac{0.693}{\lambda}$$
+  <p>For radioactive atoms this is the <em class="term">half-life</em>. Carbon-14 has a half-life of about 5,730 years, so its decay rate is \(\lambda = \ln 2 / 5730 \approx 1.21 \times 10^{-4}\) per year. After two half-lives a quarter of the atoms remain, and after three an eighth. Every equal stretch of time multiplies the survivors by the same factor \(e^{-\lambda}\) per unit of time. That is why, on a logarithmic scale, the survival curve is a straight line with slope \(-\lambda\). Engineers plot failure data this way to check whether it is exponential.</p>
+</section>
+
+<!-- 3 -->
+<section id="memory">
+  <div class="secnum">03</div>
+  <h2>No memory</h2>
+  <p>You have already waited \(s\) minutes for something whose waiting time is exponential. How much longer will you wait? Intuition says it must be “due” by now. The exponential distribution says: <strong>exactly as long as if you had just started</strong>. The proof takes one line:</p>
+  $$\begin{aligned} P(T > s + t \mid T > s) &= \frac{P(T > s + t)}{P(T > s)} \\ &= \frac{e^{-\lambda(s+t)}}{e^{-\lambda s}} \\ &= e^{-\lambda t} = P(T > t) \end{aligned}$$
+  <p>Given that nothing has happened by time \(s\), the remaining wait \(T - s\) has the same \(\text{Exp}(\lambda)\) distribution as a fresh wait. This is called <em class="term">memorylessness</em>. A quiet Geiger counter has no idea how long it has been quiet.</p>
+
+  <div class="widget">
+    <p class="widget-title">How much longer, after waiting a while?</p>
+    <div class="controls">
+      <button class="btn on" data-md="exp" aria-pressed="true">Exponential</button>
+      <button class="btn" data-md="gam" aria-pressed="false">Wear-out (gamma)</button>
+      <button class="btn" data-md="uni" aria-pressed="false">Uniform on [0, 4]</button>
+    </div>
+    <div class="controls">
+      <label class="ctrl">already waited \(s\) <input type="range" id="meS" min="0" max="6" step="0.1" value="1.5"><output id="meSOut"></output></label>
+    </div>
+    <canvas id="meChart" style="height:240px" role="img" aria-label="A waiting-time density, the part after s shaded, and that tail shifted back to zero and rescaled"></canvas>
+    <div class="legend"><span><i class="sw line" style="border-color:var(--accent)"></i>density of the total wait</span><span><i class="sw" style="background:var(--accent-soft);border:1px solid var(--accent)"></i>still possible after waiting \(s\)</span><span><i class="sw dash" style="border-color:var(--gold)"></i>that tail, slid back to 0 and rescaled to area 1</span></div>
+    <div class="readout" id="meRead" style="margin-top:8px"></div>
+  </div>
+  <p>All three distributions have an average wait of 2. Only for the exponential does the gold curve land exactly on the blue one, at every \(s\). For a wear-out lifetime, such as a gamma distribution (section 7), the remaining wait shrinks as you wait: an old machine really is closer to failing. For the uniform, the event is certain by \(t = 4\), so after waiting 3.5 it must happen within the next half unit.</p>
+  <p>Another way to say this uses the <em class="term">hazard rate</em> \(h(t) = f(t)/S(t)\). It is the chance per unit time that the event happens right now, given that it hasn’t happened yet. For the exponential it is constant:</p>
+  $$h(t) = \frac{\lambda e^{-\lambda t}}{e^{-\lambda t}} = \lambda$$
+  <p>A constant hazard is memorylessness in another form. Rising hazards describe things that wear out. Falling hazards describe things that are most fragile when new.</p>
+  <div class="callout"><p><strong>Old atoms are not “due”.</strong> A uranium-238 atom that has existed since the Earth formed, about 4.5 billion years ago, is exactly as likely to decay in the next second as one created yesterday. If a process really is exponential, a long quiet spell tells you nothing about how soon the next event will come.</p></div>
+  <details>
+    <summary>Why the exponential is the only memoryless waiting time</summary>
+    <p>Memorylessness says \(P(T > s + t) = P(T > s)\,P(T > t)\), that is \(S(s+t) = S(s)S(t)\) for all \(s, t \ge 0\). Take logarithms: \(g = \ln S\) satisfies \(g(s+t) = g(s) + g(t)\). For a decreasing function the only solutions are straight lines through the origin, \(g(t) = -\lambda t\), so \(S(t) = e^{-\lambda t}\). Among waiting times measured in whole steps, the geometric distribution plays the same role: it is the only memoryless distribution on \(1, 2, 3, \dots\)</p>
+  </details>
+</section>
+
+<!-- 4 -->
+<section id="mv">
+  <div class="secnum">04</div>
+  <h2>Mean and variance</h2>
+  <p>The rate and the average wait are reciprocals. Three buses an hour means one every 20 minutes on average. For a nonnegative waiting time, the mean is the area under the survival curve:</p>
+  $$\begin{aligned} E[T] &= \int_0^\infty P(T > t)\,dt \\ &= \int_0^\infty e^{-\lambda t}\,dt = \frac{1}{\lambda} \end{aligned}$$
+  <p>The same trick gives the second moment, and from it the variance:</p>
+  $$\begin{aligned} E[T^2] &= \int_0^\infty 2t\,e^{-\lambda t}\,dt = \frac{2}{\lambda^2} \\ \operatorname{Var}(T) &= \frac{2}{\lambda^2} - \frac{1}{\lambda^2} = \frac{1}{\lambda^2} \end{aligned}$$
+  <p>So the standard deviation, \(1/\lambda\), <strong>equals the mean</strong>. Exponential waits vary a lot. When the average is 10 minutes, waits of 1 minute and of 25 minutes are both common. About one wait in seven is more than twice the average (\(e^{-2} \approx 0.135\)). Yet most waits are <em>shorter</em> than average: \(F(1/\lambda) = 1 - e^{-1} \approx 0.632\). The rare long waits pull the mean up above the median, \(0.693/\lambda\).</p>
+  <details>
+    <summary>Why the mean is the area under the survival curve</summary>
+    <p>Write \(T = \int_0^\infty \mathbf 1\{T > t\}\,dt\): integrating the indicator “still waiting at time \(t\)” over all \(t\) gives exactly \(T\). Take expectations and swap the integral with the expectation: \(E[T] = \int_0^\infty P(T > t)\,dt\). In the same way \(T^2 = \int_0^\infty 2t\,\mathbf 1\{T > t\}\,dt\), which gives the formula for \(E[T^2]\).</p>
+  </details>
+
+  <div class="widget">
+    <p class="widget-title">Waiting-time laboratory</p>
+    <div class="controls">
+      <label class="ctrl">\(\lambda\) <input type="range" id="lbL" min="0.2" max="3" step="0.1" value="1"><output id="lbLOut"></output></label>
+      <button class="btn" id="lb1">Wait once</button>
+      <button class="btn" id="lb100">+100</button>
+      <button class="btn primary" id="lb1000">+1,000</button>
+      <button class="btn" id="lbReset">Reset</button>
+    </div>
+    <canvas id="lbChart" style="height:230px" role="img" aria-label="Running average of the simulated waits as more are added, converging to one over lambda inside a shrinking band"></canvas>
+    <div class="legend"><span><i class="sw line" style="border-color:var(--zero)"></i>running average of the waits</span><span><i class="sw dash"></i>\(1/\lambda\)</span><span><i class="sw" style="background:var(--accent-soft);border:1px solid var(--accent)"></i>\(1/\lambda \pm 2\sigma/\sqrt n\)</span></div>
+    <div class="readout" id="lbRead" style="margin-top:8px"></div>
+  </div>
+  <p>The horizontal axis is logarithmic, so each step to the right is ten times more waits. The average settles on \(1/\lambda\) at the usual \(1/\sqrt n\) pace. The sample standard deviation settles on the same number.</p>
+</section>
+
+<!-- 5 -->
+<section id="process">
+  <div class="secnum">05</div>
+  <h2>The Poisson process</h2>
+  <p>Keep the clock running. After each event, start a fresh \(\text{Exp}(\lambda)\) wait for the next one. The events form a <em class="term">Poisson process</em> with rate \(\lambda\). This is the counter from the top of the page.</p>
+  <p>It is the same object we built from slices in section 1. Each thin slice holds an event with probability \(\lambda\Delta t\), independently of the others. So the number of events in a window of length \(t\) counts successes among \(n = t/\Delta t\) slices. That count is \(\text{Binomial}(n, \lambda\Delta t)\) with mean \(np = \lambda t\). As the slices shrink, \(n\) grows with \(np\) fixed, which is exactly the <a href="binomial-distribution.html#poisson">Poisson limit</a> from the Binomial tutorial:</p>
+  $$\begin{gathered} N(t) \sim \text{Poisson}(\lambda t) \\ P(N(t) = k) = \frac{(\lambda t)^k e^{-\lambda t}}{k!} \end{gathered}$$
+  <p>One process, two descriptions: the <strong>gaps are exponential</strong> and the <strong>counts are Poisson</strong>. They fit together exactly. No events by time \(t\) means the first wait is longer than \(t\), and both descriptions give \(P(N(t) = 0) = P(T > t) = e^{-\lambda t}\).</p>
+
+  <div class="widget">
+    <p class="widget-title">Count the events in each window</p>
+    <div class="controls">
+      <label class="ctrl">rate \(\lambda\) <input type="range" id="ppL" min="0.2" max="3" step="0.1" value="1"><output id="ppLOut"></output></label>
+      <label class="ctrl">window length \(t\) <input type="range" id="ppW" min="0.5" max="5" step="0.5" value="2"><output id="ppWOut"></output></label>
+    </div>
+    <div class="controls">
+      <button class="btn" id="ppNew">New timeline</button>
+      <button class="btn primary" id="ppMany">+500 timelines</button>
+      <button class="btn" id="ppReset">Reset</button>
+    </div>
+    <canvas id="ppLine" style="height:96px" role="img" aria-label="A timeline of 30 time units with random events, cut into windows labeled with their event counts"></canvas>
+    <div class="cap">Above: one timeline 30 units long, cut into windows. Below: the counts from every window so far.</div>
+    <canvas id="ppHist" style="height:210px" role="img" aria-label="Histogram of event counts per window compared with Poisson probabilities"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i>share of windows with \(k\) events</span><span><i class="sw dot" style="background:var(--gold)"></i>\(\text{Poisson}(\lambda t)\)</span></div>
+    <div class="readout" id="ppRead" style="margin-top:8px"></div>
+  </div>
+  <p>Nothing in the simulation mentions the Poisson distribution. It only draws exponential gaps. The Poisson counts appear on their own, with mean and variance both equal to \(\lambda t\).</p>
+</section>
+
+<!-- 6 -->
+<section id="paradox">
+  <div class="secnum">06</div>
+  <h2>The waiting-time paradox</h2>
+  <p>Buses arrive as a Poisson process, on average every 10 minutes (\(\lambda = 0.1\) per minute). You turn up at a random moment. How long do you expect to wait?</p>
+  <p>“Half a gap, so 5 minutes” sounds right, but it is wrong. The buses don’t know when you arrived, so by memorylessness your wait is a fresh \(\text{Exp}(\lambda)\): <strong>10 minutes on average</strong>. Stranger still, the gap you land in, from the bus you just missed to the one you catch, averages <strong>20 minutes</strong>, twice the average gap.</p>
+  <p>There is no contradiction. Long gaps cover more of the clock, so a random arrival is more likely to fall into one. A 20-minute gap is twice as likely to catch you as a 10-minute gap. This is <em class="term">length-biased sampling</em>, also called the <em class="term">inspection paradox</em>. Weighting each gap length by how long it is gives the density of the gap you land in:</p>
+  $$g(t) = \frac{t\,f(t)}{E[T]} = \lambda^2 t\,e^{-\lambda t}$$
+  <p>Its mean is \(2/\lambda\). Your arrival splits that gap into two pieces, the time since the last bus and the wait for the next. Each piece is an independent \(\text{Exp}(\lambda)\).</p>
+
+  <div class="widget">
+    <p class="widget-title">Drop passengers at random times</p>
+    <div class="controls">
+      <button class="btn on" data-px="rand" aria-pressed="true">Random buses</button>
+      <button class="btn" data-px="sched" aria-pressed="false">Buses every 10 minutes exactly</button>
+    </div>
+    <div class="controls">
+      <button class="btn" id="px1">Drop 1 passenger</button>
+      <button class="btn primary" id="px1000">+1,000 passengers</button>
+      <button class="btn" id="pxReset">Reset</button>
+    </div>
+    <canvas id="pxLine" style="height:130px" role="img" aria-label="One hour of bus arrivals; each passenger is a dot with an arrow to the next bus, and the latest passenger's gap is highlighted"></canvas>
+    <div class="cap">One hour of buses. Each dot is a passenger; the gold arrow is their wait. The latest passenger’s gap is shaded.</div>
+    <canvas id="pxHist" style="height:190px" role="img" aria-label="Histogram of the lengths of the gaps that passengers landed in"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i>length of the gap each passenger landed in (minutes)</span><span id="pxLeg1"><i class="sw dash" style="border-color:var(--ink-3)"></i>all gaps: \(\lambda e^{-\lambda t}\)</span><span id="pxLeg2"><i class="sw line" style="border-color:var(--gold)"></i>gaps passengers land in: \(\lambda^2 t e^{-\lambda t}\)</span></div>
+    <div class="readout" id="pxRead" style="margin-top:8px"></div>
+  </div>
+  <p>Switch to buses that run exactly every 10 minutes and the paradox disappears: the average wait drops to 5 minutes and every gap is 10. Randomness alone doubles your wait. The same bias appears whenever you sample by landing on something. Ask students how big their classes are and you get a larger average than the school’s own average class size, because big classes contain more students to ask.</p>
+</section>
+
+<!-- 7 -->
+<section id="race">
+  <div class="secnum">07</div>
+  <h2>Races: the first of many clocks</h2>
+  <p>Three independent exponential clocks run at rates \(\lambda_A\), \(\lambda_B\) and \(\lambda_C\). Think of three machines, any of which might fail first, or three radioactive isotopes in one sample. When does the first clock ring, and which one is it?</p>
+  <p>The first ring is later than \(t\) only if all three are:</p>
+  $$\begin{aligned} P(\min > t) &= e^{-\lambda_A t}\,e^{-\lambda_B t}\,e^{-\lambda_C t} \\ &= e^{-(\lambda_A + \lambda_B + \lambda_C)t} \end{aligned}$$
+  <p>So <strong>the first ring is itself exponential, with the rates added</strong>. And each clock’s chance of ringing first is its share of the total rate:</p>
+  $$P(A \text{ first}) = \frac{\lambda_A}{\lambda_A + \lambda_B + \lambda_C}$$
+
+  <div class="widget">
+    <p class="widget-title">Race three clocks</p>
+    <div class="controls">
+      <label class="ctrl"><span style="color:var(--one);font-weight:650">A</span> \(\lambda_A\) <input type="range" id="raA" min="0" max="3" step="0.1" value="1"><output id="raAOut"></output></label>
+      <label class="ctrl"><span style="color:var(--zero);font-weight:650">B</span> \(\lambda_B\) <input type="range" id="raB" min="0" max="3" step="0.1" value="0.5"><output id="raBOut"></output></label>
+      <label class="ctrl"><span style="color:var(--gold);font-weight:650">C</span> \(\lambda_C\) <input type="range" id="raC" min="0" max="3" step="0.1" value="0.3"><output id="raCOut"></output></label>
+    </div>
+    <div class="controls">
+      <button class="btn" id="raGo">Race once</button>
+      <button class="btn primary" id="ra1000">+1,000 races</button>
+      <button class="btn" id="raReset">Reset tally</button>
+    </div>
+    <canvas id="raLane" style="height:140px" role="img" aria-label="Three lanes; each clock's bar grows until its random ringing time, and the first to ring is marked"></canvas>
+    <canvas id="raBars" style="height:170px;margin-top:10px" role="img" aria-label="Share of races won by each clock compared with its share of the total rate"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i>share of races won</span><span><i class="sw line"></i>theory: \(\lambda_i / \sum \lambda\)</span></div>
+    <div class="readout" id="raRead" style="margin-top:8px"></div>
+  </div>
+  <p>After the first ring, the other clocks have no memory of the time that passed, so the race starts afresh among the rest. Chaining these two facts is how computers simulate chemical reactions and queues: draw one exponential with the total rate to find <em>when</em> the next event happens, then pick <em>which</em> event in proportion to its rate. This is the Gillespie algorithm.</p>
+  <details>
+    <summary>Why the winning chance is \(\lambda_A / \sum\lambda\)</summary>
+    <p>Write \(\Lambda = \lambda_A + \lambda_B + \lambda_C\). Clock A rings in a short interval around \(t\) with probability \(\lambda_A e^{-\lambda_A t}\,dt\), and the other two are both still silent then with probability \(e^{-(\lambda_B + \lambda_C)t}\). Add up over all \(t\):</p>
+    $$\begin{aligned} P(A \text{ first}) &= \int_0^\infty \lambda_A e^{-\lambda_A t}\,e^{-(\lambda_B+\lambda_C)t}\,dt \\ &= \lambda_A \int_0^\infty e^{-\Lambda t}\,dt = \frac{\lambda_A}{\Lambda} \end{aligned}$$
+    <p>The same calculation shows that <em>which</em> clock wins is independent of <em>when</em> the first ring happens.</p>
+  </details>
+  <h3>Adding waits instead of racing them</h3>
+  <p>The time until the \(k\)-th event of a Poisson process is a sum of \(k\) independent \(\text{Exp}(\lambda)\) gaps. It follows the <em class="term">gamma distribution</em> with shape \(k\), also called the <em class="term">Erlang distribution</em>:</p>
+  $$f_k(t) = \frac{\lambda^k t^{k-1} e^{-\lambda t}}{(k-1)!}$$
+  <p>It has mean \(k/\lambda\) and variance \(k/\lambda^2\). The wear-out curve in section 3 was this with \(k = 3\). As \(k\) grows, the central limit theorem pulls it toward a bell curve.</p>
+</section>
+
+<!-- 8 -->
+<section id="sampling">
+  <div class="secnum">08</div>
+  <h2>Making exponentials from uniforms</h2>
+  <p>Every simulation on this page needs exponential waits, but a computer’s random-number generator only gives uniform numbers \(U\) between 0 and 1. The fix is to run the CDF backwards. Solve \(F(t) = u\) for \(t\):</p>
+  $$u = 1 - e^{-\lambda t} \;\iff\; t = -\frac{\ln(1-u)}{\lambda}$$
+  <p>Feed in uniform \(u\)’s and out come exponential \(t\)’s. It works because</p>
+  $$P(T \le t) = P\big(U \le F(t)\big) = F(t)$$
+  <p>This is called <em class="term">inverse transform sampling</em>. Since \(1 - U\) is also uniform, \(T = -\ln(U)/\lambda\) works just as well.</p>
+
+  <div class="widget">
+    <p class="widget-title">Pick a height, go across, drop down</p>
+    <div class="controls">
+      <label class="ctrl">\(\lambda\) <input type="range" id="itL" min="0.5" max="3" step="0.1" value="1"><output id="itLOut"></output></label>
+      <button class="btn" id="it1">Draw 1</button>
+      <button class="btn primary" id="it200">+200</button>
+      <button class="btn" id="itGrid">19 evenly spaced u’s</button>
+      <button class="btn" id="itReset">Reset</button>
+    </div>
+    <canvas id="itMap" style="height:260px" role="img" aria-label="The exponential CDF; uniform values on the vertical axis are mapped across to the curve and down to waiting times on the horizontal axis"></canvas>
+    <canvas id="itHist" style="height:130px;margin-top:6px" role="img" aria-label="Histogram of the generated waiting times with the exponential density on top"></canvas>
+    <div class="legend"><span><i class="sw dot" style="background:var(--zero)"></i>uniform \(u\) (left edge)</span><span><i class="sw line" style="border-color:var(--gold)"></i>path to \(t\)</span><span><i class="sw" style="background:var(--accent)"></i>resulting \(t\)’s</span><span><i class="sw line"></i>\(\lambda e^{-\lambda t}\)</span></div>
+    <div class="readout" id="itRead" style="margin-top:8px"></div>
+  </div>
+  <p>Try the evenly spaced \(u\)’s. They land unevenly: bunched near 0, where the CDF is steep, and spread thin in the tail, where it is flat. The steepness of \(F\) is the density \(f\), so steep means likely. Move \(\lambda\) and every point slides at once. Changing the rate only rescales time.</p>
+</section>
+
+<!-- 9 -->
+<section id="estimate">
+  <div class="secnum">09</div>
+  <h2>Going backwards: what is \(\lambda\)?</h2>
+  <p>In practice you don’t know the rate. You time \(n\) waits \(t_1, \dots, t_n\) and want to estimate \(\lambda\). The <em class="term">likelihood</em> is the probability density of your data, viewed as a function of \(\lambda\):</p>
+  $$\begin{aligned} L(\lambda) &= \prod_{i=1}^{n} \lambda e^{-\lambda t_i} \\ &= \lambda^n e^{-\lambda \sum t_i} \end{aligned}$$
+  <p>Take the logarithm, differentiate and set the result to zero:</p>
+  $$\begin{aligned} \ell(\lambda) &= n\ln\lambda - \lambda\textstyle\sum t_i \\ \ell'(\lambda) &= \frac{n}{\lambda} - \textstyle\sum t_i = 0 \\ \hat\lambda &= \frac{n}{\sum t_i} = \frac{1}{\bar t} \end{aligned}$$
+  <p>The <em class="term">maximum likelihood estimate</em> is the natural one: events counted divided by time watched. It is slightly too high on average, since \(E[\hat\lambda] = \frac{n}{n-1}\lambda\), and \((n{-}1)/\sum t_i\) is the unbiased version. With 5 waits the difference is 25%; with 100 it is 1%.</p>
+  <h3>An exact confidence interval</h3>
+  <p>The total \(\lambda \sum t_i\) is a sum of \(n\) independent \(\text{Exp}(1)\) waits, so it follows a gamma distribution with shape \(n\), whatever \(\lambda\) is. If \(g_{0.025}\) and \(g_{0.975}\) are the 2.5% and 97.5% points of that gamma distribution, then</p>
+  $$\left[\frac{g_{0.025}}{\sum t_i},\; \frac{g_{0.975}}{\sum t_i}\right]$$
+  <p>is a 95% confidence interval for \(\lambda\). Textbooks often state the same fact as \(2\lambda\sum t_i \sim \chi^2_{2n}\). Unlike the binomial intervals, this one needs no approximation. It covers the true rate exactly 95% of the time, even for \(n = 1\). For example, 10 waits that add up to 12.5 minutes give \(\hat\lambda = 0.8\) per minute, with 95% interval \([0.38, 1.37]\).</p>
+
+  <div class="widget">
+    <p class="widget-title">Estimate the rate from data</p>
+    <div class="controls">
+      <label class="ctrl">true \(\lambda\) <input type="range" id="esL" min="0.2" max="3" step="0.1" value="0.8"><output id="esLOut"></output></label>
+      <button class="btn" id="es1">+1 wait</button>
+      <button class="btn" id="es10">+10</button>
+      <button class="btn primary" id="es100">+100</button>
+      <button class="btn" id="esReset">Reset</button>
+    </div>
+    <canvas id="esRug" style="height:46px" role="img" aria-label="The observed waits as dots on a time axis, with their average marked"></canvas>
+    <canvas id="esLik" style="height:220px" role="img" aria-label="Likelihood of each possible rate, with the estimate, the 95 percent interval and the true rate marked"></canvas>
+    <div class="legend"><span><i class="sw line" style="border-color:var(--accent)"></i>likelihood (scaled to peak 1)</span><span><i class="sw" style="background:var(--accent-soft);border:1px solid var(--accent)"></i>exact 95% interval</span><span><i class="sw dash" style="border-color:var(--gold)"></i>true \(\lambda\)</span></div>
+    <div class="readout" id="esRead" style="margin-top:8px"></div>
+    <div class="controls"><button class="btn" id="esCov">Repeat this experiment 1,000 times</button></div>
+    <div class="readout" id="esCovRead"></div>
+  </div>
+  <p>With a handful of waits the likelihood is broad and lopsided, and the interval stretches further to the right than to the left. With hundreds it becomes narrow and nearly symmetric. Its width then shrinks like \(1/\sqrt n\), roughly \(\hat\lambda \pm 1.96\,\hat\lambda/\sqrt n\).</p>
+  <div class="callout"><p><strong>Studies that end early.</strong> In a reliability test or a medical study, some items are still working when the study stops. Their lifetimes are <em>censored</em>: you only know they exceed the time watched. If \(d\) items failed and all items together were watched for a total time \(\tau\), counting the survivors’ time too, the maximum likelihood estimate is still events divided by time watched: \(\hat\lambda = d/\tau\). Dropping the survivors, or pretending they failed at the end, makes the rate look too high.</p></div>
+</section>
+
+<!-- 10 -->
+<section id="props">
+  <div class="secnum">10</div>
+  <h2>All the properties</h2>
+  <p>Here are the main facts about \(T \sim \text{Exp}(\lambda)\) in one place. Some books use the <em>scale</em> \(\theta = 1/\lambda\) (the mean) instead of the rate, writing the density as \(\frac1\theta e^{-t/\theta}\). Always check which convention a formula uses. Drag the slider to update every value.</p>
+
+  <div class="sticky-ctrl">
+    <label class="ctrl">\(\lambda\) <input type="range" id="prL" min="0.1" max="5" step="0.05" value="1"><output id="prLOut"></output></label>
+  </div>
+
+  <div class="minis" style="margin-top:16px">
+    <div class="mini"><div class="mcap">PDF</div><canvas id="miniPDF" style="height:150px" role="img" aria-label="Density for the current rate on the interval 0 to 5"></canvas></div>
+    <div class="mini"><div class="mcap">CDF</div><canvas id="miniCDF" style="height:150px" role="img" aria-label="Cumulative distribution function for the current rate"></canvas></div>
+    <div class="mini"><div class="mcap">Hazard rate</div><canvas id="miniHaz" style="height:150px" role="img" aria-label="Hazard rate for the current rate: a flat line at height lambda"></canvas></div>
+  </div>
+
+  <h3>The numbers</h3>
+  <div class="cards">
+    <div class="card"><h4>Support and parameter</h4><div class="f">\(t \ge 0\), rate \(\lambda > 0\)</div><div class="v" id="cPar"></div></div>
+    <div class="card"><h4>PDF</h4><div class="f">\(f(t) = \lambda e^{-\lambda t}\)</div><div class="v" id="cPDF"></div></div>
+    <div class="card"><h4>CDF</h4><div class="f">\(F(t) = 1 - e^{-\lambda t}\)</div><div class="v" id="cCDF"></div></div>
+    <div class="card"><h4>Survival</h4><div class="f">\(S(t) = e^{-\lambda t}\)</div><div class="v" id="cSurv"></div></div>
+    <div class="card"><h4>Hazard</h4><div class="f">\(h(t) = \lambda\)</div><div class="v" id="cHaz"></div></div>
+    <div class="card"><h4>Mean</h4><div class="f">\(E[T] = 1/\lambda\)</div><div class="v" id="cMean"></div></div>
+    <div class="card"><h4>Variance and SD</h4><div class="f">\(\operatorname{Var}(T) = 1/\lambda^2,\; \sigma = 1/\lambda\)</div><div class="v" id="cVar"></div></div>
+    <div class="card"><h4>Median and mode</h4><div class="f">median \(\ln 2/\lambda\), mode \(0\)</div><div class="v" id="cMed"></div></div>
+    <div class="card"><h4>Quantile</h4><div class="f">\(Q(u) = -\ln(1-u)/\lambda\)</div><div class="v" id="cQ"></div></div>
+    <div class="card"><h4>Shape</h4><div class="f">skewness \(2\), excess kurtosis \(6\)</div><div class="v">the same for every λ</div></div>
+    <div class="card"><h4>Entropy</h4><div class="f">\(H = 1 - \ln\lambda\) nats</div><div class="v" id="cEnt"></div></div>
+    <div class="card"><h4>MGF</h4><div class="f">\(M(s) = \dfrac{\lambda}{\lambda - s},\; s < \lambda\)</div><div class="v" id="cMGF"></div></div>
+    <div class="card"><h4>Estimate and information</h4><div class="f">\(\hat\lambda = n/\sum t_i,\; I(\lambda) = 1/\lambda^2\)</div><div class="v" id="cMLE"></div></div>
+  </div>
+
+  <h3>Where the formulas come from</h3>
+  <details>
+    <summary>All the moments at once, from the MGF</summary>
+    <p>The moment generating function is \(M(s) = E[e^{sT}] = \int_0^\infty \lambda e^{-(\lambda - s)t}\,dt = \frac{\lambda}{\lambda - s}\) for \(s < \lambda\). Expand it as a geometric series:</p>
+    $$\frac{\lambda}{\lambda - s} = \sum_{k=0}^{\infty} \frac{s^k}{\lambda^k} = \sum_{k=0}^{\infty} \frac{k!}{\lambda^k}\cdot\frac{s^k}{k!}$$
+    <p>The coefficient of \(s^k/k!\) is the \(k\)-th moment, so \(E[T^k] = k!/\lambda^k\). That gives \(E[T] = 1/\lambda\), \(E[T^2] = 2/\lambda^2\), \(E[T^3] = 6/\lambda^3\) and \(E[T^4] = 24/\lambda^4\).</p>
+  </details>
+  <details>
+    <summary>Skewness 2 and excess kurtosis 6</summary>
+    <p>The cumulants of \(\text{Exp}(\lambda)\) are \(\kappa_r = (r-1)!/\lambda^r\), read off from \(\ln M(s) = -\ln(1 - s/\lambda)\). So \(\kappa_2 = 1/\lambda^2\), \(\kappa_3 = 2/\lambda^3\) and \(\kappa_4 = 6/\lambda^4\), and</p>
+    $$\gamma_1 = \frac{\kappa_3}{\kappa_2^{3/2}} = 2, \qquad \gamma_2 = \frac{\kappa_4}{\kappa_2^{2}} = 6$$
+    <p>Both are free of \(\lambda\). Every exponential has the same shape; the rate only stretches the time axis. A sum of \(k\) independent exponentials (the gamma distribution) has skewness \(2/\sqrt k\) and excess kurtosis \(6/k\), shrinking toward the normal’s 0 and 0.</p>
+  </details>
+  <details>
+    <summary>Entropy, and why the exponential is the “most random” waiting time</summary>
+    <p>The differential entropy is \(H = -E[\ln f(T)] = -E[\ln\lambda - \lambda T] = 1 - \ln\lambda\) nats. It can be negative when \(\lambda > e\); differential entropy measures spread relative to a unit of time, not an absolute count of bits. Among all distributions on \([0, \infty)\) with a given mean, the exponential has the largest entropy. If all you know about a waiting time is its average, the exponential assumes the least beyond that.</p>
+  </details>
+  <details>
+    <summary>Fisher information and the best estimate</summary>
+    <p>The log-density of one observation is \(\ln\lambda - \lambda t\). Its second derivative in \(\lambda\) is \(-1/\lambda^2\), so each wait carries Fisher information \(1/\lambda^2\), and \(n\) waits carry \(n/\lambda^2\). Any unbiased estimator therefore has variance at least \(\lambda^2/n\). The likelihood depends on the data only through \(\sum t_i\), so the total time watched is a <em>sufficient statistic</em>: once you know it and \(n\), the individual waits tell you nothing more about \(\lambda\).</p>
+  </details>
+
+  <h3>Structural facts worth remembering</h3>
+  <ol class="facts">
+    <li><strong>Memoryless, and the only one.</strong> \(P(T > s+t \mid T > s) = P(T > t)\). No other continuous distribution has this property (section 3).</li>
+    <li><strong>Its discrete twin is the geometric.</strong> Rounding up, \(\lceil T \rceil\) is geometric with success probability \(1 - e^{-\lambda}\). The exponential is the geometric with infinitely fine slices (section 1).</li>
+    <li><strong>Scaling.</strong> \(cT \sim \text{Exp}(\lambda/c)\) for \(c > 0\). Every exponential is a stretched \(\text{Exp}(1)\): \(T = E/\lambda\) with \(E \sim \text{Exp}(1)\).</li>
+    <li><strong>Sums: gamma.</strong> The sum of \(k\) independent \(\text{Exp}(\lambda)\) waits is \(\text{Gamma}(k, \lambda)\), the Erlang distribution.</li>
+    <li><strong>Special case of bigger families.</strong> \(\text{Exp}(\lambda)\) is the gamma distribution with shape 1 and the Weibull distribution with shape 1. Also, \(2\lambda T \sim \chi^2_2\).</li>
+    <li><strong>Differences: Laplace.</strong> The difference of two independent \(\text{Exp}(\lambda)\) waits has the Laplace (“double exponential”) distribution, with density \(\tfrac{\lambda}{2}e^{-\lambda|x|}\).</li>
+    <li><strong>Conjugate prior: gamma.</strong> If your uncertainty about \(\lambda\) is \(\text{Gamma}(\alpha, \beta)\) (shape \(\alpha\), rate \(\beta\)), then after observing \(n\) waits it becomes \(\text{Gamma}(\alpha + n,\; \beta + \sum t_i)\).</li>
+  </ol>
+
+</section>
+
+<!-- 11 -->
+<section id="uses">
+  <div class="secnum">11</div>
+  <h2>Where you will meet it</h2>
+  <div class="cards">
+    <div class="card"><h4>Radioactive decay</h4><p>Each nucleus decays after an exponential time, independently of its age. Half-lives, carbon dating and the clicking of a Geiger counter all follow from this.</p></div>
+    <div class="card"><h4>Queues and call centers</h4><p>In queueing theory the classic model, the M/M/1 queue, assumes exponential gaps between arrivals and exponential service times. The “M” stands for Markov, which here means memoryless. Staffing formulas for call centers start from it.</p></div>
+    <div class="card"><h4>Reliability</h4><p>Electronic parts in mid-life fail at a roughly constant rate. Their lifetime is then exponential, and the “mean time between failures” quoted on data sheets is \(1/\lambda\).</p></div>
+    <div class="card"><h4>Servers and networks</h4><p>Requests from many independent users arrive at a server roughly as a Poisson process. Load tests generate traffic with exponential gaps for this reason.</p></div>
+    <div class="card"><h4>Survival analysis</h4><p>Medical and actuarial studies model time to an event through its hazard rate. The exponential, with constant hazard, is the baseline that richer models such as the Weibull and Cox models build on.</p></div>
+    <div class="card"><h4>When it fails</h4><p>Things that wear out have rising hazards; use a Weibull or gamma instead. Traffic that comes in bursts, or follows a daily cycle, has more variable gaps than the exponential allows. Check with a log-scale survival plot: a straight line means exponential.</p></div>
+  </div>
+</section>
+
+</main>
+<footer>A single-file interactive explainer, following <a href="bernoulli-distribution.html">The Bernoulli Distribution</a> and <a href="binomial-distribution.html">The Binomial Distribution</a>. Math typeset with KaTeX. Every simulation runs live in your browser using <code>Math.random()</code>.</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script>
+(function(){
+'use strict';
+/* ---------- helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const root = document.documentElement;
+const C = n => getComputedStyle(root).getPropertyValue(n).trim();
+const clamp = (x,a,b) => Math.max(a, Math.min(b, x));
+const f1 = x => x.toFixed(1), f2 = x => x.toFixed(2), f3 = x => x.toFixed(3), f4 = x => x.toFixed(4);
+const fmtN = x => Math.abs(x - Math.round(x)) < 1e-9 ? String(Math.round(x)) : String(+x.toFixed(2));
+const pct = x => (100 * x).toFixed(1) + '%';
+const SANS = 'system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';
+const MONO = 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
+const RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+const TAU = Math.PI * 2;
+const expS = l => -Math.log(1 - Math.random()) / l;   // 1 - U is in (0, 1], so the log is finite
+
+if (window.renderMathInElement) {
+  renderMathInElement(document.body, {
+    delimiters: [{left:'$$', right:'$$', display:true}, {left:'\\(', right:'\\)', display:false}],
+    throwOnError: false
+  });
+}
+function markOverflow(el){
+  if (!el) return;
+  el.classList.toggle('ovf', el.scrollWidth - el.clientWidth - el.scrollLeft > 2);
+}
+function markAllOverflow(){ $$('.katex-display').forEach(markOverflow); }
+document.addEventListener('scroll', e => {
+  if (e.target.classList && e.target.classList.contains('katex-display')) markOverflow(e.target);
+}, true);
+markAllOverflow();
+window.addEventListener('load', markAllOverflow);   // KaTeX web fonts can change widths
+function fit(c){
+  const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+  if (c.width !== w*dpr || c.height !== h*dpr) { c.width = w*dpr; c.height = h*dpr; }
+  const ctx = c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  return {ctx, w, h};
+}
+const redraws = [];
+function redrawAll(){ redraws.forEach(f => f()); markAllOverflow(); }
+let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(redrawAll, 80); });
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+if (mq.addEventListener) mq.addEventListener('change', redrawAll);
+new MutationObserver(redrawAll).observe(root, {attributes:true, attributeFilter:['data-theme']});
+
+function bindRange(input, out, cb, fmt){
+  fmt = fmt || fmtN;
+  const f = () => { const v = parseFloat(input.value); if (out) out.textContent = fmt(v); cb(v); };
+  input.addEventListener('input', f); f();
+}
+function setRange(input, v){ input.value = v; input.dispatchEvent(new Event('input')); }
+function niceTicks(max, count){
+  const raw = max / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const step = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag;
+  const t = []; for (let v = 0; v <= max + 1e-9; v += step) t.push(v); return t;
+}
+function intStep(px, minPx){
+  for (const s of [1,2,5,10,20,25,50,100,200,250,500,1000]) if (s * px >= minPx) return s;
+  return 1000;
+}
+function yGrid(ctx, X0, X1, ys, ticks, fmt){
+  ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ticks.forEach(v => {
+    const y = Math.round(ys(v)) + .5;
+    ctx.strokeStyle = C('--line'); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X0, y); ctx.lineTo(X1, y); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.fillText(fmt(v), X0 - 6, y);
+  });
+}
+function stepFmt(ticks){ const st = ticks.length > 1 ? ticks[1] - ticks[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9)); return v => v.toFixed(d); }
+function roundRect(ctx, x, y, w, h, r){
+  r = Math.max(0, Math.min(r, w/2, Math.abs(h)/2));
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+function dot(ctx, x, y, r){ ctx.beginPath(); ctx.arc(x, y, Math.max(0.5, r), 0, TAU); ctx.fill(); }
+
+/* continuous axes: x from xmin to xmax, y from 0 to ymax (or a custom y-scale) */
+function cax(ctx, w, h, o){
+  const X0 = o.left != null ? o.left : 44, X1 = w - (o.right != null ? o.right : 12);
+  const Y0 = h - (o.bottom != null ? o.bottom : 24), Y1 = o.top != null ? o.top : 12;
+  const xmin = o.xmin || 0, xmax = o.xmax;
+  const xs = x => X0 + (x - xmin) / (xmax - xmin) * (X1 - X0);
+  const ixs = px => xmin + (px - X0) / (X1 - X0) * (xmax - xmin);
+  const ys = o.yscale ? o.yscale(Y0, Y1) : (v => Y0 - v / o.ymax * (Y0 - Y1));
+  if (o.ygrid !== false) {
+    const t = o.yticks || niceTicks(o.ymax, o.ny || 4).filter(v => v <= o.ymax * 1.0001);
+    yGrid(ctx, X0, X1, ys, t, o.yfmt || stepFmt(t));
+  }
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  if (o.xlabels !== false) {
+    const xt = niceTicks(xmax - xmin, Math.max(2, Math.floor((X1 - X0) / (o.xgap || 58))));
+    const fmt = o.xfmt || stepFmt(xt);
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    xt.forEach(v => ctx.fillText(fmt(v + xmin), xs(v + xmin), Y0 + 6));
+  }
+  return {X0, X1, Y0, Y1, xs, ixs, ys};
+}
+function clipTo(ctx, A){ ctx.save(); ctx.beginPath(); ctx.rect(A.X0, A.Y1 - 4, A.X1 - A.X0 + 1, A.Y0 - A.Y1 + 4.5); ctx.clip(); }
+function pathFn(ctx, A, f, x0, x1, n){
+  n = n || 240; ctx.beginPath(); let on = false;
+  for (let i = 0; i <= n; i++) {
+    const x = x0 + (x1 - x0) * i / n, v = f(x);
+    if (!isFinite(v)) { on = false; continue; }
+    const px = A.xs(x), py = A.ys(v);
+    if (on) ctx.lineTo(px, py); else { ctx.moveTo(px, py); on = true; }
+  }
+}
+function fillFn(ctx, A, f, x0, x1, color, n){
+  if (!(x1 > x0)) return;
+  n = n || 160; ctx.beginPath(); ctx.moveTo(A.xs(x0), A.Y0);
+  for (let i = 0; i <= n; i++) { const x = x0 + (x1 - x0) * i / n; ctx.lineTo(A.xs(x), A.ys(f(x))); }
+  ctx.lineTo(A.xs(x1), A.Y0); ctx.closePath(); ctx.fillStyle = color; ctx.fill();
+}
+function vline(ctx, x, y0, y1, color, dash, lw){
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw || 1.5; if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(Math.round(x) + .5, y0); ctx.lineTo(Math.round(x) + .5, y1); ctx.stroke(); ctx.restore();
+}
+/* integer-valued bar charts (counts) */
+function frame(ctx, w, h, o){
+  const X0 = o.left != null ? o.left : 44, X1 = w - 10, Y0 = h - 24, Y1 = o.top != null ? o.top : 12;
+  const span = o.hi - o.lo + 1, bw = (X1 - X0) / span;
+  const xc = k => X0 + bw * (k - o.lo + .5), ys = v => Y0 - (v / o.ymax) * (Y0 - Y1);
+  const t = niceTicks(o.ymax, 4).filter(v => v <= o.ymax * 1.0001); yGrid(ctx, X0, X1, ys, t, o.yfmt || stepFmt(t));
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  const st = intStep(bw, 22);
+  for (let k = Math.ceil(o.lo / st) * st; k <= o.hi; k += st) ctx.fillText(k, xc(k), Y0 + 6);
+  return {X0, X1, Y0, Y1, bw, xc, ys};
+}
+function drawBars(ctx, F, lo, hi, val, color, frac){
+  const bwid = Math.max(1, F.bw * (frac == null ? .8 : frac));
+  for (let k = lo; k <= hi; k++) {
+    const v = val(k); if (!(v > 0)) continue;
+    const y = F.ys(v), hh = F.Y0 - y; if (hh < 0.2) continue;
+    const x = F.xc(k) - bwid / 2;
+    ctx.fillStyle = typeof color === 'function' ? color(k) : color;
+    if (bwid >= 6 && hh >= 3) { roundRect(ctx, x, y, bwid, hh, Math.min(3, bwid / 4)); ctx.fill(); }
+    else ctx.fillRect(x, y, bwid, hh);
+  }
+}
+/* histogram of continuous values, drawn as a density */
+function drawHistDensity(ctx, A, counts, bw, n, color){
+  if (!n) return;
+  ctx.fillStyle = color;
+  for (let b = 0; b < counts.length; b++) {
+    if (!counts[b]) continue;
+    const d = counts[b] / (n * bw), x0 = A.xs(b * bw), x1 = A.xs((b + 1) * bw), y = A.ys(d);
+    const g = x1 - x0 > 5 ? 1 : 0;
+    ctx.fillRect(x0 + g / 2, y, Math.max(1, x1 - x0 - g), A.Y0 - y);
+  }
+}
+function histMax(counts, bw, n){ let m = 0; if (!n) return 0; for (const c of counts) m = Math.max(m, c / (n * bw)); return m; }
+
+/* ---------- special functions ---------- */
+const LF = [0];
+function lf(n){ while (LF.length <= n) { const i = LF.length; LF.push(LF[i-1] + Math.log(i)); } return LF[n]; }
+function poisPMF(l, k){ return l <= 0 ? (k === 0 ? 1 : 0) : Math.exp(-l + k * Math.log(l) - lf(k)); }
+function lgam(x){
+  const g = 7, c = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+  if (x < 0.5) return Math.log(Math.PI / Math.abs(Math.sin(Math.PI * x))) - lgam(1 - x);
+  x -= 1; let a = c[0]; const t = x + g + 0.5;
+  for (let i = 1; i < 9; i++) a += c[i] / (x + i);
+  return 0.5 * Math.log(TAU) + (x + 0.5) * Math.log(t) - t + Math.log(a);
+}
+function gammaP(a, x){   // regularized lower incomplete gamma P(a, x)
+  if (x <= 0) return 0;
+  const lead = Math.exp(-x + a * Math.log(x) - lgam(a));
+  if (x < a + 1) {
+    let ap = a, del = 1 / a, sum = del;
+    for (let i = 0; i < 2000; i++) { ap += 1; del *= x / ap; sum += del; if (Math.abs(del) < Math.abs(sum) * 1e-15) break; }
+    return Math.min(1, sum * lead);
+  }
+  const TINY = 1e-300; let b = x + 1 - a, c = 1 / TINY, d = 1 / b, hh = d;
+  for (let i = 1; i < 2000; i++) {
+    const an = -i * (i - a); b += 2;
+    d = an * d + b; if (Math.abs(d) < TINY) d = TINY;
+    c = b + an / c; if (Math.abs(c) < TINY) c = TINY;
+    d = 1 / d; const del = d * c; hh *= del; if (Math.abs(del - 1) < 1e-15) break;
+  }
+  return Math.max(0, 1 - lead * hh);
+}
+function gammaQuantile(a, p){
+  let lo = 0, hi = Math.max(1, 2 * a);
+  while (gammaP(a, hi) < p) hi *= 2;
+  for (let i = 0; i < 200; i++) { const m = (lo + hi) / 2; if (gammaP(a, m) < p) lo = m; else hi = m; if (hi - lo < 1e-12 * hi) break; }
+  return (lo + hi) / 2;
+}
+window.__expo = {gammaP, gammaQuantile, lgam};   // exposed for testing
+
+/* ---------- 0. hero: a random clicker ---------- */
+(function(){
+  const lc = $('#heroLine'), hc = $('#heroHist'), hint = $('#heroHint'), go = $('#heroGo');
+  const LAM = 1.5, WIN = 8, BW = 0.2, NB = 20, KEEP = 400;
+  let now = 0, next = expS(LAM), ev = [], lastEv = 0, running = !RM, raf = 0, last = 0, visible = true;
+  let nClicks = 0, nGaps = 0, sumG = 0, maxG = 0, over = 0;
+  const hist = new Array(NB).fill(0);
+  function add(t){
+    if (nClicks) { const g = t - lastEv; nGaps++; sumG += g; if (g > maxG) maxG = g; const b = Math.floor(g / BW); if (b < NB) hist[b]++; else over++; }
+    lastEv = t; nClicks++; ev.push(t); if (ev.length > KEEP) ev.splice(0, ev.length - KEEP);
+  }
+  function advance(dt){ now += dt; let added = false; while (next <= now) { add(next); next += expS(LAM); added = true; } return added; }
+  function drawLine(){
+    const {ctx, w, h} = fit(lc);
+    const X0 = 8, X1 = w - 8, yL = h - 24, t0 = now - WIN, top = yL - 58;
+    const xs = t => X0 + (t - t0) / WIN * (X1 - X0);
+    ctx.save(); ctx.beginPath(); ctx.rect(X0, 0, X1 - X0, h); ctx.clip();
+    // gaps between consecutive clicks
+    for (let i = 1; i < ev.length; i++) {
+      const a = ev[i - 1], b = ev[i]; if (b < t0) continue;
+      const xa = xs(Math.max(a, t0 - .5)), xb = xs(b);
+      ctx.fillStyle = i % 2 ? C('--accent-soft') : C('--gold-soft');
+      ctx.fillRect(xa, top + 14, xb - xa, yL - top - 14);
+      if (xb - xa >= 38 && a >= t0) {
+        ctx.fillStyle = C('--ink-2'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillText(f1(b - a) + ' s', (xa + xb) / 2, top + 18);
+      }
+    }
+    // the gap still open
+    if (nClicks) {
+      const xa = xs(Math.max(lastEv, t0 - .5)), xb = xs(now);
+      ctx.save(); ctx.setLineDash([4, 3]); ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1;
+      ctx.strokeRect(xa + .5, top + 14.5, Math.max(0, xb - xa - 1), yL - top - 15); ctx.restore();
+    }
+    // clicks
+    ev.forEach(t => {
+      if (t < t0 - .1) return;
+      const x = xs(t), age = now - t, fresh = age < .35;
+      ctx.strokeStyle = fresh ? C('--zero') : C('--ink'); ctx.lineWidth = fresh ? 3 : 2;
+      ctx.beginPath(); ctx.moveTo(x, top + 6); ctx.lineTo(x, yL); ctx.stroke();
+      if (fresh && !RM) { ctx.strokeStyle = C('--zero'); ctx.lineWidth = 1.5; ctx.globalAlpha = 1 - age / .35; ctx.beginPath(); ctx.arc(x, top + 6, 4 + age * 40, 0, TAU); ctx.stroke(); ctx.globalAlpha = 1; }
+    });
+    ctx.restore();
+    // axis
+    ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, yL + .5); ctx.lineTo(X1, yL + .5); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textBaseline = 'top';
+    for (let s = 0; s <= WIN; s += 2) {
+      const x = X1 - s / WIN * (X1 - X0);
+      ctx.textAlign = s === 0 ? 'right' : s === WIN ? 'left' : 'center';
+      ctx.fillText(s === 0 ? 'now' : '−' + s + ' s', x, yL + 6);
+    }
+  }
+  function drawHist(){
+    const {ctx, w, h} = fit(hc);
+    const ymax = Math.max(LAM * 1.12, histMax(hist, BW, nGaps) * 1.08);
+    const A = cax(ctx, w, h, {xmax: NB * BW, ymax, left: 36, ny: 3});
+    drawHistDensity(ctx, A, hist, BW, nGaps, C('--accent'));
+    if (nGaps >= 30) {
+      clipTo(ctx, A); ctx.strokeStyle = C('--gold'); ctx.lineWidth = 2.5;
+      pathFn(ctx, A, t => LAM * Math.exp(-LAM * t), 0, NB * BW); ctx.stroke(); ctx.restore();
+    }
+  }
+  function setHint(){
+    if (nGaps < 1) return;
+    let s = `<b>${nClicks.toLocaleString()}</b> clicks · average gap <b>${f2(sumG / nGaps)} s</b> (rate 1.5 per second, so 1/1.5 ≈ 0.67 s) · longest gap ${f1(maxG)} s`;
+    if (over) s += ` · ${over.toLocaleString()} gap${over === 1 ? '' : 's'} longer than 4 s not shown`;
+    if (nGaps >= 30) s += '<br>Short gaps are the most common and long ones are rare, but they happen. The gold curve is λe<sup>−λt</sup>, the exponential distribution.';
+    hint.innerHTML = s;
+  }
+  function tick(ts){
+    raf = 0;
+    if (!running || !visible) { last = 0; return; }
+    const dt = last ? Math.min(.1, (ts - last) / 1000) : 0; last = ts;
+    if (advance(dt)) { setHint(); drawHist(); }
+    drawLine();
+    raf = requestAnimationFrame(tick);
+  }
+  function kick(){ if (!raf && running && visible) raf = requestAnimationFrame(tick); }
+  function setRunning(on){ running = on; go.textContent = on ? '❚❚ Pause' : '▶ Listen'; if (on) kick(); else drawLine(); }
+  go.addEventListener('click', () => setRunning(!running));
+  $('#heroMany').addEventListener('click', () => {
+    for (let i = 0; i < 500; i++) { now = next; add(next); next += expS(LAM); }
+    setHint(); drawHist(); drawLine();
+  });
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(es => { visible = es[0].isIntersecting; kick(); }).observe(lc);
+  }
+  const draw = () => { drawLine(); drawHist(); };
+  setRunning(running); draw(); redraws.push(draw);
+})();
+
+/* ---------- 1. slices ---------- */
+(function(){
+  const cv = $('#slChart'), sc = $('#slStrip');
+  const DTS = [0.5, 0.25, 0.1, 0.05, 0.02, 0.01];
+  let lam = 1, dt = .25, run = null, raf = 0;
+  const xmax = () => 5 / lam;
+  const margins = {left: 40, right: 12};
+  function revealed(now){
+    if (!run) return 0;
+    const S = Math.ceil(xmax() / dt), target = Math.min(run.K, S);
+    if (RM) return target;
+    const per = Math.max(3, Math.min(60, 1400 / target));
+    return Math.min(target, Math.floor((now - run.t0) / per) + 1);
+  }
+  function drawStrip(now){
+    const {ctx, w, h} = fit(sc);
+    const X0 = margins.left, X1 = w - margins.right, X = xmax(), S = Math.ceil(X / dt), r = revealed(now);
+    const px = (X1 - X0) * dt / X, g = px >= 5 ? 1 : 0;
+    for (let i = 1; i <= S; i++) {
+      const x0 = X0 + (i - 1) * px; if (x0 > X1) break;
+      let col = C('--surface-2');
+      if (run && i <= r) col = (i === run.K) ? C('--one') : C('--ink-3');
+      ctx.fillStyle = col; ctx.fillRect(x0 + g / 2, 6, Math.max(.6, Math.min(px - g, X1 - x0)), h - 12);
+    }
+  }
+  function drawChart(){
+    const {ctx, w, h} = fit(cv);
+    const X = xmax(), p = Math.min(1, lam * dt), ymax = lam * 1.15;
+    const A = cax(ctx, w, h, {xmax: X, ymax, left: margins.left, right: margins.right});
+    clipTo(ctx, A);
+    const K = Math.ceil(X / dt), pw = A.xs(dt) - A.xs(0), g = pw > 5 ? 1 : 0;
+    const done = run && revealed(performance.now()) >= Math.min(run.K, K);
+    for (let k = 1; k <= K; k++) {
+      const P = p >= 1 ? (k === 1 ? 1 : 0) : Math.pow(1 - p, k - 1) * p, v = P / dt;
+      if (!(v > 0)) continue;
+      const x0 = A.xs((k - 1) * dt), y = A.ys(v);
+      ctx.fillStyle = (done && run.K === k) ? C('--gold') : C('--accent');
+      ctx.fillRect(x0 + g / 2, y, Math.max(.8, pw - g), A.Y0 - y);
+    }
+    ctx.strokeStyle = C('--ink'); ctx.lineWidth = 2;
+    pathFn(ctx, A, t => lam * Math.exp(-lam * t), 0, X); ctx.stroke();
+    ctx.restore();
+  }
+  function readout(){
+    const p = Math.min(1, lam * dt), n1 = Math.round(1 / dt);
+    let s = `slice width Δt = <b>${fmtN(dt)}</b> → p = λΔt = <b>${fmtN(p)}</b> per slice<br>` +
+      `P(T > 1) = (1 − p)<sup>${n1}</sup> = <b>${f4(Math.pow(1 - p, n1))}</b> · limit e<sup>−λ</sup> = <b>${f4(Math.exp(-lam))}</b><br>` +
+      `average wait Δt / p = <b>${fmtN(1 / lam)}</b> = 1/λ`;
+    if (run && revealed(performance.now()) >= Math.min(run.K, Math.ceil(xmax() / dt))) {
+      s += `<br>last run: first click in slice <b>${run.K.toLocaleString()}</b>, so T = ${fmtN(run.K * dt)}` + (run.K * dt > xmax() ? ' (beyond the right edge)' : '');
+    }
+    $('#slRead').innerHTML = s;
+  }
+  function tick(now){
+    raf = 0; drawStrip(now); drawChart();
+    const S = Math.ceil(xmax() / dt);
+    if (run && revealed(now) < Math.min(run.K, S)) raf = requestAnimationFrame(tick); else readout();
+  }
+  $('#slRun').addEventListener('click', () => {
+    const p = Math.min(1, lam * dt); let K = 1;
+    while (Math.random() >= p && K < 1e6) K++;       // one real coin flip per slice
+    run = {K, t0: performance.now()};
+    readout(); if (!raf) raf = requestAnimationFrame(tick);
+  });
+  const draw = () => { drawStrip(performance.now()); drawChart(); };
+  bindRange($('#slL'), $('#slLOut'), v => { lam = v; run = null; draw(); readout(); });
+  bindRange($('#slD'), $('#slDOut'), v => { dt = DTS[v]; run = null; draw(); readout(); }, v => fmtN(DTS[v]));
+  redraws.push(draw);
+})();
+
+/* ---------- 2. density, CDF, survival ---------- */
+(function(){
+  const pc = $('#dnPDF'), cc = $('#dnCum'), XM = 8;
+  let lam = 1, a = .5, b = 2, mode = 'F', A = null;
+  const S = t => Math.exp(-lam * t);
+  function drawPDF(){
+    const {ctx, w, h} = fit(pc);
+    const lo = Math.min(a, b), hi = Math.max(a, b);
+    A = cax(ctx, w, h, {xmax: XM, ymax: lam * 1.12, left: 40});
+    clipTo(ctx, A);
+    const f = t => lam * Math.exp(-lam * t);
+    fillFn(ctx, A, f, lo, hi, C('--gold-soft'));
+    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2.5; pathFn(ctx, A, f, 0, XM); ctx.stroke();
+    ctx.restore();
+    [lo, hi].forEach(x => vline(ctx, A.xs(x), A.Y0, A.ys(f(x)) - 6, C('--gold'), null, 2));
+    const m = Math.LN2 / lam;
+    if (m <= XM) {
+      vline(ctx, A.xs(m), A.Y0, A.Y1 + 14, C('--ink-2'), [4, 3], 1);
+      ctx.fillStyle = C('--ink-2'); ctx.font = '11px ' + MONO; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+      ctx.fillText('median', A.xs(m) + 4, A.Y1 + 2);
+    }
+  }
+  function drawCum(){
+    const {ctx, w, h} = fit(cc);
+    const LOGMIN = 1e-3, log = mode === 'L';
+    const yscale = log ? (Y0, Y1) => v => Y0 - (Math.log10(Math.max(v, LOGMIN)) + 3) / 3 * (Y0 - Y1) : null;
+    const B = cax(ctx, w, h, {xmax: XM, ymax: 1, left: 44, yscale, yticks: log ? [0.001, 0.01, 0.1, 1] : [0, .25, .5, .75, 1],
+      yfmt: log ? (v => String(v)) : (v => String(v))});
+    const fn = mode === 'F' ? (t => 1 - S(t)) : S;
+    clipTo(ctx, B);
+    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2.5;
+    const tEnd = log ? Math.min(XM, 3 * Math.LN10 / lam) : XM;   // stop where S(t) = 0.001, never take log(0)
+    pathFn(ctx, B, fn, 0, tEnd); ctx.stroke();
+    ctx.restore();
+    // half-life staircase
+    const m = Math.LN2 / lam, labels = ['½', '¼', '⅛'];
+    ctx.font = '12px ' + MONO;
+    for (let j = 1; j <= 3; j++) {
+      const t = j * m; if (t > XM) break;
+      const v = mode === 'F' ? 1 - Math.pow(.5, j) : Math.pow(.5, j), x = B.xs(t), y = B.ys(v);
+      ctx.save(); ctx.setLineDash([3, 3]); ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(B.X0, y); ctx.lineTo(x, y); ctx.lineTo(x, B.Y0); ctx.stroke(); ctx.restore();
+      ctx.fillStyle = C('--gold'); dot(ctx, x, y, 4);
+      ctx.fillStyle = C('--ink-2'); ctx.textAlign = 'left'; ctx.textBaseline = mode === 'F' ? 'top' : 'bottom';
+      ctx.fillText(mode === 'F' ? (j === 1 ? '½' : j === 2 ? '¾' : '⅞') : labels[j - 1], x + 5, y + (mode === 'F' ? 3 : -3));
+    }
+  }
+  function readout(){
+    const lo = Math.min(a, b), hi = Math.max(a, b), sa = S(lo), sb = S(hi);
+    $('#dnRead').innerHTML = `P(${fmtN(lo)} ≤ T ≤ ${fmtN(hi)}) = e<sup>−λ·${fmtN(lo)}</sup> − e<sup>−λ·${fmtN(hi)}</sup> = ${f4(sa)} − ${f4(sb)} = <b>${f4(sa - sb)}</b><br>` +
+      `median (half-life) ln 2/λ = <b>${f3(Math.LN2 / lam)}</b> · mean 1/λ = <b>${f3(1 / lam)}</b>`;
+    const txt = {
+      F: `F(t) climbs from 0 toward 1. The dots mark the half-lives: half the waits are over by ${f2(Math.LN2 / lam)}, three quarters by ${f2(2 * Math.LN2 / lam)}.`,
+      S: `S(t) = 1 − F(t). Every ${f2(Math.LN2 / lam)} time units, the share still waiting halves: ½, ¼, ⅛ …`,
+      L: `On a log scale S(t) is a straight line. It falls by a factor of 10 every ln 10/λ = ${f2(Math.LN10 / lam)} time units.`
+    };
+    $('#dnCumRead').textContent = txt[mode];
+  }
+  const draw = () => { drawPDF(); drawCum(); };
+  $$('[data-cm]').forEach(btn => btn.addEventListener('click', () => {
+    mode = btn.dataset.cm;
+    $$('[data-cm]').forEach(x => { const on = x === btn; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
+    drawCum(); readout();
+  }));
+  let drag = null;
+  function pickT(e){ const r = pc.getBoundingClientRect(); return Math.round(clamp(A.ixs(e.clientX - r.left), 0, XM) * 10) / 10; }
+  pc.addEventListener('pointerdown', e => {
+    if (!A) return; const t = pickT(e);
+    drag = Math.abs(t - a) <= Math.abs(t - b) ? 'a' : 'b';
+    try { pc.setPointerCapture(e.pointerId); } catch (_) {}
+    setRange(drag === 'a' ? $('#dnA') : $('#dnB'), t);
+  });
+  pc.addEventListener('pointermove', e => { if (drag) setRange(drag === 'a' ? $('#dnA') : $('#dnB'), pickT(e)); });
+  const end = () => { drag = null; };
+  pc.addEventListener('pointerup', end); pc.addEventListener('pointercancel', end);
+  bindRange($('#dnL'), $('#dnLOut'), v => { lam = v; draw(); readout(); });
+  bindRange($('#dnA'), $('#dnAOut'), v => { a = v; drawPDF(); readout(); });
+  bindRange($('#dnB'), $('#dnBOut'), v => { b = v; drawPDF(); readout(); });
+  redraws.push(draw);
+})();
+
+/* ---------- 3. memorylessness ---------- */
+(function(){
+  const cv = $('#meChart'), XM = 10, B3 = 1.5;
+  const D = {
+    exp: {f: t => t < 0 ? 0 : .5 * Math.exp(-.5 * t), S: t => Math.exp(-.5 * Math.max(0, t)), mrl: () => 2},
+    gam: {f: t => t < 0 ? 0 : B3 * B3 * B3 * t * t * Math.exp(-B3 * t) / 2,
+          S: t => { const y = B3 * Math.max(0, t); return Math.exp(-y) * (1 + y + y * y / 2); },
+          mrl: s => { const y = B3 * s; return (3 + 2 * y + y * y / 2) / (B3 * (1 + y + y * y / 2)); }},
+    uni: {f: t => (t >= 0 && t <= 4) ? .25 : 0, S: t => clamp(1 - t / 4, 0, 1), mrl: s => s < 4 ? (4 - s) / 2 : NaN}
+  };
+  let key = 'exp', s = 1.5;
+  function draw(){
+    const {ctx, w, h} = fit(cv), d = D[key], Ss = d.S(s), alive = Ss > 1e-9;
+    const g = u => d.f(s + u) / Ss;
+    let mx = 0; for (let i = 0; i <= 400; i++) { const t = XM * i / 400; mx = Math.max(mx, d.f(t)); if (alive) mx = Math.max(mx, g(t)); }
+    const ymax = clamp(mx * 1.15, .3, 2.2);
+    const A = cax(ctx, w, h, {xmax: XM, ymax, left: 40});
+    clipTo(ctx, A);
+    if (alive) fillFn(ctx, A, d.f, s, XM, C('--accent-soft'), 300);
+    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2.5; pathFn(ctx, A, d.f, 0, XM, 500); ctx.stroke();
+    if (alive) { ctx.save(); ctx.setLineDash([7, 5]); ctx.strokeStyle = C('--gold'); ctx.lineWidth = 2.5; pathFn(ctx, A, g, 0, XM, 500); ctx.stroke(); ctx.restore(); }
+    ctx.restore();
+    vline(ctx, A.xs(s), A.Y0, A.Y1 + 14, C('--ink'), [4, 3], 1.5);
+    ctx.fillStyle = C('--ink'); ctx.font = '11px ' + MONO; ctx.textBaseline = 'top';
+    ctx.textAlign = A.xs(s) > A.X1 - 90 ? 'right' : 'left';
+    ctx.fillText('waited s = ' + fmtN(s), A.xs(s) + (ctx.textAlign === 'left' ? 4 : -4), A.Y1);
+  }
+  function readout(){
+    const d = D[key], Ss = d.S(s);
+    if (!(Ss > 1e-9)) { $('#meRead').innerHTML = `waited s = <b>${fmtN(s)}</b> · <span class="warn">a uniform wait on [0, 4] is certain to be over by t = 4</span>, so “given you have waited s” is impossible here.`; return; }
+    const cond = d.S(s + 2) / Ss, fresh = d.S(2), same = Math.abs(cond - fresh) < 1e-9, mrl = d.mrl(s), hz = d.f(s) / Ss;
+    $('#meRead').innerHTML = `P(wait 2 more | waited ${fmtN(s)}) = S(s + 2)/S(s) = <b class="${same ? 'ok' : 'warn'}">${f4(cond)}</b> · from a fresh start P(T > 2) = <b>${f4(fresh)}</b><br>` +
+      `expected remaining wait <b class="${same ? 'ok' : 'warn'}">${f3(mrl)}</b> (from a fresh start: 2) · hazard right now h(s) = <b>${f3(hz)}</b>`;
+  }
+  $$('[data-md]').forEach(btn => btn.addEventListener('click', () => {
+    key = btn.dataset.md;
+    $$('[data-md]').forEach(x => { const on = x === btn; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
+    draw(); readout();
+  }));
+  bindRange($('#meS'), $('#meSOut'), v => { s = v; draw(); readout(); });
+  redraws.push(draw);
+})();
+
+/* ---------- 4. lab: running mean ---------- */
+(function(){
+  const cv = $('#lbChart'), MAXN = 20000;
+  let lam = 1, n = 0, sum = 0, sum2 = 0, above = 0;
+  const rm = new Float64Array(MAXN + 1);
+  function drawN(m){
+    m = Math.min(m, MAXN - n);
+    for (let i = 0; i < m; i++) { const x = expS(lam); n++; sum += x; sum2 += x * x; if (x > 1 / lam) above++; rm[n] = sum / n; }
+    draw(); readout();
+  }
+  function draw(){
+    const {ctx, w, h} = fit(cv);
+    const NX = Math.max(10, n), LNX = Math.log10(NX), mu = 1 / lam, ymax = 2.5 * mu;
+    const A = cax(ctx, w, h, {xmax: 1, ymax, left: 44, xlabels: false});
+    const xs = k => A.X0 + Math.log10(k) / LNX * (A.X1 - A.X0);
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    for (let k = 1; k <= NX * 1.0001; k *= 10) ctx.fillText(k.toLocaleString(), xs(k), A.Y0 + 6);
+    clipTo(ctx, A);
+    // funnel
+    ctx.beginPath();
+    for (let i = 0; i <= 200; i++) { const k = Math.pow(NX, i / 200); ctx.lineTo(xs(k), A.ys(mu + 2 * mu / Math.sqrt(k))); }
+    for (let i = 200; i >= 0; i--) { const k = Math.pow(NX, i / 200); ctx.lineTo(xs(k), A.ys(Math.max(0, mu - 2 * mu / Math.sqrt(k)))); }
+    ctx.closePath(); ctx.fillStyle = C('--accent-soft'); ctx.fill();
+    ctx.save(); ctx.setLineDash([6, 4]); ctx.strokeStyle = C('--ink'); ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(A.X0, A.ys(mu)); ctx.lineTo(A.X1, A.ys(mu)); ctx.stroke(); ctx.restore();
+    if (n) {
+      ctx.strokeStyle = C('--zero'); ctx.lineWidth = 1.8; ctx.beginPath();
+      const step = Math.max(1, Math.floor(n / 3000));
+      for (let k = 1; k <= n; k++) { if (k > 2000 && k % step && k !== n) continue; const x = xs(k), y = A.ys(rm[k]); k === 1 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); }
+      ctx.stroke();
+      ctx.fillStyle = C('--zero'); dot(ctx, xs(n), A.ys(rm[n]), 3.5);
+    }
+    ctx.restore();
+  }
+  function readout(){
+    if (!n) { $('#lbRead').innerHTML = `Each wait is drawn from Exp(${fmtN(lam)}). Theory: mean = standard deviation = 1/λ = <b>${f3(1 / lam)}</b>.`; return; }
+    const mean = sum / n, sd = n > 1 ? Math.sqrt(Math.max(0, (sum2 - n * mean * mean) / (n - 1))) : NaN;
+    let s = `waits <b>${n.toLocaleString()}</b> · average <b>${f3(mean)}</b> · standard deviation <b>${n > 1 ? f3(sd) : '–'}</b> · theory for both: 1/λ = <b>${f3(1 / lam)}</b><br>` +
+      `share of waits longer than the mean: <b>${pct(above / n)}</b> (theory e<sup>−1</sup> ≈ 36.8%)`;
+    if (n >= MAXN) s += `<br><span class="warn">limit of ${MAXN.toLocaleString()} waits reached, press Reset to start over</span>`;
+    $('#lbRead').innerHTML = s;
+  }
+  function reset(){ n = 0; sum = 0; sum2 = 0; above = 0; draw(); readout(); }
+  $('#lb1').addEventListener('click', () => drawN(1));
+  $('#lb100').addEventListener('click', () => drawN(100));
+  $('#lb1000').addEventListener('click', () => drawN(1000));
+  $('#lbReset').addEventListener('click', reset);
+  bindRange($('#lbL'), $('#lbLOut'), v => { lam = v; reset(); });
+  redraws.push(draw);
+})();
+
+/* ---------- 5. Poisson process ---------- */
+(function(){
+  const lc = $('#ppLine'), hc = $('#ppHist'), L = 30, MAXW = 1000000;
+  let lam = 1, win = 2, ev = [], tally = [], nWin = 0, sumC = 0, sumC2 = 0, zeros = 0, capped = false;
+  function timeline(){ const out = []; let t = expS(lam); while (t < L) { out.push(t); t += expS(lam); } return out; }
+  function record(evs){
+    const m = Math.floor(L / win + 1e-9), cnt = new Array(m).fill(0);
+    evs.forEach(t => { const j = Math.floor(t / win); if (j < m) cnt[j]++; });
+    cnt.forEach(c => { while (tally.length <= c) tally.push(0); tally[c]++; nWin++; sumC += c; sumC2 += c * c; if (!c) zeros++; });
+  }
+  function addTimelines(k){
+    const m = Math.floor(L / win + 1e-9);
+    for (let i = 0; i < k; i++) {
+      if (nWin + m > MAXW) { capped = true; break; }
+      const evs = timeline(); record(evs); if (i === k - 1) ev = evs;
+    }
+    draw(); readout();
+  }
+  function drawLine(){
+    const {ctx, w, h} = fit(lc);
+    const X0 = 8, X1 = w - 8, yL = h - 22, xs = t => X0 + t / L * (X1 - X0);
+    const m = Math.floor(L / win + 1e-9);
+    for (let j = 0; j < m; j++) {
+      const x0 = xs(j * win), x1 = xs((j + 1) * win);
+      ctx.fillStyle = j % 2 ? C('--surface-2') : C('--accent-soft'); ctx.fillRect(x0, 20, x1 - x0, yL - 20);
+      if (x1 - x0 >= 12) {
+        const c = ev.filter(t => t >= j * win && t < (j + 1) * win).length;
+        ctx.fillStyle = C('--ink'); ctx.font = '600 11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillText(c, (x0 + x1) / 2, 4);
+      }
+    }
+    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2;
+    ev.forEach(t => { const x = Math.round(xs(t)) + .5; ctx.beginPath(); ctx.moveTo(x, 28); ctx.lineTo(x, yL); ctx.stroke(); });
+    ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, yL + .5); ctx.lineTo(X1, yL + .5); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textBaseline = 'top';
+    for (let t = 0; t <= L; t += 10) { ctx.textAlign = t === 0 ? 'left' : t === L ? 'right' : 'center'; ctx.fillText(t, xs(t), yL + 5); }
+    if (!ev.length && !nWin) { ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'center'; ctx.font = '13px ' + SANS; ctx.textBaseline = 'middle'; ctx.fillText('Press “New timeline”', (X0 + X1) / 2, (20 + yL) / 2 + 4); }
+  }
+  function drawHist(){
+    const {ctx, w, h} = fit(hc);
+    const mu = lam * win, kmax = Math.max(tally.length - 1, Math.ceil(mu + 4 * Math.sqrt(mu) + 1));
+    let ymax = 0; for (let k = 0; k <= kmax; k++) ymax = Math.max(ymax, poisPMF(mu, k), nWin ? (tally[k] || 0) / nWin : 0);
+    const F = frame(ctx, w, h, {lo: 0, hi: kmax, ymax: ymax * 1.15, left: 40});
+    drawBars(ctx, F, 0, kmax, k => nWin ? (tally[k] || 0) / nWin : 0, C('--accent'), .75);
+    ctx.fillStyle = C('--gold');
+    for (let k = 0; k <= kmax; k++) { const v = poisPMF(mu, k); if (v > ymax * .004) dot(ctx, F.xc(k), F.ys(v), clamp(F.bw * .22, 2.5, 5)); }
+  }
+  function readout(){
+    const mu = lam * win;
+    if (!nWin) { $('#ppRead').innerHTML = `λt = ${fmtN(lam)} × ${fmtN(win)} = <b>${fmtN(mu)}</b> events expected per window.`; return; }
+    const mean = sumC / nWin, v = nWin > 1 ? (sumC2 - nWin * mean * mean) / (nWin - 1) : 0;
+    let s = `windows counted <b>${nWin.toLocaleString()}</b> · average count <b>${f3(mean)}</b> · variance <b>${f3(v)}</b> · theory for both: λt = <b>${fmtN(mu)}</b><br>` +
+      `empty windows <b>${pct(zeros / nWin)}</b> · theory P(N = 0) = e<sup>−λt</sup> = <b>${pct(Math.exp(-mu))}</b>`;
+    if (capped) s += `<br><span class="warn">limit of ${MAXW.toLocaleString()} windows reached, press Reset to start over</span>`;
+    $('#ppRead').innerHTML = s;
+  }
+  function reset(){ ev = []; tally = []; nWin = 0; sumC = 0; sumC2 = 0; zeros = 0; capped = false; draw(); readout(); }
+  const draw = () => { drawLine(); drawHist(); };
+  $('#ppNew').addEventListener('click', () => addTimelines(1));
+  $('#ppMany').addEventListener('click', () => addTimelines(500));
+  $('#ppReset').addEventListener('click', reset);
+  bindRange($('#ppL'), $('#ppLOut'), v => { lam = v; reset(); });
+  bindRange($('#ppW'), $('#ppWOut'), v => { win = v; reset(); });
+  redraws.push(draw);
+})();
+
+/* ---------- 6. inspection paradox ---------- */
+(function(){
+  const lc = $('#pxLine'), hc = $('#pxHist'), LAM = .1, VIS = 60, BW = 2, NB = 40, SHOW = 6;
+  let mode = 'rand', buses = [], pas = [], nP = 0, sumW = 0, sumGap = 0, nG = 0, sumG = 0, over = 0;
+  const hist = new Array(NB).fill(0);
+  function gen(a, b){
+    const out = [];
+    if (mode === 'sched') { for (let t = a + Math.random() * 10; t < b; t += 10) out.push(t); }
+    else { let t = a + expS(LAM); while (t < b) { out.push(t); t += expS(LAM); } }
+    for (let i = 1; i < out.length; i++) { nG++; sumG += out[i] - out[i - 1]; }
+    return out;
+  }
+  function firstAfter(arr, u){ let lo = 0, hi = arr.length; while (lo < hi) { const m = (lo + hi) >> 1; if (arr[m] > u) hi = m; else lo = m + 1; } return lo; }
+  function drop(arr, u){
+    const i = firstAfter(arr, u); if (i <= 0 || i >= arr.length) return null;
+    const prev = arr[i - 1], nx = arr[i], gap = nx - prev, wait = nx - u;
+    nP++; sumW += wait; sumGap += gap; const b = Math.floor(gap / BW); if (b < NB) hist[b]++; else over++;
+    return {u, prev, next: nx};
+  }
+  function newVisible(){ buses = gen(-150, VIS + 150); }
+  function drawLine(){
+    const {ctx, w, h} = fit(lc);
+    const X0 = 10, X1 = w - 10, yL = h - 24, xs = t => X0 + t / VIS * (X1 - X0);
+    ctx.save(); ctx.beginPath(); ctx.rect(X0, 0, X1 - X0, h); ctx.clip();
+    const lastP = pas[pas.length - 1];
+    if (lastP) { ctx.fillStyle = C('--accent-soft'); ctx.fillRect(xs(lastP.prev), 6, xs(lastP.next) - xs(lastP.prev), yL - 6); }
+    pas.forEach((p, i) => {
+      const y = yL - 14 - (pas.length - 1 - i) * 13, latest = i === pas.length - 1;
+      ctx.globalAlpha = latest ? 1 : .55;
+      ctx.strokeStyle = C('--gold'); ctx.lineWidth = latest ? 2.5 : 1.5;
+      const xa = xs(p.u), xb = xs(p.next);
+      ctx.beginPath(); ctx.moveTo(xa, y); ctx.lineTo(xb - 3, y); ctx.stroke();
+      ctx.fillStyle = C('--gold'); ctx.beginPath(); ctx.moveTo(xb, y); ctx.lineTo(xb - 6, y - 4); ctx.lineTo(xb - 6, y + 4); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = C('--zero'); dot(ctx, xa, y, latest ? 4.5 : 3.5);
+      ctx.globalAlpha = 1;
+    });
+    buses.forEach(t => {
+      const x = xs(t); if (x < X0 - 10 || x > X1 + 10) return;
+      ctx.fillStyle = C('--ink'); roundRect(ctx, x - 5, yL - 9, 10, 9, 2); ctx.fill();
+    });
+    ctx.restore();
+    ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, yL + .5); ctx.lineTo(X1, yL + .5); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textBaseline = 'top';
+    for (let t = 0; t <= VIS; t += 10) { ctx.textAlign = t === 0 ? 'left' : t === VIS ? 'right' : 'center'; ctx.fillText(t === VIS ? '60 min' : t, xs(t), yL + 5); }
+  }
+  function drawHist(){
+    const {ctx, w, h} = fit(hc);
+    const ymax = Math.max(LAM * 1.12, histMax(hist, BW, nP) * 1.1);
+    const A = cax(ctx, w, h, {xmax: NB * BW, ymax, left: 44, ny: 3});
+    drawHistDensity(ctx, A, hist, BW, nP, C('--accent'));
+    if (mode === 'rand') {
+      clipTo(ctx, A);
+      ctx.save(); ctx.setLineDash([5, 4]); ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 2; pathFn(ctx, A, t => LAM * Math.exp(-LAM * t), 0, NB * BW); ctx.stroke(); ctx.restore();
+      ctx.strokeStyle = C('--gold'); ctx.lineWidth = 2.5; pathFn(ctx, A, t => LAM * LAM * t * Math.exp(-LAM * t), 0, NB * BW); ctx.stroke();
+      ctx.restore();
+    }
+  }
+  function readout(){
+    const naive = mode === 'rand' ? 'naive guess: half a gap = 5' : 'half a gap = 5';
+    if (!nP) { $('#pxRead').innerHTML = mode === 'rand' ? 'Buses arrive at random, on average every 10 minutes. Drop a passenger and see how long they wait.' : 'Buses run exactly every 10 minutes; you still arrive at a random moment.'; return; }
+    let s = `passengers <b>${nP.toLocaleString()}</b> · average wait <b>${f2(sumW / nP)} min</b> (${naive}${mode === 'rand' ? ', theory 1/λ = 10' : ''})<br>` +
+      `average gap they landed in <b>${f2(sumGap / nP)} min</b> (theory ${mode === 'rand' ? '2/λ = 20' : '10'}) · average gap between buses <b>${nG ? f2(sumG / nG) : '–'} min</b>`;
+    if (over) s += `<br>${over.toLocaleString()} gap${over === 1 ? '' : 's'} longer than 80 minutes not shown`;
+    $('#pxRead').innerHTML = s;
+  }
+  function reset(){ pas = []; nP = 0; sumW = 0; sumGap = 0; nG = 0; sumG = 0; over = 0; hist.fill(0); newVisible(); draw(); readout(); }
+  const draw = () => { drawLine(); drawHist(); };
+  $('#px1').addEventListener('click', () => {
+    let p = null; for (let tries = 0; !p && tries < 20; tries++) p = drop(buses, Math.random() * VIS);
+    if (p) { pas.push(p); if (pas.length > SHOW) pas.shift(); }
+    draw(); readout();
+  });
+  $('#px1000').addEventListener('click', () => {
+    // each passenger gets a fresh, independent stretch of timeline around their arrival
+    for (let i = 0; i < 1000; i++) { let ok = null; while (!ok) ok = drop(gen(-150, 150), Math.random() * 100 - 50); }
+    draw(); readout();
+  });
+  $('#pxReset').addEventListener('click', reset);
+  $$('[data-px]').forEach(btn => btn.addEventListener('click', () => {
+    mode = btn.dataset.px;
+    $$('[data-px]').forEach(x => { const on = x === btn; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
+    $('#pxLeg1').hidden = $('#pxLeg2').hidden = mode !== 'rand';
+    reset();
+  }));
+  reset(); redraws.push(draw);
+})();
+
+/* ---------- 7. races ---------- */
+(function(){
+  const lc = $('#raLane'), bc = $('#raBars'), COL = ['--one', '--zero', '--gold'], NM = ['A', 'B', 'C'], DUR = 1500;
+  let rates = [1, .5, .3], race = null, wins = [0, 0, 0], races = 0, sumMin = 0, raf = 0;
+  const total = () => rates[0] + rates[1] + rates[2];
+  function sample(){
+    const T = rates.map(r => r > 0 ? expS(r) : Infinity);
+    let wi = 0; for (let i = 1; i < 3; i++) if (T[i] < T[wi]) wi = i;
+    return {T, wi, m: T[wi]};
+  }
+  function tally(r){ wins[r.wi]++; races++; sumMin += r.m; }
+  function finish(){ if (race && !race.counted) { tally(race); race.counted = true; drawBars(); readout(); } }
+  function prog(now){ return !race ? 0 : RM ? 1 : clamp((now - race.t0) / DUR, 0, 1); }
+  function drawLanes(now){
+    const {ctx, w, h} = fit(lc);
+    const X0 = 70, X1 = w - 16, yAx = h - 22;
+    const xmax = race ? race.xmax : 3 / Math.max(total(), .1), cur = race ? prog(now) * xmax : 0;
+    const xs = t => X0 + Math.min(t, xmax) / xmax * (X1 - X0);
+    for (let i = 0; i < 3; i++) {
+      const y = 18 + i * 36, col = C(COL[i]);
+      ctx.font = '600 13px ' + SANS; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = rates[i] > 0 ? col : C('--ink-3');
+      ctx.fillText(NM[i] + '  λ=' + fmtN(rates[i]), 4, y);
+      ctx.fillStyle = C('--surface-2'); ctx.fillRect(X0, y - 6, X1 - X0, 12);
+      if (!(rates[i] > 0)) { ctx.fillStyle = C('--ink-3'); ctx.font = '12px ' + SANS; ctx.fillText('not racing', X0 + 8, y); continue; }
+      if (!race) continue;
+      const T = race.T[i], end = Math.min(cur, T);
+      ctx.fillStyle = col; ctx.globalAlpha = (cur >= race.m && i !== race.wi) ? .45 : 1;
+      ctx.fillRect(X0, y - 6, xs(end) - X0, 12); ctx.globalAlpha = 1;
+      if (cur >= T) {
+        ctx.fillStyle = col; dot(ctx, xs(T), y, 7);
+        ctx.fillStyle = C('--ink'); ctx.font = (i === race.wi ? '700 ' : '') + '11px ' + MONO;
+        const lab = (i === race.wi ? 'first! ' : '') + f2(T);
+        const tx = xs(T) + 11, fits = tx + ctx.measureText(lab).width < X1;
+        ctx.textAlign = fits ? 'left' : 'right';
+        ctx.fillText(lab, fits ? tx : xs(T) - 11, y - (fits ? 0 : 14));
+      }
+    }
+    ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, yAx + .5); ctx.lineTo(X1, yAx + .5); ctx.stroke();
+    const tk = niceTicks(xmax, Math.max(2, Math.floor((X1 - X0) / 60))), fm = stepFmt(tk);
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    tk.forEach(v => ctx.fillText(fm(v), xs(v), yAx + 5));
+    if (race && cur < xmax) vline(ctx, xs(cur), 6, yAx, C('--ink-2'), [3, 3], 1);
+  }
+  function drawBars(){
+    const {ctx, w, h} = fit(bc);
+    const X0 = 44, X1 = w - 10, Y0 = h - 24, Y1 = 10, ys = v => Y0 - v * (Y0 - Y1), cw = (X1 - X0) / 3, tot = total();
+    yGrid(ctx, X0, X1, ys, [0, .25, .5, .75, 1], v => v.toFixed(2));
+    ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+    for (let i = 0; i < 3; i++) {
+      const xc = X0 + cw * (i + .5), bw = Math.min(70, cw * .5), obs = races ? wins[i] / races : 0, th = tot > 0 ? rates[i] / tot : 0;
+      ctx.fillStyle = C(COL[i]);
+      if (obs > 0) { roundRect(ctx, xc - bw / 2, ys(obs), bw, Y0 - ys(obs), 3); ctx.fill(); }
+      ctx.fillStyle = C('--ink'); ctx.fillRect(xc - bw / 2 - 8, Math.round(ys(th)) - 1.5, bw + 16, 3);
+      ctx.font = '600 12px ' + SANS; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillStyle = C(COL[i]);
+      ctx.fillText(NM[i], xc, Y0 + 6);
+    }
+  }
+  function readout(){
+    const tot = total();
+    if (!(tot > 0)) { $('#raRead').innerHTML = '<span class="warn">Give at least one clock a positive rate.</span>'; return; }
+    const th = rates.map(r => r / tot);
+    let s = NM.map((nm, i) => `${nm} won <b>${races ? pct(wins[i] / races) : '–'}</b> (theory ${pct(th[i])})`).join(' · ');
+    s += `<br>races <b>${races.toLocaleString()}</b> · average time of the first ring <b>${races ? f3(sumMin / races) : '–'}</b> (theory 1/(λ<sub>A</sub>+λ<sub>B</sub>+λ<sub>C</sub>) = ${f3(1 / tot)})`;
+    $('#raRead').innerHTML = s;
+  }
+  function tick(now){ raf = 0; drawLanes(now); if (race && prog(now) < 1) raf = requestAnimationFrame(tick); else finish(); }
+  function enable(){ const ok = total() > 0; $('#raGo').disabled = $('#ra1000').disabled = !ok; }
+  $('#raGo').addEventListener('click', () => {
+    if (!(total() > 0)) return;
+    finish();
+    const r = sample(), fin = r.T.filter(isFinite);
+    race = Object.assign(r, {xmax: Math.max(...fin) * 1.06, t0: performance.now(), counted: false});
+    if (!raf) raf = requestAnimationFrame(tick);
+  });
+  $('#ra1000').addEventListener('click', () => {
+    if (!(total() > 0)) return;
+    finish(); for (let i = 0; i < 1000; i++) tally(sample());
+    drawBars(); readout();
+  });
+  function resetTally(){ wins = [0, 0, 0]; races = 0; sumMin = 0; if (race) race.counted = true; drawBars(); readout(); }
+  $('#raReset').addEventListener('click', resetTally);
+  ['raA', 'raB', 'raC'].forEach((id, i) => bindRange($('#' + id), $('#' + id + 'Out'), v => { rates[i] = v; race = null; enable(); resetTally(); drawLanes(performance.now()); }));
+  const draw = () => { drawLanes(performance.now()); drawBars(); };
+  redraws.push(draw);
+})();
+
+/* ---------- 8. inverse transform ---------- */
+(function(){
+  const mc = $('#itMap'), hc = $('#itHist'), XM = 6, BW = .25, NB = 24, MAXU = 5000;
+  let lam = 1, U = [], anim = null, raf = 0, capped = false;
+  const T = u => -Math.log(1 - u) / lam;
+  function progress(now){ return !anim ? 1 : RM ? 1 : clamp((now - anim.t0) / 900, 0, 1); }
+  function drawMap(now){
+    const {ctx, w, h} = fit(mc);
+    const A = cax(ctx, w, h, {xmax: XM, ymax: 1, left: 48, yticks: [0, .25, .5, .75, 1], yfmt: v => v.toFixed(2)});
+    clipTo(ctx, A);
+    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2.5; pathFn(ctx, A, t => 1 - Math.exp(-lam * t), 0, XM); ctx.stroke();
+    const few = U.length <= 25;
+    ctx.globalAlpha = few ? .7 : .35;
+    U.forEach((u, i) => {
+      const t = T(u), x = A.xs(Math.min(t, XM)), y = A.ys(u), isLast = i === U.length - 1;
+      if (few && !(isLast && anim)) {
+        ctx.strokeStyle = C('--gold'); ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(A.X0, y); ctx.lineTo(x, y); if (t <= XM) ctx.lineTo(x, A.Y0); ctx.stroke();
+      }
+    });
+    ctx.globalAlpha = 1;
+    ctx.restore();
+    // rugs
+    ctx.globalAlpha = U.length > 300 ? .25 : .6;
+    U.forEach(u => { ctx.fillStyle = C('--zero'); dot(ctx, A.X0 + 6, A.ys(u), 2.5); });
+    U.forEach(u => { const t = T(u); if (t <= XM) { ctx.fillStyle = C('--accent'); dot(ctx, A.xs(t), A.Y0 - 5, 2.5); } });
+    ctx.globalAlpha = 1;
+    // the animated latest path
+    if (U.length && (!few || anim)) {
+      const u = U[U.length - 1], t = T(u), xT = A.xs(Math.min(t, XM)), y = A.ys(u), p = progress(now);
+      const p1 = clamp(p / .55, 0, 1), p2 = clamp((p - .55) / .45, 0, 1);
+      ctx.strokeStyle = C('--gold'); ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(A.X0, y);
+      ctx.lineTo(A.X0 + (xT - A.X0) * p1, y);
+      if (p2 > 0 && t <= XM) ctx.lineTo(xT, y + (A.Y0 - y) * p2);
+      ctx.stroke();
+      ctx.fillStyle = C('--zero'); dot(ctx, A.X0 + 6, y, 4.5);
+      if (p >= 1 && t <= XM) { ctx.fillStyle = C('--gold'); dot(ctx, xT, A.Y0 - 5, 4.5); }
+    }
+  }
+  function drawHist(){
+    const {ctx, w, h} = fit(hc), cnt = new Array(NB).fill(0);
+    U.forEach(u => { const b = Math.floor(T(u) / BW); if (b < NB) cnt[b]++; });
+    const A = cax(ctx, w, h, {xmax: XM, ymax: Math.max(lam * 1.12, histMax(cnt, BW, U.length) * 1.08), left: 48, ny: 3});
+    drawHistDensity(ctx, A, cnt, BW, U.length, C('--accent'));
+    clipTo(ctx, A); ctx.strokeStyle = C('--ink'); ctx.lineWidth = 2; pathFn(ctx, A, t => lam * Math.exp(-lam * t), 0, XM); ctx.stroke(); ctx.restore();
+  }
+  function readout(){
+    if (!U.length) { $('#itRead').innerHTML = 'Draw a uniform u, find it on the vertical axis, go across to the curve and drop down to t = −ln(1 − u)/λ.'; return; }
+    const u = U[U.length - 1], ts = U.map(T), mean = ts.reduce((a, b) => a + b, 0) / ts.length, beyond = ts.filter(t => t > XM).length;
+    let s = `latest: u = <b>${f3(u)}</b> → t = −ln(1 − ${f3(u)})/${fmtN(lam)} = <b>${f3(T(u))}</b><br>` +
+      `draws <b>${U.length.toLocaleString()}</b> · average t <b>${f3(mean)}</b> (theory 1/λ = ${f3(1 / lam)})` + (beyond ? ` · ${beyond} beyond t = 6, off the chart` : '');
+    if (capped) s += `<br><span class="warn">limit of ${MAXU.toLocaleString()} draws reached, press Reset to start over</span>`;
+    $('#itRead').innerHTML = s;
+  }
+  function tick(now){ raf = 0; drawMap(now); if (anim && progress(now) < 1) raf = requestAnimationFrame(tick); else { anim = null; drawMap(now); } }
+  function add(k, animate){
+    for (let i = 0; i < k; i++) { if (U.length >= MAXU) { capped = true; break; } U.push(Math.random()); }
+    if (animate) { anim = {t0: performance.now()}; if (!raf) raf = requestAnimationFrame(tick); } else { anim = null; drawMap(performance.now()); }
+    drawHist(); readout();
+  }
+  $('#it1').addEventListener('click', () => add(1, true));
+  $('#it200').addEventListener('click', () => add(200, false));
+  $('#itGrid').addEventListener('click', () => { U = []; capped = false; for (let i = 1; i <= 19; i++) U.push(i / 20); anim = null; draw(); readout(); });
+  $('#itReset').addEventListener('click', () => { U = []; capped = false; anim = null; draw(); readout(); });
+  const draw = () => { drawMap(performance.now()); drawHist(); };
+  bindRange($('#itL'), $('#itLOut'), v => { lam = v; draw(); readout(); });
+  redraws.push(draw);
+})();
+
+/* ---------- 9. estimation ---------- */
+(function(){
+  const rc = $('#esRug'), lc = $('#esLik'), MAXN = 1000;
+  let lam = .8, data = [], sum = 0, qCache = {};
+  function quant(n){ if (!qCache[n]) qCache[n] = [gammaQuantile(n, .025), gammaQuantile(n, .975)]; return qCache[n]; }
+  function ci(n, s){ const q = quant(n); return [q[0] / s, q[1] / s]; }
+  function drawRug(){
+    const {ctx, w, h} = fit(rc);
+    const X0 = 48, X1 = w - 12, yL = h - 18, xm = Math.max(4 / lam, ...data) * 1.04, xs = t => X0 + t / xm * (X1 - X0);
+    ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, yL + .5); ctx.lineTo(X1, yL + .5); ctx.stroke();
+    const tk = niceTicks(xm, Math.max(2, Math.floor((X1 - X0) / 60))), fm = stepFmt(tk);
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    tk.forEach(v => ctx.fillText(fm(v), xs(v), yL + 4));
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText('waits', X0 - 6, yL - 9);
+    ctx.globalAlpha = data.length > 100 ? .35 : .7; ctx.fillStyle = C('--accent');
+    data.forEach(t => dot(ctx, xs(t), yL - 9, 3)); ctx.globalAlpha = 1;
+    if (data.length) { const m = sum / data.length; vline(ctx, xs(m), 2, yL, C('--zero'), null, 2); ctx.fillStyle = C('--zero'); ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText('t̄', xs(m) + 4, 0); }
+  }
+  function drawLik(){
+    const {ctx, w, h} = fit(lc), n = data.length;
+    if (!n) {
+      const A = cax(ctx, w, h, {xmax: 3 * lam, ymax: 1, left: 48, yticks: [0, .5, 1]});
+      vline(ctx, A.xs(lam), A.Y0, A.Y1, C('--gold'), [6, 4], 2);
+      ctx.fillStyle = C('--ink-3'); ctx.font = '13px ' + SANS; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('Add some waits to see the likelihood', (A.X0 + A.X1) / 2, (A.Y0 + A.Y1) / 2);
+      return;
+    }
+    const hat = n / sum, [lo, hi] = ci(n, sum);
+    const xm = Math.min(Math.max(1.6 * lam, 1.2 * hi, 1.8 * hat), 6 * Math.max(lam, hat));
+    const A = cax(ctx, w, h, {xmax: xm, ymax: 1.08, left: 48, yticks: [0, .5, 1], yfmt: v => String(v)});
+    clipTo(ctx, A);
+    ctx.fillStyle = C('--accent-soft'); ctx.fillRect(A.xs(lo), A.Y1, A.xs(Math.min(hi, xm * 1.1)) - A.xs(lo), A.Y0 - A.Y1);
+    const Lr = l => l <= 0 ? 0 : Math.exp(n * Math.log(l / hat) - (l - hat) * sum);
+    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2.5; pathFn(ctx, A, Lr, xm * 1e-4, xm, 400); ctx.stroke();
+    ctx.restore();
+    vline(ctx, A.xs(lam), A.Y0, A.Y1, C('--gold'), [6, 4], 2);
+    vline(ctx, A.xs(hat), A.Y0, A.ys(1), C('--accent'), null, 1.5);
+    ctx.fillStyle = C('--accent'); dot(ctx, A.xs(hat), A.ys(1), 4.5);
+    ctx.font = '11px ' + MONO; ctx.textBaseline = 'bottom'; ctx.fillStyle = C('--ink');
+    const lx = A.xs(hat); ctx.textAlign = lx > A.X1 - 40 ? 'right' : 'left'; ctx.fillText('λ̂', lx + (ctx.textAlign === 'left' ? 6 : -6), A.ys(1) - 2);
+  }
+  function readout(){
+    const n = data.length;
+    if (!n) { $('#esRead').innerHTML = `True rate λ = <b>${fmtN(lam)}</b>, so the average wait is ${f3(1 / lam)}. Pretend you don’t know it, and estimate it from the waits.`; return; }
+    const hat = n / sum, [lo, hi] = ci(n, sum), inside = lo <= lam && lam <= hi;
+    let s = `waits n = <b>${n.toLocaleString()}</b> · total time Σt = <b>${f3(sum)}</b> · average t̄ = <b>${f3(sum / n)}</b><br>` +
+      `estimate λ̂ = n/Σt = <b>${f3(hat)}</b> · exact 95% interval [<b>${f3(lo)}</b>, <b>${f3(hi)}</b>] · ` +
+      (inside ? `<span class="ok">contains the true λ = ${fmtN(lam)}</span>` : `<span class="warn">misses the true λ = ${fmtN(lam)}</span>`);
+    if (n >= MAXN) s += `<br><span class="warn">limit of ${MAXN.toLocaleString()} waits reached, press Reset to start over</span>`;
+    $('#esRead').innerHTML = s;
+  }
+  function add(k){ k = Math.min(k, MAXN - data.length); for (let i = 0; i < k; i++) { const x = expS(lam); data.push(x); sum += x; } $('#esCovRead').textContent = ''; draw(); readout(); }
+  function reset(){ data = []; sum = 0; $('#esCovRead').textContent = ''; draw(); readout(); }
+  $('#es1').addEventListener('click', () => add(1));
+  $('#es10').addEventListener('click', () => add(10));
+  $('#es100').addEventListener('click', () => add(100));
+  $('#esReset').addEventListener('click', reset);
+  $('#esCov').addEventListener('click', () => {
+    const n = Math.max(1, data.length), R = 1000, q = quant(n);
+    let hits = 0, sumHat = 0;
+    for (let r = 0; r < R; r++) {
+      let s = 0; for (let i = 0; i < n; i++) s += expS(lam);
+      if (q[0] / s <= lam && lam <= q[1] / s) hits++;
+      sumHat += n / s;
+    }
+    $('#esCovRead').innerHTML = `1,000 fresh experiments with n = ${n}: the interval contained λ in <b>${pct(hits / R)}</b> of them (target 95%) · average λ̂ = <b>${f3(sumHat / R)}</b>` +
+      (n > 1 ? ` (theory nλ/(n − 1) = ${f3(n * lam / (n - 1))})` : ' (with n = 1 the theoretical average of λ̂ is infinite)');
+  });
+  const draw = () => { drawRug(); drawLik(); };
+  bindRange($('#esL'), $('#esLOut'), v => { lam = v; reset(); });
+  redraws.push(draw);
+})();
+
+/* ---------- 10. properties ---------- */
+(function(){
+  let lam = 1;
+  const XM = 5;
+  function values(){
+    const m = 1 / lam;
+    $('#cPar').textContent = `λ = ${fmtN(lam)} per unit time · scale θ = 1/λ = ${f3(m)}`;
+    $('#cPDF').textContent = `f(0) = λ = ${fmtN(lam)}`;
+    $('#cCDF').textContent = `F(1/λ) = 1 − e⁻¹ ≈ 0.632, for every λ`;
+    $('#cSurv').textContent = `S(1) = e^(−λ) = ${f4(Math.exp(-lam))}`;
+    $('#cHaz').textContent = `${fmtN(lam)} at every t`;
+    $('#cMean').textContent = f3(m);
+    $('#cVar').textContent = `variance ${f3(m * m)} · σ = ${f3(m)}`;
+    $('#cMed').textContent = `median ${f3(Math.LN2 * m)}`;
+    $('#cQ').textContent = `90th percentile: ln 10/λ = ${f3(Math.LN10 * m)}`;
+    const H = 1 - Math.log(lam);
+    const sg = x => (x < 0 ? '−' : '') + f3(Math.abs(x));
+    $('#cEnt').textContent = `${sg(H)} nats = ${sg(H / Math.LN2)} bits`;
+    $('#cMGF').textContent = `E[T²] = 2/λ² = ${f3(2 * m * m)}`;
+    $('#cMLE').textContent = `with 100 waits, sd of λ̂ ≈ λ/10 = ${f3(lam / 10)}`;
+  }
+  function mini(id, fn, ymax, yt){
+    const {ctx, w, h} = fit($(id));
+    const A = cax(ctx, w, h, {xmax: XM, ymax, left: 36, top: 10, yticks: yt, xgap: 40});
+    clipTo(ctx, A); ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2; pathFn(ctx, A, fn, 0, XM); ctx.stroke(); ctx.restore();
+    return A;
+  }
+  function draw(){
+    const ym = Math.max(1, lam * 1.1);
+    mini('#miniPDF', t => lam * Math.exp(-lam * t), ym, niceTicks(ym, 3).filter(v => v <= ym));
+    const A = mini('#miniCDF', t => 1 - Math.exp(-lam * t), 1.05, [0, .5, 1]);
+    const med = Math.LN2 / lam;
+    if (med <= XM) { const c = A.xs(med); const ctx = $('#miniCDF').getContext('2d'); ctx.fillStyle = C('--gold'); dot(ctx, c, A.ys(.5), 3.5); }
+    mini('#miniHaz', () => lam, 5.5, [0, 1, 2, 3, 4, 5]);
+  }
+  bindRange($('#prL'), $('#prLOut'), v => { lam = v; values(); draw(); });
+  redraws.push(draw);
+})();
+
+})();
+</script>
+</body>
+</html>
