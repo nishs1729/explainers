@@ -454,7 +454,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
   </div>
 
   <p>The readout gives the <em class="term">total variation distance</em> between the two distributions: the largest difference between the probabilities they give to any event. Le Cam’s inequality guarantees it is at most \(np^2 = \lambda p\). So what makes the Poisson approximation good is that <strong>\(p\) is small</strong>, not merely that \(n\) is large. The variances tell the same story: the binomial’s \(npq = \lambda(1-p)\) approaches the Poisson’s \(\lambda\) as \(p \to 0\).</p>
-  <p>The gaps between Poisson events have a distribution of their own, the exponential. It is the subject of the next tutorial, <a href="exponential.html">The Exponential Distribution</a>. The Poisson count itself, with real data, estimation and what to do when it fails, has a tutorial of its own: <a href="poisson.html">The Poisson Distribution</a>.</p>
+  <p>The next tutorial turns the question around: instead of counting successes in a fixed number of trials, how long until the first success? That is <a href="geometric.html">The Geometric Distribution</a>. The gaps between Poisson events have a distribution of their own too, the exponential, covered in <a href="exponential.html">The Exponential Distribution</a>. The Poisson count itself, with real data, estimation and what to do when it fails, has a tutorial of its own: <a href="poisson.html">The Poisson Distribution</a>.</p>
   <details>
     <summary>Why the limit holds</summary>
     <p>Substitute \(p = \lambda/n\) and look at the pieces one at a time. First,</p>
@@ -646,7 +646,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
 </section>
 
 </main>
-<footer>A single-file interactive explainer and a companion to <a href="bernoulli.html">The Bernoulli Distribution</a>. Math typeset with KaTeX. Every simulation runs live in your browser using <code>Math.random()</code>.</footer>
+<footer>A single-file interactive explainer. Math typeset with KaTeX. Every simulation runs live in your browser using <code>Math.random()</code>.</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>

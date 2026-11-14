@@ -178,11 +178,8 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
 <section id="slices">
   <div class="secnum">01</div>
   <h2>From coin flips to waiting times</h2>
-  <p>The <a href="binomial.html">binomial distribution</a> fixes the number of trials and counts the successes. Turn the question around: keep trying until the first success, and ask <strong>how long that took</strong>.</p>
-  <p>With separate trials this is easy. Roll a die until the first six. The six arrives on roll \(k\) when the first \(k-1\) rolls fail and roll \(k\) succeeds. With success probability \(p\) and \(q = 1 - p\) as before,</p>
-  $$P(K = k) = q^{\,k-1}p, \quad k = 1, 2, \dots$$
-  <p>This is the <em class="term">geometric distribution</em>. On average you need \(1/p\) tries: 6 rolls for a six.</p>
-  <p>Now let time flow continuously. A Geiger counter clicks at random moments, on average \(\lambda\) times per second. The Greek letter \(\lambda\) (lambda) is the <em class="term">rate</em>. To reuse what we know, chop time into thin slices of width \(\Delta t\). In each slice, flip a coin that comes up “click” with probability \(p = \lambda\Delta t\). Each slice is a <a href="bernoulli.html">Bernoulli trial</a>, and waiting for the first click is waiting for the first success.</p>
+  <p>The <a href="geometric.html">geometric distribution</a> answered the question “how many trials until the first success?” With success probability \(p\) per trial and \(q = 1 - p\), the first success comes on trial \(k\) with probability \(q^{\,k-1}p\), and on average after \(1/p\) trials: 6 rolls for a six. This page asks the same question when there are no separate trials, only time flowing continuously.</p>
+  <p>A Geiger counter clicks at random moments, on average \(\lambda\) times per second. The Greek letter \(\lambda\) (lambda) is the <em class="term">rate</em>. To reuse what we know, chop time into thin slices of width \(\Delta t\). In each slice, flip a coin that comes up “click” with probability \(p = \lambda\Delta t\). Each slice is a <a href="bernoulli.html">Bernoulli trial</a>, and the slice holding the first click is geometric.</p>
   <p>The wait \(T\) is longer than \(t\) exactly when the first \(t/\Delta t\) slices all fail:</p>
   $$P(T > t) = (1 - \lambda\Delta t)^{t/\Delta t}$$
   <p>Let the slices shrink. The right-hand side tends to a limit you may know from compound interest:</p>
@@ -246,7 +243,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
   <h2>No memory</h2>
   <p>You have already waited \(s\) minutes for something whose waiting time is exponential. How much longer will you wait? Intuition says it must be “due” by now. The exponential distribution says: <strong>exactly as long as if you had just started</strong>. The proof takes one line:</p>
   $$\begin{aligned} &P(T > s + t \mid T > s) \\ &\quad= \frac{P(T > s + t)}{P(T > s)} = \frac{e^{-\lambda(s+t)}}{e^{-\lambda s}} \\ &\quad= e^{-\lambda t} = P(T > t) \end{aligned}$$
-  <p>Given that nothing has happened by time \(s\), the remaining wait \(T - s\) has the same \(\text{Exp}(\lambda)\) distribution as a fresh wait. This is called <em class="term">memorylessness</em>. A quiet Geiger counter has no idea how long it has been quiet.</p>
+  <p>Given that nothing has happened by time \(s\), the remaining wait \(T - s\) has the same \(\text{Exp}(\lambda)\) distribution as a fresh wait. This is called <em class="term">memorylessness</em>. A quiet Geiger counter has no idea how long it has been quiet. The <a href="geometric.html#memory">geometric distribution</a> has the same property for separate trials.</p>
 
   <div class="widget">
     <p class="widget-title">How much longer, after waiting a while?</p>
@@ -518,7 +515,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
   <h3>Structural facts worth remembering</h3>
   <ol class="facts">
     <li><strong>Memoryless, and the only one.</strong> No other continuous distribution satisfies \(P(T > s+t \mid T > s) = P(T > t)\) for all \(s, t\) (section 3).</li>
-    <li><strong>Its discrete twin is the geometric.</strong> Rounding up, \(\lceil T \rceil\) is geometric with success probability \(1 - e^{-\lambda}\). The exponential is the geometric with infinitely fine slices (section 1).</li>
+    <li><strong>Its discrete twin is the <a href="geometric.html">geometric</a>.</strong> Rounding up, \(\lceil T \rceil\) is geometric with success probability \(1 - e^{-\lambda}\). The exponential is the geometric with infinitely fine slices (section 1).</li>
     <li><strong>Scaling.</strong> \(cT \sim \text{Exp}(\lambda/c)\) for \(c > 0\). Every exponential is a stretched \(\text{Exp}(1)\): \(T = E/\lambda\) with \(E \sim \text{Exp}(1)\).</li>
     <li><strong>Sums: gamma.</strong> The sum of \(k\) independent \(\text{Exp}(\lambda)\) waits is \(\text{Gamma}(k, \lambda)\), the Erlang distribution.</li>
     <li><strong>Special case of bigger families.</strong> \(\text{Exp}(\lambda)\) is the gamma distribution with shape 1 and the Weibull distribution with shape 1. Also, \(2\lambda T \sim \chi^2_2\).</li>
@@ -542,7 +539,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
 </section>
 
 </main>
-<footer>A single-file interactive explainer, following <a href="bernoulli.html">The Bernoulli Distribution</a> and <a href="binomial.html">The Binomial Distribution</a>. Math typeset with KaTeX. Every simulation runs live in your browser using <code>Math.random()</code>.</footer>
+<footer>A single-file interactive explainer. Math typeset with KaTeX. Every simulation runs live in your browser using <code>Math.random()</code>.</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>

@@ -41,8 +41,8 @@
     return `<li><a class="card" href="${XP.url(t.path)}">
       <div class="thumb"><span class="ph" aria-hidden="true">${esc((t.short || t.title).charAt(0))}</span>
         <img src="${thumbSrc(t)}" alt="" loading="lazy" data-thumb="${esc(t.id)}" onerror="this.remove()">
-        ${part ? `<span class="part">Part ${part}</span>` : ''}</div>
-      <div class="card-body"><h4>${esc(t.title)}</h4><p>${esc(t.summary)}</p>
+</div>
+      <div class="card-body">${part ? `<span class="part">Part ${part}</span>` : ''}<h4>${esc(t.title)}</h4><p>${esc(t.summary)}</p>
         ${(t.tags || []).length ? `<div class="tags">${t.tags.slice(0, 3).map(g => `<span>${esc(g)}</span>`).join('')}</div>` : ''}</div>
     </a></li>`;
   }

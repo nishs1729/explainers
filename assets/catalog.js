@@ -29,7 +29,7 @@ window.EXPLAINERS = {
           "id": "distributions",
           "title": "Probability distributions",
           "blurb": "From a single coin flip to counting and waiting for rare events. Each one builds on the last.",
-          "topics": ["bernoulli", "binomial", "exponential", "poisson"]
+          "topics": ["bernoulli", "binomial", "geometric", "exponential", "poisson"]
         }
       ],
       "topics": [
@@ -49,6 +49,15 @@ window.EXPLAINERS = {
           "path": "probability/binomial.html",
           "summary": "Repeat a yes/no experiment n times and count the yeses: Pascal's triangle, the Galton board and confidence intervals.",
           "tags": ["counting", "Pascal's triangle", "normal approximation", "confidence interval", "hypothesis test"],
+          "preview": { "select": ".hero-play", "click": ["#heroMany", "#heroMany", "#heroMany"] }
+        },
+        {
+          "id": "geometric",
+          "title": "The Geometric Distribution",
+          "short": "Geometric",
+          "path": "probability/geometric.html",
+          "summary": "How many tries until it works? Waiting for the first success, why nothing is ever due, and collecting a full set of stickers.",
+          "tags": ["waiting time", "memoryless", "first success", "coupon collector", "gambler's fallacy"],
           "preview": { "select": ".hero-play", "click": ["#heroMany", "#heroMany", "#heroMany"] }
         },
         {
