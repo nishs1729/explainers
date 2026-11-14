@@ -28,8 +28,8 @@ window.EXPLAINERS = {
         {
           "id": "distributions",
           "title": "Probability distributions",
-          "blurb": "From a single coin flip to counting and waiting for rare events. Each one builds on the last.",
-          "topics": ["bernoulli", "binomial", "geometric", "exponential", "poisson"]
+          "blurb": "From a single coin flip to counting and waiting for rare events, and what to do when counts vary too much. Each one builds on the last.",
+          "topics": ["bernoulli", "binomial", "geometric", "exponential", "poisson", "negative-binomial"]
         }
       ],
       "topics": [
@@ -77,6 +77,15 @@ window.EXPLAINERS = {
           "summary": "How many? Counts of rare events, from horse kicks and flying bombs to the illusion that randomness is evenly spread.",
           "tags": ["counting", "rare events", "overdispersion", "chi-square", "clustering"],
           "preview": { "select": "#heroField", "click": ["#heroMany", "#heroMany"] }
+        },
+        {
+          "id": "negative-binomial",
+          "title": "The Negative Binomial Distribution",
+          "short": "Negative binomial",
+          "path": "probability/negative-binomial.html",
+          "summary": "Waiting for the r-th success, and the go-to model when counts vary more than a Poisson allows.",
+          "tags": ["overdispersion", "gamma–Poisson mixture", "waiting time", "dispersion", "model fitting"],
+          "preview": { "select": ".hero-play", "click": ["#heroMany", "#heroMany", "#heroMany"] }
         }
       ]
     }

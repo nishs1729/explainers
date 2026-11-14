@@ -396,7 +396,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
     <li><strong>The only memoryless discrete distribution.</strong> \(P(X > s + t \mid X > s) = P(X > t)\), and no other distribution on \(1, 2, \dots\) does this (section 4).</li>
     <li><strong>Its continuous twin is the exponential.</strong> With \(p = \lambda\Delta t\) and \(\Delta t \to 0\), \(\Delta t \cdot X\) becomes \(\text{Exp}(\lambda)\). In reverse, rounding an \(\text{Exp}(\lambda)\) wait up to a whole number gives a geometric with \(p = 1 - e^{-\lambda}\).</li>
     <li><strong>The first of several.</strong> If independent geometric waits with \(p_1\) and \(p_2\) run side by side, the first to finish is geometric with \(p = 1 - q_1q_2\): a trial “succeeds” when either one does.</li>
-    <li><strong>Sums wait for later successes.</strong> Adding \(r\) independent \(\text{Geometric}(p)\) waits gives the number of trials until the \(r\)-th success, the negative binomial distribution. With different \(p\)s, as in the coupon collector, the sum has no special name.</li>
+    <li><strong>Sums wait for later successes.</strong> Adding \(r\) independent \(\text{Geometric}(p)\) waits gives the number of trials until the \(r\)-th success, the <a href="negative-binomial.html">negative binomial distribution</a>. With different \(p\)s, as in the coupon collector, the sum has no special name.</li>
     <li><strong>Maximum entropy.</strong> Among all distributions on \(1, 2, 3, \dots\) with a given mean, the geometric has the largest entropy. It is the least informative, most “random” way to have that average wait.</li>
   </ol>
 </section>
@@ -413,6 +413,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
     <div class="card"><h4>Genetics</h4><p>Along a DNA sequence, the distance to the next occurrence of a given base or short pattern, or the length of a run of one base, is roughly geometric when the bases are close to independent.</p></div>
     <div class="card"><h4>When it fails</h4><p>If the chance changes from try to try, the geometric is wrong: a learner improves with practice, a machine wears out, a salesperson gets more desperate. Plot the tail \(P(X > k)\) on a log scale: a straight line means geometric, a bend means \(p\) is changing.</p></div>
   </div>
+  <p>Waiting for the \(r\)-th success instead of the first stacks up \(r\) geometric waits; that is the <a href="negative-binomial.html">negative binomial distribution</a>, the last part of this series.</p>
   <p>Next in the series: the wait for an event that can happen at any moment, not just at separate trials. That is <a href="exponential.html">The Exponential Distribution</a>.</p>
 </section>
 

@@ -610,7 +610,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
     <li><strong>Large \(n\): normal.</strong> \(Y \approx \mathcal N(np, npq)\) when \(np\) and \(nq\) are both reasonably large (section 7).</li>
     <li><strong>Small \(p\): Poisson.</strong> \(\text{Bin}(n, \lambda/n) \to \text{Poisson}(\lambda)\) (section 8).</li>
     <li><strong>Without replacement: hypergeometric.</strong> Sampling from a finite population without replacement gives the hypergeometric distribution, which approaches the binomial when the population is large.</li>
-    <li><strong>Fix the successes instead: negative binomial.</strong> Count trials until the \(r\)-th success and you get the negative binomial distribution (the geometric for \(r = 1\)). The two are linked: at least \(r\) successes in \(n\) trials means the \(r\)-th success came by trial \(n\).</li>
+    <li><strong>Fix the successes instead: negative binomial.</strong> Count trials until the \(r\)-th success and you get the negative binomial distribution (the geometric for \(r = 1\)). The two are linked: at least \(r\) successes in \(n\) trials means the \(r\)-th success came by trial \(n\), so \(P(r\text{-th success by trial } n) = P(\text{Bin}(n, p) \ge r)\). See the <a href="negative-binomial.html#mirror">Negative Binomial tutorial</a>.</li>
     <li><strong>Conjugate prior: Beta.</strong> If your uncertainty about \(p\) is a \(\text{Beta}(a, b)\) distribution, then after \(k\) successes in \(n\) trials it becomes \(\text{Beta}(a+k,\; b+n-k)\).</li>
     <li><strong>A recurrence for computing it.</strong> \(P(Y=k+1) = P(Y=k)\cdot\frac{n-k}{k+1}\cdot\frac{p}{q}\). Starting from \(P(Y=0) = q^n\), you can get every bar without computing a single factorial.</li>
   </ol>

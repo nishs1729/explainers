@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Negative Binomial Distribution — a visual introduction</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<style>
+:root{
+  --bg:#faf8f4; --surface:#ffffff; --surface-2:#f2efe8; --ink:#1c1c1e; --ink-2:#4c4e55; --ink-3:#8b8d93; --line:#e3dfd5;
+  --one:#16917c; --one-soft:rgba(22,145,124,.15);
+  --zero:#d9573a; --zero-soft:rgba(217,87,58,.15);
+  --accent:#3654c9; --accent-soft:rgba(54,84,201,.11);
+  --gold:#b98317; --gold-soft:rgba(185,131,23,.22);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+    --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+    --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+    --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+    --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+  --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+  --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+  --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+  --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.68 var(--sans);-webkit-font-smoothing:antialiased}
+main{max-width:820px;margin:0 auto;padding:0 20px 80px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;letter-spacing:-.01em}
+h1{font-size:clamp(2.2rem,6vw,3.4rem);margin:.2em 0 .3em}
+h2{font-size:clamp(1.6rem,4vw,2.1rem);margin:0 0 .5em}
+h3{font-size:1.2rem;margin:1.6em 0 .4em}
+p{margin:0 0 1em}
+a{color:var(--accent)}
+strong{font-weight:650}
+em.term{font-style:normal;font-weight:650;color:var(--accent)}
+.muted{color:var(--ink-2)}
+small,.small{font-size:14px}
+
+/* hero */
+.hero{text-align:center;padding:64px 0 24px}
+.kicker{text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--ink-3);margin:0}
+.lede{font-size:1.2rem;color:var(--ink-2);max-width:620px;margin:0 auto}
+.hero-play{max-width:600px;margin:30px auto 0;text-align:left}
+.hero-play .controls{justify-content:center}
+.hint{font-size:15px;color:var(--ink-2);min-height:3.2em;margin:6px 0 0;text-align:center}
+
+.toc{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;margin:28px 0 8px}
+.toc ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 20px;counter-reset:t}
+.toc li{counter-increment:t;font-size:15px}
+.toc li::before{content:counter(t,decimal-leading-zero);font-family:var(--mono);color:var(--ink-3);margin-right:10px;font-size:13px}
+.toc a{color:var(--ink);text-decoration:none}
+.toc a:hover{color:var(--accent)}
+
+section{padding-top:56px}
+.secnum{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.08em;margin-bottom:4px}
+
+.widget{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin:26px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.widget-title{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);margin:0 0 12px;font-weight:600}
+.controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:12px 0}
+.ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:15px}
+.ctrl output{font-family:var(--mono);font-size:14px;min-width:3.2em;color:var(--ink)}
+input[type=range]{accent-color:var(--accent);width:170px;max-width:100%}
+.btn{font:inherit;font-size:14px;line-height:1.2;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;transition:background .15s,transform .1s}
+.btn:hover{border-color:var(--ink-3)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.lh{font-family:var(--serif);font-style:italic;font-size:1.08em}
+.readout{font-family:var(--mono);font-size:14px;color:var(--ink-2);line-height:1.6}
+.readout b{color:var(--ink);font-weight:600}
+.readout .ok{color:var(--one);font-weight:600}
+.readout .warn{color:var(--zero);font-weight:600}
+canvas{display:block;width:100%}
+canvas.pick{cursor:ew-resize;touch-action:pan-y}
+.cap{font-size:13px;color:var(--ink-3);margin:2px 0 6px}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:20px 0}
+.callout p:last-child{margin-bottom:0}
+.katex-display{overflow-x:auto;overflow-y:hidden;padding:4px 0}
+.mathbox{overflow-x:auto;padding:6px 0}
+.katex-display.ovf,.mathbox.ovf{-webkit-mask-image:linear-gradient(to right,#000 82%,transparent);mask-image:linear-gradient(to right,#000 82%,transparent)}
+details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:14px 0;background:var(--surface)}
+details summary{cursor:pointer;font-weight:600;font-size:15px;color:var(--ink-2)}
+details[open] summary{margin-bottom:8px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin-top:8px}
+.legend > span{display:inline-block}
+.legend .sw{vertical-align:middle;margin:0 6px 2px 0}
+.sw{display:inline-block;width:16px;height:10px;border-radius:2px}
+.sw.dot{width:8px;height:8px;border-radius:50%}
+.sw.dash{height:0;border-top:2px dashed var(--ink)}
+.sw.line{height:0;border-top:2px solid var(--ink)}
+
+/* properties */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:18px 0}
+.card{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
+.card h4{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+.card .f{overflow-x:auto;overflow-y:hidden;font-size:15px;min-height:1.8em}
+.card .v{font:600 15px var(--mono);color:var(--accent);margin-top:6px}
+.card p{font-size:15px;margin:0;color:var(--ink-2)}
+.sticky-ctrl{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:6px 22px}
+.minis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:640px){.minis{grid-template-columns:1fr}}
+.mini{border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--surface)}
+.mini .mcap{font-size:13px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.facts{counter-reset:f;list-style:none;padding:0;margin:18px 0}
+.facts li{counter-increment:f;position:relative;padding:12px 0 12px 44px;border-bottom:1px solid var(--line)}
+.facts li::before{content:counter(f);position:absolute;left:0;top:12px;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:600 13px var(--mono)}
+.facts li strong{display:block}
+.table-wrap{overflow-x:auto}
+table.summary{border-collapse:collapse;width:100%;font-size:15px;margin:14px 0}
+table.summary td,table.summary th{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:middle}
+table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3)}
+canvas.tap{cursor:pointer}
+@media (max-width:480px){table.summary td,table.summary th{padding:8px 5px}}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+@media (max-width:640px){.pair{grid-template-columns:1fr}}
+.pair .mcap{font-size:13px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+table.summary td:not(:first-child),table.summary th:not(:first-child){text-align:right;font-family:var(--mono);font-size:14px}
+footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60px;border-top:1px solid var(--line);margin-top:60px}
+
+@media (max-width:480px){
+  main{padding:0 16px 80px}
+  .widget{padding:14px}
+  .katex-display{font-size:.92em}
+  input[type=range]{width:150px}
+}
+</style>
+<script>try{var t=localStorage.getItem('xp-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/catalog.js" defer></script>
+<script src="../assets/site.js" defer></script>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <p class="kicker">A visual introduction</p>
+  <h1>The Negative Binomial Distribution</h1>
+  <p class="lede">How many misses before the third basket? How many claims from a driver who may be careful or reckless? The same distribution answers both: it counts the failures before the \(r\)-th success, and it is the go-to model for counts that are more spread out than a Poisson allows.</p>
+  <div class="hero-play">
+    <canvas id="heroRuns" style="height:150px" role="img" aria-label="The latest runs of shots, one per row: gray misses and green makes, each run ending at the third make, with the number of misses at the end of the row"></canvas>
+    <div class="controls">
+      <button class="btn primary" id="heroGo">❚❚ Pause</button>
+      <button class="btn" id="heroMany">+100 runs</button>
+      <button class="btn" id="heroClear">Clear</button>
+    </div>
+    <canvas id="heroHist" style="height:150px" role="img" aria-label="Share of runs with 0, 1, 2 and more misses before the third make, with the negative binomial probabilities as dots"></canvas>
+    <div class="legend" style="justify-content:center"><span><i class="sw" style="background:var(--accent)"></i><span>share of runs with \(k\) misses</span></span><span><i class="sw dot" style="background:var(--gold)"></i><span>negative binomial, \(r = 3,\ p = 0.4\)</span></span></div>
+    <p class="hint" id="heroHint" aria-live="polite">A player who makes 40% of their shots keeps shooting until they have made 3. Each row is one run.</p>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#rth">Waiting for the r-th success</a></li>
+    <li><a href="#mirror">The binomial in the mirror</a></li>
+    <li><a href="#sum">A stack of geometric waits</a></li>
+    <li><a href="#mixture">Counts that are too spread out</a></li>
+    <li><a href="#params">One distribution, many names</a></li>
+    <li><a href="#mites">Mites on apple leaves</a></li>
+    <li><a href="#props">All the properties</a></li>
+    <li><a href="#uses">Where you will meet it</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<section id="rth">
+  <div class="secnum">01</div>
+  <h2>Waiting for the r-th success</h2>
+  <p>The <a href="geometric.html">geometric distribution</a> waits for the first success. Now wait for the \(r\)-th: keep making independent <a href="bernoulli.html">Bernoulli trials</a> with success probability \(p\) until \(r\) of them have succeeded, and count the <strong>failures</strong> along the way. Call that count \(Y\).</p>
+  <p>For \(Y = k\), the run has \(k + r\) trials, and the last one must be the \(r\)-th success. The other \(r - 1\) successes and the \(k\) failures can sit in any order among the first \(k + r - 1\) trials. Every such order has the same probability \(p^r q^k\), with \(q = 1 - p\), so</p>
+  $$P(Y = k) = \binom{k + r - 1}{k}\, p^{\,r} q^{\,k}$$
+  <p>for \(k = 0, 1, 2, \dots\) This is the <em class="term">negative binomial distribution</em>, written \(Y \sim \text{NB}(r, p)\). With \(r = 1\) it is the geometric again.</p>
+
+  <div class="widget">
+    <p class="widget-title">Every way to get there</p>
+    <div class="controls">
+      <label class="ctrl">successes \(r\) <input type="range" id="arR" min="1" max="5" step="1" value="3"><output id="arROut"></output></label>
+      <label class="ctrl">failures \(k\) <input type="range" id="arK" min="0" max="10" step="1" value="2"><output id="arKOut"></output></label>
+      <label class="ctrl">\(p\) <input type="range" id="arP" min="0.05" max="0.95" step="0.05" value="0.4"><output id="arPOut"></output></label>
+    </div>
+    <canvas id="arChart" style="height:120px" role="img" aria-label="Every possible order of the trials, one per row: makes in green and misses in gray, each row ending with the final make"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--one)"></i><span>success</span></span><span><i class="sw" style="background:var(--ink-3)"></i><span>failure</span></span><span><i class="sw" style="background:var(--gold)"></i><span>the \(r\)-th success, always last</span></span></div>
+    <div class="readout" id="arRead" style="margin-top:8px"></div>
+  </div>
+  <p>This is the path counting of the <a href="binomial.html#paths">binomial tutorial</a> with one twist: the last step is pinned. That is why the coefficient is \(\binom{k + r - 1}{k}\) and not \(\binom{k + r}{k}\).</p>
+  <div class="callout">
+    <p><strong>Two conventions.</strong> This page counts <em>failures</em>, so \(Y\) starts at 0. That is what most software uses: <code>dnbinom</code> in R and <code>scipy.stats.nbinom</code> in Python. Some books count <em>trials</em> instead, \(X = Y + r\), starting at \(r\), with mean \(r/p\). It is the same experiment shifted by \(r\). The failure count is also the one that turns up in section 4, where there are no trials at all.</p>
+  </div>
+  <details>
+    <summary>Why “negative”?</summary>
+    <p>The coefficient can be written with a negative top number. Expanding \(\binom{-r}{k} = \frac{(-r)(-r-1)\cdots(-r-k+1)}{k!}\) and pulling out the \(k\) minus signs gives \(\binom{k + r - 1}{k} = (-1)^k\binom{-r}{k}\). So</p>
+    $$P(Y = k) = \binom{-r}{k}\, p^{\,r}(-q)^k$$
+    <p>These are the terms of Newton’s binomial series \((1 - q)^{-r} = \sum_k \binom{-r}{k}(-q)^k\), the binomial theorem with a negative power. Multiplied by \(p^r = (1-q)^r\), they add to 1. The binomial distribution comes from expanding \((q + p)^n\); this one comes from \(p^r(1 - q)^{-r}\).</p>
+  </details>
+</section>
+
+<!-- 2 -->
+<section id="mirror">
+  <div class="secnum">02</div>
+  <h2>The binomial in the mirror</h2>
+  <p>The <a href="binomial.html">binomial</a> fixes the number of trials \(n\) and counts the successes. The negative binomial fixes the number of successes \(r\) and counts the trials it takes. They look at the same sequence of trials from opposite ends, and one sentence links them: <strong>the \(r\)-th success comes by trial \(n\) exactly when the first \(n\) trials hold at least \(r\) successes.</strong> In symbols, with \(Y\) the failures and \(Y + r\) the trials,</p>
+  $$\begin{aligned} P(Y + r \le n) &= P\big(\text{Bin}(n, p) \ge r\big) \end{aligned}$$
+
+  <div class="widget">
+    <p class="widget-title">One sequence, two questions</p>
+    <div class="controls">
+      <label class="ctrl">successes \(r\) <input type="range" id="miR" min="1" max="6" step="1" value="3"><output id="miROut"></output></label>
+      <label class="ctrl">window \(n\) <input type="range" id="miN" min="1" max="30" step="1" value="8"><output id="miNOut"></output></label>
+      <label class="ctrl">\(p\) <input type="range" id="miP" min="0.1" max="0.9" step="0.05" value="0.4"><output id="miPOut"></output></label>
+    </div>
+    <div class="controls">
+      <button class="btn primary" id="miNew">New sequence</button>
+      <button class="btn" id="mi1000">Check 1,000 sequences</button>
+    </div>
+    <canvas id="miChart" style="height:110px" role="img" aria-label="A row of trials, makes in green and misses in gray, with the first n trials shaded and the trial of the r-th make marked"></canvas>
+    <div class="readout" id="miRead" style="margin-top:8px"></div>
+  </div>
+  <p>The two answers can never disagree, sequence by sequence, so their probabilities are equal. This is how software computes the negative binomial’s cumulative probabilities: as a binomial tail, or as the regularized incomplete beta function \(I_p(r, k + 1)\) that both share.</p>
+</section>
+
+<!-- 3 -->
+<section id="sum">
+  <div class="secnum">03</div>
+  <h2>A stack of geometric waits</h2>
+  <p>Split the run at each success. The failures before the first success, then between the first and the second, and so on, are \(r\) separate waits. The trials are independent and nothing carries over from one success to the next, so the waits are independent geometric counts \(G_1, \dots, G_r\), each with mean \(q/p\) and variance \(q/p^2\) (counting failures). Adding them:</p>
+  $$\begin{aligned} Y &= G_1 + G_2 + \dots + G_r \\ E[Y] &= \frac{rq}{p}, \qquad \operatorname{Var}(Y) = \frac{rq}{p^{2}} \end{aligned}$$
+  <p>For the hero’s shooter, \(r = 3\) and \(p = 0.4\): an average of \(3 \times 0.6/0.4 = 4.5\) misses, or 7.5 shots in all, with a standard deviation of about 3.4 misses.</p>
+
+  <div class="widget">
+    <p class="widget-title">Stack r waits</p>
+    <div class="controls">
+      <label class="ctrl">successes \(r\) <input type="range" id="suR" min="1" max="40" step="1" value="3"><output id="suROut"></output></label>
+      <label class="ctrl">\(p\) <input type="range" id="suP" min="0.1" max="0.9" step="0.05" value="0.4"><output id="suPOut"></output></label>
+      <button class="btn primary" id="suDraw">Draw one wait</button>
+    </div>
+    <canvas id="suBlocks" style="height:56px" role="img" aria-label="The latest draw as a bar split into r pieces, one geometric wait each"></canvas>
+    <canvas id="suChart" style="height:220px" role="img" aria-label="Negative binomial probabilities as bars, with a normal curve of the same mean and variance, and the latest draw marked"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i><span>\(P(Y = k)\)</span></span><span><i class="sw dash" style="border-color:var(--ink-2)"></i><span>normal, same mean and variance</span></span><span><i class="sw line" style="border-color:var(--gold)"></i><span>your latest draw</span></span></div>
+    <div class="readout" id="suRead" style="margin-top:8px"></div>
+  </div>
+  <p>With \(r = 1\) the bars fall from 0, the geometric shape. As \(r\) grows they pull away from 0, turn into a hump, and settle into a bell: a sum of many independent waits obeys the central limit theorem. Each stage adds the same skew, but it is diluted by \(\sqrt r\), so the skewness \((1 + q)/\sqrt{rq}\) fades slowly.</p>
+  <p>The same story in continuous time is the <a href="exponential.html#race">gamma (or Erlang) distribution</a>, the sum of \(r\) exponential waits. The negative binomial is its discrete twin, just as the geometric is the exponential’s.</p>
+</section>
+
+<!-- 4 -->
+<section id="mixture">
+  <div class="secnum">04</div>
+  <h2>Counts that are too spread out</h2>
+  <p>Now forget about trials. The <a href="poisson.html">Poisson distribution</a> is the standard model for counts of events, and it has a fingerprint: <a href="poisson.html#meanvar">its variance equals its mean</a>. Real counts often fail that test. Accidents per driver, claims per policy, customers per store, sequencing reads per gene: the variance is well above the mean.</p>
+  <p>The usual reason is that the units differ. Each driver has their own accident rate \(\lambda\), and given that rate their count is Poisson. But a careful driver and a reckless one have very different rates, and that spread of rates adds to the spread of counts. If the rates follow a <em class="term">gamma distribution</em> with shape \(r\) and mean \(\mu\), the counts follow a negative binomial:</p>
+  $$\begin{aligned} \lambda &\sim \text{Gamma}(\text{shape } r,\ \text{mean } \mu) \\ Y \mid \lambda &\sim \text{Poisson}(\lambda) \\ \Rightarrow\ Y &\sim \text{NB}\Big(r,\ p = \frac{r}{r + \mu}\Big) \end{aligned}$$
+  <p>Its mean is \(\mu\) and its variance is</p>
+  $$\operatorname{Var}(Y) = \mu + \frac{\mu^2}{r}$$
+  <p>The first \(\mu\) is the Poisson noise every count has. The extra \(\mu^2/r\) is the spread of the rates themselves. A small \(r\) means very unequal units; as \(r \to \infty\) the rates all equal \(\mu\) and the Poisson comes back.</p>
+
+  <div class="widget">
+    <p class="widget-title">Give every unit its own rate</p>
+    <div class="controls">
+      <label class="ctrl">mean \(\mu\) <input type="range" id="mxM" min="0.5" max="20" step="0.5" value="4"><output id="mxMOut"></output></label>
+      <label class="ctrl">shape \(r\) <input type="range" id="mxR" min="0" max="9" step="1" value="3"><output id="mxROut"></output></label>
+    </div>
+    <div class="controls">
+      <button class="btn" id="mx100">+100 units</button>
+      <button class="btn primary" id="mx2000">+2,000 units</button>
+      <button class="btn" id="mxReset">Reset</button>
+    </div>
+    <p class="cap">Step 1: each unit draws a rate from the gamma distribution.</p>
+    <canvas id="mxRates" style="height:120px" role="img" aria-label="Histogram of the rates drawn for the units, with the gamma density as a curve"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>rates drawn so far</span></span><span><i class="sw line" style="border-color:var(--accent)"></i><span>gamma density, shape \(r\), mean \(\mu\)</span></span></div>
+    <p class="cap" style="margin-top:12px">Step 2: each unit’s count is Poisson at its own rate.</p>
+    <canvas id="mxCounts" style="height:220px" role="img" aria-label="Histogram of the counts, with the negative binomial probabilities as dots and the Poisson probabilities for the same mean as short lines"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i><span>share of units with count \(k\)</span></span><span><i class="sw dot" style="background:var(--gold)"></i><span>negative binomial</span></span><span><i class="sw line" style="border-color:var(--ink)"></i><span>Poisson, same mean \(\mu\)</span></span></div>
+    <div class="readout" id="mxRead" style="margin-top:8px"></div>
+  </div>
+  <p>Slide \(r\) down and the rates spread out. Many units get rates near 0, so zeros pile up, while a few get high rates and produce a long right tail. The Poisson with the same mean misses both. Slide \(r\) to ∞ and the gamma collapses to a spike at \(\mu\): every unit is alike, and the counts are Poisson.</p>
+  <details>
+    <summary>Where the formula comes from</summary>
+    <p>Write the gamma with shape \(r\) and rate \(\beta = r/\mu\). Averaging the Poisson probability over it,</p>
+    $$\begin{aligned} P(Y = k) &= \int_0^\infty \frac{e^{-\lambda}\lambda^k}{k!} \\ &\quad\times \frac{\beta^r\lambda^{r-1}e^{-\beta\lambda}}{\Gamma(r)}\,d\lambda \\ &= \frac{\beta^r}{k!\,\Gamma(r)} \\ &\quad\times \int_0^\infty \lambda^{k+r-1}e^{-(1+\beta)\lambda}\,d\lambda \\ &= \frac{\Gamma(k + r)}{k!\,\Gamma(r)} \\ &\quad\times \Big(\frac{\beta}{1+\beta}\Big)^{r}\Big(\frac{1}{1+\beta}\Big)^{k} \end{aligned}$$
+    <p>With \(p = \beta/(1 + \beta) = r/(r + \mu)\) this is \(\binom{k + r - 1}{k}p^r q^k\) again. Nothing in the derivation needs \(r\) to be a whole number, so in this use \(r\) can be any positive number: \(\Gamma(k + r)/(k!\,\Gamma(r))\) takes the place of the binomial coefficient. The variance follows from the law of total variance: \(E[\operatorname{Var}(Y\mid\lambda)] + \operatorname{Var}(E[Y\mid\lambda]) = \mu + \mu^2/r\).</p>
+  </details>
+  <div class="callout">
+    <p><strong>The counting family.</strong> Three distributions cover most counts, and the variance-to-mean ratio tells them apart.</p>
+    <canvas id="trio" style="height:170px" role="img" aria-label="Three distributions with mean 4: a binomial, narrower than the Poisson, and a negative binomial, wider than the Poisson"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--one)"></i><span>binomial \((8, 0.5)\): variance 2</span></span><span><i class="sw" style="background:var(--accent)"></i><span>Poisson(4): variance 4</span></span><span><i class="sw" style="background:var(--zero)"></i><span>negative binomial \((r = 2)\): variance 12</span></span></div>
+    <p style="margin-top:8px">All three have mean 4. The <a href="binomial.html">binomial</a> has a ceiling of \(n\) slots, so its variance \(npq\) is <strong>below</strong> its mean. The <a href="poisson.html">Poisson</a>’s variance <strong>equals</strong> its mean. The negative binomial’s variance \(\mu + \mu^2/r\) is <strong>above</strong> it.</p>
+  </div>
+</section>
+
+<!-- 5 -->
+<section id="params">
+  <div class="secnum">05</div>
+  <h2>One distribution, many names</h2>
+  <p>The two stories lead to two natural ways to describe the same distribution. Waiting for successes suggests \((r, p)\). Modeling counts suggests the mean \(\mu\) and a <em class="term">dispersion</em> parameter that says how much extra variance there is. Software and fields mix the two freely, and mixing them up is the most common mistake made with this distribution.</p>
+  <div class="table-wrap">
+  <table class="summary params">
+    <tr><th>Where</th><th>Parameters</th><th>Variance</th></tr>
+    <tr><td>This page, R <code>dnbinom(k, size, prob)</code>, scipy <code>nbinom(n, p)</code></td><td>\(r,\ p\)</td><td>\(rq/p^2\)</td></tr>
+    <tr><td>R <code>dnbinom(k, size, mu)</code>; ecology’s and epidemiology’s \(k\); RNA-seq</td><td>\(\mu,\ r\)</td><td>\(\mu + \mu^2/r\)</td></tr>
+    <tr><td>statsmodels, many GLM texts</td><td>\(\mu,\ \alpha = 1/r\)</td><td>\(\mu + \alpha\mu^2\)</td></tr>
+    <tr><td>Counting trials, not failures: \(X = Y + r\)</td><td>\(r,\ p\)</td><td>\(rq/p^2\)</td></tr>
+  </table>
+  </div>
+  <p>The conversions are</p>
+  $$\begin{gathered} p = \frac{r}{r + \mu}, \qquad \mu = \frac{rq}{p}, \qquad \alpha = \frac1r \end{gathered}$$
+  <p>For example, a mean of \(\mu = 4\) with size \(r = 2\) is \(p = 2/6 = 1/3\), dispersion \(\alpha = 0.5\), and variance \(4 + 16/2 = 12\). Note that a <em>larger</em> \(r\) means <em>less</em> overdispersion, while a larger \(\alpha\) means more. Before you trust a fitted value, check which one a program reports.</p>
+</section>
+
+<!-- 6 -->
+<section id="mites">
+  <div class="secnum">06</div>
+  <h2>Mites on apple leaves</h2>
+  <p>In 1953 Chester Bliss and Ronald Fisher used the negative binomial to describe how insects spread over plants. One of their examples counts European red mites on 150 apple leaves. Mites cluster: a leaf that suits them, or where a female laid eggs, collects many, while others stay clean. The counts have mean \(\bar x = 172/150 = 1.147\) but variance \(s^2 = 2.27\), about twice the mean.</p>
+
+  <div class="widget">
+    <p class="widget-title">Fit the mite counts</p>
+    <div class="controls">
+      <button class="btn" data-mf="pois" aria-pressed="false">Poisson</button>
+      <button class="btn" data-mf="mom" aria-pressed="false">Negative binomial, moments</button>
+      <button class="btn on" data-mf="mle" aria-pressed="true">Negative binomial, maximum likelihood</button>
+    </div>
+    <canvas id="mfChart" style="height:220px" role="img" aria-label="Observed numbers of leaves with each mite count as bars, with the expected numbers under the chosen model as dots"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i><span>observed leaves</span></span><span><i class="sw dot" style="background:var(--gold)"></i><span>expected under the chosen fit</span></span></div>
+    <div class="table-wrap"><table class="summary" id="mfTable"></table></div>
+    <div class="readout" id="mfRead"></div>
+  </div>
+  <p>Both fits keep the mean at \(\bar x\) and differ only in \(r\). The <em class="term">method of moments</em> matches the variance too: setting \(s^2 = \bar x + \bar x^2/r\) gives</p>
+  $$\hat r = \frac{\bar x^{2}}{s^{2} - \bar x} = \frac{1.147^{2}}{2.274 - 1.147} \approx 1.17$$
+  <p><em class="term">Maximum likelihood</em> picks the \(r\) under which the observed counts are most probable. It has no closed form, so the widget finds it numerically: \(\hat r \approx 1.02\), the value Bliss and Fisher reported. The Poisson expects far too few empty leaves and far too few crowded ones, and the chi-square test rejects it decisively. Either negative binomial fits well.</p>
+  <p>The method of moments only works when \(s^2 > \bar x\). If the variance is at or below the mean, there is no overdispersion to model and the Poisson (or a binomial) is the better choice.</p>
+</section>
+
+<!-- 7 -->
+<section id="props">
+  <div class="secnum">07</div>
+  <h2>All the properties</h2>
+  <p>Here are the main facts about \(Y \sim \text{NB}(r, p)\), counting failures, in one place. Drag the sliders to update every value.</p>
+
+  <div class="sticky-ctrl">
+    <label class="ctrl">\(r\) <input type="range" id="prR" min="0.5" max="20" step="0.5" value="3"><output id="prROut"></output></label>
+    <label class="ctrl">\(p\) <input type="range" id="prP" min="0.05" max="0.95" step="0.05" value="0.4"><output id="prPOut"></output></label>
+  </div>
+
+  <div class="pair" style="margin-top:16px">
+    <div class="mini"><div class="mcap">PMF</div><canvas id="miniPMF" style="height:130px" role="img" aria-label="Probability mass function for the current r and p, with the mean marked"></canvas></div>
+    <div class="mini"><div class="mcap">CDF</div><canvas id="miniCDF" style="height:130px" role="img" aria-label="Cumulative distribution function for the current r and p, with the median marked"></canvas></div>
+  </div>
+
+  <h3>The numbers</h3>
+  <div class="cards">
+    <div class="card"><h4>Support and parameters</h4><div class="f">\(k = 0, 1, 2, \dots\); \(r > 0\), \(0 < p \le 1\)</div><div class="v" id="cPar"></div></div>
+    <div class="card"><h4>PMF</h4><div class="f">\(\frac{\Gamma(k+r)}{k!\,\Gamma(r)}\,p^r q^k\)</div><div class="v" id="cPMF"></div></div>
+    <div class="card"><h4>Mean</h4><div class="f">\(\mu = rq/p\)</div><div class="v" id="cMean"></div></div>
+    <div class="card"><h4>Variance</h4><div class="f">\(rq/p^2 = \mu + \mu^2/r\)</div><div class="v" id="cVar"></div></div>
+    <div class="card"><h4>Mode</h4><div class="f">\(\lfloor (r-1)q/p \rfloor\) if \(r > 1\), else 0</div><div class="v" id="cMode"></div></div>
+    <div class="card"><h4>Dispersion index</h4><div class="f">\(\operatorname{Var}/E = 1/p = 1 + \mu/r\)</div><div class="v" id="cD"></div></div>
+    <div class="card"><h4>Skewness</h4><div class="f">\((1+q)/\sqrt{rq}\)</div><div class="v" id="cSkew"></div></div>
+    <div class="card"><h4>Excess kurtosis</h4><div class="f">\(6/r + p^2/(rq)\)</div><div class="v" id="cKurt"></div></div>
+    <div class="card"><h4>PGF</h4><div class="f">\(G(s) = \big(p/(1 - qs)\big)^{r}\)</div><div class="v" id="cPGF"></div></div>
+    <div class="card"><h4>MGF</h4><div class="f">\(\big(p/(1 - qe^{t})\big)^{r}\), \(t < -\ln q\)</div><div class="v" id="cMGF"></div></div>
+    <div class="card"><h4>CDF</h4><div class="f">\(P(Y \le k) = I_p(r,\ k+1)\)</div><div class="v" id="cCDF"></div></div>
+  </div>
+
+  <h3>Where the formulas come from</h3>
+  <details>
+    <summary>Everything from the PGF</summary>
+    <p>A geometric count of failures has PGF \(E[s^G] = \sum_j q^j p\, s^j = p/(1 - qs)\). A sum of \(r\) independent ones multiplies them: \(G(s) = \big(p/(1-qs)\big)^r\). Then \(G'(1) = rq/p\) is the mean and \(G''(1) = r(r+1)q^2/p^2\) is \(E[Y(Y-1)]\), so</p>
+    $$\begin{aligned} \operatorname{Var}(Y) &= G''(1) + G'(1) - G'(1)^2 \\ &= \frac{r(r+1)q^2}{p^2} + \frac{rq}{p} - \frac{r^2q^2}{p^2} \\ &= \frac{rq}{p^2} \end{aligned}$$
+    <p>The PGF also makes sense for any real \(r > 0\), which is the gamma-mixture case of section 4.</p>
+  </details>
+  <details>
+    <summary>Back to the Poisson</summary>
+    <p>Hold the mean \(\mu\) fixed and let \(r \to \infty\), so \(p = r/(r+\mu) \to 1\). The PGF becomes</p>
+    $$\begin{aligned} &\Big(\frac{1}{1 + \frac{\mu}{r}(1 - s)}\Big)^{r} \\ &\quad\to e^{-\mu(1-s)} = e^{\mu(s-1)} \end{aligned}$$
+    <p>which is the Poisson’s PGF. The extra variance \(\mu^2/r\) shrinks to 0 along the way.</p>
+  </details>
+
+  <h3>Structural facts worth remembering</h3>
+  <ol class="facts">
+    <li><strong>One success: the geometric.</strong> \(\text{NB}(1, p)\) is the <a href="geometric.html">geometric</a> distribution of failures before the first success.</li>
+    <li><strong>Same \(p\) adds.</strong> \(\text{NB}(r_1, p) + \text{NB}(r_2, p) = \text{NB}(r_1 + r_2, p)\) for independent counts: waiting for \(r_1\) successes and then \(r_2\) more is waiting for \(r_1 + r_2\).</li>
+    <li><strong>The binomial mirror.</strong> \(P(Y + r \le n) = P(\text{Bin}(n, p) \ge r)\) (section 2).</li>
+    <li><strong>A gamma mixture of Poissons.</strong> If \(\lambda \sim \text{Gamma}(r, \text{mean } \mu)\) and \(Y \mid \lambda \sim \text{Poisson}(\lambda)\), then \(Y \sim \text{NB}(r, r/(r+\mu))\) (section 4).</li>
+    <li><strong>The Poisson limit.</strong> With the mean held fixed, \(r \to \infty\) gives back the <a href="poisson.html">Poisson</a>.</li>
+    <li><strong>The continuous twin: the gamma.</strong> Shrink each trial to a slice of time, as the <a href="exponential.html#slices">exponential tutorial</a> does for the geometric, and the wait for the \(r\)-th event becomes \(\text{Gamma}(r)\).</li>
+  </ol>
+</section>
+
+<!-- 8 -->
+<section id="uses">
+  <div class="secnum">08</div>
+  <h2>Where you will meet it</h2>
+  <div class="cards">
+    <div class="card"><h4>Genomics</h4><p>The number of sequencing reads mapping to a gene varies between samples far more than Poisson noise allows. DESeq2 and edgeR, the standard tools for RNA-seq, model the counts as negative binomial with a dispersion fitted per gene.</p></div>
+    <div class="card"><h4>Insurance</h4><p>Claims per policyholder are overdispersed because drivers differ. A gamma-distributed risk with Poisson claims gives the negative binomial, and bonus-malus pricing updates each driver’s rate from their own record.</p></div>
+    <div class="card"><h4>Accident proneness</h4><p>Greenwood and Yule introduced the gamma–Poisson mixture in 1920 to describe accidents among munitions workers: a few workers had many accidents, more than equal risks would produce.</p></div>
+    <div class="card"><h4>Ecology</h4><p>Insects on plants, parasites in hosts and seedlings in plots are clumped. Ecologists read the fitted \(r\) (usually written \(k\)) as an index of aggregation: the smaller \(k\), the more clumped.</p></div>
+    <div class="card"><h4>Superspreading</h4><p>The number of people each infected person infects is often negative binomial. For SARS in 2003 the estimated \(k\) was about 0.16: most cases infected no one, and a few infected dozens.</p></div>
+    <div class="card"><h4>Web and sales counts</h4><p>Visits per user, purchases per customer and messages per account are overdispersed, because a few heavy users dominate. Count regressions on such data default to the negative binomial.</p></div>
+    <div class="card"><h4>When it fails</h4><p>Some units can never have events at all, which adds zeros that a zero-inflated model handles better (see the <a href="poisson.html#overdispersion">Poisson tutorial</a>). Very heavy tails, such as followers per account, can be too extreme even for the negative binomial.</p></div>
+  </div>
+  <p>This is the end of the series. It started with a single coin flip and built the binomial, geometric, exponential and Poisson distributions from it; the negative binomial ties the counting and the waiting together. <a href="../index.html">Browse all explainers</a>.</p>
+</section>
+
+</main>
+<footer>A single-file interactive explainer. Math typeset with KaTeX. Every simulation runs live in your browser using <code>Math.random()</code>.</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script>
+(function(){
+'use strict';
+/* ---------- helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const root = document.documentElement;
+const C = n => getComputedStyle(root).getPropertyValue(n).trim();
+const clamp = (x,a,b) => Math.max(a, Math.min(b, x));
+const f1 = x => x.toFixed(1), f2 = x => x.toFixed(2), f3 = x => x.toFixed(3), f4 = x => x.toFixed(4);
+const fmtN = x => Math.abs(x - Math.round(x)) < 1e-9 ? String(Math.round(x)) : String(+x.toFixed(2));
+const pct = x => (100 * x).toFixed(1) + '%';
+const SANS = 'system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';
+const MONO = 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
+const RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+const TAU = Math.PI * 2;
+
+if (window.renderMathInElement) {
+  renderMathInElement(document.body, {
+    delimiters: [{left:'$$', right:'$$', display:true}, {left:'\\(', right:'\\)', display:false}],
+    throwOnError: false
+  });
+}
+function markOverflow(el){
+  if (!el) return;
+  el.classList.toggle('ovf', el.scrollWidth - el.clientWidth - el.scrollLeft > 2);
+}
+function markAllOverflow(){ $$('.katex-display').forEach(markOverflow); }
+document.addEventListener('scroll', e => {
+  if (e.target.classList && e.target.classList.contains('katex-display')) markOverflow(e.target);
+}, true);
+markAllOverflow();
+window.addEventListener('load', markAllOverflow);   // KaTeX web fonts can change widths
+function fit(c){
+  const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+  if (c.width !== w*dpr || c.height !== h*dpr) { c.width = w*dpr; c.height = h*dpr; }
+  const ctx = c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  return {ctx, w, h};
+}
+const redraws = [];
+function redrawAll(){ redraws.forEach(f => f()); markAllOverflow(); }
+let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(redrawAll, 80); });
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+if (mq.addEventListener) mq.addEventListener('change', redrawAll);
+new MutationObserver(redrawAll).observe(root, {attributes:true, attributeFilter:['data-theme']});
+
+function bindRange(input, out, cb, fmt){
+  fmt = fmt || fmtN;
+  const f = () => { const v = parseFloat(input.value); if (out) out.textContent = fmt(v); cb(v); };
+  input.addEventListener('input', f); f();
+}
+function setRange(input, v){ input.value = v; input.dispatchEvent(new Event('input')); }
+function niceTicks(max, count){
+  const raw = max / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const step = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag;
+  const t = []; for (let v = 0; v <= max + 1e-9; v += step) t.push(v); return t;
+}
+function intStep(px, minPx){
+  for (const s of [1,2,5,10,20,25,50,100,200,250,500,1000]) if (s * px >= minPx) return s;
+  return 1000;
+}
+function yGrid(ctx, X0, X1, ys, ticks, fmt){
+  ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ticks.forEach(v => {
+    const y = Math.round(ys(v)) + .5;
+    ctx.strokeStyle = C('--line'); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X0, y); ctx.lineTo(X1, y); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.fillText(fmt(v), X0 - 6, y);
+  });
+}
+function stepFmt(ticks){ const st = ticks.length > 1 ? ticks[1] - ticks[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9)); return v => v.toFixed(d); }
+function roundRect(ctx, x, y, w, h, r){
+  r = Math.max(0, Math.min(r, w/2, Math.abs(h)/2));
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+function dot(ctx, x, y, r){ ctx.beginPath(); ctx.arc(x, y, Math.max(0.5, r), 0, TAU); ctx.fill(); }
+
+/* continuous axes: x from xmin to xmax, y from 0 to ymax (or a custom y-scale) */
+function cax(ctx, w, h, o){
+  const X0 = o.left != null ? o.left : 44, X1 = w - (o.right != null ? o.right : 12);
+  const Y0 = h - (o.bottom != null ? o.bottom : 24), Y1 = o.top != null ? o.top : 12;
+  const xmin = o.xmin || 0, xmax = o.xmax;
+  const xs = x => X0 + (x - xmin) / (xmax - xmin) * (X1 - X0);
+  const ixs = px => xmin + (px - X0) / (X1 - X0) * (xmax - xmin);
+  const ys = o.yscale ? o.yscale(Y0, Y1) : (v => Y0 - v / o.ymax * (Y0 - Y1));
+  if (o.ygrid !== false) {
+    const t = o.yticks || niceTicks(o.ymax, o.ny || 4).filter(v => v <= o.ymax * 1.0001);
+    yGrid(ctx, X0, X1, ys, t, o.yfmt || stepFmt(t));
+  }
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  if (o.xlabels !== false) {
+    const xt = niceTicks(xmax - xmin, Math.max(2, Math.floor((X1 - X0) / (o.xgap || 58))));
+    const fmt = o.xfmt || stepFmt(xt);
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    xt.forEach(v => ctx.fillText(fmt(v + xmin), xs(v + xmin), Y0 + 6));
+  }
+  return {X0, X1, Y0, Y1, xs, ixs, ys};
+}
+function clipTo(ctx, A){ ctx.save(); ctx.beginPath(); ctx.rect(A.X0, A.Y1 - 4, A.X1 - A.X0 + 1, A.Y0 - A.Y1 + 4.5); ctx.clip(); }
+function pathFn(ctx, A, f, x0, x1, n){
+  n = n || 240; ctx.beginPath(); let on = false;
+  for (let i = 0; i <= n; i++) {
+    const x = x0 + (x1 - x0) * i / n, v = f(x);
+    if (!isFinite(v)) { on = false; continue; }
+    const px = A.xs(x), py = A.ys(v);
+    if (on) ctx.lineTo(px, py); else { ctx.moveTo(px, py); on = true; }
+  }
+}
+function fillFn(ctx, A, f, x0, x1, color, n){
+  if (!(x1 > x0)) return;
+  n = n || 160; ctx.beginPath(); ctx.moveTo(A.xs(x0), A.Y0);
+  for (let i = 0; i <= n; i++) { const x = x0 + (x1 - x0) * i / n; ctx.lineTo(A.xs(x), A.ys(f(x))); }
+  ctx.lineTo(A.xs(x1), A.Y0); ctx.closePath(); ctx.fillStyle = color; ctx.fill();
+}
+function vline(ctx, x, y0, y1, color, dash, lw){
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw || 1.5; if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(Math.round(x) + .5, y0); ctx.lineTo(Math.round(x) + .5, y1); ctx.stroke(); ctx.restore();
+}
+/* integer-valued bar charts (counts) */
+function frame(ctx, w, h, o){
+  const X0 = o.left != null ? o.left : 44, X1 = w - 10, Y0 = h - 24, Y1 = o.top != null ? o.top : 12;
+  const span = o.hi - o.lo + 1, bw = (X1 - X0) / span;
+  const xc = k => X0 + bw * (k - o.lo + .5), ys = v => Y0 - (v / o.ymax) * (Y0 - Y1);
+  const t = niceTicks(o.ymax, 4).filter(v => v <= o.ymax * 1.0001); yGrid(ctx, X0, X1, ys, t, o.yfmt || stepFmt(t));
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  const st = intStep(bw, 22);
+  for (let k = Math.ceil(o.lo / st) * st; k <= o.hi; k += st) ctx.fillText(o.lab ? o.lab(k) : k, xc(k), Y0 + 6);
+  return {X0, X1, Y0, Y1, bw, xc, ys};
+}
+function drawBars(ctx, F, lo, hi, val, color, frac){
+  const bwid = Math.max(1, F.bw * (frac == null ? .8 : frac));
+  for (let k = lo; k <= hi; k++) {
+    const v = val(k); if (!(v > 0)) continue;
+    const y = F.ys(v), hh = F.Y0 - y; if (hh < 0.2) continue;
+    const x = F.xc(k) - bwid / 2;
+    ctx.fillStyle = typeof color === 'function' ? color(k) : color;
+    if (bwid >= 6 && hh >= 3) { roundRect(ctx, x, y, bwid, hh, Math.min(3, bwid / 4)); ctx.fill(); }
+    else ctx.fillRect(x, y, bwid, hh);
+  }
+}
+/* histogram of continuous values, drawn as a density */
+function drawHistDensity(ctx, A, counts, bw, n, color){
+  if (!n) return;
+  ctx.fillStyle = color;
+  for (let b = 0; b < counts.length; b++) {
+    if (!counts[b]) continue;
+    const d = counts[b] / (n * bw), x0 = A.xs(b * bw), x1 = A.xs((b + 1) * bw), y = A.ys(d);
+    const g = x1 - x0 > 5 ? 1 : 0;
+    ctx.fillRect(x0 + g / 2, y, Math.max(1, x1 - x0 - g), A.Y0 - y);
+  }
+}
+function histMax(counts, bw, n){ let m = 0; if (!n) return 0; for (const c of counts) m = Math.max(m, c / (n * bw)); return m; }
+
+
+/* ---------- special functions ---------- */
+const LF = [0];
+function lf(n){ while (LF.length <= n) { const i = LF.length; LF.push(LF[i-1] + Math.log(i)); } return LF[n]; }
+function lgam(x){
+  const g = 7, c = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+  if (x < 0.5) return Math.log(Math.PI / Math.abs(Math.sin(Math.PI * x))) - lgam(1 - x);
+  x -= 1; let a = c[0]; const t = x + g + 0.5;
+  for (let i = 1; i < 9; i++) a += c[i] / (x + i);
+  return 0.5 * Math.log(TAU) + (x + 0.5) * Math.log(t) - t + Math.log(a);
+}
+function betacf(a, b, x){
+  const TINY = 1e-300; let qab = a + b, qap = a + 1, qam = a - 1, c = 1, d = 1 - qab * x / qap;
+  if (Math.abs(d) < TINY) d = TINY; d = 1 / d; let h = d;
+  for (let m = 1; m <= 3000; m++) {
+    const m2 = 2 * m; let aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+    d = 1 + aa * d; if (Math.abs(d) < TINY) d = TINY; c = 1 + aa / c; if (Math.abs(c) < TINY) c = TINY; d = 1 / d; h *= d * c;
+    aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+    d = 1 + aa * d; if (Math.abs(d) < TINY) d = TINY; c = 1 + aa / c; if (Math.abs(c) < TINY) c = TINY; d = 1 / d;
+    const del = d * c; h *= del; if (Math.abs(del - 1) < 1e-15) break;
+  }
+  return h;
+}
+function betaI(a, b, x){   // regularized incomplete beta I_x(a, b)
+  if (x <= 0) return 0; if (x >= 1) return 1;
+  const lb = Math.exp(lgam(a + b) - lgam(a) - lgam(b) + a * Math.log(x) + b * Math.log1p(-x));
+  return x < (a + 1) / (a + b + 2) ? lb * betacf(a, b, x) / a : 1 - lb * betacf(b, a, 1 - x) / b;
+}
+function gammaP(a, x){   // regularized lower incomplete gamma P(a, x)
+  if (x <= 0) return 0;
+  const lead = Math.exp(-x + a * Math.log(x) - lgam(a));
+  if (x < a + 1) {
+    let ap = a, del = 1 / a, sum = del;
+    for (let i = 0; i < 4000; i++) { ap += 1; del *= x / ap; sum += del; if (Math.abs(del) < Math.abs(sum) * 1e-15) break; }
+    return Math.min(1, sum * lead);
+  }
+  const TINY = 1e-300; let b = x + 1 - a, c = 1 / TINY, d = 1 / b, hh = d;
+  for (let i = 1; i < 4000; i++) {
+    const an = -i * (i - a); b += 2;
+    d = an * d + b; if (Math.abs(d) < TINY) d = TINY;
+    c = b + an / c; if (Math.abs(c) < TINY) c = TINY;
+    d = 1 / d; const del = d * c; hh *= del; if (Math.abs(del - 1) < 1e-15) break;
+  }
+  return Math.max(0, 1 - lead * hh);
+}
+function gammaQuantile(a, p){   // quantile of Gamma(shape a, scale 1)
+  let lo = 0, hi = Math.max(1, 2 * a);
+  while (gammaP(a, hi) < p) hi *= 2;
+  for (let i = 0; i < 200; i++) { const m = (lo + hi) / 2; if (gammaP(a, m) < p) lo = m; else hi = m; if (hi - lo < 1e-12 * hi) break; }
+  return (lo + hi) / 2;
+}
+
+/* ---------- distributions ---------- */
+// negative binomial, failures before the r-th success; any real r > 0
+function nbPMF(r, p, k){
+  if (k < 0 || !Number.isInteger(k)) return 0;
+  if (p >= 1) return k === 0 ? 1 : 0;
+  if (p <= 0) return 0;
+  return Math.exp(lgam(k + r) - lgam(r) - lf(k) + r * Math.log(p) + k * Math.log1p(-p));
+}
+const nbP = (mu, r) => r / (r + mu);   // mean/size -> p
+function nbCDF(r, p, k){ return k < 0 ? 0 : p >= 1 ? 1 : betaI(r, k + 1, p); }
+function nbQuant(r, p, u, cap){   // smallest k with CDF >= u (by summing; cap guards the tail)
+  if (p >= 1) return 0;
+  let F = 0, k = 0; cap = cap || 5000;
+  for (; k < cap; k++) { F += nbPMF(r, p, k); if (F >= u) return k; }
+  return cap;
+}
+function poisPMF(l, k){ return l <= 0 ? (k === 0 ? 1 : 0) : Math.exp(-l + k * Math.log(l) - lf(k)); }
+function binPMF(n, p, k){ return k < 0 || k > n ? 0 : Math.exp(lf(n) - lf(k) - lf(n - k) + k * Math.log(p) + (n - k) * Math.log1p(-p)); }
+function binTailGE(n, p, r){ let s = 0; for (let j = r; j <= n; j++) s += binPMF(n, p, j); return s; }
+function gammaDens(x, r, mu){   // gamma with shape r and mean mu
+  if (x <= 0) return r < 1 ? Infinity : r === 1 ? r / mu : 0;
+  const b = r / mu; return Math.exp(r * Math.log(b) + (r - 1) * Math.log(x) - b * x - lgam(r));
+}
+
+/* ---------- samplers ---------- */
+const expS = () => -Math.log(1 - Math.random());
+function gaussS(){ let u = 0; while (u === 0) u = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(TAU * Math.random()); }
+function gammaS(a){   // Marsaglia–Tsang, shape a, scale 1
+  if (a < 1) { let u = 0; while (u === 0) u = Math.random(); return gammaS(a + 1) * Math.pow(u, 1 / a); }
+  const d = a - 1 / 3, c = 1 / Math.sqrt(9 * d);
+  for (;;) {
+    let x, v;
+    do { x = gaussS(); v = 1 + c * x; } while (v <= 0);
+    v = v * v * v; const u = Math.random();
+    if (u < 1 - 0.0331 * x * x * x * x) return d * v;
+    if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) return d * v;
+  }
+}
+function poisS(l){   // exact Poisson sampler
+  if (!(l > 0)) return 0;
+  if (l < 30) { let k = 0, s = expS(); while (s < l) { k++; s += expS(); } return k; }
+  // inversion from the mode outward: O(sqrt(l)) steps
+  const m = Math.floor(l), u = Math.random();
+  let F = 1 - gammaP(m + 1, l), pm = poisPMF(l, m), p = pm, k = m;
+  if (u <= F) { while (k > 0 && u <= F - p) { F -= p; p = p * k / l; k--; } return k; }
+  while (u > F && p > 0 && k < m + 1e6) { k++; p = p * l / k; F += p; }
+  return k;
+}
+function geoFailS(p){ if (p >= 1) return 0; return Math.floor(Math.log(1 - Math.random()) / Math.log1p(-p)); }
+
+/* ---------- formatting and small tools ---------- */
+const fmtP = p => p >= 1e-3 ? f4(p) : p > 0 ? p.toExponential(2).replace(/e-(\d+)/, (m, d) => '×10<sup>−' + d + '</sup>') : '0';
+const nf = n => n.toLocaleString('en-US');
+const fmtV = v => Math.abs(v) >= 1e-3 ? String(+v.toFixed(4)) : fmtP(v);
+function choose(n, k){ return Math.round(Math.exp(lf(n) - lf(k) - lf(n - k))); }
+function pickBtns(attr, cb){
+  const bs = $$('[data-' + attr + ']');
+  bs.forEach(b => b.addEventListener('click', () => {
+    bs.forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
+    cb(b.dataset[attr]);
+  }));
+}
+function onScreen(el, cb){
+  if ('IntersectionObserver' in window) new IntersectionObserver(es => cb(es[0].isIntersecting)).observe(el);
+}
+function sampleVar(n, s, s2){ return n > 1 ? Math.max(0, (s2 - s * s / n) / (n - 1)) : NaN; }
+function missMark(ctx, x, y, r){
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(x, y, r - .75, 0, TAU); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x - r * .45, y - r * .45); ctx.lineTo(x + r * .45, y + r * .45); ctx.moveTo(x + r * .45, y - r * .45); ctx.lineTo(x - r * .45, y + r * .45); ctx.stroke();
+}
+window.__nb = {nbPMF, nbCDF, poisPMF, binTailGE, gammaS, poisS, nbQuant, betaI};
+
+/* ---------- 0. hero: shooting until the third make ---------- */
+(function(){
+  const rc = $('#heroRuns'), hc = $('#heroHist'), go = $('#heroGo'), hint = $('#heroHint');
+  const P = 0.4, R = 3, KMAX = 16, ROWS = 6, MAXRUNS = 100000, SHOT_MS = 160;
+  let rows = [], cur = [], counts = new Array(KMAX + 2).fill(0), n = 0, sum = 0, longest = 0;
+  let running = !RM, raf = 0, last = 0, acc = 0, visible = true;
+  function finish(seq){
+    rows.unshift(seq); if (rows.length > ROWS) rows.length = ROWS;
+    const k = seq.length - R;
+    counts[Math.min(k, KMAX + 1)]++; n++; sum += k; if (k > longest) longest = k;
+  }
+  function runS(){ const s = []; let m = 0; while (m < R) { const hit = Math.random() < P; s.push(hit); if (hit) m++; } return s; }
+  function shoot(){
+    const hit = Math.random() < P; cur.push(hit);
+    if (cur.filter(Boolean).length >= R) { finish(cur); cur = []; return true; }
+    return false;
+  }
+  function drawRuns(){
+    const {ctx, w, h} = fit(rc);
+    const rh = h / ROWS, r = Math.max(3, Math.min(7, rh * .32)), gap = r * 2 + 5, X0 = 10, X1 = w - 66;
+    const fitN = Math.max(4, Math.floor((X1 - X0) / gap));
+    const live = cur.length || (running && n === 0) ? [{s: cur, live: true}] : [];
+    const show = live.concat(rows.map(s => ({s, live: false}))).slice(0, ROWS);
+    show.forEach((row, i) => {
+      const y = rh * (i + .5), s = row.s;
+      ctx.globalAlpha = row.live ? 1 : Math.max(.35, 1 - i * .12);
+      // long runs: keep the end of the run (where the makes finish), elide the start
+      const cut = s.length > fitN, items = cut ? s.slice(s.length - (fitN - 1)) : s;
+      items.forEach((hit, j) => {
+        const x = X0 + r + (j + (cut ? 1 : 0)) * gap, isLast = !row.live && j === items.length - 1;
+        if (hit) { ctx.fillStyle = isLast ? C('--gold') : C('--one'); dot(ctx, x, y, r); }
+        else missMark(ctx, x, y, r);
+      });
+      if (cut) { ctx.fillStyle = C('--ink-3'); ctx.font = '12px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('…', X0 + r, y); }
+      const k = s.length - s.filter(Boolean).length;
+      ctx.fillStyle = row.live ? C('--ink-3') : C('--ink'); ctx.font = (row.live ? '' : '600 ') + '12px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      ctx.fillText(row.live ? (s.length ? '…' : '') : (k === 1 ? '1 miss' : k + ' misses'), w - 4, y);
+    });
+    ctx.globalAlpha = 1;
+    if (!show.length) { ctx.fillStyle = C('--ink-3'); ctx.font = '13px ' + SANS; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('Press play to start shooting', w / 2, h / 2); }
+  }
+  function drawHist(){
+    const {ctx, w, h} = fit(hc);
+    let ym = 0; for (let k = 0; k <= KMAX; k++) ym = Math.max(ym, nbPMF(R, P, k), n ? counts[k] / n : 0);
+    const F = frame(ctx, w, h, {lo: 0, hi: KMAX, ymax: ym * 1.15, left: 40});
+    drawBars(ctx, F, 0, KMAX, k => n ? counts[k] / n : 0, C('--accent'), .72);
+    ctx.fillStyle = C('--gold');
+    for (let k = 0; k <= KMAX; k++) dot(ctx, F.xc(k), F.ys(nbPMF(R, P, k)), 3.5);
+  }
+  function setHint(){
+    if (!n) { hint.textContent = 'A player who makes 40% of their shots keeps shooting until they have made 3. Each row is one run.'; return; }
+    const over = counts[KMAX + 1];
+    hint.innerHTML = `<b>${nf(n)}</b> runs · average <b>${f2(sum / n)}</b> misses before the 3rd make (theory 4.5) · most <b>${longest}</b>` +
+      (over ? ` · ${nf(over)} ${over === 1 ? 'run' : 'runs'} with more than ${KMAX} misses not shown` : '') + (n >= MAXRUNS ? ' · limit of 100,000 runs reached, press Clear' : '');
+  }
+  function drawAll(){ drawRuns(); drawHist(); }
+  function tick(t){
+    raf = 0;
+    if (!running || !visible) return;
+    if (last) acc += Math.min(500, t - last);
+    last = t;
+    let done = false;
+    while (acc >= SHOT_MS) { acc -= SHOT_MS; if (n < MAXRUNS && shoot()) done = true; }
+    if (n >= MAXRUNS) setRunning(false);
+    drawRuns(); if (done) { drawHist(); setHint(); }
+    raf = requestAnimationFrame(tick);
+  }
+  function kick(){ if (!raf && running && visible) { last = 0; raf = requestAnimationFrame(tick); } }
+  function setRunning(v){ running = v; go.textContent = v ? '❚❚ Pause' : '▶ Play'; if (v) kick(); }
+  go.addEventListener('click', () => setRunning(!running));
+  $('#heroMany').addEventListener('click', () => {
+    for (let i = 0; i < 100 && n < MAXRUNS; i++) finish(runS());
+    drawAll(); setHint();
+  });
+  $('#heroClear').addEventListener('click', () => {
+    rows = []; cur = []; counts.fill(0); n = 0; sum = 0; longest = 0; drawAll(); setHint();
+  });
+  onScreen(rc, v => { visible = v; kick(); });
+  for (let i = 0; i < 60; i++) finish(runS());
+  setHint();
+  if (RM) setRunning(false);
+  redraws.push(drawAll); drawAll(); kick();
+})();
+
+/* ---------- 1. arrangements ---------- */
+function arrangements(r, k, limit){   // positions of the r-1 early successes among the first k+r-1 slots
+  const L = k + r - 1, out = [], idx = [];
+  (function rec(start, left){
+    if (out.length >= limit) return;
+    if (left === 0) { const s = new Array(L).fill(false); idx.forEach(i => s[i] = true); s.push(true); out.push(s); return; }
+    for (let i = start; i <= L - left; i++) { idx.push(i); rec(i + 1, left - 1); idx.pop(); if (out.length >= limit) return; }
+  })(0, r - 1);
+  return out;
+}
+(function(){
+  const cv = $('#arChart'); let r = 3, k = 2, p = .4;
+  function draw(){
+    const L = k + r, total = choose(k + r - 1, k);
+    const W = cv.getBoundingClientRect().width || 300;
+    const cell = clamp(Math.floor((W - 8) / (L * 1.3)), 8, 22), rad = cell * .38;
+    const rowW = L * cell, colGap = Math.max(14, cell), cols = Math.max(1, Math.floor((W + colGap) / (rowW + colGap)));
+    const rowH = cell + 3, MAXR = Math.max(3, Math.floor(260 / rowH));
+    const list = arrangements(r, k, cols * MAXR), cut = total > list.length;
+    const maxRows = Math.max(1, Math.min(MAXR, Math.ceil(list.length / cols)));
+    cv.style.height = (maxRows * rowH + 12 + (cut ? 20 : 0)) + 'px';
+    const {ctx, w} = fit(cv);
+    const shownCols = Math.min(cols, Math.ceil(list.length / maxRows));
+    const x0 = Math.max(0, (w - (shownCols * rowW + (shownCols - 1) * colGap)) / 2);
+    list.forEach((s, i) => {
+      const c = Math.floor(i / maxRows), rr = i % maxRows, y = 6 + rr * rowH + cell / 2;
+      s.forEach((hit, j) => {
+        const x = x0 + c * (rowW + colGap) + j * cell + cell / 2;
+        if (j === s.length - 1) { ctx.fillStyle = C('--gold'); dot(ctx, x, y, rad); }
+        else if (hit) { ctx.fillStyle = C('--one'); dot(ctx, x, y, rad); }
+        else { ctx.fillStyle = C('--ink-3'); dot(ctx, x, y, rad * .7); }
+      });
+    });
+    if (cut) {
+      ctx.fillStyle = C('--ink-3'); ctx.font = '12px ' + SANS; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      ctx.fillText(`showing ${nf(list.length)} of ${nf(total)} orders`, w / 2, cv.clientHeight - 2);
+    }
+  }
+  function readout(){
+    const total = choose(k + r - 1, k), each = Math.pow(p, r) * Math.pow(1 - p, k);
+    $('#arRead').innerHTML = `${k + r} trials, the last one fixed: C(${k + r - 1}, ${k}) = <b>${nf(total)}</b> order${total === 1 ? '' : 's'}` +
+      ` × p<sup>${r}</sup>q<sup>${k}</sup> = ${fmtP(each)} each<br>P(Y = ${k}) = <b>${fmtP(total * each)}</b>`;
+  }
+  const upd = () => { draw(); readout(); };
+  bindRange($('#arR'), $('#arROut'), v => { r = v; upd(); });
+  bindRange($('#arK'), $('#arKOut'), v => { k = v; upd(); });
+  bindRange($('#arP'), $('#arPOut'), v => { p = v; upd(); });
+  redraws.push(draw);
+})();
+
+/* ---------- 2. binomial mirror ---------- */
+(function(){
+  const cv = $('#miChart'), NMAX = 30;
+  let r = 3, n = 8, p = .4, seq = [], agree = 0, checked = 0, hitsT = 0;
+  function newSeq(){ seq = []; for (let i = 0; i < NMAX; i++) seq.push(Math.random() < p); }
+  function rthAt(s){ let m = 0; for (let i = 0; i < s.length; i++) if (s[i] && ++m === r) return i + 1; return Infinity; }
+  function draw(){
+    const {ctx, w, h} = fit(cv);
+    const X0 = 6, X1 = w - 6, cw = (X1 - X0) / NMAX, y = 46, rad = Math.max(2.5, Math.min(8, cw * .36));
+    const T = rthAt(seq);
+    ctx.fillStyle = C('--accent-soft'); roundRect(ctx, X0, y - rad - 14, cw * n, 2 * rad + 28, 6); ctx.fill();
+    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 1.5; roundRect(ctx, X0, y - rad - 14, cw * n, 2 * rad + 28, 6); ctx.stroke();
+    ctx.fillStyle = C('--accent'); ctx.font = '600 11px ' + MONO; ctx.textBaseline = 'bottom';
+    ctx.textAlign = n * cw < 70 ? 'left' : 'center';
+    ctx.fillText(`first ${n}`, ctx.textAlign === 'left' ? X0 + 2 : X0 + cw * n / 2, y - rad - 16);
+    let m = 0;
+    seq.forEach((hit, i) => {
+      const x = X0 + cw * (i + .5);
+      if (hit) { m++; ctx.fillStyle = m === r ? C('--gold') : C('--one'); dot(ctx, x, y, rad); }
+      else { ctx.fillStyle = C('--ink-3'); dot(ctx, x, y, rad * .55); }
+    });
+    ctx.fillStyle = C('--ink-3'); ctx.font = '10px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    const st = intStep(cw, 22);
+    for (let i = st; i <= NMAX; i += st) ctx.fillText(i, X0 + cw * (i - .5), y + rad + 18);
+    if (isFinite(T)) {
+      const x = X0 + cw * (T - .5);
+      ctx.strokeStyle = C('--gold'); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x, y + rad + 3); ctx.lineTo(x, y + rad + 14); ctx.stroke();
+    }
+  }
+  function readout(){
+    const T = rthAt(seq), S = seq.slice(0, n).filter(Boolean).length;
+    const a = isFinite(T) && T <= n, b = S >= r;
+    const pNB = nbCDF(r, p, n - r), pBin = binTailGE(n, p, r);
+    let s = `${r === 1 ? '1st' : r === 2 ? '2nd' : r === 3 ? '3rd' : r + 'th'} success on trial <b>${isFinite(T) ? T : '> ' + NMAX}</b> · successes in the first ${n}: <b>${S}</b><br>` +
+      `came by trial ${n}? <b>${a ? 'yes' : 'no'}</b> · at least ${r} in the first ${n}? <b>${b ? 'yes' : 'no'}</b> → ` +
+      (a === b ? '<span class="ok">same answer</span>' : '<span class="warn">different</span>') +
+      `<br>P(Y + r ≤ ${n}) = <b>${fmtP(pNB)}</b> · P(Bin(${n}, ${fmtN(p)}) ≥ ${r}) = <b>${fmtP(pBin)}</b>`;
+    if (checked) s += `<br>${nf(checked)} sequences checked: the answers agreed in <b>${nf(agree)}</b>; the ${r === 1 ? '1st' : r === 2 ? '2nd' : r === 3 ? '3rd' : r + 'th'} success came by trial ${n} in <b>${pct(hitsT / checked)}</b> of them`;
+    $('#miRead').innerHTML = s;
+  }
+  function check(){
+    for (let i = 0; i < 1000; i++) {
+      const s = []; for (let j = 0; j < n; j++) s.push(Math.random() < p);
+      const T = rthAt(s), S = s.filter(Boolean).length;
+      const a = isFinite(T) && T <= n; if (a === (S >= r)) agree++; if (a) hitsT++; checked++;
+    }
+    readout();
+  }
+  const resetTally = () => { agree = 0; checked = 0; hitsT = 0; };
+  const upd = () => { draw(); readout(); };
+  bindRange($('#miR'), $('#miROut'), v => { r = v; resetTally(); upd(); });
+  bindRange($('#miN'), $('#miNOut'), v => { n = v; resetTally(); upd(); });
+  bindRange($('#miP'), $('#miPOut'), v => { p = v; newSeq(); resetTally(); upd(); });
+  $('#miNew').addEventListener('click', () => { newSeq(); upd(); });
+  $('#mi1000').addEventListener('click', check);
+  newSeq(); upd();
+  redraws.push(draw);
+})();
+
+/* ---------- 3. sum of geometric waits ---------- */
+(function(){
+  const bc = $('#suBlocks'), cv = $('#suChart');
+  let r = 3, p = .4, pieces = null;
+  function range(){
+    const q = 1 - p, m = r * q / p, sd = Math.sqrt(r * q) / p;
+    let lo = Math.max(0, Math.floor(m - 5 * sd)), hi = Math.max(10, Math.ceil(m + 6 * sd));
+    if (lo < 12) lo = 0;
+    return [lo, hi];
+  }
+  function draw(){
+    const [lo, hi] = range(), q = 1 - p, m = r * q / p, sd = Math.sqrt(r * q) / p;
+    const {ctx, w, h} = fit(cv);
+    let ym = 0; for (let k = lo; k <= hi; k++) ym = Math.max(ym, nbPMF(r, p, k));
+    const F = frame(ctx, w, h, {lo, hi, ymax: ym * 1.15, left: 44});
+    drawBars(ctx, F, lo, hi, k => nbPMF(r, p, k), C('--accent'), .78);
+    // normal curve, scaled to unit-width bars
+    ctx.save(); ctx.beginPath(); ctx.rect(F.X0, F.Y1 - 4, F.X1 - F.X0, F.Y0 - F.Y1 + 4); ctx.clip();
+    ctx.setLineDash([5, 4]); ctx.strokeStyle = C('--ink-2'); ctx.lineWidth = 1.6; ctx.beginPath();
+    const N = 240;
+    for (let i = 0; i <= N; i++) {
+      const x = lo - .5 + (hi - lo + 1) * i / N, d = Math.exp(-((x - m) ** 2) / (2 * sd * sd)) / (sd * Math.sqrt(TAU));
+      const px = F.xc(lo) + (x - lo) * F.bw, py = F.ys(d);
+      i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+    }
+    ctx.stroke(); ctx.restore();
+    if (pieces) {
+      const tot = pieces.reduce((a, b) => a + b, 0);
+      if (tot >= lo && tot <= hi) vline(ctx, F.xc(tot), F.Y1, F.Y0, C('--gold'), null, 2);
+    }
+  }
+  function drawBlocks(){
+    const {ctx, w, h} = fit(bc);
+    if (!pieces) { ctx.fillStyle = C('--ink-3'); ctx.font = '13px ' + SANS; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('Press “Draw one wait” to split a run into its r geometric pieces', w / 2, h / 2); return; }
+    const tot = pieces.reduce((a, b) => a + b, 0), units = tot + pieces.length;   // misses plus one success per piece
+    const X0 = 4, X1 = w - 4, uw = (X1 - X0) / Math.max(units, 1), y = 10, bh = 22;
+    let x = X0;
+    pieces.forEach((g, i) => {
+      const segW = g * uw;
+      if (g > 0) { ctx.fillStyle = i % 2 ? C('--accent-soft') : C('--surface-2'); ctx.fillRect(x, y, segW, bh); ctx.strokeStyle = C('--accent'); ctx.lineWidth = 1; ctx.strokeRect(x + .5, y + .5, Math.max(0, segW - 1), bh - 1); }
+      x += segW;
+      ctx.fillStyle = C('--one'); ctx.fillRect(x, y, Math.max(2, uw), bh);
+      x += uw;
+      if (uw * (g + 1) > 16 && pieces.length <= 12) {
+        ctx.fillStyle = C('--ink-2'); ctx.font = '10px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillText(g, x - uw - segW / 2, y + bh + 4);
+      }
+    });
+  }
+  function readout(){
+    const q = 1 - p, m = r * q / p, v = r * q / (p * p);
+    let s = `mean rq/p = <b>${fmtN(m)}</b> · variance rq/p² = <b>${fmtN(v)}</b> · sd <b>${fmtN(Math.sqrt(v))}</b> · skewness <b>${fmtN((1 + q) / Math.sqrt(r * q))}</b>`;
+    if (pieces) {
+      const tot = pieces.reduce((a, b) => a + b, 0);
+      s += `<br>your draw: ${pieces.length <= 12 ? pieces.join(' + ') + ' = ' : ''}<b>${tot}</b> failure${tot === 1 ? '' : 's'} in ${r} piece${r === 1 ? '' : 's'}`;
+      const [lo, hi] = range(); if (tot > hi || tot < lo) s += ' (off the chart)';
+    }
+    $('#suRead').innerHTML = s;
+  }
+  const upd = () => { pieces = null; draw(); drawBlocks(); readout(); };
+  bindRange($('#suR'), $('#suROut'), v => { r = v; upd(); });
+  bindRange($('#suP'), $('#suPOut'), v => { p = v; upd(); });
+  $('#suDraw').addEventListener('click', () => { pieces = []; for (let i = 0; i < r; i++) pieces.push(geoFailS(p)); draw(); drawBlocks(); readout(); });
+  pieces = []; for (let i = 0; i < r; i++) pieces.push(geoFailS(p)); draw(); drawBlocks(); readout();
+  redraws.push(() => { draw(); drawBlocks(); });
+})();
+
+/* ---------- 4. gamma–Poisson mixture ---------- */
+(function(){
+  const rc = $('#mxRates'), cc = $('#mxCounts');
+  const RS = [0.25, 0.5, 1, 2, 3, 5, 10, 20, 50, Infinity], MAXN = 100000, KCAP = 400;
+  let mu = 4, ri = 3, rates = [], counts = [], n = 0, s = 0, s2 = 0, over = 0, rN = 0;
+  const RB = 48; let rHist = new Array(RB).fill(0), rMax = 1;
+  const rr = () => RS[ri];
+  function rateMax(){ const r = rr(); return isFinite(r) ? Math.max(mu * 1.5, gammaQuantile(r, .99) * mu / r) : mu * 2; }
+  function kMax(){ const r = rr(); return Math.min(KCAP, Math.max(10, isFinite(r) ? nbQuant(r, nbP(mu, r), .995, KCAP) : Math.ceil(mu + 4 * Math.sqrt(mu) + 3))); }
+  function reset(){ counts = []; n = 0; s = 0; s2 = 0; over = 0; rN = 0; rMax = rateMax(); rHist = new Array(RB).fill(0); }
+  function add(m){
+    const r = rr(), K = kMax();
+    for (let i = 0; i < m && n < MAXN; i++) {
+      const lam = isFinite(r) ? gammaS(r) * mu / r : mu;
+      const y = poisS(lam);
+      const b = Math.floor(lam / rMax * RB); if (b < RB) rHist[b]++; rN++;
+      counts[y] = (counts[y] || 0) + 1; n++; s += y; s2 += y * y; if (y > K) over++;
+    }
+    draw(); readout();
+  }
+  function drawRates(){
+    const {ctx, w, h} = fit(rc), r = rr(), bw = rMax / RB;
+    let dm = histMax(rHist, bw, rN);
+    if (isFinite(r)) for (let i = 1; i <= 60; i++) { const d = gammaDens(rMax * i / 60, r, mu); if (isFinite(d)) dm = Math.max(dm, d); }
+    const ymax = Math.max(dm * 1.12, 1e-6);
+    const A = cax(ctx, w, h, {xmax: rMax, ymax, left: 44, ny: 2, bottom: 22});
+    drawHistDensity(ctx, A, rHist, bw, rN, C('--ink-3'));
+    clipTo(ctx, A);
+    if (isFinite(r)) { ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2.2; pathFn(ctx, A, x => Math.min(gammaDens(x, r, mu), ymax * 3), rMax / 400, rMax, 300); ctx.stroke(); }
+    else vline(ctx, A.xs(mu), A.Y1, A.Y0, C('--accent'), null, 2.5);
+    ctx.restore();
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+    ctx.fillText('rate λ', A.X1, A.Y1);
+  }
+  function drawCounts(){
+    const {ctx, w, h} = fit(cc), r = rr(), K = kMax(), p = isFinite(r) ? nbP(mu, r) : 1;
+    const th = k => isFinite(r) ? nbPMF(r, p, k) : poisPMF(mu, k);
+    let ym = 0; for (let k = 0; k <= K; k++) ym = Math.max(ym, th(k), poisPMF(mu, k), n ? (counts[k] || 0) / n : 0);
+    const F = frame(ctx, w, h, {lo: 0, hi: K, ymax: ym * 1.12, left: 44});
+    drawBars(ctx, F, 0, K, k => n ? (counts[k] || 0) / n : 0, C('--accent'), .72);
+    const tw = Math.max(3, Math.min(9, F.bw * .45));
+    ctx.strokeStyle = C('--ink'); ctx.lineWidth = 2;
+    for (let k = 0; k <= K; k++) { const y = Math.round(F.ys(poisPMF(mu, k))) + .5; if (F.Y0 - y < .5) continue; ctx.beginPath(); ctx.moveTo(F.xc(k) - tw, y); ctx.lineTo(F.xc(k) + tw, y); ctx.stroke(); }
+    ctx.fillStyle = C('--gold');
+    const dr = Math.max(1.6, Math.min(3.8, F.bw * .3));
+    for (let k = 0; k <= K; k++) dot(ctx, F.xc(k), F.ys(th(k)), dr);
+  }
+  function draw(){ drawRates(); drawCounts(); }
+  function readout(){
+    const r = rr(), v = sampleVar(n, s, s2), m = n ? s / n : NaN, thV = isFinite(r) ? mu + mu * mu / r : mu;
+    const p0 = isFinite(r) ? nbPMF(r, nbP(mu, r), 0) : Math.exp(-mu);
+    let t = `units <b>${nf(n)}</b> · mean <b>${n ? f2(m) : '–'}</b> · variance <b>${n > 1 ? f2(v) : '–'}</b> · D = s²/x̄ <b>${n > 1 && m > 0 ? f2(v / m) : '–'}</b>` +
+      `<br>theory: mean ${fmtN(mu)} · variance ${isFinite(r) ? `μ + μ²/r = ${fmtN(thV)}` : `${fmtN(mu)} (Poisson)`} · D = ${fmtN(thV / mu)}` +
+      `<br>share of zeros: <b>${n ? pct((counts[0] || 0) / n) : '–'}</b> · ${isFinite(r) ? 'negative binomial' : 'theory'} ${pct(p0)} · Poisson ${pct(Math.exp(-mu))}`;
+    if (over) t += ` · ${nf(over)} count${over === 1 ? '' : 's'} above ${kMax()} not drawn`;
+    if (n >= MAXN) t += `<br><span class="warn">limit of ${nf(MAXN)} units reached, press Reset to start over</span>`;
+    $('#mxRead').innerHTML = t;
+  }
+  const fmtR = i => isFinite(RS[i]) ? fmtN(RS[i]) : '∞';
+  bindRange($('#mxM'), $('#mxMOut'), v => { mu = v; reset(); add(1000); });
+  bindRange($('#mxR'), $('#mxROut'), v => { ri = v; reset(); add(1000); }, fmtR);
+  $('#mx100').addEventListener('click', () => add(100));
+  $('#mx2000').addEventListener('click', () => add(2000));
+  $('#mxReset').addEventListener('click', () => { reset(); draw(); readout(); });
+  redraws.push(draw);
+})();
+
+/* ---------- 4b. the counting family ---------- */
+(function(){
+  const cv = $('#trio'), K = 16;
+  function draw(){
+    const {ctx, w, h} = fit(cv);
+    const series = [[k => binPMF(8, .5, k), '--one'], [k => poisPMF(4, k), '--accent'], [k => nbPMF(2, 1 / 3, k), '--zero']];
+    let ym = 0; series.forEach(([f]) => { for (let k = 0; k <= K; k++) ym = Math.max(ym, f(k)); });
+    const F = frame(ctx, w, h, {lo: 0, hi: K, ymax: ym * 1.12, left: 40});
+    const bw = Math.max(1, F.bw * .26);
+    series.forEach(([f, col], j) => {
+      ctx.fillStyle = C(col);
+      for (let k = 0; k <= K; k++) { const v = f(k); if (v <= 0) continue; const y = F.ys(v); ctx.fillRect(F.xc(k) + (j - 1) * bw - bw / 2, y, bw, F.Y0 - y); }
+    });
+    vline(ctx, F.xc(4), F.Y1, F.Y0, C('--ink-3'), [3, 3], 1);
+  }
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 6. mite data ---------- */
+const MITES = [70, 38, 17, 10, 9, 3, 2, 1];   // leaves with 0..7 mites (none had 8 or more); Bliss & Fisher 1953
+function miteFit(model){
+  const obs = MITES, N = obs.reduce((a, b) => a + b, 0), K = obs.length - 1;
+  const S = obs.reduce((a, c, k) => a + c * k, 0), m = S / N;
+  const S2 = obs.reduce((a, c, k) => a + c * (k - m) ** 2, 0), v = S2 / (N - 1);
+  const rMoM = m * m / (v - m);
+  const ll = r => obs.reduce((a, c, k) => a + c * Math.log(nbPMF(r, nbP(m, r), k)), 0);
+  let lo = Math.log(.01), hi = Math.log(1000);   // golden-section on log r
+  for (let i = 0; i < 200; i++) { const a = lo + (hi - lo) * .382, b = lo + (hi - lo) * .618; if (ll(Math.exp(a)) < ll(Math.exp(b))) lo = a; else hi = b; }
+  const rMLE = Math.exp((lo + hi) / 2);
+  const r = model === 'mom' ? rMoM : model === 'mle' ? rMLE : Infinity;
+  const pr = k => isFinite(r) ? nbPMF(r, nbP(m, r), k) : poisPMF(m, k);
+  let cum = 0;
+  const cells = obs.map((o, k) => { const e = k < K ? N * pr(k) : N * (1 - cum); cum += pr(k); return {o, e, lab: k < K ? String(k) : K + '+'}; });
+  const pooled = cells.map(c => Object.assign({}, c));
+  while (pooled.length > 2 && pooled[pooled.length - 1].e < 5) {
+    const a = pooled.pop(), b = pooled[pooled.length - 1];
+    b.o += a.o; b.e += a.e; b.lab = b.lab.replace('+', '') + '+';
+  }
+  const chi = pooled.reduce((t, c) => t + (c.o - c.e) ** 2 / c.e, 0), df = pooled.length - 1 - (isFinite(r) ? 2 : 1);
+  return {N, m, v, r, rMoM, rMLE, cells, pooled, chi, df, p: df > 0 ? 1 - gammaP(df / 2, chi / 2) : NaN};
+}
+window.__nb.miteFit = miteFit;
+(function(){
+  const cv = $('#mfChart'); let model = 'mle';
+  function draw(){
+    const R = miteFit(model), K = MITES.length - 1, {ctx, w, h} = fit(cv);
+    const ym = Math.max(...R.cells.map(c => Math.max(c.o, c.e))) * 1.15;
+    const F = frame(ctx, w, h, {lo: 0, hi: K, ymax: ym, lab: k => R.cells[k].lab});
+    drawBars(ctx, F, 0, K, k => MITES[k], C('--accent'), .6);
+    ctx.fillStyle = C('--gold'); R.cells.forEach((c, k) => dot(ctx, F.xc(k), F.ys(c.e), 4.5));
+    ctx.fillStyle = C('--ink-2'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    R.cells.forEach((c, k) => ctx.fillText(c.o, F.xc(k), Math.min(F.ys(c.o), F.ys(c.e) - 4) - 3));
+  }
+  function table(){
+    const R = miteFit(model);
+    $('#mfTable').innerHTML = `<tr><th>mites</th>${R.cells.map(c => `<th>${c.lab}</th>`).join('')}</tr>` +
+      `<tr><td>observed</td>${R.cells.map(c => `<td>${c.o}</td>`).join('')}</tr>` +
+      `<tr><td>expected</td>${R.cells.map(c => `<td>${f1(c.e)}</td>`).join('')}</tr>`;
+    const name = model === 'pois' ? `Poisson, <span class="lh">λ̂</span> = <span class="lh">x̄</span> = <b>${f3(R.m)}</b>` :
+      `negative binomial, <span class="lh">μ̂</span> = <span class="lh">x̄</span> = <b>${f3(R.m)}</b>, <span class="lh">r̂</span> = <b>${f3(R.r)}</b> (${model === 'mom' ? 'method of moments' : 'maximum likelihood'})`;
+    $('#mfRead').innerHTML = `${R.N} leaves, mean ${f3(R.m)}, variance ${f3(R.v)} · ${name}<br>` +
+      `classes after merging: ${R.pooled.map(c => c.lab).join(', ')} · χ² = <b>${f2(R.chi)}</b> on ${R.df} degree${R.df === 1 ? '' : 's'} of freedom · p-value <b>${R.p < 1e-4 ? fmtP(R.p) : f3(R.p)}</b> ` +
+      (R.p > .05 ? '<span class="ok">no sign of a misfit</span>' : '<span class="warn">poor fit</span>');
+  }
+  pickBtns('mf', v => { model = v; draw(); table(); });
+  draw(); table(); redraws.push(draw);
+})();
+
+/* ---------- 7. properties dashboard ---------- */
+(function(){
+  let r = 3, p = .4;
+  function median(){ return nbQuant(r, p, .5, 100000); }
+  function range(){ return Math.max(8, Math.min(400, nbQuant(r, p, .995, 400))); }
+  function drawPMF(){
+    const c = $('#miniPMF'), {ctx, w, h} = fit(c), K = range();
+    let ym = 0; for (let k = 0; k <= K; k++) ym = Math.max(ym, nbPMF(r, p, k));
+    const F = frame(ctx, w, h, {lo: 0, hi: K, ymax: ym * 1.15, left: 36});
+    drawBars(ctx, F, 0, K, k => nbPMF(r, p, k), C('--accent'), .75);
+    const m = r * (1 - p) / p;
+    if (m <= K) vline(ctx, F.xc(0) + m * F.bw, F.Y1, F.Y0, C('--gold'), [4, 3], 1.5);
+  }
+  function drawCDF(){
+    const c = $('#miniCDF'), {ctx, w, h} = fit(c), K = range();
+    const F = frame(ctx, w, h, {lo: 0, hi: K, ymax: 1, left: 36});
+    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2; ctx.beginPath();
+    let Fv = 0;
+    for (let k = 0; k <= K; k++) {
+      const x0 = F.xc(k) - F.bw / 2, x1 = F.xc(k) + F.bw / 2; Fv += nbPMF(r, p, k);
+      k ? ctx.lineTo(x0, F.ys(Fv)) : ctx.moveTo(x0, F.ys(Fv)); ctx.lineTo(x1, F.ys(Fv));
+    }
+    ctx.stroke();
+    const md = median(); if (md <= K) vline(ctx, F.xc(md), F.ys(.5), F.Y0, C('--gold'), [4, 3], 1.5);
+    ctx.strokeStyle = C('--ink-3'); ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(F.X0, F.ys(.5)); ctx.lineTo(F.X1, F.ys(.5)); ctx.stroke(); ctx.setLineDash([]);
+  }
+  function cards(){
+    const q = 1 - p, m = r * q / p, v = r * q / (p * p);
+    const mr = (r - 1) * q / p, tie = r > 1 && Math.abs(mr - Math.round(mr)) < 1e-9;
+    const mode = r > 1 ? (tie ? Math.round(mr) : Math.floor(mr)) : 0;
+    const k3 = Math.max(0, Math.round(m));
+    $('#cPar').textContent = `r = ${fmtN(r)}, p = ${fmtN(p)}, q = ${fmtN(q)}`;
+    $('#cPMF').innerHTML = `P(Y = ${k3}) = ${fmtP(nbPMF(r, p, k3))}`;
+    $('#cMean').textContent = `μ = ${fmtN(m)}`;
+    $('#cVar').textContent = `${fmtN(v)} = ${fmtN(m)} + ${fmtN(m * m / r)}`;
+    $('#cMode').textContent = `${mode}` + (tie && mode > 0 ? ` and ${mode - 1}` : '') + ` · median ${median()}`;
+    $('#cD').textContent = `D = ${fmtN(1 / p)}`;
+    $('#cSkew').textContent = fmtN((1 + q) / Math.sqrt(r * q));
+    $('#cKurt').textContent = fmtN(6 / r + p * p / (r * q));
+    $('#cPGF').innerHTML = `G(0) = P(Y = 0) = p<sup>r</sup> = ${fmtV(Math.pow(p, r))}`;
+    $('#cMGF').textContent = `finite for t < ${f3(-Math.log(q))}`;
+    $('#cCDF').innerHTML = `P(Y ≤ ${k3}) = ${fmtP(nbCDF(r, p, k3))}`;
+  }
+  const upd = () => { drawPMF(); drawCDF(); cards(); };
+  bindRange($('#prR'), $('#prROut'), v => { r = v; upd(); });
+  bindRange($('#prP'), $('#prPOut'), v => { p = v; upd(); });
+  redraws.push(() => { drawPMF(); drawCDF(); });
+})();
+
+redrawAll();
+})();
+</script>
+</body>
+</html>

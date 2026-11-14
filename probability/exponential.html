@@ -393,7 +393,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
     $$\begin{aligned} &P(A \text{ first}) \\ &\quad= \int_0^\infty \lambda_A e^{-\lambda_A t}\,e^{-(\lambda_B+\lambda_C)t}\,dt \\ &\quad= \lambda_A \int_0^\infty e^{-\Lambda t}\,dt = \frac{\lambda_A}{\Lambda} \end{aligned}$$
     <p>The same calculation shows that <em>which</em> clock wins is independent of <em>when</em> the first ring happens.</p>
   </details>
-  <p><strong>Adding waits instead of racing them.</strong> The time until the \(k\)-th event of a Poisson process is a sum of \(k\) independent \(\text{Exp}(\lambda)\) gaps. It follows the <em class="term">gamma distribution</em> with shape \(k\), also called the <em class="term">Erlang distribution</em>, with density \(\lambda^k t^{k-1} e^{-\lambda t}/(k-1)!\), mean \(k/\lambda\) and variance \(k/\lambda^2\). The wear-out curve in section 3 was this with \(k = 3\).</p>
+  <p><strong>Adding waits instead of racing them.</strong> The time until the \(k\)-th event of a Poisson process is a sum of \(k\) independent \(\text{Exp}(\lambda)\) gaps. It follows the <em class="term">gamma distribution</em> with shape \(k\), also called the <em class="term">Erlang distribution</em>, with density \(\lambda^k t^{k-1} e^{-\lambda t}/(k-1)!\), mean \(k/\lambda\) and variance \(k/\lambda^2\). The wear-out curve in section 3 was this with \(k = 3\). Its discrete counterpart, the number of failures before the \(k\)-th success in a run of trials, is the <a href="negative-binomial.html">negative binomial distribution</a>.</p>
 </section>
 
 <!-- 8 -->

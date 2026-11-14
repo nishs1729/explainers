@@ -248,7 +248,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
     <div class="legend"><span><i class="sw" style="background:var(--accent)"></i><span>share of counts equal to \(k\)</span></span><span><i class="sw dot" style="background:var(--gold)"></i><span>Poisson with the same mean</span></span></div>
     <div class="readout" id="dsRead" style="margin-top:8px"></div>
   </div>
-  <p>All three sources have the same mean. The <strong>clumpy</strong> counts first draw a rate of their own from a gamma distribution with mean \(\lambda\), then a Poisson count at that rate, so their variance is \(\lambda + \lambda^2/2\). The <strong>regular</strong> counts fill a fixed number of slots, \(m = \lceil 1.5\lambda\rceil\), each with probability \(\lambda/m\). That is a binomial, whose variance \(\lambda(1 - \lambda/m)\) is below its mean. Only the Poisson bars sit on the dots, and only the Poisson’s \(D\) stays near 1. For genuine Poisson data \(D\) wobbles by about \(\sqrt{2/(n-1)}\), so the readout flags values more than twice that from 1.</p>
+  <p>All three sources have the same mean. The <strong>clumpy</strong> counts first draw a rate of their own from a gamma distribution with mean \(\lambda\), then a Poisson count at that rate, so their variance is \(\lambda + \lambda^2/2\): they are <a href="negative-binomial.html">negative binomial</a> counts. The <strong>regular</strong> counts fill a fixed number of slots, \(m = \lceil 1.5\lambda\rceil\), each with probability \(\lambda/m\). That is a binomial, whose variance \(\lambda(1 - \lambda/m)\) is below its mean. Only the Poisson bars sit on the dots, and only the Poisson’s \(D\) stays near 1. For genuine Poisson data \(D\) wobbles by about \(\sqrt{2/(n-1)}\), so the readout flags values more than twice that from 1.</p>
 </section>
 
 <!-- 4 -->
@@ -404,7 +404,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
   <h2>When Poisson fails</h2>
   <p>Real counts often have a variance well above their mean. The usual cause is that the rate is not the same for everyone. Some drivers have more accidents than others; some web pages get far more visits. Each unit’s count is Poisson given its own rate \(\Lambda\), but the rates differ. The law of total variance then adds the spread of the rates to the Poisson spread:</p>
   $$\begin{aligned} \operatorname{Var}(X) &= E[\operatorname{Var}(X \mid \Lambda)] \\ &\quad + \operatorname{Var}(E[X \mid \Lambda]) \\ &= \mu + \operatorname{Var}(\Lambda) \end{aligned}$$
-  <p>where \(\mu = E[\Lambda]\). If the rates follow a gamma distribution with coefficient of variation \(c\) (standard deviation over mean), the counts follow the <em class="term">negative binomial distribution</em>, with variance \(\mu + c^2\mu^2\).</p>
+  <p>where \(\mu = E[\Lambda]\). Whenever the rates differ between units, the variance exceeds the mean. The usual model lets the rates follow a gamma distribution, which makes the counts <em class="term">negative binomial</em>. The slider \(c\) below is the rates’ coefficient of variation (standard deviation over mean); the <a href="negative-binomial.html#mixture">Negative Binomial tutorial</a> builds this mixture step by step and fits it to real data.</p>
   <p>A second failure is <em class="term">too many zeros</em>. Some units cannot have events at all: a shop that was closed, a patient who is immune, a sensor that was off. A <em class="term">zero-inflated</em> Poisson mixes a share \(\pi\) of these structural zeros with ordinary Poisson counts.</p>
 
   <div class="widget">
@@ -418,7 +418,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
     <div class="legend"><span><i class="sw" style="background:var(--accent)"></i><span>mixed count</span></span><span><i class="sw dot" style="background:var(--gold)"></i><span>Poisson with the same mean</span></span></div>
     <div class="readout" id="odRead" style="margin-top:8px"></div>
   </div>
-  <p>Both failures stretch the variance past the mean, and both put more weight on 0 than a Poisson with the same mean allows. In practice you check \(D\) first. If it is well above 1, a Poisson model will give intervals that are too narrow and effects that look more significant than they are. The usual fixes are a negative binomial or zero-inflated model, or “quasi-Poisson” standard errors scaled up by \(\sqrt D\).</p>
+  <p>Both failures stretch the variance past the mean, and both put more weight on 0 than a Poisson with the same mean allows. In practice you check \(D\) first. If it is well above 1, a Poisson model will give intervals that are too narrow and effects that look more significant than they are. The usual fixes are a <a href="negative-binomial.html">negative binomial</a> or zero-inflated model, or “quasi-Poisson” standard errors scaled up by \(\sqrt D\).</p>
 </section>
 
 <!-- 10 -->
@@ -476,7 +476,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
     <li><strong>Thinning gives independent Poissons.</strong> Keep each event with probability \(p\): kept \(\sim \text{Poisson}(p\lambda)\), dropped \(\sim \text{Poisson}((1-p)\lambda)\), independent (section 6).</li>
     <li><strong>Given the total, the pieces are binomial.</strong> If \(X_1, \dots, X_m\) are independent Poissons, then given their sum the counts are multinomial with probabilities proportional to the rates.</li>
     <li><strong>The binomial limit.</strong> \(\text{Binomial}(n, \lambda/n) \to \text{Poisson}(\lambda)\) as \(n \to \infty\) (<a href="binomial.html#poisson">Binomial tutorial, section 8</a>).</li>
-    <li><strong>Mixing gives the negative binomial.</strong> A Poisson count whose rate is gamma-distributed is negative binomial, the standard model for overdispersed counts (section 9).</li>
+    <li><strong>Mixing gives the negative binomial.</strong> A Poisson count whose rate is gamma-distributed is <a href="negative-binomial.html#mixture">negative binomial</a>, the standard model for overdispersed counts (section 9).</li>
     <li><strong>Conjugate prior: gamma.</strong> If your uncertainty about \(\lambda\) is \(\text{Gamma}(\alpha, \beta)\) (shape \(\alpha\), rate \(\beta\)), then after observing counts \(x_1, \dots, x_n\) it becomes \(\text{Gamma}(\alpha + \sum x_i,\; \beta + n)\).</li>
   </ol>
 </section>
@@ -494,6 +494,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
     <div class="card"><h4>Quality control</h4><p>Defects per meter of cable, typos per page, flaws per wafer: when they occur independently at a steady rate, a Poisson count with control limits at \(\lambda \pm 3\sqrt\lambda\) flags unusual batches.</p></div>
     <div class="card"><h4>When it fails</h4><p>Events that trigger each other (aftershocks, retweets, contagion) cluster, and rates that vary between units inflate the variance. Check \(D\) before trusting a Poisson model.</p></div>
   </div>
+  <p>Next in the series: what to do when counts vary more than a Poisson allows. That is <a href="negative-binomial.html">The Negative Binomial Distribution</a>.</p>
 </section>
 
 </main>
