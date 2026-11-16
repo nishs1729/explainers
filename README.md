@@ -10,7 +10,8 @@ site works straight from the repo on GitHub Pages or opened locally.
 index.html              home page: cards or list view, search
 assets/
   catalog.js            the list of every explainer (the single source of truth)
-  site.js, site.css     top bar, light/dark/auto theme switch, series navigation
+  site.js, site.css     top bar, theme switch, series navigation, footer
+  quotes.js             the footer's random quotes (each with a traceable source)
   home.js               renders the home page from the catalog
   thumbs/               card images, <id>-light.png and <id>-dark.png
 probability/            one folder per category, one file per topic

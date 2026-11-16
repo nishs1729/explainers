@@ -126,9 +126,73 @@
     if (main && main.parentNode) main.parentNode.insertBefore(nav, main.nextSibling); else document.body.appendChild(nav);
   }
 
+  /* ---------- footer: a random quote and links for browsing ---------- */
+  let quotes = null, lastQuote = -1;
+  function showQuote(fig) {
+    if (!quotes || !quotes.length) return;
+    let i; do { i = Math.floor(Math.random() * quotes.length); } while (quotes.length > 1 && i === lastQuote);
+    lastQuote = i;
+    const x = quotes[i];
+    fig.querySelector('blockquote').textContent = '\u201C' + x.q + '\u201D';
+    fig.querySelector('figcaption').innerHTML = `${esc(x.a)}${x.s ? `<span class="xs-src">${esc(x.s)}</span>` : ''}`;
+    fig.hidden = false;
+  }
+  function loadQuotes(fig) {
+    if (window.XP_QUOTES) { quotes = window.XP_QUOTES; showQuote(fig); return; }
+    const sc = document.createElement('script');
+    sc.src = url('assets/quotes.js');
+    sc.onload = () => { quotes = window.XP_QUOTES || []; showQuote(fig); };
+    document.head.appendChild(sc);
+  }
+  function footer() {
+    const all = [];
+    CAT.categories.forEach(c => c.topics.forEach(t => all.push(t)));
+    const pool = all.filter(t => t !== current);
+    const foot = el('footer', 'xs-foot');
+    const inner = el('div', 'xs-in');
+    // quote
+    const fig = el('figure', 'xs-quote');
+    fig.hidden = true;
+    fig.innerHTML = '<blockquote></blockquote><figcaption></figcaption>';
+    const again = el('button', 'xs-again', '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.6-3.7M13 2.5v3h-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Another quote');
+    again.type = 'button';
+    again.addEventListener('click', () => showQuote(fig));
+    fig.appendChild(again);
+    inner.appendChild(fig);
+    // browse
+    const nav = el('nav', 'xs-browse'); nav.setAttribute('aria-label', 'Browse');
+    let h = '<p class="xs-kick">Browse</p><ul>';
+    CAT.categories.forEach(c => {
+      h += `<li><a href="${url('index.html#' + c.id)}">${esc(c.title)}</a> <span class="xs-count">${c.topics.length}</span>`;
+      const ss = (c.series || []).filter(s => s.topics.length);
+      if (ss.length) {
+        h += '<ul>';
+        ss.forEach(s => { const first = byId(s.topics[0]); if (first) h += `<li><a href="${url(first.path)}">${esc(s.title)}</a> <span class="xs-count">${s.topics.length} parts</span></li>`; });
+        h += '</ul>';
+      }
+      h += '</li>';
+    });
+    h += `<li><a href="${url('index.html')}">All explainers</a></li></ul>`;
+    nav.innerHTML = h;
+    if (pool.length) {
+      const r = el('a', 'xs-random', '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="5.5" cy="5.5" r="1.1" fill="currentColor"/><circle cx="10.5" cy="10.5" r="1.1" fill="currentColor"/><circle cx="8" cy="8" r="1.1" fill="currentColor"/></svg>Surprise me');
+      const pick = () => { r.href = url(pool[Math.floor(Math.random() * pool.length)].path); };
+      pick();
+      r.addEventListener('click', pick);   // a fresh pick each time, set before the browser follows the link
+      nav.appendChild(r);
+    }
+    inner.appendChild(nav);
+    foot.appendChild(inner);
+    // replace the page's own footer, if it has one
+    const old = [...document.body.children].reverse().find(n => n.tagName === 'FOOTER');
+    if (old) old.replaceWith(foot); else document.body.appendChild(foot);
+    loadQuotes(fig);
+  }
+
   function init() {
     topBar();
     if (current) bottomNav();
+    footer();
     syncButtons();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
