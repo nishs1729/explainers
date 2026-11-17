@@ -13,12 +13,10 @@
 .xs-crumbs .xs-home{font-family:var(--serif,Georgia,serif);font-weight:600;font-size:16px;color:var(--ink,#1c1c1e)}
 .xs-step{margin-left:10px;padding-left:12px;border-left:1px solid var(--line,#e3dfd5);font-size:13px;color:var(--ink-3,#8b8d93)}
 
-.xs-theme{display:inline-flex;flex:none;border:1px solid var(--line,#e3dfd5);border-radius:999px;padding:2px;background:var(--surface,#fff)}
-.xs-theme button{all:unset;box-sizing:border-box;width:30px;height:26px;display:grid;place-items:center;border-radius:999px;color:var(--ink-3,#8b8d93);cursor:pointer}
-.xs-theme button svg{width:15px;height:15px}
-.xs-theme button:hover{color:var(--ink,#1c1c1e)}
-.xs-theme button[aria-pressed="true"]{background:var(--accent-soft,rgba(54,84,201,.11));color:var(--accent,#3654c9)}
-.xs-theme button:focus-visible{outline:2px solid var(--accent,#3654c9);outline-offset:1px}
+.xs-theme{all:unset;box-sizing:border-box;flex:none;width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--line,#e3dfd5);border-radius:50%;background:var(--surface,#fff);color:var(--ink-2,#4c4e55);cursor:pointer;transition:color .15s,border-color .15s}
+.xs-theme svg{width:16px;height:16px}
+.xs-theme:hover{color:var(--accent,#3654c9);border-color:var(--accent,#3654c9)}
+.xs-theme:focus-visible{outline:2px solid var(--accent,#3654c9);outline-offset:2px}
 
 /* bottom navigation on explainer pages */
 .xs-next{font:15px/1.5 var(--sans,system-ui,sans-serif);color:var(--ink,#1c1c1e);margin-top:20px}

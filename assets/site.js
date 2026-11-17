@@ -19,37 +19,32 @@
   function apply(p) {
     if (p === 'light' || p === 'dark') root.setAttribute('data-theme', p); else root.removeAttribute('data-theme');
   }
+  const system = () => (mq && mq.matches ? 'dark' : 'light');
+  // Only a choice that differs from the device's setting is stored, so choosing
+  // the device's own theme goes back to following the device.
   function setTheme(p) {
+    if (p === system()) p = 'auto';
     try { if (p === 'auto') localStorage.removeItem(KEY); else localStorage.setItem(KEY, p); } catch (e) {}
     apply(p); syncButtons(); fire();
   }
   function fire() { document.dispatchEvent(new CustomEvent('xp-themechange', {detail: {theme: effective()}})); }
-  if (mq) (mq.addEventListener ? mq.addEventListener('change', () => { if (pref() === 'auto') fire(); }) : mq.addListener(() => { if (pref() === 'auto') fire(); }));
+  if (mq) (mq.addEventListener ? mq.addEventListener('change', () => { if (pref() === 'auto') { syncButtons(); fire(); } }) : mq.addListener(() => { if (pref() === 'auto') { syncButtons(); fire(); } }));
   // another tab changed the theme
   window.addEventListener('storage', e => { if (e.key === KEY) { apply(pref()); syncButtons(); fire(); } });
   apply(pref());
 
-  const ICONS = {
-    auto: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 2.5a5.5 5.5 0 0 1 0 11z" fill="currentColor"/></svg>',
-    light: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3" fill="currentColor"/><g stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 1.5v1.6M8 12.9v1.6M1.5 8h1.6M12.9 8h1.6M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M3.4 12.6l1.1-1.1M11.5 4.5l1.1-1.1"/></g></svg>',
-    dark: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.6 10.2A6 6 0 0 1 5.8 2.4a6 6 0 1 0 7.8 7.8z" fill="currentColor"/></svg>'
-  };
-  const LABEL = {auto: 'Match device', light: 'Light', dark: 'Dark'};
+  const SUN = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3" fill="currentColor"/><g stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 1.5v1.6M8 12.9v1.6M1.5 8h1.6M12.9 8h1.6M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M3.4 12.6l1.1-1.1M11.5 4.5l1.1-1.1"/></g></svg>';
+  const MOON = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.6 10.2A6 6 0 0 1 5.8 2.4a6 6 0 1 0 7.8 7.8z" fill="currentColor"/></svg>';
+  // one button: shows where a click takes you (moon in light mode, sun in dark mode)
   function themeSwitch() {
-    const g = document.createElement('div');
-    g.className = 'xs-theme'; g.setAttribute('role', 'group'); g.setAttribute('aria-label', 'Color theme');
-    ['auto', 'light', 'dark'].forEach(t => {
-      const b = document.createElement('button');
-      b.type = 'button'; b.dataset.xsTheme = t; b.innerHTML = ICONS[t];
-      b.title = LABEL[t] + ' theme'; b.setAttribute('aria-label', LABEL[t] + ' theme');
-      b.addEventListener('click', () => setTheme(t));
-      g.appendChild(b);
-    });
-    return g;
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'xs-theme';
+    b.addEventListener('click', () => setTheme(effective() === 'dark' ? 'light' : 'dark'));
+    return b;
   }
   function syncButtons() {
-    const p = pref();
-    document.querySelectorAll('[data-xs-theme]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.xsTheme === p)));
+    const dark = effective() === 'dark', label = dark ? 'Switch to light theme' : 'Switch to dark theme';
+    document.querySelectorAll('.xs-theme').forEach(b => { b.innerHTML = dark ? SUN : MOON; b.title = label; b.setAttribute('aria-label', label); });
   }
 
   /* ---------- catalog lookups ---------- */
