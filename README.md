@@ -1,5 +1,7 @@
-# explainers
+# Explainers
 Visual explainers of topics of my interest
+
+**Live site: <https://nishs1729.github.io/explainers/>**
 
 Open `index.html` for the full collection. Everything is static HTML, so the
 site works straight from the repo on GitHub Pages or opened locally.

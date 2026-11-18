@@ -70,4 +70,7 @@
 .xs-count{font:12px var(--mono,monospace);color:var(--ink-3,#8b8d93)}
 .xs-browse .xs-random{display:inline-flex;align-items:center;gap:7px;margin-top:12px;padding:6px 14px;border:1px solid var(--line,#e3dfd5);border-radius:999px;background:var(--surface,#fff);font-size:14px}
 .xs-browse .xs-random:hover{border-color:var(--accent,#3654c9);text-decoration:none}
+.xs-browse .xs-repo{display:flex;align-items:center;gap:7px;width:max-content;margin-top:14px;font-size:14px;color:var(--ink-2,#4c4e55)}
+.xs-repo svg{width:15px;height:15px}
+.xs-browse .xs-repo:focus-visible{outline:2px solid var(--accent,#3654c9);outline-offset:2px}
 @media (max-width:700px){.xs-foot .xs-in{grid-template-columns:1fr}}

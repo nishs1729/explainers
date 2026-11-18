@@ -17,7 +17,8 @@
 window.EXPLAINERS = {
   "site": {
     "title": "Explainers",
-    "tagline": "Interactive, visual introductions to ideas worth understanding properly."
+    "tagline": "Interactive, visual introductions to ideas worth understanding properly.",
+    "repo": "https://github.com/nishs1729/explainers"
   },
   "categories": [
     {
