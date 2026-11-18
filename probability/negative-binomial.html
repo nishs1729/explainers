@@ -254,7 +254,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
     <div class="legend"><span><i class="sw" style="background:var(--accent)"></i><span>\(P(Y = k)\)</span></span><span><i class="sw dash" style="border-color:var(--ink-2)"></i><span>normal, same mean and variance</span></span><span><i class="sw line" style="border-color:var(--gold)"></i><span>your latest draw</span></span></div>
     <div class="readout" id="suRead" style="margin-top:8px"></div>
   </div>
-  <p>With \(r = 1\) the bars fall from 0, the geometric shape. As \(r\) grows they pull away from 0, turn into a hump, and settle into a bell: a sum of many independent waits obeys the central limit theorem. Each stage adds the same skew, but it is diluted by \(\sqrt r\), so the skewness \((1 + q)/\sqrt{rq}\) fades slowly.</p>
+  <p>With \(r = 1\) the bars fall from 0, the geometric shape. As \(r\) grows they pull away from 0, turn into a hump, and settle into a bell: a sum of many independent waits obeys the <a href="normal.html#clt">central limit theorem</a>. Each stage adds the same skew, but it is diluted by \(\sqrt r\), so the skewness \((1 + q)/\sqrt{rq}\) fades slowly.</p>
   <p>The same story in continuous time is the <a href="exponential.html#race">gamma (or Erlang) distribution</a>, the sum of \(r\) exponential waits. The negative binomial is its discrete twin, just as the geometric is the exponential’s.</p>
 </section>
 
@@ -415,7 +415,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
     <div class="card"><h4>Web and sales counts</h4><p>Visits per user, purchases per customer and messages per account are overdispersed, because a few heavy users dominate. Count regressions on such data default to the negative binomial.</p></div>
     <div class="card"><h4>When it fails</h4><p>Some units can never have events at all, which adds zeros that a zero-inflated model handles better (see the <a href="poisson.html#overdispersion">Poisson tutorial</a>). Very heavy tails, such as followers per account, can be too extreme even for the negative binomial.</p></div>
   </div>
-  <p>This is the end of the series. It started with a single coin flip and built the binomial, geometric, exponential and Poisson distributions from it; the negative binomial ties the counting and the waiting together. <a href="../index.html">Browse all explainers</a>.</p>
+  <p>Next in the series: why sums of almost anything, from coin flips to these waits, end up as a bell curve. That is <a href="normal.html">The Normal Distribution</a>.</p>
 </section>
 
 </main>

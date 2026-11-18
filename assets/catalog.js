@@ -29,8 +29,8 @@ window.EXPLAINERS = {
         {
           "id": "distributions",
           "title": "Probability distributions",
-          "blurb": "From a single coin flip to counting and waiting for rare events, and what to do when counts vary too much. Each one builds on the last.",
-          "topics": ["bernoulli", "binomial", "geometric", "exponential", "poisson", "negative-binomial"]
+          "blurb": "From a single coin flip to counting and waiting for rare events, and on to the bell curve that all those sums lead to. Each one builds on the last.",
+          "topics": ["bernoulli", "binomial", "geometric", "exponential", "poisson", "negative-binomial", "normal"]
         }
       ],
       "topics": [
@@ -87,6 +87,15 @@ window.EXPLAINERS = {
           "summary": "Waiting for the r-th success, and the go-to model when counts vary more than a Poisson allows.",
           "tags": ["overdispersion", "gamma–Poisson mixture", "waiting time", "dispersion", "model fitting"],
           "preview": { "select": ".hero-play", "click": ["#heroMany", "#heroMany", "#heroMany"] }
+        },
+        {
+          "id": "normal",
+          "title": "The Normal Distribution",
+          "short": "Normal",
+          "path": "probability/normal.html",
+          "summary": "Add up almost anything and you get a bell: the central limit theorem, z-scores, the square-root law, and where the bell fails.",
+          "tags": ["central limit theorem", "bell curve", "z-score", "standard error", "lognormal"],
+          "preview": { "select": ".hero-play", "click": ["#heroMany", "#heroMany"] }
         }
       ]
     }

@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Normal Distribution — a visual introduction</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<style>
+:root{
+  --bg:#faf8f4; --surface:#ffffff; --surface-2:#f2efe8; --ink:#1c1c1e; --ink-2:#4c4e55; --ink-3:#8b8d93; --line:#e3dfd5;
+  --one:#16917c; --one-soft:rgba(22,145,124,.15);
+  --zero:#d9573a; --zero-soft:rgba(217,87,58,.15);
+  --accent:#3654c9; --accent-soft:rgba(54,84,201,.11);
+  --gold:#b98317; --gold-soft:rgba(185,131,23,.22);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+    --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+    --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+    --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+    --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+  --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+  --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+  --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+  --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.68 var(--sans);-webkit-font-smoothing:antialiased}
+main{max-width:820px;margin:0 auto;padding:0 20px 80px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;letter-spacing:-.01em}
+h1{font-size:clamp(2.2rem,6vw,3.4rem);margin:.2em 0 .3em}
+h2{font-size:clamp(1.6rem,4vw,2.1rem);margin:0 0 .5em}
+h3{font-size:1.2rem;margin:1.6em 0 .4em}
+p{margin:0 0 1em}
+a{color:var(--accent)}
+strong{font-weight:650}
+em.term{font-style:normal;font-weight:650;color:var(--accent)}
+.muted{color:var(--ink-2)}
+small,.small{font-size:14px}
+
+/* hero */
+.hero{text-align:center;padding:64px 0 24px}
+.kicker{text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--ink-3);margin:0}
+.lede{font-size:1.2rem;color:var(--ink-2);max-width:620px;margin:0 auto}
+.hero-play{max-width:600px;margin:30px auto 0;text-align:left}
+.hero-play .controls{justify-content:center}
+.hint{font-size:15px;color:var(--ink-2);min-height:3.2em;margin:6px 0 0;text-align:center}
+
+.toc{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;margin:28px 0 8px}
+.toc ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 20px;counter-reset:t}
+.toc li{counter-increment:t;font-size:15px}
+.toc li::before{content:counter(t,decimal-leading-zero);font-family:var(--mono);color:var(--ink-3);margin-right:10px;font-size:13px}
+.toc a{color:var(--ink);text-decoration:none}
+.toc a:hover{color:var(--accent)}
+
+section{padding-top:56px}
+.secnum{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.08em;margin-bottom:4px}
+
+.widget{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin:26px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.widget-title{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);margin:0 0 12px;font-weight:600}
+.controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:12px 0}
+.ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:15px}
+.ctrl output{font-family:var(--mono);font-size:14px;min-width:3.2em;color:var(--ink)}
+input[type=range]{accent-color:var(--accent);width:170px;max-width:100%}
+.btn{font:inherit;font-size:14px;line-height:1.2;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;transition:background .15s,transform .1s}
+.btn:hover{border-color:var(--ink-3)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.lh{font-family:var(--serif);font-style:italic;font-size:1.08em}
+.readout{font-family:var(--mono);font-size:14px;color:var(--ink-2);line-height:1.6}
+.readout b{color:var(--ink);font-weight:600}
+.readout .ok{color:var(--one);font-weight:600}
+.readout .warn{color:var(--zero);font-weight:600}
+canvas{display:block;width:100%}
+canvas.pick{cursor:ew-resize;touch-action:pan-y}
+.cap{font-size:13px;color:var(--ink-3);margin:2px 0 6px}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:20px 0}
+.callout p:last-child{margin-bottom:0}
+.katex-display{overflow-x:auto;overflow-y:hidden;padding:4px 0}
+.mathbox{overflow-x:auto;padding:6px 0}
+.katex-display.ovf,.mathbox.ovf{-webkit-mask-image:linear-gradient(to right,#000 82%,transparent);mask-image:linear-gradient(to right,#000 82%,transparent)}
+details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:14px 0;background:var(--surface)}
+details summary{cursor:pointer;font-weight:600;font-size:15px;color:var(--ink-2)}
+details[open] summary{margin-bottom:8px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin-top:8px}
+.legend > span{display:inline-block}
+.legend .sw{vertical-align:middle;margin:0 6px 2px 0}
+.sw{display:inline-block;width:16px;height:10px;border-radius:2px}
+.sw.dot{width:8px;height:8px;border-radius:50%}
+.sw.dash{height:0;border-top:2px dashed var(--ink)}
+.sw.line{height:0;border-top:2px solid var(--ink)}
+
+/* properties */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:18px 0}
+.card{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
+.card h4{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+.card .f{overflow-x:auto;overflow-y:hidden;font-size:15px;min-height:1.8em}
+.card .v{font:600 15px var(--mono);color:var(--accent);margin-top:6px}
+.card p{font-size:15px;margin:0;color:var(--ink-2)}
+.sticky-ctrl{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:6px 22px}
+.minis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:640px){.minis{grid-template-columns:1fr}}
+.mini{border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--surface)}
+.mini .mcap{font-size:13px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.facts{counter-reset:f;list-style:none;padding:0;margin:18px 0}
+.facts li{counter-increment:f;position:relative;padding:12px 0 12px 44px;border-bottom:1px solid var(--line)}
+.facts li::before{content:counter(f);position:absolute;left:0;top:12px;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:600 13px var(--mono)}
+.facts li strong{display:block}
+.table-wrap{overflow-x:auto}
+table.summary{border-collapse:collapse;width:100%;font-size:15px;margin:14px 0}
+table.summary td,table.summary th{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:middle}
+table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3)}
+canvas.tap{cursor:pointer}
+@media (max-width:480px){table.summary td,table.summary th{padding:8px 5px}}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+@media (max-width:640px){.pair{grid-template-columns:1fr}}
+.pair .mcap{font-size:13px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+table.summary td:not(:first-child),table.summary th:not(:first-child){text-align:right;font-family:var(--mono);font-size:14px}
+.btn.right{background:var(--one-soft);border-color:var(--one);color:var(--one)}
+.btn.wrong{background:var(--zero-soft);border-color:var(--zero);color:var(--zero)}
+/* quiz */
+.quiz{display:grid;gap:10px}
+.qitem{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg)}
+.qitem p{margin:0 0 8px;font-size:16px}
+.qbtns{display:flex;flex-wrap:wrap;gap:8px}
+.qexp{font-size:15px;color:var(--ink-2);margin:10px 0 0!important}
+.controls[hidden]{display:none}
+.addgrid{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-top:6px}
+@media (max-width:640px){.addgrid{grid-template-columns:1fr}.addgrid #adTri{height:170px!important}}
+
+@media (max-width:480px){
+  main{padding:0 16px 80px}
+  .widget{padding:14px}
+  .katex-display{font-size:.92em}
+  input[type=range]{width:150px}
+}
+</style>
+<script>try{var t=localStorage.getItem('xp-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/catalog.js" defer></script>
+<script src="../assets/site.js" defer></script>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <p class="kicker">A visual introduction</p>
+  <h1>The Normal Distribution</h1>
+  <p class="lede">Add up enough random things, almost any random things, and the total settles into the same shape: the bell curve. That is the central limit theorem, and it is why one distribution turns up in coin tosses, measurement errors, heights and averages of every kind.</p>
+  <div class="hero-play">
+    <canvas id="heroDice" style="height:64px" role="img" aria-label="The latest roll of eight dice and their total"></canvas>
+    <div class="controls">
+      <button class="btn primary" id="heroGo">❚❚ Pause</button>
+      <button class="btn" id="heroMany">+1,000 rolls</button>
+      <button class="btn" id="heroClear">Clear</button>
+    </div>
+    <canvas id="heroHist" style="height:170px" role="img" aria-label="Share of rolls with each total from 8 to 48, with a normal curve of the same mean and standard deviation"></canvas>
+    <div class="legend" style="justify-content:center"><span><i class="sw" style="background:var(--accent)"></i><span>share of rolls with each total</span></span><span><i class="sw line" style="border-color:var(--gold)"></i><span>normal curve, mean 28, sd 4.83</span></span></div>
+    <p class="hint" id="heroHint" aria-live="polite">Roll eight dice and add them up. One die is flat: every face is equally likely. The total is not.</p>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#clt">Add anything up</a></li>
+    <li><a href="#curve">The bell curve</a></li>
+    <li><a href="#z">Z-scores and areas</a></li>
+    <li><a href="#sqrtn">The square-root law</a></li>
+    <li><a href="#approx">Approximating counts</a></li>
+    <li><a href="#fails">When the bell fails</a></li>
+    <li><a href="#add">Normals add up</a></li>
+    <li><a href="#props">All the properties</a></li>
+    <li><a href="#uses">Where you will meet it</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<section id="clt">
+  <div class="secnum">01</div>
+  <h2>Add anything up</h2>
+  <p>Every distribution so far in this series has had its own shape. The <a href="bernoulli.html">Bernoulli</a> is two bars, the <a href="geometric.html">geometric</a> and the <a href="exponential.html">exponential</a> fall away from zero, the <a href="poisson.html">Poisson</a> leans to the right. Yet the <a href="binomial.html#galton">Galton board</a>, a <a href="poisson.html#normal">Poisson with a large mean</a> and a <a href="negative-binomial.html#sum">stack of geometric waits</a> all ended in the same bell. Each of them is a <strong>sum of many independent pieces</strong>, and that is all it takes.</p>
+  <p>Take independent draws \(X_1, \dots, X_n\) from any distribution with mean \(\mu\) and a finite standard deviation \(\sigma\). Their sum \(S_n\) has mean \(n\mu\) and standard deviation \(\sigma\sqrt n\). Shift and rescale it so that it has mean 0 and standard deviation 1:</p>
+  $$Z_n = \frac{S_n - n\mu}{\sigma\sqrt n}$$
+  <p>The <em class="term">central limit theorem</em> says that as \(n\) grows, the distribution of \(Z_n\) gets closer and closer to one fixed curve, the <em class="term">standard normal distribution</em>, whatever distribution the draws came from.</p>
+
+  <div class="widget">
+    <p class="widget-title">The central limit machine</p>
+    <div class="controls" role="group" aria-label="What to add up">
+      <button class="btn" data-base="coin" aria-pressed="false">Fair coin</button>
+      <button class="btn" data-base="die" aria-pressed="false">Die</button>
+      <button class="btn" data-base="unif" aria-pressed="false">Uniform 0 to 1</button>
+      <button class="btn on" data-base="expo" aria-pressed="true">Exponential</button>
+      <button class="btn" data-base="rare" aria-pressed="false">Rare win (5%)</button>
+      <button class="btn" data-base="own" aria-pressed="false">Draw your own</button>
+    </div>
+    <p class="cap" id="cltBaseCap">One draw</p>
+    <canvas id="cltBase" style="height:100px" role="img" aria-label="The distribution of a single draw, with its mean marked"></canvas>
+    <div class="controls">
+      <label class="ctrl">draws added \(n\) <input type="range" id="cltN" min="1" max="100" step="1" value="5"><output id="cltNOut"></output></label>
+      <button class="btn" id="cltMore">+10,000 sums</button>
+    </div>
+    <p class="cap">The standardized sum \(Z_n\), many times over</p>
+    <canvas id="cltChart" style="height:230px" role="img" aria-label="Histogram of the standardized sums, drawn as a density, with the standard normal curve"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i><span>standardized sums \(Z_n\)</span></span><span><i class="sw line" style="border-color:var(--gold)"></i><span>standard normal curve</span></span><span><i class="sw dash" style="border-color:var(--gold)"></i><span>mean of one draw</span></span></div>
+    <div class="readout" id="cltRead" style="margin-top:8px"></div>
+  </div>
+  <p>Try the exponential first. With \(n = 1\) it is the lopsided exponential itself; by \(n = 30\) the histogram hugs the curve, though its right tail is still a little heavy. The uniform gets there almost at once, because it is symmetric to begin with. The rare win is the slowest: with \(n = 20\) most sums are 0 or 1, and you need hundreds of draws before the bell is smooth. Draw your own shape too, even one with two humps: as long as it has some spread, adding it up leads to the same curve.</p>
+  <p>How fast the bell appears depends mostly on how skewed one draw is. The skewness of a sum of \(n\) draws is the skewness of one draw divided by \(\sqrt n\), so a strongly skewed draw needs many terms before the asymmetry fades.</p>
+  <div class="callout">
+    <p><strong>What the theorem needs.</strong> The draws must be independent (or nearly so), and none of them may dominate the total. Above all, the standard deviation \(\sigma\) must be finite. Section 6 shows what happens without it.</p>
+  </div>
+  <details>
+    <summary>Who found it</summary>
+    <p>Abraham de Moivre found the bell curve as an approximation to coin-tossing counts in 1733. Pierre-Simon Laplace extended it to sums of other variables around 1810, and Carl Friedrich Gauss had just used the same curve, in 1809, as the law of errors in astronomical measurements, which is why it is also called the <em class="term">Gaussian distribution</em>. The theorem in its modern generality was proved in the early twentieth century by Lyapunov, Lindeberg and others; the name “central limit theorem” is George Pólya’s, from 1920.</p>
+  </details>
+</section>
+
+<!-- 2 -->
+<section id="curve">
+  <div class="secnum">02</div>
+  <h2>The bell curve</h2>
+  <p>The standard normal curve has a simple formula: \(e^{-z^2/2}\), scaled so that the total area under it is 1. Its height at \(z\) is</p>
+  $$\varphi(z) = \frac{1}{\sqrt{2\pi}}\, e^{-z^{2}/2}$$
+  <p>Moving it to center \(\mu\) and stretching it by \(\sigma\) gives the general <em class="term">normal distribution</em> \(\mathcal N(\mu, \sigma^2)\), with mean \(\mu\) and variance \(\sigma^2\):</p>
+  $$f(x) = \frac{1}{\sigma\sqrt{2\pi}}\, \exp\!\Big(-\frac{(x - \mu)^{2}}{2\sigma^{2}}\Big)$$
+  <p>Every normal curve is the same shape. \(\mu\) only slides it along, and \(\sigma\) only stretches it sideways (and squashes it down, so the area stays 1). That is why one table, or one function, is enough for all of them.</p>
+
+  <div class="widget">
+    <p class="widget-title">Shape a normal curve</p>
+    <div class="controls">
+      <label class="ctrl">mean \(\mu\) <input type="range" id="cvM" min="-5" max="5" step="0.5" value="0"><output id="cvMOut"></output></label>
+      <label class="ctrl">sd \(\sigma\) <input type="range" id="cvS" min="0.5" max="3" step="0.1" value="1"><output id="cvSOut"></output></label>
+    </div>
+    <canvas id="cvChart" style="height:280px" role="img" aria-label="A normal curve with the regions within one, two and three standard deviations of the mean shaded, and brackets below showing 68, 95 and 99.7 percent"></canvas>
+    <div class="legend"><span><i class="sw line" style="border-color:var(--accent)"></i><span>\(\mathcal N(\mu, \sigma^2)\)</span></span><span><i class="sw dash" style="border-color:var(--ink-3)"></i><span>standard normal, for reference</span></span><span><i class="sw" style="background:var(--accent);opacity:.45"></i><span>within 1, 2, 3 sd of the mean</span></span></div>
+    <div class="readout" id="cvRead" style="margin-top:8px"></div>
+  </div>
+  <p>The shaded bands give the <em class="term">68–95–99.7 rule</em>: about 68% of the area is within one standard deviation of the mean, 95% within two and 99.7% within three. So a value more than three standard deviations from the mean happens about 3 times in 1,000. The curve also bends at exactly \(\mu \pm \sigma\): those are its inflection points, where it changes from curving down to curving up.</p>
+  <details>
+    <summary>Why the area is 1: the \(\sqrt{2\pi}\)</summary>
+    <p>Call the area under \(e^{-x^2/2}\) \(I\). Multiply two copies, one in \(x\) and one in \(y\), and switch to polar coordinates, where \(x^2 + y^2 = r^2\) and the area element is \(r\,dr\,d\theta\):</p>
+    $$\begin{aligned} I^2 &= \int\!\!\int e^{-(x^2 + y^2)/2}\,dx\,dy \\ &= \int_0^{2\pi}\!\!\int_0^\infty e^{-r^2/2}\,r\,dr\,d\theta \\ &= 2\pi \cdot 1 = 2\pi \end{aligned}$$
+    <p>So \(I = \sqrt{2\pi}\), and dividing by it makes the area exactly 1. The inner integral works because \(r\,e^{-r^2/2}\) is the derivative of \(-e^{-r^2/2}\).</p>
+  </details>
+</section>
+
+<!-- 3 -->
+<section id="z">
+  <div class="secnum">03</div>
+  <h2>Z-scores and areas</h2>
+  <p>Because every normal curve is the standard one, shifted and stretched, any question about \(X \sim \mathcal N(\mu, \sigma^2)\) can be moved to the standard scale. The <em class="term">z-score</em> of a value \(x\) counts how many standard deviations it is from the mean:</p>
+  $$z = \frac{x - \mu}{\sigma}, \qquad P(X \le x) = \Phi(z)$$
+  <p>Here \(\Phi\) is the standard normal <em class="term">cumulative distribution function</em>: \(\Phi(z)\) is the area under the curve to the left of \(z\). It has no formula in elementary functions, so it is computed numerically; every statistics package and spreadsheet has it (<code>pnorm</code> in R, <code>NORM.S.DIST</code> in spreadsheets, <code>scipy.stats.norm.cdf</code>). Probabilities of ranges are differences of \(\Phi\), and the curve’s symmetry gives \(\Phi(-z) = 1 - \Phi(z)\).</p>
+
+  <div class="widget">
+    <p class="widget-title">Shade an area</p>
+    <div class="controls" role="group" aria-label="Which area">
+      <button class="btn" data-zm="below" aria-pressed="false">below \(b\)</button>
+      <button class="btn on" data-zm="between" aria-pressed="true">between \(a\) and \(b\)</button>
+      <button class="btn" data-zm="above" aria-pressed="false">above \(a\)</button>
+      <button class="btn" data-zm="outside" aria-pressed="false">outside \(a\) and \(b\)</button>
+    </div>
+    <div class="controls">
+      <label class="ctrl">\(a\) <input type="range" id="zA" min="-3.5" max="3.5" step="0.01" value="-1"><output id="zAOut"></output></label>
+      <label class="ctrl">\(b\) <input type="range" id="zB" min="-3.5" max="3.5" step="0.01" value="1"><output id="zBOut"></output></label>
+    </div>
+    <canvas id="zChart" class="pick" style="height:220px" role="img" aria-label="The standard normal curve with the chosen area shaded; drag on the chart to move the nearest cut-off"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--gold-soft);border:1px solid var(--gold)"></i><span>shaded area</span></span><span><i class="sw line" style="border-color:var(--gold)"></i><span>cut-offs \(a\) and \(b\), drag to move</span></span></div>
+    <div class="controls">
+      <button class="btn" data-zp="between,-1.96,1.96">middle 95%</button>
+      <button class="btn" data-zp="above,1.645,3">top 5%</button>
+      <button class="btn" data-zp="outside,-2.576,2.576">outer 1%</button>
+      <button class="btn" data-zp="above,3,3.5">beyond 3 sd</button>
+    </div>
+    <div class="readout" id="zRead"></div>
+  </div>
+  <p>Three cut-offs come up again and again. 1.645 leaves 5% in one tail, 1.96 leaves 2.5% in each tail (95% in the middle), and 2.576 leaves 0.5% in each tail (99% in the middle). The 1.96 is the one behind the familiar “± 2 standard errors” of <a href="binomial.html#infer">confidence intervals</a>.</p>
+  <p>The tails thin out very fast. Beyond 3 standard deviations lies 0.13% of the area on each side, beyond 4 about 3 in 100,000, beyond 5 about 3 in 10 million, beyond 6 about 1 in a billion. A normal model says big outliers essentially never happen, which is exactly where real data often disagrees with it.</p>
+</section>
+
+<!-- 4 -->
+<section id="sqrtn">
+  <div class="secnum">04</div>
+  <h2>The square-root law</h2>
+  <p>The central limit theorem is about sums, but it is used mostly for <strong>averages</strong>. The average \(\bar X = S_n/n\) of \(n\) independent draws has the same shape as the sum, scaled down by \(n\), so it is approximately</p>
+  $$\bar X \approx \mathcal N\Big(\mu,\ \frac{\sigma^{2}}{n}\Big), \qquad \operatorname{sd}(\bar X) = \frac{\sigma}{\sqrt n}$$
+  <p>The spread of an average shrinks like \(1/\sqrt n\), not like \(1/n\). The variances of independent draws add, so the sum’s variance is \(n\sigma^2\) and its standard deviation only \(\sigma\sqrt n\); dividing by \(n\) leaves \(\sigma/\sqrt n\). This standard deviation of an average is called its <em class="term">standard error</em>.</p>
+
+  <div class="widget">
+    <p class="widget-title">Averages of die rolls</p>
+    <div class="controls">
+      <button class="btn primary" id="snNew">New samples</button>
+    </div>
+    <canvas id="snChart" style="height:320px" role="img" aria-label="Rows of dots, one row each for averages of 1, 4, 16, 64 and 256 die rolls; each row narrows by half"></canvas>
+    <div class="legend"><span><i class="sw dot" style="background:var(--accent)"></i><span>one average of \(n\) rolls (300 per row)</span></span><span><i class="sw line" style="border-color:var(--gold)"></i><span>\(3.5 \pm \sigma/\sqrt n\)</span></span></div>
+    <div class="readout" id="snRead" style="margin-top:8px"></div>
+  </div>
+  <p>Each row uses four times as many rolls as the one above, and each is half as wide. <strong>To halve the error you need four times the data</strong>, and to get one more decimal place, a hundred times. This is why polls of 1,000 people are common and polls of 100,000 are not: the second costs a hundred times as much and is only ten times as precise.</p>
+  <p>The square-root law also explains the 1.96 in a confidence interval. An average lies within \(1.96\,\sigma/\sqrt n\) of the true mean 95% of the time, so the interval \(\bar x \pm 1.96\,\sigma/\sqrt n\) catches the true mean in 95% of samples. That is the <a href="binomial.html#infer">Wald interval</a> of the binomial tutorial, with \(\sigma = \sqrt{pq}\).</p>
+</section>
+
+<!-- 5 -->
+<section id="approx">
+  <div class="secnum">05</div>
+  <h2>Approximating counts</h2>
+  <p>A <a href="binomial.html">binomial</a> count is a sum of \(n\) Bernoulli trials, and a <a href="poisson.html">Poisson</a> count with mean \(\lambda\) is a sum of \(\lambda\) independent Poisson(1) counts (for whole \(\lambda\)). So for large \(n\) or \(\lambda\) both are close to a normal with the same mean and variance:</p>
+  $$\begin{gathered} \text{Bin}(n, p) \approx \mathcal N(np,\ npq) \\ \text{Poisson}(\lambda) \approx \mathcal N(\lambda,\ \lambda) \end{gathered}$$
+  <p>Counts are whole numbers and the normal is continuous, so give each count \(k\) the stretch from \(k - \tfrac12\) to \(k + \tfrac12\). To approximate \(P(X \le k)\), take the area up to \(k + \tfrac12\). This <em class="term">continuity correction</em> was introduced in the <a href="binomial.html#normal">binomial</a> and <a href="poisson.html#normal">Poisson</a> tutorials:</p>
+  $$P(X \le k) \approx \Phi\Big(\frac{k + \tfrac12 - \mu}{\sigma}\Big)$$
+
+  <div class="widget">
+    <p class="widget-title">Counts versus the bell</p>
+    <div class="controls" role="group" aria-label="Which count">
+      <button class="btn on" data-ap="bin" aria-pressed="true">Binomial</button>
+      <button class="btn" data-ap="pois" aria-pressed="false">Poisson</button>
+      <button class="btn on" id="apCC" aria-pressed="true">Continuity correction: on</button>
+    </div>
+    <div class="controls" id="apBinCtl">
+      <label class="ctrl">\(n\) <input type="range" id="apN" min="1" max="200" step="1" value="30"><output id="apNOut"></output></label>
+      <label class="ctrl">\(p\) <input type="range" id="apP" min="0.01" max="0.99" step="0.01" value="0.2"><output id="apPOut"></output></label>
+    </div>
+    <div class="controls" id="apPoisCtl" hidden>
+      <label class="ctrl">\(\lambda\) <input type="range" id="apL" min="0.5" max="60" step="0.5" value="6"><output id="apLOut"></output></label>
+    </div>
+    <div class="controls">
+      <label class="ctrl">\(P(X \le k)\) for \(k\) = <input type="range" id="apK" min="0" max="30" step="1" value="4"><output id="apKOut"></output></label>
+    </div>
+    <canvas id="apChart" style="height:240px" role="img" aria-label="Count probabilities as bars, with the matching normal curve and the normal area used for the approximation shaded"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i><span>bars counted in \(P(X \le k)\)</span></span><span><i class="sw" style="background:var(--ink-3)"></i><span>other counts</span></span><span><i class="sw" style="background:var(--gold-soft);border:1px solid var(--gold)"></i><span>normal area used as the approximation</span></span></div>
+    <div class="readout" id="apRead" style="margin-top:8px"></div>
+  </div>
+  <p>The approximation is worst where the count is lopsided: a binomial with \(p\) near 0 or 1, or a Poisson with a small mean. The usual rule of thumb asks for \(np \ge 10\) and \(nq \ge 10\), or \(\lambda \ge 10\). The error shrinks like \(1/\sqrt n\), and the <em class="term">Berry–Esseen theorem</em> puts a bound on it that grows with \(E|X - \mu|^3/\sigma^3\), a measure of how lopsided and heavy-tailed one draw is. Today software computes exact binomial and Poisson probabilities directly, but the approximation is still how people reason about counts in their heads: a count of about 100 is uncertain by about \(\pm 2\sqrt{100} = \pm 20\).</p>
+</section>
+
+<!-- 6 -->
+<section id="fails">
+  <div class="secnum">06</div>
+  <h2>When the bell fails</h2>
+  <p>The central limit theorem has conditions, and the most important is a finite standard deviation. The <em class="term">Cauchy distribution</em> breaks it. It looks harmless, a bell with fatter tails, and is what you get by dividing one standard normal by another. But its tails are so heavy that it has no mean and no standard deviation: now and then a draw is so huge that it outweighs everything before it.</p>
+
+  <div class="widget">
+    <p class="widget-title">Running averages</p>
+    <div class="controls">
+      <button class="btn primary" id="raNew">New run</button>
+    </div>
+    <canvas id="raChart" style="height:230px" role="img" aria-label="The running average of 5,000 draws against the number of draws on a log scale: the normal average settles at 0, the Cauchy average keeps jumping"></canvas>
+    <p class="cap" style="text-align:center">number of draws so far, on a log scale</p>
+    <div class="legend"><span><i class="sw line" style="border-color:var(--accent)"></i><span>average of normal draws</span></span><span><i class="sw line" style="border-color:var(--zero)"></i><span>average of Cauchy draws</span></span><span><i class="sw dash" style="border-color:var(--ink-3)"></i><span>center, 0</span></span></div>
+    <div class="readout" id="raRead" style="margin-top:8px"></div>
+  </div>
+  <p>The normal average closes in on 0, at the \(1/\sqrt n\) pace of section 4. The Cauchy average never does. It drifts, then jumps when one enormous draw arrives, and the average of 5,000 draws is no more reliable than a single draw. In fact it has exactly the same Cauchy distribution as one draw. Distributions with heavy tails like this, where the variance is infinite, turn up in finance, in insurance losses and in the sizes of cities and earthquakes; for them the bell is the wrong picture.</p>
+
+  <h3>Products instead of sums</h3>
+  <p>Many things grow by multiplying: an investment that gains or loses a percentage each year, a population, a cell that grows by a random factor before dividing. The logarithm turns a product into a sum, \(\ln(U_1 U_2 \cdots U_n) = \ln U_1 + \dots + \ln U_n\), so the <em>log</em> of the product is approximately normal. The product itself is then <em class="term">lognormal</em>: piled up on the left with a long tail to the right.</p>
+
+  <div class="widget">
+    <p class="widget-title">Twenty years of random growth</p>
+    <div class="controls">
+      <label class="ctrl">years \(n\) <input type="range" id="lgN" min="1" max="50" step="1" value="20"><output id="lgNOut"></output></label>
+      <button class="btn on" data-lg="lin" aria-pressed="true">Value</button>
+      <button class="btn" data-lg="log" aria-pressed="false">Log of value</button>
+    </div>
+    <canvas id="lgChart" style="height:230px" role="img" aria-label="Histogram of 20,000 final values of 1 multiplied by a random factor between 0.5 and 1.5 each year, with the lognormal curve, or of their logarithms with the normal curve"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i><span>20,000 runs</span></span><span><i class="sw line" style="border-color:var(--gold)"></i><span id="lgCurveLab">lognormal curve</span></span><span><i class="sw dash" style="border-color:var(--zero)"></i><span>median</span></span><span><i class="sw dash" style="border-color:var(--one)"></i><span>mean</span></span></div>
+    <div class="readout" id="lgRead" style="margin-top:8px"></div>
+  </div>
+  <p>Each year the value is multiplied by a random factor between 0.5 and 1.5, which averages exactly 1. So the <em>mean</em> final value stays at 1. But the typical run loses money: the median is well below 1, because a 50% loss needs a 100% gain to undo it. A few lucky runs end far above 1 and hold up the mean. Switch to the log view and the lopsided pile becomes a bell.</p>
+  <p>Dependence breaks the theorem too. If the pieces move together, as house prices in one city do, or as loans did in 2008, their sum varies far more than \(\sigma\sqrt n\), and the tails are much heavier than a normal predicts.</p>
+</section>
+
+<!-- 7 -->
+<section id="add">
+  <div class="secnum">07</div>
+  <h2>Normals add up</h2>
+  <p>The sum of two independent normal variables is exactly normal, not just approximately. Their means add, and so do their <strong>variances</strong>:</p>
+  $$\begin{gathered} X \sim \mathcal N(\mu_1, \sigma_1^2),\quad Y \sim \mathcal N(\mu_2, \sigma_2^2) \\ \Rightarrow\ X + Y \sim \mathcal N(\mu_1 + \mu_2,\ \sigma_1^2 + \sigma_2^2) \end{gathered}$$
+  <p>The standard deviations do not add. They combine like the sides of a right triangle: \(\sigma = \sqrt{\sigma_1^2 + \sigma_2^2}\), always less than \(\sigma_1 + \sigma_2\). Independent errors partly cancel.</p>
+
+  <div class="widget">
+    <p class="widget-title">Add two normals</p>
+    <div class="controls">
+      <label class="ctrl">\(\mu_1\) <input type="range" id="adM1" min="-5" max="5" step="0.5" value="-2"><output id="adM1Out"></output></label>
+      <label class="ctrl">\(\sigma_1\) <input type="range" id="adS1" min="0.5" max="3" step="0.1" value="1"><output id="adS1Out"></output></label>
+      <label class="ctrl">\(\mu_2\) <input type="range" id="adM2" min="-5" max="5" step="0.5" value="3"><output id="adM2Out"></output></label>
+      <label class="ctrl">\(\sigma_2\) <input type="range" id="adS2" min="0.5" max="3" step="0.1" value="1.5"><output id="adS2Out"></output></label>
+    </div>
+    <div class="addgrid">
+      <canvas id="adChart" style="height:220px" role="img" aria-label="The densities of X, Y and X plus Y, with a histogram of simulated sums under the X plus Y curve"></canvas>
+      <canvas id="adTri" style="height:220px" role="img" aria-label="A right triangle with sides sigma one and sigma two; its long side is the standard deviation of the sum"></canvas>
+    </div>
+    <div class="legend"><span><i class="sw line" style="border-color:var(--accent)"></i><span>\(X\)</span></span><span><i class="sw line" style="border-color:var(--one)"></i><span>\(Y\)</span></span><span><i class="sw line" style="border-color:var(--gold)"></i><span>\(X + Y\)</span></span><span><i class="sw" style="background:var(--gold-soft)"></i><span>20,000 simulated sums</span></span></div>
+    <div class="readout" id="adRead" style="margin-top:8px"></div>
+  </div>
+  <p>Two more rules complete the toolkit. Scaling and shifting keep a normal normal: \(aX + b \sim \mathcal N(a\mu + b,\ a^2\sigma^2)\). And a difference is a sum with a minus sign, so \(X - Y \sim \mathcal N(\mu_1 - \mu_2,\ \sigma_1^2 + \sigma_2^2)\): the variances still add. Comparing two noisy measurements is noisier than either one.</p>
+  <p>These rules also say why the central limit theorem lands on <em>this</em> curve. Take two independent standard normals, add them and divide by \(\sqrt 2\): the result is a standard normal again. The normal is the fixed point of “add up and rescale”. Any shape with finite variance that is added and rescaled over and over is pulled toward that fixed point, and the bell is the only place it can stop.</p>
+</section>
+
+<!-- 8 -->
+<section id="props">
+  <div class="secnum">08</div>
+  <h2>All the properties</h2>
+  <p>Here are the main facts about \(X \sim \mathcal N(\mu, \sigma^2)\) in one place. Drag the sliders to update every value.</p>
+
+  <div class="sticky-ctrl">
+    <label class="ctrl">\(\mu\) <input type="range" id="prM" min="-10" max="10" step="0.5" value="0"><output id="prMOut"></output></label>
+    <label class="ctrl">\(\sigma\) <input type="range" id="prS" min="0.5" max="5" step="0.1" value="1"><output id="prSOut"></output></label>
+  </div>
+
+  <div class="pair" style="margin-top:16px">
+    <div class="mini"><div class="mcap">PDF</div><canvas id="miniPDF" style="height:130px" role="img" aria-label="Density of the normal distribution for the current mean and standard deviation, with the mean marked"></canvas></div>
+    <div class="mini"><div class="mcap">CDF</div><canvas id="miniCDF" style="height:130px" role="img" aria-label="Cumulative distribution function for the current mean and standard deviation, with the median marked"></canvas></div>
+  </div>
+
+  <h3>The numbers</h3>
+  <div class="cards">
+    <div class="card"><h4>Support and parameters</h4><div class="f">\(x \in \mathbb R\); \(\mu \in \mathbb R\), \(\sigma > 0\)</div><div class="v" id="cPar"></div></div>
+    <div class="card"><h4>PDF</h4><div class="f">\(\frac{1}{\sigma\sqrt{2\pi}}e^{-(x-\mu)^2/(2\sigma^2)}\)</div><div class="v" id="cPDF"></div></div>
+    <div class="card"><h4>CDF</h4><div class="f">\(\Phi\big((x - \mu)/\sigma\big)\)</div><div class="v" id="cCDF"></div></div>
+    <div class="card"><h4>Mean, median, mode</h4><div class="f">all equal \(\mu\)</div><div class="v" id="cMean"></div></div>
+    <div class="card"><h4>Variance</h4><div class="f">\(\sigma^2\)</div><div class="v" id="cVar"></div></div>
+    <div class="card"><h4>Middle 95%</h4><div class="f">\(\mu \pm 1.96\,\sigma\)</div><div class="v" id="c95"></div></div>
+    <div class="card"><h4>Quartiles</h4><div class="f">\(\mu \pm 0.674\,\sigma\)</div><div class="v" id="cIQR"></div></div>
+    <div class="card"><h4>Mean absolute deviation</h4><div class="f">\(\sigma\sqrt{2/\pi} \approx 0.798\,\sigma\)</div><div class="v" id="cMAD"></div></div>
+    <div class="card"><h4>Skewness and excess kurtosis</h4><div class="f">both 0</div><div class="v" id="cSkew"></div></div>
+    <div class="card"><h4>MGF</h4><div class="f">\(M(t) = e^{\mu t + \sigma^2 t^2/2}\)</div><div class="v" id="cMGF"></div></div>
+    <div class="card"><h4>Entropy</h4><div class="f">\(\tfrac12\ln(2\pi e\,\sigma^2)\)</div><div class="v" id="cEnt"></div></div>
+  </div>
+
+  <h3>Where the formulas come from</h3>
+  <details>
+    <summary>The MGF, and everything from it</summary>
+    <p>For the standard normal, complete the square in the exponent:</p>
+    $$\begin{aligned} E[e^{tZ}] &= \int \frac{1}{\sqrt{2\pi}}\, e^{tz - z^2/2}\,dz \\ &= e^{t^2/2}\int \frac{1}{\sqrt{2\pi}}\, e^{-(z - t)^2/2}\,dz \\ &= e^{t^2/2} \end{aligned}$$
+    <p>since the last integral is the area under a shifted bell, 1. With \(X = \mu + \sigma Z\) this gives \(M(t) = e^{\mu t + \sigma^2 t^2/2}\). Its logarithm, \(\mu t + \sigma^2t^2/2\), has no terms beyond \(t^2\), so every cumulant after the variance is 0: no skewness, no excess kurtosis. Multiplying two such MGFs adds the means and the variances, which is section 7.</p>
+  </details>
+  <details>
+    <summary>Why the central limit theorem works</summary>
+    <p>Let \(Y = (X - \mu)/\sigma\) have mean 0 and variance 1, so its MGF starts \(M_Y(t) = 1 + t^2/2 + \dots\). The standardized sum is \(Z_n = (Y_1 + \dots + Y_n)/\sqrt n\), and independence multiplies MGFs:</p>
+    $$\begin{aligned} M_{Z_n}(t) &= M_Y\big(t/\sqrt n\big)^{n} \\ &= \Big(1 + \frac{t^2}{2n} + \dots\Big)^{n} \\ &\to e^{t^2/2} \end{aligned}$$
+    <p>which is the standard normal’s MGF. The dropped terms are of order \(n^{-3/2}\) and vanish in the limit. Only the mean and the variance of one draw survive; every other detail of its shape is washed out. (A rigorous proof uses the characteristic function \(E[e^{itY}]\), which exists for every distribution, but the idea is the same.)</p>
+  </details>
+
+  <h3>Structural facts worth remembering</h3>
+  <ol class="facts">
+    <li><strong>Standardizing.</strong> \(Z = (X - \mu)/\sigma\) is standard normal, so one function \(\Phi\) answers every question.</li>
+    <li><strong>Sums and differences.</strong> Independent normals add to a normal; means add and variances add (section 7).</li>
+    <li><strong>The central limit theorem.</strong> Sums and averages of many independent draws with finite variance are approximately normal (section 1).</li>
+    <li><strong>The square-root law.</strong> An average of \(n\) draws has standard deviation \(\sigma/\sqrt n\) (section 4).</li>
+    <li><strong>Limit of the counting distributions.</strong> The <a href="binomial.html#normal">binomial</a>, <a href="poisson.html#normal">Poisson</a> and <a href="negative-binomial.html#sum">negative binomial</a> all become normal as their means grow.</li>
+    <li><strong>Maximum entropy.</strong> Of all distributions with a given mean and variance, the normal has the largest entropy: it assumes the least beyond those two numbers.</li>
+  </ol>
+</section>
+
+<!-- 9 -->
+<section id="uses">
+  <div class="secnum">09</div>
+  <h2>Where you will meet it</h2>
+  <div class="cards">
+    <div class="card"><h4>Measurement error</h4><p>A measurement is disturbed by many small independent effects, so its error is close to normal. Gauss used this to justify least squares: with normal errors, the least-squares fit is the most likely one.</p></div>
+    <div class="card"><h4>Statistics</h4><p>Confidence intervals, z-tests and much of regression rest on averages being approximately normal. When \(\sigma\) is estimated from a small sample, the <em>t</em> distribution takes the normal’s place.</p></div>
+    <div class="card"><h4>Quality control</h4><p>Shewhart’s control charts set limits at the mean \(\pm 3\sigma\). For a normal process only about 3 points in 1,000 fall outside by chance, so a point outside is worth a look.</p></div>
+    <div class="card"><h4>Diffusion</h4><p>A particle bumped by molecules takes a sum of tiny random steps, so its position is normal with a variance that grows in proportion to time. This is Brownian motion, as Einstein explained it in 1905.</p></div>
+    <div class="card"><h4>Traits from many genes</h4><p>Height and many other traits are shaped by thousands of genetic variants, each with a small effect, plus environment. Their sum is close to normal, as Fisher showed in 1918.</p></div>
+    <div class="card"><h4>Electronic noise</h4><p>Thermal noise in a resistor is the combined jitter of vast numbers of electrons, and is very accurately Gaussian. Signal processing and communications are built around it.</p></div>
+    <div class="card"><h4>When it fails</h4><p>Financial returns, insurance losses and network traffic have far heavier tails than a normal. Products are lognormal, not normal. Check the tails before trusting the bell.</p></div>
+  </div>
+
+  <h3>Normal or not?</h3>
+  <p>Which of these would you expect to be roughly normal?</p>
+  <div class="widget">
+    <div class="quiz" id="quiz"></div>
+    <div class="readout" id="quizScore" style="margin-top:10px" aria-live="polite"></div>
+  </div>
+
+  <p>That completes the series so far. It started with a single coin flip, built the counting and waiting distributions from it, and ends where all those sums lead: the bell curve. Still to come is the <strong>gamma distribution</strong>, the continuous wait for the \(k\)-th event, which ties the <a href="exponential.html">exponential</a> to the <a href="negative-binomial.html">negative binomial</a> and, as \(k\) grows, turns into a bell as well. <a href="../index.html">Browse all explainers</a>.</p>
+</section>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script>
+(function(){
+'use strict';
+/* ---------- helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const root = document.documentElement;
+const C = n => getComputedStyle(root).getPropertyValue(n).trim();
+const clamp = (x,a,b) => Math.max(a, Math.min(b, x));
+const f1 = x => x.toFixed(1), f2 = x => x.toFixed(2), f3 = x => x.toFixed(3), f4 = x => x.toFixed(4);
+const fmtN = x => Math.abs(x - Math.round(x)) < 1e-9 ? String(Math.round(x)) : String(+x.toFixed(2));
+const pct = x => (100 * x).toFixed(1) + '%';
+const SANS = 'system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';
+const MONO = 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
+const RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+const TAU = Math.PI * 2;
+
+if (window.renderMathInElement) {
+  renderMathInElement(document.body, {
+    delimiters: [{left:'$$', right:'$$', display:true}, {left:'\\(', right:'\\)', display:false}],
+    throwOnError: false
+  });
+}
+function markOverflow(el){
+  if (!el) return;
+  el.classList.toggle('ovf', el.scrollWidth - el.clientWidth - el.scrollLeft > 2);
+}
+function markAllOverflow(){ $$('.katex-display').forEach(markOverflow); }
+document.addEventListener('scroll', e => {
+  if (e.target.classList && e.target.classList.contains('katex-display')) markOverflow(e.target);
+}, true);
+markAllOverflow();
+window.addEventListener('load', markAllOverflow);   // KaTeX web fonts can change widths
+function fit(c){
+  const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+  if (c.width !== w*dpr || c.height !== h*dpr) { c.width = w*dpr; c.height = h*dpr; }
+  const ctx = c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  return {ctx, w, h};
+}
+const redraws = [];
+function redrawAll(){ redraws.forEach(f => f()); markAllOverflow(); }
+let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(redrawAll, 80); });
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+if (mq.addEventListener) mq.addEventListener('change', redrawAll);
+new MutationObserver(redrawAll).observe(root, {attributes:true, attributeFilter:['data-theme']});
+
+function bindRange(input, out, cb, fmt){
+  fmt = fmt || fmtN;
+  const f = () => { const v = parseFloat(input.value); if (out) out.textContent = fmt(v); cb(v); };
+  input.addEventListener('input', f); f();
+}
+function setRange(input, v){ input.value = v; input.dispatchEvent(new Event('input')); }
+function niceTicks(max, count){
+  const raw = max / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const step = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag;
+  const t = []; for (let v = 0; v <= max + 1e-9; v += step) t.push(v); return t;
+}
+function intStep(px, minPx){
+  for (const s of [1,2,5,10,20,25,50,100,200,250,500,1000]) if (s * px >= minPx) return s;
+  return 1000;
+}
+function yGrid(ctx, X0, X1, ys, ticks, fmt){
+  ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ticks.forEach(v => {
+    const y = Math.round(ys(v)) + .5;
+    ctx.strokeStyle = C('--line'); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X0, y); ctx.lineTo(X1, y); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.fillText(fmt(v), X0 - 6, y);
+  });
+}
+function stepFmt(ticks){ const st = ticks.length > 1 ? ticks[1] - ticks[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9)); return v => v.toFixed(d); }
+function roundRect(ctx, x, y, w, h, r){
+  r = Math.max(0, Math.min(r, w/2, Math.abs(h)/2));
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+function dot(ctx, x, y, r){ ctx.beginPath(); ctx.arc(x, y, Math.max(0.5, r), 0, TAU); ctx.fill(); }
+
+/* continuous axes: x from xmin to xmax, y from 0 to ymax (or a custom y-scale) */
+function cax(ctx, w, h, o){
+  const X0 = o.left != null ? o.left : 44, X1 = w - (o.right != null ? o.right : 12);
+  const Y0 = h - (o.bottom != null ? o.bottom : 24), Y1 = o.top != null ? o.top : 12;
+  const xmin = o.xmin || 0, xmax = o.xmax;
+  const xs = x => X0 + (x - xmin) / (xmax - xmin) * (X1 - X0);
+  const ixs = px => xmin + (px - X0) / (X1 - X0) * (xmax - xmin);
+  const ys = o.yscale ? o.yscale(Y0, Y1) : (v => Y0 - v / o.ymax * (Y0 - Y1));
+  if (o.ygrid !== false) {
+    const t = o.yticks || niceTicks(o.ymax, o.ny || 4).filter(v => v <= o.ymax * 1.0001);
+    yGrid(ctx, X0, X1, ys, t, o.yfmt || stepFmt(t));
+  }
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  if (o.xlabels !== false) {
+    // ticks at round multiples of the step, wherever the axis starts
+    const t0 = niceTicks(xmax - xmin, Math.max(2, Math.floor((X1 - X0) / (o.xgap || 58))));
+    const st = t0.length > 1 ? t0[1] - t0[0] : (xmax - xmin), xt = [];
+    for (let v = Math.ceil(xmin / st - 1e-9) * st; v <= xmax + st * 1e-9; v += st) xt.push(Math.abs(v) < st * 1e-9 ? 0 : v);
+    const fmt = o.xfmt || stepFmt(t0);
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    xt.forEach(v => ctx.fillText(fmt(v), xs(v), Y0 + 6));
+  }
+  return {X0, X1, Y0, Y1, xs, ixs, ys};
+}
+function clipTo(ctx, A){ ctx.save(); ctx.beginPath(); ctx.rect(A.X0, A.Y1 - 4, A.X1 - A.X0 + 1, A.Y0 - A.Y1 + 4.5); ctx.clip(); }
+function pathFn(ctx, A, f, x0, x1, n){
+  n = n || 240; ctx.beginPath(); let on = false;
+  for (let i = 0; i <= n; i++) {
+    const x = x0 + (x1 - x0) * i / n, v = f(x);
+    if (!isFinite(v)) { on = false; continue; }
+    const px = A.xs(x), py = A.ys(v);
+    if (on) ctx.lineTo(px, py); else { ctx.moveTo(px, py); on = true; }
+  }
+}
+function fillFn(ctx, A, f, x0, x1, color, n){
+  if (!(x1 > x0)) return;
+  n = n || 160; ctx.beginPath(); ctx.moveTo(A.xs(x0), A.Y0);
+  for (let i = 0; i <= n; i++) { const x = x0 + (x1 - x0) * i / n; ctx.lineTo(A.xs(x), A.ys(f(x))); }
+  ctx.lineTo(A.xs(x1), A.Y0); ctx.closePath(); ctx.fillStyle = color; ctx.fill();
+}
+function vline(ctx, x, y0, y1, color, dash, lw){
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw || 1.5; if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(Math.round(x) + .5, y0); ctx.lineTo(Math.round(x) + .5, y1); ctx.stroke(); ctx.restore();
+}
+/* integer-valued bar charts (counts) */
+function frame(ctx, w, h, o){
+  const X0 = o.left != null ? o.left : 44, X1 = w - 10, Y0 = h - 24, Y1 = o.top != null ? o.top : 12;
+  const span = o.hi - o.lo + 1, bw = (X1 - X0) / span;
+  const xc = k => X0 + bw * (k - o.lo + .5), ys = v => Y0 - (v / o.ymax) * (Y0 - Y1);
+  const t = niceTicks(o.ymax, 4).filter(v => v <= o.ymax * 1.0001); yGrid(ctx, X0, X1, ys, t, o.yfmt || stepFmt(t));
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  const st = intStep(bw, 22);
+  for (let k = Math.ceil(o.lo / st) * st; k <= o.hi; k += st) ctx.fillText(o.lab ? o.lab(k) : k, xc(k), Y0 + 6);
+  return {X0, X1, Y0, Y1, bw, xc, ys};
+}
+function drawBars(ctx, F, lo, hi, val, color, frac){
+  const bwid = Math.max(1, F.bw * (frac == null ? .8 : frac));
+  for (let k = lo; k <= hi; k++) {
+    const v = val(k); if (!(v > 0)) continue;
+    const y = F.ys(v), hh = F.Y0 - y; if (hh < 0.2) continue;
+    const x = F.xc(k) - bwid / 2;
+    ctx.fillStyle = typeof color === 'function' ? color(k) : color;
+    if (bwid >= 6 && hh >= 3) { roundRect(ctx, x, y, bwid, hh, Math.min(3, bwid / 4)); ctx.fill(); }
+    else ctx.fillRect(x, y, bwid, hh);
+  }
+}
+/* histogram of continuous values, drawn as a density */
+function drawHistDensity(ctx, A, counts, bw, n, color){
+  if (!n) return;
+  ctx.fillStyle = color;
+  for (let b = 0; b < counts.length; b++) {
+    if (!counts[b]) continue;
+    const d = counts[b] / (n * bw), x0 = A.xs(b * bw), x1 = A.xs((b + 1) * bw), y = A.ys(d);
+    const g = x1 - x0 > 5 ? 1 : 0;
+    ctx.fillRect(x0 + g / 2, y, Math.max(1, x1 - x0 - g), A.Y0 - y);
+  }
+}
+function histMax(counts, bw, n){ let m = 0; if (!n) return 0; for (const c of counts) m = Math.max(m, c / (n * bw)); return m; }
+/* ---------- special functions ---------- */
+const LF = [0];
+function lf(n){ while (LF.length <= n) { const i = LF.length; LF.push(LF[i-1] + Math.log(i)); } return LF[n]; }
+function lgam(x){
+  const g = 7, c = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+  if (x < 0.5) return Math.log(Math.PI / Math.abs(Math.sin(Math.PI * x))) - lgam(1 - x);
+  x -= 1; let a = c[0]; const t = x + g + 0.5;
+  for (let i = 1; i < 9; i++) a += c[i] / (x + i);
+  return 0.5 * Math.log(TAU) + (x + 0.5) * Math.log(t) - t + Math.log(a);
+}
+function gammaPQ(a, x){   // regularized incomplete gamma: [P(a, x), Q(a, x)], each accurate in its own tail
+  if (x <= 0) return [0, 1];
+  const lead = Math.exp(-x + a * Math.log(x) - lgam(a));
+  if (x < a + 1) {
+    let ap = a, del = 1 / a, sum = del;
+    for (let i = 0; i < 4000; i++) { ap += 1; del *= x / ap; sum += del; if (Math.abs(del) < Math.abs(sum) * 1e-16) break; }
+    const P = Math.min(1, sum * lead); return [P, 1 - P];
+  }
+  const TINY = 1e-300; let b = x + 1 - a, c = 1 / TINY, d = 1 / b, hh = d;
+  for (let i = 1; i < 4000; i++) {
+    const an = -i * (i - a); b += 2;
+    d = an * d + b; if (Math.abs(d) < TINY) d = TINY;
+    c = b + an / c; if (Math.abs(c) < TINY) c = TINY;
+    d = 1 / d; const del = d * c; hh *= del; if (Math.abs(del - 1) < 1e-16) break;
+  }
+  const Q = Math.max(0, lead * hh); return [1 - Q, Q];
+}
+const SQ2PI = Math.sqrt(TAU);
+const phi = z => Math.exp(-z * z / 2) / SQ2PI;
+const nPDF = (x, m, s) => phi((x - m) / s) / s;
+function Phi(z){   // standard normal CDF, accurate far into both tails
+  if (z === Infinity) return 1; if (z === -Infinity) return 0;
+  const [P, Q] = gammaPQ(0.5, z * z / 2);
+  return z < 0 ? 0.5 * Q : 0.5 + 0.5 * P;
+}
+function PhiInv(p){   // Acklam's rational approximation, polished with one Halley step
+  if (p <= 0) return -Infinity; if (p >= 1) return Infinity;
+  const a = [-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02, 1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00];
+  const b = [-5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02, 6.680131188771972e+01, -1.328068155288572e+01];
+  const c = [-7.784894002430293e-03, -3.223964580411365e-01, -2.400758277161838e+00, -2.549732539343734e+00, 4.374664141464968e+00, 2.938163982698783e+00];
+  const d = [7.784695709041462e-03, 3.224671290700398e-01, 2.445134137142996e+00, 3.754408661907416e+00];
+  const lo = 0.02425; let x;
+  if (p < lo) { const q = Math.sqrt(-2 * Math.log(p)); x = (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5]) / ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1); }
+  else if (p <= 1 - lo) { const q = p - 0.5, r = q * q; x = (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5]) * q / (((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1); }
+  else { const q = Math.sqrt(-2 * Math.log1p(-p)); x = -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5]) / ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1); }
+  const e = Phi(x) - p, u = e * SQ2PI * Math.exp(x * x / 2);
+  return x - u / (1 + x * u / 2);
+}
+function binPMF(n, p, k){ return k < 0 || k > n ? 0 : p <= 0 ? (k === 0 ? 1 : 0) : p >= 1 ? (k === n ? 1 : 0) : Math.exp(lf(n) - lf(k) - lf(n - k) + k * Math.log(p) + (n - k) * Math.log1p(-p)); }
+function poisPMF(l, k){ return k < 0 ? 0 : l <= 0 ? (k === 0 ? 1 : 0) : Math.exp(-l + k * Math.log(l) - lf(k)); }
+
+/* ---------- samplers ---------- */
+const expS = () => -Math.log(1 - Math.random());
+function gaussS(){ let u = 0; while (u === 0) u = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(TAU * Math.random()); }
+function cauchyS(){ let u = 0; while (u === 0 || u === 0.5) u = Math.random(); return Math.tan(Math.PI * (u - 0.5)); }
+
+/* ---------- formatting and small tools ---------- */
+const nf = n => n.toLocaleString('en-US');
+const fmtSig = x => { const a = Math.abs(x); return a >= 1e4 ? nf(Math.round(x)) : a >= 100 ? x.toFixed(0) : a >= 1 ? x.toFixed(2) : x.toFixed(3); };
+function fmtArea(p){   // a probability as a percentage, readable down to tiny tails
+  if (p >= 0.9995 && p < 1) return (100 * p).toFixed(p > 0.99995 ? 4 : 2) + '%';
+  if (p >= 0.0001) return (100 * p).toFixed(2) + '%';
+  if (p <= 0) return '0';
+  return p.toExponential(2).replace(/e-(\d+)/, (m, d) => '×10<sup>−' + d + '</sup>');
+}
+const sgn = x => (x < 0 ? '−' : '') + Math.abs(x);
+const fz = x => (x < 0 && Math.abs(x) >= 0.005 ? '−' : '') + Math.abs(x).toFixed(2);
+const fmtS = x => (x < 0 ? '−' : '') + fmtN(Math.abs(x));
+function pickBtns(attr, cb){
+  const bs = $$('[data-' + attr + ']');
+  bs.forEach(b => b.addEventListener('click', () => {
+    bs.forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
+    cb(b.dataset[attr]);
+  }));
+  return bs;
+}
+function onScreen(el, cb){
+  if ('IntersectionObserver' in window) new IntersectionObserver(es => cb(es[0].isIntersecting)).observe(el);
+}
+function gcd(a, b){ a = Math.abs(a); b = Math.abs(b); while (b) { [a, b] = [b, a % b]; } return a; }
+/* x position of a continuous value on an integer bar frame */
+const fx = (F, lo, x) => F.xc(lo) + (x - lo) * F.bw;
+window.__nm = {Phi, PhiInv, phi, binPMF, poisPMF};
+
+/* ---------- 0. hero: totals of eight dice ---------- */
+(function(){
+  const dc = $('#heroDice'), hc = $('#heroHist'), go = $('#heroGo'), hint = $('#heroHint');
+  const D = 8, LO = D, HI = 6 * D, MU = 3.5 * D, SD = Math.sqrt(D * 35 / 12), MAX = 200000, ROLL_MS = 240;
+  const PIPS = {1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8]};
+  let counts = new Array(HI + 1).fill(0), n = 0, s1 = 0, s2 = 0, last = null;
+  let running = !RM, raf = 0, prev = 0, acc = 0, visible = true;
+  function roll(){
+    const r = []; let s = 0;
+    for (let i = 0; i < D; i++) { const v = 1 + Math.floor(Math.random() * 6); r.push(v); s += v; }
+    counts[s]++; n++; s1 += s; s2 += s * s; return r;
+  }
+  function drawDice(){
+    const {ctx, w, h} = fit(dc);
+    if (!last) { ctx.fillStyle = C('--ink-3'); ctx.font = '13px ' + SANS; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('Press play to roll', w / 2, h / 2); return; }
+    const tot = last.reduce((a, b) => a + b, 0), labW = 58;
+    const size = clamp(Math.floor((w - labW - 8 * 7) / D), 22, 42), gap = Math.max(4, Math.round(size * .18));
+    const rowW = D * size + (D - 1) * gap + labW, x0 = (w - rowW) / 2, y0 = (h - size) / 2;
+    last.forEach((v, i) => {
+      const x = x0 + i * (size + gap);
+      ctx.fillStyle = C('--surface'); ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1.2;
+      roundRect(ctx, x + .5, y0 + .5, size - 1, size - 1, size * .18); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = C('--ink');
+      PIPS[v].forEach(j => dot(ctx, x + size * (.25 + .25 * (j % 3)), y0 + size * (.25 + .25 * Math.floor(j / 3)), size * .085));
+    });
+    ctx.fillStyle = C('--accent'); ctx.font = '600 20px ' + MONO; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillText('= ' + tot, x0 + D * (size + gap) + 2, h / 2 + 1);
+  }
+  function drawHist(){
+    const {ctx, w, h} = fit(hc);
+    let ym = phi(0) / SD; for (let k = LO; k <= HI; k++) if (n) ym = Math.max(ym, counts[k] / n);
+    const F = frame(ctx, w, h, {lo: LO, hi: HI, ymax: ym * 1.15, left: 40});
+    drawBars(ctx, F, LO, HI, k => n ? counts[k] / n : 0, C('--accent'), .78);
+    clipTo(ctx, F);
+    ctx.strokeStyle = C('--gold'); ctx.lineWidth = 2; ctx.beginPath();
+    for (let i = 0; i <= 240; i++) { const x = LO - .5 + (HI - LO + 1) * i / 240, X = fx(F, LO, x), Y = F.ys(nPDF(x, MU, SD)); i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); }
+    ctx.stroke(); ctx.restore();
+  }
+  function setHint(){
+    if (!n) { hint.textContent = 'Roll eight dice and add them up. One die is flat: every face is equally likely. The total is not.'; return; }
+    const m = s1 / n, sd = n > 1 ? Math.sqrt(Math.max(0, (s2 - s1 * s1 / n) / (n - 1))) : 0;
+    hint.innerHTML = `<b>${nf(n)}</b> rolls · average total <b>${f2(m)}</b> (theory 28) · standard deviation <b>${f2(sd)}</b> (theory 4.83)` +
+      (n >= MAX ? ' · limit of 200,000 rolls reached, press Clear' : '');
+  }
+  function drawAll(){ drawDice(); drawHist(); }
+  function tick(t){
+    raf = 0;
+    if (!running || !visible) return;
+    if (prev) acc += Math.min(500, t - prev);
+    prev = t;
+    let rolled = false;
+    while (acc >= ROLL_MS) { acc -= ROLL_MS; if (n < MAX) { last = roll(); rolled = true; } }
+    if (n >= MAX) setRunning(false);
+    if (rolled) { drawAll(); setHint(); }
+    raf = requestAnimationFrame(tick);
+  }
+  function kick(){ if (!raf && running && visible) { prev = 0; raf = requestAnimationFrame(tick); } }
+  function setRunning(v){ running = v; go.textContent = v ? '❚❚ Pause' : '▶ Play'; if (v) kick(); }
+  go.addEventListener('click', () => setRunning(!running));
+  $('#heroMany').addEventListener('click', () => {
+    for (let i = 0; i < 1000 && n < MAX; i++) last = roll();
+    drawAll(); setHint();
+  });
+  $('#heroClear').addEventListener('click', () => { counts.fill(0); n = 0; s1 = 0; s2 = 0; last = null; drawAll(); setHint(); });
+  onScreen(hc, v => { visible = v; kick(); });
+  for (let i = 0; i < 300; i++) last = roll();
+  setHint();
+  if (RM) setRunning(false);
+  redraws.push(drawAll); drawAll(); kick();
+})();
+
+/* ---------- 1. the central limit machine ---------- */
+(function(){
+  const own = [6, 3.5, 1.5, .5, .2, .2, .6, 1.8, 3.2, 4.5].map(v => v / 6);
+  const BASES = {
+    coin: {kind: 'd', vals: [0, 1], w: [1, 1], cap: 'One draw: heads = 1, tails = 0'},
+    die:  {kind: 'd', vals: [1, 2, 3, 4, 5, 6], w: [1, 1, 1, 1, 1, 1], cap: 'One draw: a die roll'},
+    rare: {kind: 'd', vals: [0, 1], w: [95, 5], cap: 'One draw: 1 with chance 5%, otherwise 0'},
+    own:  {kind: 'd', vals: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], w: own, cap: 'One draw: drag on the bars to reshape it'},
+    unif: {kind: 'c', lo: 0, hi: 1, mean: .5, sd: Math.sqrt(1 / 12), skew: 0, dens: x => (x >= 0 && x <= 1 ? 1 : 0), sample: Math.random, cap: 'One draw: any number from 0 to 1, all equally likely'},
+    expo: {kind: 'c', lo: 0, hi: 5, mean: 1, sd: 1, skew: 2, dens: x => (x >= 0 ? Math.exp(-x) : 0), sample: expS, cap: 'One draw: an exponential waiting time with mean 1'}
+  };
+  const BATCH = 10000, CAP = 200000, ZL = -4, ZH = 4, CBW = 0.16;
+  const bc = $('#cltBase'), cc = $('#cltChart'), more = $('#cltMore');
+  let key = 'expo', n = 5, B, st, N = 0, bins = [], below = 0, above = 0, out = 0, binfo = null, baseF = null, dragging = false, simT = 0;
+
+  function stats(b){
+    if (b.kind === 'c') return {mean: b.mean, sd: b.sd, skew: b.skew};
+    const W = b.w.reduce((a, x) => a + x, 0);
+    if (!(W > 1e-9)) return {mean: 0, sd: 0, skew: 0, pr: b.w.map(() => 0), cum: [], vmin: 0, vmax: 0, d: 1};
+    const pr = b.w.map(x => x / W);
+    let m = 0; b.vals.forEach((v, i) => m += pr[i] * v);
+    let v2 = 0, v3 = 0; b.vals.forEach((v, i) => { v2 += pr[i] * (v - m) ** 2; v3 += pr[i] * (v - m) ** 3; });
+    const sd = Math.sqrt(v2), sup = b.vals.filter((v, i) => pr[i] > 0);
+    let d = 0; sup.forEach(v => d = gcd(d, v - sup[0]));
+    const cum = []; let acc = 0; pr.forEach(p => cum.push(acc += p));
+    return {mean: m, sd, skew: sd > 1e-12 ? v3 / sd ** 3 : 0, pr, cum, vmin: sup[0], vmax: sup[sup.length - 1], d: d || 1};
+  }
+  function sampler(){
+    if (B.kind === 'c') return B.sample;
+    const vals = B.vals, cum = st.cum, L = vals.length - 1;
+    return () => { const u = Math.random(); let i = 0; while (i < L && u >= cum[i]) i++; return vals[i]; };
+  }
+  function reset(){
+    B = BASES[key]; st = stats(B); N = 0; below = 0; above = 0; out = 0;
+    const sdS = st.sd * Math.sqrt(n);
+    if (B.kind === 'd') {
+      const m = Math.max(1, Math.ceil(0.14 * sdS / st.d)), nb = Math.floor(n * (st.vmax - st.vmin) / st.d / m) + 1;
+      binfo = {m, wz: st.d * m / sdS, left: b => (n * st.vmin + st.d * b * m - st.d / 2 - n * st.mean) / sdS};
+      bins = new Array(nb).fill(0);
+    } else {
+      binfo = null; bins = new Array(Math.round((ZH - ZL) / CBW)).fill(0);
+    }
+  }
+  function add(k){
+    if (st.sd < 1e-12) return;
+    const draw = sampler(), sdS = st.sd * Math.sqrt(n), m0 = n * st.mean;
+    k = Math.min(k, CAP - N);
+    for (let i = 0; i < k; i++) {
+      let s = 0; for (let j = 0; j < n; j++) s += draw();
+      const z = (s - m0) / sdS;
+      if (z < -2 - 1e-9) below++; else if (z > 2 + 1e-9) above++;
+      if (binfo) {
+        const b = Math.floor(Math.round((s - n * st.vmin) / st.d) / binfo.m); bins[b]++;
+        const L = binfo.left(b); if (L + binfo.wz <= ZL || L >= ZH) out++;
+      } else if (z < ZL || z >= ZH) out++;
+      else bins[Math.floor((z - ZL) / CBW)]++;
+    }
+    N += k;
+  }
+  function drawBase(){
+    const {ctx, w, h} = fit(bc);
+    if (B.kind === 'c') {
+      const A = cax(ctx, w, h, {xmin: B.lo - (B.hi - B.lo) * .05, xmax: B.hi, ymax: 1.25, ny: 2, left: 40, bottom: 22, top: 8});
+      clipTo(ctx, A);
+      fillFn(ctx, A, B.dens, B.lo, B.hi, C('--accent-soft'));
+      ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2;
+      if (key === 'unif') { ctx.beginPath(); ctx.moveTo(A.xs(B.lo), A.Y0); ctx.lineTo(A.xs(B.lo), A.ys(1)); ctx.lineTo(A.xs(B.hi), A.ys(1)); ctx.lineTo(A.xs(B.hi), A.Y0); ctx.stroke(); }
+      else { pathFn(ctx, A, B.dens, B.lo, B.hi); ctx.stroke(); }
+      ctx.restore();
+      vline(ctx, A.xs(st.mean), A.Y1, A.Y0, C('--gold'), [4, 3], 1.5);
+      baseF = null; return;
+    }
+    const lo = B.vals[0], hi = B.vals[B.vals.length - 1];
+    if (key === 'own') {
+      const F = frame(ctx, w, h, {lo, hi, ymax: 1.05, left: 40, top: 8, yfmt: () => ''});
+      drawBars(ctx, F, lo, hi, k => B.w[k - lo], C('--accent'), .7);
+      for (let k = lo; k <= hi; k++) if (B.w[k - lo] <= 0.002) { ctx.fillStyle = C('--line'); ctx.fillRect(F.xc(k) - F.bw * .35, F.Y0 - 2, F.bw * .7, 2); }
+      if (st.sd > 1e-12) vline(ctx, fx(F, lo, st.mean), F.Y1, F.Y0, C('--gold'), [4, 3], 1.5);
+      baseF = F; return;
+    }
+    const F = frame(ctx, w, h, {lo, hi, ymax: Math.max(...st.pr) * 1.2, left: 40, top: 8});
+    drawBars(ctx, F, lo, hi, k => st.pr[k - lo], C('--accent'), hi - lo < 3 ? .3 : .6);
+    vline(ctx, fx(F, lo, st.mean), F.Y1, F.Y0, C('--gold'), [4, 3], 1.5);
+    baseF = null;
+  }
+  function drawMain(){
+    const {ctx, w, h} = fit(cc);
+    let hm = 0;
+    if (N) {
+      if (binfo) bins.forEach((c, b) => { const L = binfo.left(b); if (c && L + binfo.wz > ZL && L < ZH) hm = Math.max(hm, c / (N * binfo.wz)); });
+      else hm = histMax(bins, CBW, N);
+    }
+    const A = cax(ctx, w, h, {xmin: ZL, xmax: ZH, ymax: Math.max(.5, hm * 1.08), left: 40, xgap: 44, xfmt: v => sgn(v)});
+    if (st.sd < 1e-12) {
+      ctx.fillStyle = C('--ink-3'); ctx.font = '13px ' + SANS; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('Only one value has any weight: nothing random to add up.', (A.X0 + A.X1) / 2, (A.Y0 + A.Y1) / 2); return;
+    }
+    clipTo(ctx, A);
+    ctx.fillStyle = C('--accent');
+    if (N && binfo) {
+      bins.forEach((c, b) => {
+        if (!c) return;
+        const L = binfo.left(b), x0 = A.xs(L), x1 = A.xs(L + binfo.wz), y = A.ys(c / (N * binfo.wz)), g = x1 - x0 > 5 ? 1 : 0;
+        ctx.fillRect(x0 + g / 2, y, Math.max(1, x1 - x0 - g), A.Y0 - y);
+      });
+    } else if (N) {
+      bins.forEach((c, b) => {
+        if (!c) return;
+        const x0 = A.xs(ZL + b * CBW), x1 = A.xs(ZL + (b + 1) * CBW), y = A.ys(c / (N * CBW));
+        ctx.fillRect(x0 + .5, y, Math.max(1, x1 - x0 - 1), A.Y0 - y);
+      });
+    }
+    ctx.strokeStyle = C('--gold'); ctx.lineWidth = 2.2; pathFn(ctx, A, phi, ZL, ZH); ctx.stroke();
+    ctx.restore();
+  }
+  function readout(){
+    if (st.sd < 1e-12) { $('#cltRead').innerHTML = 'Give at least two of the bars some height.'; more.disabled = true; return; }
+    more.disabled = N >= CAP;
+    const sk = st.skew / Math.sqrt(n);
+    $('#cltRead').innerHTML = `${nf(N)} sums of n = <b>${n}</b> draws · one draw: mean ${fmtSig(st.mean)}, sd ${fmtSig(st.sd)}, skewness ${f2(st.skew)} · the sum: skewness ${f2(st.skew)}/√${n} = <b>${f2(sk)}</b><br>` +
+      `share of <i>Z</i><sub>n</sub> below −2: <b>${fmtArea(below / N)}</b> · above +2: <b>${fmtArea(above / N)}</b> (normal: 2.28% each)` +
+      (out ? ` · ${nf(out)} ${out === 1 ? 'sum' : 'sums'} beyond ±4, off the chart` : '') +
+      (N >= CAP ? ' · limit of 200,000 sums reached; change a setting to start over' : '');
+  }
+  function run(){ reset(); add(BATCH); drawBase(); drawMain(); readout(); }
+  function drawAll(){ drawBase(); drawMain(); }
+  pickBtns('base', v => { key = v; $('#cltBaseCap').textContent = BASES[v].cap; bc.style.cursor = v === 'own' ? 'crosshair' : ''; bc.style.touchAction = v === 'own' ? 'none' : ''; run(); });
+  bindRange($('#cltN'), $('#cltNOut'), v => { n = v; if (B) run(); });
+  more.addEventListener('click', () => { add(BATCH); drawMain(); readout(); });
+  // draw your own: set bar heights by dragging
+  function paint(e){
+    if (key !== 'own' || !baseF) return;
+    const r = bc.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    const k = clamp(Math.round((x - baseF.X0) / baseF.bw - .5), 0, 9);
+    B.w[k] = clamp((baseF.Y0 - y) / (baseF.Y0 - baseF.Y1) * 1.05, 0, 1);
+    st = stats(B); drawBase();
+    const now = performance.now(); if (now - simT > 120) { simT = now; run(); }
+  }
+  bc.addEventListener('pointerdown', e => { if (key !== 'own') return; dragging = true; bc.setPointerCapture(e.pointerId); paint(e); });
+  bc.addEventListener('pointermove', e => { if (dragging) paint(e); });
+  const end = () => { if (dragging) { dragging = false; run(); } };
+  bc.addEventListener('pointerup', end); bc.addEventListener('pointercancel', end);
+  $('#cltBaseCap').textContent = BASES[key].cap;
+  run(); redraws.push(drawAll);
+})();
+
+/* ---------- 2. shape a normal curve ---------- */
+(function(){
+  let mu = 0, s = 1;
+  const BANDS = [[3, .12, '99.7%'], [2, .2, '95.4%'], [1, .32, '68.3%']];
+  function draw(){
+    const c = $('#cvChart'), {ctx, w, h} = fit(c);
+    const A = cax(ctx, w, h, {xmin: -10, xmax: 10, ymax: .85, left: 40, bottom: 76, xgap: 40, xfmt: v => sgn(v)});
+    const f = x => nPDF(x, mu, s);
+    clipTo(ctx, A);
+    BANDS.forEach(([k, al]) => { ctx.globalAlpha = al; fillFn(ctx, A, f, Math.max(-10, mu - k * s), Math.min(10, mu + k * s), C('--accent')); });
+    ctx.globalAlpha = 1;
+    if (mu !== 0 || s !== 1) { ctx.save(); ctx.setLineDash([5, 4]); ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1.5; pathFn(ctx, A, phi, -10, 10, 300); ctx.stroke(); ctx.restore(); }
+    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2.2; pathFn(ctx, A, f, -10, 10, 400); ctx.stroke();
+    ctx.restore();
+    // brackets under the axis
+    ctx.font = '11px ' + MONO; ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
+    [1, 2, 3].forEach((k, i) => {
+      const y = A.Y0 + 30 + i * 15, x0 = Math.max(A.X0, A.xs(mu - k * s)), x1 = Math.min(A.X1, A.xs(mu + k * s));
+      ctx.strokeStyle = C('--ink-2'); ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y);
+      if (A.xs(mu - k * s) >= A.X0) { ctx.moveTo(x0, y - 4); ctx.lineTo(x0, y + 4); }
+      if (A.xs(mu + k * s) <= A.X1) { ctx.moveTo(x1, y - 4); ctx.lineTo(x1, y + 4); }
+      ctx.stroke();
+      const lab = BANDS[2 - i][2], tw = ctx.measureText(lab).width + 8, cx = clamp((x0 + x1) / 2, A.X0 + tw / 2, A.X1 - tw / 2);
+      ctx.fillStyle = C('--surface'); ctx.fillRect(cx - tw / 2, y - 6, tw, 12);
+      ctx.fillStyle = C('--ink-2'); ctx.fillText(lab, cx, y);
+    });
+  }
+  function readout(){
+    $('#cvRead').innerHTML = `μ = ${fmtS(mu)}, σ = ${fmtN(s)} · peak height 1/(σ√2π) = <b>${f3(phi(0) / s)}</b> · inflection points at <b>${fmtS(+(mu - s).toFixed(2))}</b> and <b>${fmtS(+(mu + s).toFixed(2))}</b><br>` +
+      `95.4% of the area lies between ${fmtS(+(mu - 2 * s).toFixed(2))} and ${fmtS(+(mu + 2 * s).toFixed(2))}`;
+  }
+  const upd = () => { draw(); readout(); };
+  bindRange($('#cvM'), $('#cvMOut'), v => { mu = v; upd(); }, fmtS);
+  bindRange($('#cvS'), $('#cvSOut'), v => { s = v; upd(); });
+  redraws.push(draw);
+})();
+
+/* ---------- 3. z-scores and areas ---------- */
+(function(){
+  const ia = $('#zA'), ib = $('#zB'), c = $('#zChart');
+  let a = -1, b = 1, mode = 'between', A = null, drag = null;
+  const lo = () => Math.min(a, b), hi = () => Math.max(a, b);
+  const uses = () => mode === 'below' ? ['b'] : mode === 'above' ? ['a'] : ['a', 'b'];
+  function area(){
+    const L = lo(), H = hi();
+    return mode === 'below' ? Phi(b) : mode === 'above' ? Phi(-a) : mode === 'between' ? Phi(H) - Phi(L) : Phi(L) + Phi(-H);
+  }
+  function draw(){
+    const {ctx, w, h} = fit(c);
+    A = cax(ctx, w, h, {xmin: -4, xmax: 4, ymax: .45, left: 40, xgap: 44, xfmt: v => sgn(v)});
+    clipTo(ctx, A);
+    const g = C('--gold-soft'), L = lo(), H = hi();
+    if (mode === 'below') fillFn(ctx, A, phi, -4, b, g);
+    else if (mode === 'above') fillFn(ctx, A, phi, a, 4, g);
+    else if (mode === 'between') fillFn(ctx, A, phi, L, H, g);
+    else { fillFn(ctx, A, phi, -4, L, g); fillFn(ctx, A, phi, H, 4, g); }
+    ctx.strokeStyle = C('--ink'); ctx.lineWidth = 2; pathFn(ctx, A, phi, -4, 4, 300); ctx.stroke();
+    ctx.restore();
+    ctx.font = '600 12px ' + MONO; ctx.textBaseline = 'bottom'; ctx.textAlign = 'center';
+    uses().forEach(nm => {
+      const v = nm === 'a' ? a : b, x = A.xs(v);
+      vline(ctx, x, A.Y1 + 14, A.Y0, C('--gold'), null, 2);
+      ctx.fillStyle = C('--gold'); ctx.fillText(nm + ' = ' + fz(v), clamp(x, A.X0 + 30, A.X1 - 30), A.Y1 + 12);
+    });
+  }
+  function readout(){
+    const p = area(), L = lo(), H = hi(), sc = z => fmtN(Math.round(500 + 100 * z));
+    let expr, words;
+    if (mode === 'below') { expr = `Φ(${fz(b)})`; words = `below ${sc(b)}`; }
+    else if (mode === 'above') { expr = `1 − Φ(${fz(a)})`; words = `above ${sc(a)}`; }
+    else if (mode === 'between') { expr = `Φ(${fz(H)}) − Φ(${fz(L)})`; words = `between ${sc(L)} and ${sc(H)}`; }
+    else { expr = `Φ(${fz(L)}) + 1 − Φ(${fz(H)})`; words = `below ${sc(L)} or above ${sc(H)}`; }
+    $('#zRead').innerHTML = `area = ${expr} = <b>${fmtArea(p)}</b><br>For test scores with mean 500 and sd 100: the share of scores ${words}.`;
+  }
+  const upd = () => { draw(); readout(); };
+  bindRange(ia, $('#zAOut'), v => { a = v; upd(); }, fz);
+  bindRange(ib, $('#zBOut'), v => { b = v; upd(); }, fz);
+  pickBtns('zm', v => { mode = v; upd(); });
+  $$('[data-zp]').forEach(btn => btn.addEventListener('click', () => {
+    const [m, x, y] = btn.dataset.zp.split(',');
+    $$('[data-zm]').forEach(z => { const on = z.dataset.zm === m; z.classList.toggle('on', on); z.setAttribute('aria-pressed', on); });
+    mode = m; setRange(ia, x); setRange(ib, y);
+  }));
+  function zAt(e){ const r = c.getBoundingClientRect(); return clamp(+A.ixs(e.clientX - r.left).toFixed(2), -3.5, 3.5); }
+  c.addEventListener('pointerdown', e => {
+    if (!A) return;
+    const z = zAt(e), u = uses();
+    drag = u.length === 1 ? u[0] : (Math.abs(z - a) <= Math.abs(z - b) ? 'a' : 'b');
+    c.setPointerCapture(e.pointerId); setRange(drag === 'a' ? ia : ib, z);
+  });
+  c.addEventListener('pointermove', e => { if (drag) setRange(drag === 'a' ? ia : ib, zAt(e)); });
+  const end = () => { drag = null; };
+  c.addEventListener('pointerup', end); c.addEventListener('pointercancel', end);
+  redraws.push(draw);
+})();
+
+/* ---------- 4. the square-root law ---------- */
+(function(){
+  const NS = [1, 4, 16, 64, 256], M = 300, SIG = Math.sqrt(35 / 12);
+  let rows = [];
+  function sample(){
+    rows = NS.map(n => {
+      const pts = [];
+      for (let i = 0; i < M; i++) { let s = 0; for (let j = 0; j < n; j++) s += 1 + Math.floor(Math.random() * 6); pts.push({x: s / n, j: Math.random()}); }
+      return pts;
+    });
+  }
+  function draw(){
+    const c = $('#snChart'), {ctx, w, h} = fit(c);
+    const X0 = 62, X1 = w - 12, Y0 = h - 24, rh = (Y0 - 6) / NS.length;
+    const xs = x => X0 + (x - 1) / 5 * (X1 - X0);
+    ctx.strokeStyle = C('--line'); ctx.lineWidth = 1;
+    for (let v = 1; v <= 6; v++) { const x = Math.round(xs(v)) + .5; ctx.beginPath(); ctx.moveTo(x, 4); ctx.lineTo(x, Y0); ctx.stroke(); }
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    for (let v = 1; v <= 6; v++) ctx.fillText(v, xs(v), Y0 + 6);
+    ctx.strokeStyle = C('--ink-3'); ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+    const r = clamp(w / 260, 1.6, 2.4);
+    rows.forEach((pts, i) => {
+      const top = 6 + rh * i, n = NS[i], half = rh * .25, yc = top + 4 + half;   // dots in the top part of the row, bracket below, then a gap
+      ctx.fillStyle = C('--ink-2'); ctx.font = '12px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      ctx.fillText('n = ' + n, X0 - 10, yc);
+      ctx.globalAlpha = .45; ctx.fillStyle = C('--accent');
+      pts.forEach(p => dot(ctx, xs(p.x), yc - half + 2 * half * p.j, r));
+      ctx.globalAlpha = 1;
+      const e = SIG / Math.sqrt(n), x0 = xs(3.5 - e), x1 = xs(3.5 + e), yb = top + rh * .7;
+      ctx.strokeStyle = C('--gold'); ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(x0, yb); ctx.lineTo(x1, yb); ctx.moveTo(x0, yb - 4); ctx.lineTo(x0, yb + 4); ctx.moveTo(x1, yb - 4); ctx.lineTo(x1, yb + 4); ctx.stroke();
+    });
+  }
+  function readout(){
+    $('#snRead').innerHTML = rows.map((pts, i) => {
+      const n = NS[i], m = pts.reduce((a, p) => a + p.x, 0) / M;
+      const sd = Math.sqrt(pts.reduce((a, p) => a + (p.x - m) ** 2, 0) / (M - 1));
+      return `n = ${String(n).padStart(3, ' ')}: sd of the averages <b>${f3(sd)}</b> · theory 1.708/√${n} = ${f3(SIG / Math.sqrt(n))}`;
+    }).join('<br>');
+  }
+  $('#snNew').addEventListener('click', () => { sample(); draw(); readout(); });
+  sample(); draw(); readout(); redraws.push(draw);
+})();
+
+/* ---------- 5. approximating counts ---------- */
+(function(){
+  let model = 'bin', n = 30, p = .2, lam = 6, k = 4, cc = true;
+  const ik = $('#apK'), ccb = $('#apCC');
+  const mean = () => model === 'bin' ? n * p : lam;
+  const sd = () => Math.sqrt(model === 'bin' ? n * p * (1 - p) : lam);
+  const pmf = j => model === 'bin' ? binPMF(n, p, j) : poisPMF(lam, j);
+  function range(){
+    const m = mean(), s = sd();
+    const lo = Math.max(0, Math.floor(m - 4.5 * s - 1)), hi = model === 'bin' ? Math.min(n, Math.ceil(m + 4.5 * s + 1)) : Math.ceil(m + 4.5 * s + 2);
+    return [lo, Math.max(hi, lo + 4)];
+  }
+  function syncK(){
+    const [lo, hi] = range();
+    ik.min = lo; ik.max = hi;
+    if (k < lo || k > hi) k = clamp(Math.floor(mean()), lo, hi);
+    // after a parameter change, an old k deep in a tail would read 0% or 100%: move it next to the mean
+    const F = exact();
+    if (F > 0.995 || F < 0.005) k = clamp(Math.floor(mean()), lo, hi);
+    ik.value = k; $('#apKOut').textContent = k;
+  }
+  function exact(){ let s = 0; for (let j = 0; j <= k; j++) s += pmf(j); return Math.min(1, s); }
+  function draw(){
+    const c = $('#apChart'), {ctx, w, h} = fit(c), [lo, hi] = range(), m = mean(), s = sd();
+    let ym = 0; for (let j = lo; j <= hi; j++) ym = Math.max(ym, pmf(j)); ym = Math.max(ym, s > 0 ? phi(0) / s : 0);
+    const F = frame(ctx, w, h, {lo, hi, ymax: ym * 1.15, left: 44});
+    if (s > 0) {
+      clipTo(ctx, F);
+      const cut = cc ? k + .5 : k, x0 = lo - .5;
+      if (cut > x0) {
+        ctx.beginPath(); ctx.moveTo(fx(F, lo, x0), F.Y0);
+        for (let i = 0; i <= 160; i++) { const x = x0 + (cut - x0) * i / 160; ctx.lineTo(fx(F, lo, x), F.ys(nPDF(x, m, s))); }
+        ctx.lineTo(fx(F, lo, cut), F.Y0); ctx.closePath(); ctx.fillStyle = C('--gold-soft'); ctx.fill();
+      }
+      ctx.restore();
+    }
+    drawBars(ctx, F, lo, hi, pmf, j => j <= k ? C('--accent') : C('--ink-3'), .62);
+    if (s > 0) {
+      clipTo(ctx, F);
+      ctx.strokeStyle = C('--gold'); ctx.lineWidth = 2; ctx.beginPath();
+      for (let i = 0; i <= 300; i++) { const x = lo - .5 + (hi - lo + 1) * i / 300, X = fx(F, lo, x), Y = F.ys(nPDF(x, m, s)); i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); }
+      ctx.stroke();
+      const xc = fx(F, lo, cc ? k + .5 : k); vline(ctx, xc, F.Y1, F.Y0, C('--gold'), [4, 3], 1.5);
+      ctx.restore();
+    }
+  }
+  function readout(){
+    const m = mean(), s = sd(), ex = exact();
+    if (!(s > 0)) { $('#apRead').innerHTML = 'With no spread there is nothing to approximate.'; return; }
+    const a1 = Phi((k + .5 - m) / s), a0 = Phi((k - m) / s), neg = Phi((-.5 - m) / s);
+    const pp = x => (100 * x).toFixed(2) + '%', d = x => (x >= 0 ? '+' : '−') + (100 * Math.abs(x)).toFixed(2);
+    const rule = model === 'bin'
+      ? (Math.min(n * p, n * (1 - p)) >= 10 ? `<span class="ok">np = ${fmtN(+(n * p).toFixed(2))} and nq = ${fmtN(+(n * (1 - p)).toFixed(2))} are both at least 10: expect a good fit.</span>`
+                                            : `<span class="warn">${n * p < n * (1 - p) ? 'np' : 'nq'} = ${fmtN(+Math.min(n * p, n * (1 - p)).toFixed(2))} is below 10: the bars are lopsided, so expect visible errors.</span>`)
+      : (lam >= 10 ? `<span class="ok">λ ≥ 10: expect a good fit.</span>` : `<span class="warn">λ is below 10: the bars lean right, so expect visible errors.</span>`);
+    $('#apRead').innerHTML = `mean ${fmtSig(m)}, sd ${fmtSig(s)} · exact P(X ≤ ${k}) = <b>${pp(ex)}</b><br>` +
+      `normal with correction Φ((${k} + ½ − μ)/σ) = <b>${pp(a1)}</b> (${d(a1 - ex)} points) · without it ${pp(a0)} (${d(a0 - ex)} points)<br>` +
+      (neg >= .005 ? `The curve puts ${pp(neg)} on impossible negative counts. ` : '') + rule;
+  }
+  const upd = () => { syncK(); draw(); readout(); };
+  bindRange($('#apN'), $('#apNOut'), v => { n = v; upd(); });
+  bindRange($('#apP'), $('#apPOut'), v => { p = v; upd(); });
+  bindRange($('#apL'), $('#apLOut'), v => { lam = v; upd(); });
+  ik.addEventListener('input', () => { k = +ik.value; $('#apKOut').textContent = k; draw(); readout(); });
+  pickBtns('ap', v => { model = v; $('#apBinCtl').hidden = v !== 'bin'; $('#apPoisCtl').hidden = v === 'bin'; k = -1; upd(); });
+  ccb.addEventListener('click', () => { cc = !cc; ccb.classList.toggle('on', cc); ccb.setAttribute('aria-pressed', cc); ccb.textContent = 'Continuity correction: ' + (cc ? 'on' : 'off'); draw(); readout(); });
+  k = 4; upd(); redraws.push(draw);
+})();
+
+/* ---------- 6a. running averages: normal against Cauchy ---------- */
+(function(){
+  const T = 5000, DUR = 2600, c = $('#raChart');
+  let nm, cm, big = 0, bigAt = 0, shown = 0, raf = 0, t0 = 0, visible = true;
+  function newRun(){
+    nm = new Float64Array(T); cm = new Float64Array(T); big = 0; bigAt = 0;
+    let sn = 0, sc = 0;
+    for (let i = 0; i < T; i++) {
+      sn += gaussS(); const x = cauchyS(); sc += x;
+      if (Math.abs(x) > Math.abs(big)) { big = x; bigAt = i + 1; }
+      nm[i] = sn / (i + 1); cm[i] = sc / (i + 1);
+    }
+  }
+  function draw(){
+    const {ctx, w, h} = fit(c);
+    const A = cax(ctx, w, h, {xmin: 0, xmax: Math.log(T), ymax: 4, left: 40, xlabels: false,
+      yscale: (Y0, Y1) => v => (Y0 + Y1) / 2 - v / 4 * (Y0 - Y1) / 2, yticks: [-4, -2, 0, 2, 4], yfmt: v => sgn(v)});
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    [1, 10, 100, 1000, 5000].forEach(v => ctx.fillText(nf(v), clamp(A.xs(Math.log(v)), A.X0 + 8, A.X1 - 16), A.Y0 + 6));
+    vline(ctx, A.X0, A.Y1, A.Y0, C('--ink-3'), null, 1);
+    ctx.save(); ctx.setLineDash([5, 4]); ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(A.X0, A.ys(0)); ctx.lineTo(A.X1, A.ys(0)); ctx.stroke(); ctx.restore();
+    clipTo(ctx, A);
+    [[cm, '--zero'], [nm, '--accent']].forEach(([arr, col]) => {
+      ctx.strokeStyle = C(col); ctx.lineWidth = 1.8; ctx.beginPath();
+      for (let i = 0; i < shown; i++) { const X = A.xs(Math.log(i + 1)), Y = A.ys(clamp(arr[i], -5, 5)); i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); }
+      ctx.stroke();
+    });
+    ctx.restore();
+  }
+  function readout(){
+    if (shown < T) { $('#raRead').innerHTML = `${nf(shown)} draws so far…`; return; }
+    const off = Math.abs(cm[T - 1]) > 4 ? ' (off the chart)' : '';
+    $('#raRead').innerHTML = `after ${nf(T)} draws: normal average <b>${fz(nm[T - 1])}</b> · Cauchy average <b>${fz(cm[T - 1])}</b>${off}<br>` +
+      `largest single Cauchy draw: <b>${(big < 0 ? '−' : '') + fmtSig(Math.abs(big))}</b>, at draw ${nf(bigAt)}; on its own it moved the average by about ${f2(Math.abs(big) / bigAt)}`;
+  }
+  function tick(t){
+    raf = 0; if (!visible) return;
+    if (!t0) t0 = t;
+    const f = Math.min(1, (t - t0) / DUR);
+    shown = Math.max(1, Math.round(Math.pow(T, f)));
+    draw(); readout();
+    if (f < 1) raf = requestAnimationFrame(tick);
+  }
+  function start(){
+    newRun();
+    if (RM) { shown = T; draw(); readout(); return; }
+    shown = 0; t0 = 0; if (!raf && visible) raf = requestAnimationFrame(tick);
+  }
+  $('#raNew').addEventListener('click', start);
+  onScreen(c, v => { visible = v; if (v && shown < T && !raf) { t0 = 0; raf = requestAnimationFrame(tick); } });
+  newRun(); shown = T; draw(); readout();
+  redraws.push(draw);
+})();
+
+/* ---------- 6b. products: the lognormal ---------- */
+(function(){
+  const LO = .5, HI = 1.5, R = 20000, NBIN = 56;
+  const F1 = x => x * Math.log(x) - x, F2 = x => x * (Math.log(x) ** 2 - 2 * Math.log(x) + 2);
+  const EL = (F1(HI) - F1(LO)) / (HI - LO), VL = (F2(HI) - F2(LO)) / (HI - LO) - EL * EL;   // mean and variance of ln U
+  let n = 20, view = 'lin', L = new Float64Array(R);
+  function sim(){
+    for (let r = 0; r < R; r++) { let s = 0; for (let j = 0; j < n; j++) s += Math.log(LO + (HI - LO) * Math.random()); L[r] = s; }
+  }
+  function draw(){
+    const c = $('#lgChart'), {ctx, w, h} = fit(c), m = n * EL, s = Math.sqrt(n * VL);
+    let x0, x1, val, dens;
+    if (view === 'log') { x0 = m - 4.2 * s; x1 = m + 4.2 * s; val = v => v; dens = x => nPDF(x, m, s); }
+    else { x0 = 0; x1 = Math.exp(m + 1.8 * s); val = v => Math.exp(v); dens = x => x > 0 ? nPDF(Math.log(x), m, s) / x : 0; }
+    const bw = (x1 - x0) / NBIN, counts = new Array(NBIN).fill(0);
+    let over = 0;
+    for (let r = 0; r < R; r++) { const v = val(L[r]); if (v < x0 || v >= x1) { over++; continue; } counts[Math.floor((v - x0) / bw)]++; }
+    const showCurve = n > 1;
+    // value view: the lognormal density spikes near 0, so compare each bar with the curve's
+    // average over that bar (what the bar should hold) instead of the pointwise density
+    const cdf = x => x <= 0 ? 0 : Phi((Math.log(x) - m) / s);
+    const barAvg = b => (cdf(x0 + (b + 1) * bw) - cdf(x0 + b * bw)) / bw;
+    let cm = 0;
+    if (showCurve) {
+      if (view === 'lin') for (let b = 0; b < NBIN; b++) cm = Math.max(cm, barAvg(b));
+      else cm = phi(0) / s;
+    }
+    const ym = Math.max(histMax(counts, bw, R), cm) * 1.1;
+    const A = cax(ctx, w, h, {xmin: x0, xmax: x1, ymax: ym, left: 44, xgap: 50, xfmt: view === 'log' ? (v => fmtS(+v.toFixed(1))) : undefined});
+    clipTo(ctx, A);
+    ctx.fillStyle = C('--accent');
+    counts.forEach((cnt, b) => { if (!cnt) return; const xa = A.xs(x0 + b * bw), xb = A.xs(x0 + (b + 1) * bw), y = A.ys(cnt / (R * bw)); ctx.fillRect(xa + .5, y, Math.max(1, xb - xa - 1), A.Y0 - y); });
+    if (showCurve) {
+      ctx.strokeStyle = C('--gold'); ctx.lineWidth = 2.2;
+      if (view === 'log') pathFn(ctx, A, dens, x0, x1, 400);
+      else { ctx.beginPath(); for (let b = 0; b < NBIN; b++) { const X = A.xs(x0 + (b + .5) * bw), Y = A.ys(barAvg(b)); b ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); } }
+      ctx.stroke();
+    }
+    ctx.restore();
+    const med = view === 'log' ? m : Math.exp(m), mean = view === 'log' ? Math.log(((LO + HI) / 2) ** n) : ((LO + HI) / 2) ** n;
+    if (med >= x0 && med <= x1) vline(ctx, A.xs(med), A.Y1, A.Y0, C('--zero'), [5, 4], 1.8);
+    if (mean >= x0 && mean <= x1) vline(ctx, A.xs(mean), A.Y1, A.Y0, C('--one'), [5, 4], 1.8);
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + SANS; ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+    ctx.fillText(view === 'log' ? 'ln(final value)' : 'final value', A.X1, A.Y1);
+    $('#lgOver').innerHTML = over ? ` · ${nf(over)} runs ended beyond ${fmtSig(x1)}, off the chart` : '';
+    $('#lgCurveLab').textContent = (view === 'log' ? 'normal curve' : 'lognormal, averaged over each bar') + (showCurve ? '' : ' (hidden for n = 1)');
+  }
+  function readout(){
+    const m = n * EL, s = Math.sqrt(n * VL), sorted = Array.from(L).sort((a, b) => a - b);
+    const emp = Math.exp(sorted[Math.floor(R / 2)]), loss = sorted.findIndex(v => v >= 0);
+    const share = (loss < 0 ? R : loss) / R;
+    $('#lgRead').innerHTML = `median final value <b>${fmtSig(emp)}</b> (theory e<sup>n·E[ln U]</sup> = ${fmtSig(Math.exp(m))}) · mean (theory) <b>1</b><br>` +
+      `runs that end below where they started: <b>${(100 * share).toFixed(1)}%</b> (theory Φ(${f2(-m / s)}) = ${(100 * Phi(-m / s)).toFixed(1)}%)<span id="lgOver"></span>` +
+      (n === 1 ? '<br>With one year the value is a single factor, spread evenly from 0.5 to 1.5. Nothing has been multiplied yet, so there is no bell to compare with and the theory values are only rough.' : '');
+  }
+  const upd = () => { sim(); readout(); draw(); };
+  bindRange($('#lgN'), $('#lgNOut'), v => { n = v; upd(); });
+  pickBtns('lg', v => { view = v; draw(); });
+  redraws.push(draw);
+})();
+
+/* ---------- 7. adding two normals ---------- */
+(function(){
+  let m1 = -2, s1 = 1, m2 = 3, s2 = 1.5;
+  const R = 20000, X0V = -14, X1V = 14, NB = 112;
+  let sums = new Float64Array(R);
+  function sim(){ for (let i = 0; i < R; i++) sums[i] = m1 + s1 * gaussS() + m2 + s2 * gaussS(); }
+  function draw(){
+    const c = $('#adChart'), {ctx, w, h} = fit(c), m = m1 + m2, s = Math.hypot(s1, s2);
+    const bw = (X1V - X0V) / NB, counts = new Array(NB).fill(0);
+    for (let i = 0; i < R; i++) { const v = sums[i]; if (v >= X0V && v < X1V) counts[Math.floor((v - X0V) / bw)]++; }
+    const ym = Math.max(phi(0) / s1, phi(0) / s2, histMax(counts, bw, R)) * 1.1;
+    const A = cax(ctx, w, h, {xmin: X0V, xmax: X1V, ymax: ym, left: 40, xgap: 44, xfmt: v => sgn(v)});
+    clipTo(ctx, A);
+    ctx.fillStyle = C('--gold-soft');
+    counts.forEach((cnt, b) => { if (!cnt) return; const xa = A.xs(X0V + b * bw), xb = A.xs(X0V + (b + 1) * bw), y = A.ys(cnt / (R * bw)); ctx.fillRect(xa, y, Math.max(1, xb - xa), A.Y0 - y); });
+    [[m1, s1, '--accent', 2], [m2, s2, '--one', 2], [m, s, '--gold', 2.6]].forEach(([mm, ss, col, lw]) => {
+      ctx.strokeStyle = C(col); ctx.lineWidth = lw; pathFn(ctx, A, x => nPDF(x, mm, ss), X0V, X1V, 400); ctx.stroke();
+    });
+    ctx.restore();
+    drawTri();
+  }
+  function drawTri(){
+    const c = $('#adTri'), {ctx, w, h} = fit(c), s = Math.hypot(s1, s2);
+    const pad = 34, sc = Math.min((w - 2 * pad - 10) / s1, (h - 2 * pad) / s2) * .9;
+    const ox = (w - s1 * sc) / 2, oy = h - pad - (h - 2 * pad - s2 * sc) / 2;
+    const P = [ox, oy], Q = [ox + s1 * sc, oy], Rr = [ox + s1 * sc, oy - s2 * sc];
+    const seg = (a, b, col, lw) => { ctx.strokeStyle = C(col); ctx.lineWidth = lw; ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke(); };
+    ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; const q = 8; ctx.beginPath(); ctx.moveTo(Q[0] - q, Q[1]); ctx.lineTo(Q[0] - q, Q[1] - q); ctx.lineTo(Q[0], Q[1] - q); ctx.stroke();
+    seg(P, Q, '--accent', 3); seg(Q, Rr, '--one', 3); seg(P, Rr, '--gold', 3);
+    ctx.font = '600 12px ' + MONO;
+    ctx.fillStyle = C('--accent'); ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText('σ₁ = ' + fmtN(s1), (P[0] + Q[0]) / 2, P[1] + 6);
+    ctx.fillStyle = C('--one'); ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText('σ₂ = ' + fmtN(s2), Q[0] + 6, (Q[1] + Rr[1]) / 2);
+    ctx.fillStyle = C('--gold'); ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+    const mx = (P[0] + Rr[0]) / 2 - 6, my = (P[1] + Rr[1]) / 2 - 4;
+    ctx.fillText('σ = ' + f2(s), Math.max(ctx.measureText('σ = ' + f2(s)).width + 2, mx), Math.max(14, my));
+  }
+  function readout(){
+    const m = m1 + m2, s = Math.hypot(s1, s2);
+    let a = 0, b = 0; for (let i = 0; i < R; i++) { a += sums[i]; b += sums[i] * sums[i]; }
+    const em = a / R, es = Math.sqrt(Math.max(0, (b - a * a / R) / (R - 1)));
+    $('#adRead').innerHTML = `X + Y ~ N(${fmtS(m)}, ${fmtN(+(s1 * s1 + s2 * s2).toFixed(2))}) · sd √(${fmtN(+(s1 * s1).toFixed(2))} + ${fmtN(+(s2 * s2).toFixed(2))}) = <b>${f2(s)}</b>, not ${fmtN(+(s1 + s2).toFixed(2))}<br>` +
+      `simulated sums: mean <b>${f2(em)}</b>, sd <b>${f2(es)}</b>`;
+  }
+  const upd = () => { sim(); draw(); readout(); };
+  bindRange($('#adM1'), $('#adM1Out'), v => { m1 = v; upd(); }, fmtS);
+  bindRange($('#adS1'), $('#adS1Out'), v => { s1 = v; upd(); });
+  bindRange($('#adM2'), $('#adM2Out'), v => { m2 = v; upd(); }, fmtS);
+  bindRange($('#adS2'), $('#adS2Out'), v => { s2 = v; upd(); });
+  redraws.push(draw);
+})();
+
+/* ---------- 8. properties dashboard ---------- */
+(function(){
+  let mu = 0, s = 1;
+  const xr = () => [mu - 4 * s, mu + 4 * s];
+  function drawPDF(){
+    const c = $('#miniPDF'), {ctx, w, h} = fit(c), [a, b] = xr();
+    const A = cax(ctx, w, h, {xmin: a, xmax: b, ymax: phi(0) / s * 1.15, left: 40, xgap: 46, xfmt: v => fmtS(+v.toFixed(2))});
+    clipTo(ctx, A);
+    fillFn(ctx, A, x => nPDF(x, mu, s), a, b, C('--accent-soft'));
+    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2; pathFn(ctx, A, x => nPDF(x, mu, s), a, b); ctx.stroke();
+    ctx.restore();
+    vline(ctx, A.xs(mu), A.Y1, A.Y0, C('--gold'), [4, 3], 1.5);
+  }
+  function drawCDF(){
+    const c = $('#miniCDF'), {ctx, w, h} = fit(c), [a, b] = xr();
+    const A = cax(ctx, w, h, {xmin: a, xmax: b, ymax: 1, left: 40, xgap: 46, xfmt: v => fmtS(+v.toFixed(2))});
+    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2; pathFn(ctx, A, x => Phi((x - mu) / s), a, b); ctx.stroke();
+    ctx.save(); ctx.strokeStyle = C('--ink-3'); ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(A.X0, A.ys(.5)); ctx.lineTo(A.X1, A.ys(.5)); ctx.stroke(); ctx.restore();
+    vline(ctx, A.xs(mu), A.ys(.5), A.Y0, C('--gold'), [4, 3], 1.5);
+  }
+  function cards(){
+    const r = x => fmtS(+x.toFixed(2)), z95 = PhiInv(.975), zq = PhiInv(.75);
+    $('#cPar').textContent = `μ = ${fmtS(mu)}, σ = ${fmtN(s)}`;
+    $('#cPDF').textContent = `peak f(μ) = ${f4(phi(0) / s)}`;
+    $('#cCDF').textContent = `P(X ≤ μ + σ) = ${f4(Phi(1))}`;
+    $('#cMean').textContent = `μ = ${fmtS(mu)}`;
+    $('#cVar').textContent = `σ² = ${fmtN(+(s * s).toFixed(2))}`;
+    $('#c95').textContent = `${r(mu - z95 * s)} to ${r(mu + z95 * s)}`;
+    $('#cIQR').textContent = `${r(mu - zq * s)} and ${r(mu + zq * s)}`;
+    $('#cMAD').textContent = f3(s * Math.sqrt(2 / Math.PI));
+    $('#cSkew').textContent = 'for every μ and σ';
+    $('#cMGF').textContent = 'finite for every t';
+    const H = 0.5 * Math.log(TAU * Math.E * s * s);
+    $('#cEnt').textContent = `${f3(H)} nats = ${f3(H / Math.LN2)} bits`;
+  }
+  const upd = () => { drawPDF(); drawCDF(); cards(); };
+  bindRange($('#prM'), $('#prMOut'), v => { mu = v; upd(); }, fmtS);
+  bindRange($('#prS'), $('#prSOut'), v => { s = v; upd(); });
+  redraws.push(() => { drawPDF(); drawCDF(); });
+})();
+
+/* ---------- 9. quiz ---------- */
+(function(){
+  const Q = [
+    {s: 'The average of 100 rolls of a fair die.', a: true,
+     e: 'A sum of 100 independent draws with finite variance: the central limit theorem applies. The average is close to N(3.5, 1.708²/100), so about 95% of the time it lands between 3.16 and 3.84.'},
+    {s: 'The number of heads in 1,000 tosses of a fair coin.', a: true,
+     e: 'Binomial(1000, 0.5), with np = nq = 500. That is far past the rule of thumb, so it is very close to N(500, 250): about 95% of the time between 469 and 531.'},
+    {s: 'Household incomes in a country.', a: false,
+     e: 'Incomes are bounded below by 0 and have a long right tail: a few households earn many times the median. The bulk is closer to lognormal, and the very top follows an even heavier power-law tail. The mean is well above the median.'},
+    {s: 'Repeated measurements of the same table with a tape measure.', a: true,
+     e: 'Each reading is disturbed by many small, independent effects: where the tape starts, how it sags, how you read the mark. Their sum is close to normal, which is how Gauss arrived at the curve.'},
+    {s: 'The time until the next customer walks into a shop.', a: false,
+     e: 'Waiting times between random arrivals are exponential: most are short, a few are long, and the most likely value is 0. Nothing about one wait is a sum of many pieces.'},
+    {s: 'The number of typos on a page, when there are 0.3 per page on average.', a: false,
+     e: 'A Poisson count with a small mean: about 74% of pages have no typos at all. The distribution is piled up against 0 and nowhere near a bell. It only becomes normal when the mean is large.'},
+    {s: 'Daily returns of a stock-market index.', a: false,
+     e: 'They look roughly bell-shaped in the middle, but the tails are far heavier than a normal allows. Crashes such as October 1987 were many standard deviations from the mean, events a normal model says should essentially never happen.'},
+    {s: 'The average of 1,000 draws from a Cauchy distribution.', a: false,
+     e: 'The Cauchy has no mean and no variance, so the central limit theorem does not apply. The average of any number of Cauchy draws has exactly the same Cauchy distribution as a single draw (section 6).'}
+  ];
+  const box = $('#quiz'); let answered = 0, right = 0;
+  Q.forEach(q => {
+    const d = document.createElement('div'); d.className = 'qitem';
+    d.innerHTML = `<p>${q.s}</p><div class="qbtns"><button class="btn" data-a="1">Roughly normal</button><button class="btn" data-a="0">Not normal</button></div><p class="qexp" hidden></p>`;
+    const exp = d.querySelector('.qexp');
+    d.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      const pick = b.dataset.a === '1', ok = pick === q.a;
+      if (!d.dataset.done) { d.dataset.done = '1'; answered++; if (ok) right++; }
+      d.querySelectorAll('button').forEach(x => x.classList.remove('right', 'wrong'));
+      b.classList.add(ok ? 'right' : 'wrong');
+      exp.hidden = false; exp.innerHTML = `<b>${ok ? '✓ Right.' : '✗ Not quite.'}</b> ${q.e}`;
+      $('#quizScore').textContent = `${answered} of ${Q.length} answered · ${right} right on the first try`;
+    }));
+    box.appendChild(d);
+  });
+})();
+
+redrawAll();
+})();
+</script>
+</body>
+</html>

@@ -406,7 +406,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
   <h2>The bell curve appears</h2>
   <p>With many rows the bean-machine pile looks like a bell. That is no accident. The <em class="term">Central Limit Theorem</em> says that a sum of many independent random variables is approximately normally distributed, and \(Y\) is exactly such a sum. For large \(n\):</p>
   $$Y \approx \mathcal{N}(np,\; npq)$$
-  <p>Here \(\mathcal N(\mu, \sigma^2)\) is the <em class="term">normal distribution</em> with mean \(\mu\) and variance \(\sigma^2\), the famous bell curve. Abraham de Moivre found this special case for coin tossing in 1733, long before the general theorem, and it is known as the de Moivre–Laplace theorem.</p>
+  <p>Here \(\mathcal N(\mu, \sigma^2)\) is the <em class="term">normal distribution</em> with mean \(\mu\) and variance \(\sigma^2\), the famous bell curve. Abraham de Moivre found this special case for coin tossing in 1733, long before the general theorem, and it is known as the de Moivre–Laplace theorem. <a href="normal.html">The Normal Distribution</a> tutorial covers the curve and the theorem in full.</p>
 
   <h3>The continuity correction</h3>
   <p>The binomial lives on whole numbers; the normal curve lives on the whole number line. Draw each bar with width 1, centered on its value \(k\). Bar \(k\) then covers the stretch from \(k - \tfrac12\) to \(k + \tfrac12\). To approximate \(P(Y \le k)\) with the area under the curve, you should take the area up to \(k + \tfrac12\), not up to \(k\), or you cut bar \(k\) in half. This half-unit shift is called the <em class="term">continuity correction</em>:</p>

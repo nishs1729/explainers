@@ -342,7 +342,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
 <section id="normal">
   <div class="secnum">07</div>
   <h2>Large λ: the bell and the square root</h2>
-  <p>A \(\text{Poisson}(100)\) count is the sum of 100 independent \(\text{Poisson}(1)\) counts, by the adding rule. The central limit theorem then says it is close to a normal distribution with the same mean and variance:</p>
+  <p>A \(\text{Poisson}(100)\) count is the sum of 100 independent \(\text{Poisson}(1)\) counts, by the adding rule. The <a href="normal.html#clt">central limit theorem</a> then says it is close to a normal distribution with the same mean and variance:</p>
   $$X \approx N(\lambda,\ \lambda) \quad \text{for large } \lambda$$
   <p>Probabilities of whole-number counts are best approximated with a <em class="term">continuity correction</em>: treat the bar at \(k\) as covering \(k - \tfrac12\) to \(k + \tfrac12\), so that \(P(X \le k) \approx \Phi\big((k + \tfrac12 - \lambda)/\sqrt\lambda\big)\), where \(\Phi\) is the standard normal CDF.</p>
   <p>Poisson counts have one awkward feature: their spread depends on their size. Big counts wobble more, so a chart of counts has noisy tall bars and calm short ones. Taking square roots fixes this. Near \(\lambda\) the curve \(\sqrt x\) has slope \(1/(2\sqrt\lambda)\), so it shrinks a wobble of size \(\sqrt\lambda\) to about</p>
