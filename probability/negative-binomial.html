@@ -255,7 +255,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
     <div class="readout" id="suRead" style="margin-top:8px"></div>
   </div>
   <p>With \(r = 1\) the bars fall from 0, the geometric shape. As \(r\) grows they pull away from 0, turn into a hump, and settle into a bell: a sum of many independent waits obeys the <a href="normal.html#clt">central limit theorem</a>. Each stage adds the same skew, but it is diluted by \(\sqrt r\), so the skewness \((1 + q)/\sqrt{rq}\) fades slowly.</p>
-  <p>The same story in continuous time is the <a href="exponential.html#race">gamma (or Erlang) distribution</a>, the sum of \(r\) exponential waits. The negative binomial is its discrete twin, just as the geometric is the exponential’s.</p>
+  <p>The same story in continuous time is the <a href="gamma.html">gamma (or Erlang) distribution</a>, the sum of \(r\) exponential waits. The negative binomial is its discrete twin, just as the geometric is the exponential’s.</p>
 </section>
 
 <!-- 4 -->
@@ -263,7 +263,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
   <div class="secnum">04</div>
   <h2>Counts that are too spread out</h2>
   <p>Now forget about trials. The <a href="poisson.html">Poisson distribution</a> is the standard model for counts of events, and it has a fingerprint: <a href="poisson.html#meanvar">its variance equals its mean</a>. Real counts often fail that test. Accidents per driver, claims per policy, customers per store, sequencing reads per gene: the variance is well above the mean.</p>
-  <p>The usual reason is that the units differ. Each driver has their own accident rate \(\lambda\), and given that rate their count is Poisson. But a careful driver and a reckless one have very different rates, and that spread of rates adds to the spread of counts. If the rates follow a <em class="term">gamma distribution</em> with shape \(r\) and mean \(\mu\), the counts follow a negative binomial:</p>
+  <p>The usual reason is that the units differ. Each driver has their own accident rate \(\lambda\), and given that rate their count is Poisson. But a careful driver and a reckless one have very different rates, and that spread of rates adds to the spread of counts. If the rates follow a <a href="gamma.html">gamma distribution</a> with shape \(r\) and mean \(\mu\), the counts follow a negative binomial:</p>
   $$\begin{aligned} \lambda &\sim \text{Gamma}(\text{shape } r,\ \text{mean } \mu) \\ Y \mid \lambda &\sim \text{Poisson}(\lambda) \\ \Rightarrow\ Y &\sim \text{NB}\Big(r,\ p = \frac{r}{r + \mu}\Big) \end{aligned}$$
   <p>Its mean is \(\mu\) and its variance is</p>
   $$\operatorname{Var}(Y) = \mu + \frac{\mu^2}{r}$$
