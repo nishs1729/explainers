@@ -356,7 +356,7 @@ table.twins td:not(:first-child),table.twins th:not(:first-child){text-align:lef
   <h3>A famous special case: chi-square</h3>
   <p>Square a standard normal and you get \(\text{Gamma}(\tfrac12, \tfrac12)\). Adding \(\nu\) independent squares adds the shapes, so</p>
   $$Z_1^2 + \dots + Z_\nu^2 \sim \chi^2_\nu = \text{Gamma}\big(\tfrac{\nu}{2},\ \tfrac12\big)$$
-  <p>This is the <em class="term">chi-square distribution</em> with \(\nu\) degrees of freedom, behind sample variances and the goodness-of-fit tests used in the <a href="poisson.html#data">Poisson</a> and <a href="negative-binomial.html#mites">negative binomial</a> tutorials. With \(\nu = 2\) it is an exponential with mean 2.</p>
+  <p>This is the <a href="chi-square.html">chi-square distribution</a> with \(\nu\) degrees of freedom, behind sample variances and the goodness-of-fit tests used in the <a href="poisson.html#data">Poisson</a> and <a href="negative-binomial.html#mites">negative binomial</a> tutorials. With \(\nu = 2\) it is an exponential with mean 2.</p>
 </section>
 
 <!-- 7 -->
@@ -412,7 +412,7 @@ table.twins td:not(:first-child),table.twins th:not(:first-child){text-align:lef
     <li><strong>Large shape: normal.</strong> \(\text{Gamma}(\alpha, \lambda) \approx \mathcal N(\alpha/\lambda, \alpha/\lambda^2)\) as \(\alpha\) grows (<a href="normal.html">normal tutorial</a>).</li>
     <li><strong>Gamma mixture of Poissons.</strong> A Poisson count with a gamma rate is <a href="negative-binomial.html#mixture">negative binomial</a> (section 5).</li>
     <li><strong>Conjugate prior.</strong> A \(\text{Gamma}(\alpha, \beta)\) belief about a Poisson rate becomes \(\text{Gamma}(\alpha + n, \beta + T)\) after \(n\) events in time \(T\).</li>
-    <li><strong>Chi-square.</strong> \(\chi^2_\nu = \text{Gamma}(\nu/2, 1/2)\), the sum of \(\nu\) squared standard normals.</li>
+    <li><strong>Chi-square.</strong> \(\chi^2_\nu = \text{Gamma}(\nu/2, 1/2)\), the sum of \(\nu\) squared standard normals (<a href="chi-square.html">chi-square tutorial</a>).</li>
   </ol>
 </section>
 
@@ -437,7 +437,7 @@ table.twins td:not(:first-child),table.twins th:not(:first-child){text-align:lef
     <div class="readout" id="quizScore" style="margin-top:10px" aria-live="polite"></div>
   </div>
 
-  <p>This is the end of the series. It started with a single coin flip and built the counting and waiting distributions from it, discrete and continuous, then the bell curve that all those sums approach. The gamma closes the loop: it is the waiting time behind the Poisson count, the uncertain rate behind the negative binomial, and a sum that turns into a bell. <a href="../index.html">Browse all explainers</a>.</p>
+  <p>The gamma closes a loop in the series: it is the waiting time behind the Poisson count, the uncertain rate behind the negative binomial, and a sum that turns into a bell. Next in the series: square some normal numbers and add them up, a special gamma with a life of its own. That is <a href="chi-square.html">The Chi-Square Distribution</a>.</p>
 </section>
 
 </main>

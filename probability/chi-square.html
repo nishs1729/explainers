@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Chi-Square Distribution — a visual introduction</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<style>
+:root{
+  --bg:#faf8f4; --surface:#ffffff; --surface-2:#f2efe8; --ink:#1c1c1e; --ink-2:#4c4e55; --ink-3:#8b8d93; --line:#e3dfd5;
+  --one:#16917c; --one-soft:rgba(22,145,124,.15);
+  --zero:#d9573a; --zero-soft:rgba(217,87,58,.15);
+  --accent:#3654c9; --accent-soft:rgba(54,84,201,.11);
+  --gold:#b98317; --gold-soft:rgba(185,131,23,.22);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+    --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+    --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+    --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+    --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+  --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+  --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+  --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+  --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.68 var(--sans);-webkit-font-smoothing:antialiased}
+main{max-width:820px;margin:0 auto;padding:0 20px 80px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;letter-spacing:-.01em}
+h1{font-size:clamp(2.2rem,6vw,3.4rem);margin:.2em 0 .3em}
+h2{font-size:clamp(1.6rem,4vw,2.1rem);margin:0 0 .5em}
+h3{font-size:1.2rem;margin:1.6em 0 .4em}
+p{margin:0 0 1em}
+a{color:var(--accent)}
+strong{font-weight:650}
+em.term{font-style:normal;font-weight:650;color:var(--accent)}
+.muted{color:var(--ink-2)}
+small,.small{font-size:14px}
+
+/* hero */
+.hero{text-align:center;padding:64px 0 24px}
+.kicker{text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--ink-3);margin:0}
+.lede{font-size:1.2rem;color:var(--ink-2);max-width:620px;margin:0 auto}
+.hero-play{max-width:600px;margin:30px auto 0;text-align:left}
+.hero-play .controls{justify-content:center}
+.hint{font-size:15px;color:var(--ink-2);min-height:3.2em;margin:6px 0 0;text-align:center}
+
+.toc{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;margin:28px 0 8px}
+.toc ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 20px;counter-reset:t}
+.toc li{counter-increment:t;font-size:15px}
+.toc li::before{content:counter(t,decimal-leading-zero);font-family:var(--mono);color:var(--ink-3);margin-right:10px;font-size:13px}
+.toc a{color:var(--ink);text-decoration:none}
+.toc a:hover{color:var(--accent)}
+
+section{padding-top:56px}
+.secnum{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.08em;margin-bottom:4px}
+
+.widget{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin:26px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.widget-title{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);margin:0 0 12px;font-weight:600}
+.controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:12px 0}
+.ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:15px}
+.ctrl output{font-family:var(--mono);font-size:14px;min-width:3.2em;color:var(--ink)}
+input[type=range]{accent-color:var(--accent);width:170px;max-width:100%}
+.btn{font:inherit;font-size:14px;line-height:1.2;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;transition:background .15s,transform .1s}
+.btn:hover{border-color:var(--ink-3)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.lh{font-family:var(--serif);font-style:italic;font-size:1.08em}
+.readout{font-family:var(--mono);font-size:14px;color:var(--ink-2);line-height:1.6}
+.readout b{color:var(--ink);font-weight:600}
+.readout .ok{color:var(--one);font-weight:600}
+.readout .warn{color:var(--zero);font-weight:600}
+canvas{display:block;width:100%}
+canvas.pick{cursor:ew-resize;touch-action:pan-y}
+.cap{font-size:13px;color:var(--ink-3);margin:2px 0 6px}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:20px 0}
+.callout p:last-child{margin-bottom:0}
+.katex-display{overflow-x:auto;overflow-y:hidden;padding:4px 0}
+.mathbox{overflow-x:auto;padding:6px 0}
+.katex-display.ovf,.mathbox.ovf{-webkit-mask-image:linear-gradient(to right,#000 82%,transparent);mask-image:linear-gradient(to right,#000 82%,transparent)}
+details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:14px 0;background:var(--surface)}
+details summary{cursor:pointer;font-weight:600;font-size:15px;color:var(--ink-2)}
+details[open] summary{margin-bottom:8px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin-top:8px}
+.legend > span{display:inline-block}
+.legend .sw{vertical-align:middle;margin:0 6px 2px 0}
+.sw{display:inline-block;width:16px;height:10px;border-radius:2px}
+.sw.dot{width:8px;height:8px;border-radius:50%}
+.sw.dash{height:0;border-top:2px dashed var(--ink)}
+.sw.line{height:0;border-top:2px solid var(--ink)}
+
+/* properties */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:18px 0}
+.card{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
+.card h4{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+.card .f{overflow-x:auto;overflow-y:hidden;font-size:15px;min-height:1.8em}
+.card .v{font:600 15px var(--mono);color:var(--accent);margin-top:6px}
+.card p{font-size:15px;margin:0;color:var(--ink-2)}
+.sticky-ctrl{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:6px 22px}
+.minis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:640px){.minis{grid-template-columns:1fr}}
+.mini{border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--surface)}
+.mini .mcap{font-size:13px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.facts{counter-reset:f;list-style:none;padding:0;margin:18px 0}
+.facts li{counter-increment:f;position:relative;padding:12px 0 12px 44px;border-bottom:1px solid var(--line)}
+.facts li::before{content:counter(f);position:absolute;left:0;top:12px;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:600 13px var(--mono)}
+.facts li strong{display:block}
+.table-wrap{overflow-x:auto}
+table.summary{border-collapse:collapse;width:100%;font-size:15px;margin:14px 0}
+table.summary td,table.summary th{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:middle}
+table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3)}
+canvas.tap{cursor:pointer}
+@media (max-width:480px){table.summary td,table.summary th{padding:8px 5px}}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+@media (max-width:640px){.pair{grid-template-columns:1fr}}
+.pair .mcap{font-size:13px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+table.summary td:not(:first-child),table.summary th:not(:first-child){text-align:right;font-family:var(--mono);font-size:14px}
+.btn.right{background:var(--one-soft);border-color:var(--one);color:var(--one)}
+.btn.wrong{background:var(--zero-soft);border-color:var(--zero);color:var(--zero)}
+/* quiz */
+.quiz{display:grid;gap:10px}
+.qitem{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg)}
+.qitem p{margin:0 0 8px;font-size:16px}
+.qbtns{display:flex;flex-wrap:wrap;gap:8px}
+.qexp{font-size:15px;color:var(--ink-2);margin:10px 0 0!important}
+.controls[hidden]{display:none}
+.mcap .katex{text-transform:none}
+@media (max-width:640px){
+@media (max-width:480px){
+  main{padding:0 16px 80px}
+  .widget{padding:14px}
+  .katex-display{font-size:.92em}
+  input[type=range]{width:150px}
+}
+</style>
+<script>try{var t=localStorage.getItem('xp-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/catalog.js" defer></script>
+<script src="../assets/site.js" defer></script>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <p class="kicker">A visual introduction</p>
+  <h1>The Chi-Square Distribution</h1>
+  <p class="lede">Take a few random numbers from the bell curve, square each one and add them up. The total follows the chi-square distribution. It measures squared distances and sums of squared errors, and it is the yardstick for how much a sample’s variance can wander.</p>
+  <div class="hero-play">
+    <canvas id="heroSq" style="height:150px" role="img" aria-label="The latest three standard normal draws, each drawn as a square whose side is the size of the draw, and the sum of their areas"></canvas>
+    <div class="controls">
+      <button class="btn primary" id="heroGo">❚❚ Pause</button>
+      <button class="btn" id="heroMany">+1,000 draws</button>
+      <button class="btn" id="heroClear">Clear</button>
+    </div>
+    <canvas id="heroHist" style="height:160px" role="img" aria-label="Histogram of the sums of three squared normals, with the chi-square density with 3 degrees of freedom"></canvas>
+    <div class="legend" style="justify-content:center"><span><i class="sw" style="background:var(--accent-soft);border:1px solid var(--accent)"></i><span>a square of side \(|z|\)</span></span><span><i class="sw" style="background:var(--accent)"></i><span>sums of three squares</span></span><span><i class="sw line" style="border-color:var(--gold)"></i><span>\(\chi^2_3\) density</span></span></div>
+    <p class="hint" id="heroHint" aria-live="polite">Draw three standard normal numbers, square them and add up the areas.</p>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#build">Square and add</a></li>
+    <li><a href="#shape">Degrees of freedom</a></li>
+    <li><a href="#gamma">A gamma in disguise</a></li>
+    <li><a href="#geometry">Distance from the center</a></li>
+    <li><a href="#chi">The chi distribution</a></li>
+    <li><a href="#variance">The spread of a sample</a></li>
+    <li><a href="#props">All the properties</a></li>
+    <li><a href="#uses">Where you will meet it</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<section id="build">
+  <div class="secnum">01</div>
+  <h2>Square and add</h2>
+  <p>Let \(Z_1, \dots, Z_k\) be independent <a href="normal.html">standard normal</a> numbers. The sum of their squares</p>
+  $$Q = Z_1^2 + Z_2^2 + \dots + Z_k^2$$
+  <p>follows the <em class="term">chi-square distribution</em> with \(k\) <em class="term">degrees of freedom</em>, written \(Q \sim \chi^2_k\). The name is just the Greek letter χ (“kai”), squared.</p>
+  <p>One square already tells you the mean and the variance. A standard normal has variance 1, so \(E[Z^2] = 1\). Its fourth moment is 3, so \(\operatorname{Var}(Z^2) = 3 - 1 = 2\). Independent squares add both:</p>
+  $$E[Q] = k, \qquad \operatorname{Var}(Q) = 2k$$
+
+  <div class="widget">
+    <p class="widget-title">Square and add k normals</p>
+    <div class="controls">
+      <label class="ctrl">degrees of freedom \(k\) <input type="range" id="bdK" min="1" max="30" step="1" value="4"><output id="bdKOut"></output></label>
+      <button class="btn" id="bdMore">+20,000 sums</button>
+    </div>
+    <canvas id="bdChart" style="height:230px" role="img" aria-label="Histogram of simulated sums of k squared standard normals, with the chi-square density"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i><span>simulated sums \(Q\)</span></span><span><i class="sw line" style="border-color:var(--gold)"></i><span>\(\chi^2_k\) density</span></span><span><i class="sw dash" style="border-color:var(--ink-2);width:24px"></i><span>mean \(k\)</span></span></div>
+    <div class="readout" id="bdRead" style="margin-top:8px"></div>
+  </div>
+  <p>With \(k = 1\) most squares are tiny: a normal number is usually below 1 in size, and squaring shrinks it further. The density shoots up at 0. With \(k = 2\) it falls away from 0 like an <a href="exponential.html">exponential</a>. From \(k = 3\) on there is a hump, and it slides right as \(k\) grows, one unit per degree of freedom.</p>
+</section>
+
+<!-- 2 -->
+<section id="shape">
+  <div class="secnum">02</div>
+  <h2>Degrees of freedom</h2>
+  <p>The number of squares \(k\) is the only parameter. The density is</p>
+  $$f(x) = \frac{x^{k/2 - 1}\, e^{-x/2}}{2^{k/2}\,\Gamma(k/2)}, \qquad x > 0$$
+  <p>with the peak at \(k - 2\) (at 0 when \(k \le 2\)). The skewness is \(\sqrt{8/k}\), so the curve becomes more symmetric as \(k\) grows, and since \(Q\) is a sum of \(k\) independent pieces the <a href="normal.html#clt">central limit theorem</a> makes it approximately \(\mathcal N(k, 2k)\) for large \(k\).</p>
+
+  <div class="widget">
+    <p class="widget-title">Shape by degrees of freedom</p>
+    <div class="controls">
+      <label class="ctrl">\(k\) <input type="range" id="shK" min="0" max="13" step="1" value="4"><output id="shKOut"></output></label>
+    </div>
+    <canvas id="shChart" style="height:230px" role="img" aria-label="The chi-square density for the chosen degrees of freedom with the normal approximation and the 95th percentile marked"></canvas>
+    <div class="legend"><span><i class="sw line" style="border-color:var(--accent)"></i><span>\(\chi^2_k\) density</span></span><span><i class="sw dash" style="border-color:var(--ink-3);width:24px"></i><span>normal \(\mathcal N(k, 2k)\)</span></span><span><i class="sw" style="background:var(--gold-soft);border:1px solid var(--gold)"></i><span>top 5%</span></span></div>
+    <div class="readout" id="shRead" style="margin-top:8px"></div>
+  </div>
+  <p>The normal approximation is poor in the tails until \(k\) is large: the chi-square has a long right tail and no left one. A much better approximation, due to Wilson and Hilferty (1931), takes cube roots: \((Q/k)^{1/3}\) is close to normal with mean \(1 - \tfrac{2}{9k}\) and variance \(\tfrac{2}{9k}\). The readout compares both with the exact 95th percentile.</p>
+  <p>Why “degrees of freedom”? Each square is one independent direction in which the total can vary. Section 6 shows a case where a constraint removes one of them.</p>
+</section>
+
+<!-- 3 -->
+<section id="gamma">
+  <div class="secnum">03</div>
+  <h2>A gamma in disguise</h2>
+  <p>Compare the density with the <a href="gamma.html">gamma distribution</a>’s, \(\lambda^\alpha t^{\alpha-1}e^{-\lambda t}/\Gamma(\alpha)\): they match with shape \(\alpha = k/2\) and rate \(\lambda = \tfrac12\).</p>
+  $$\chi^2_k = \text{Gamma}\big(\tfrac{k}{2},\ \tfrac12\big)$$
+  <p>Everything about gammas carries over. One square is \(\text{Gamma}(\tfrac12, \tfrac12)\): from \(P(Z^2 \le x) = P(-\sqrt x \le Z \le \sqrt x)\), differentiating gives the density \(x^{-1/2}e^{-x/2}/\sqrt{2\pi}\), which is the formula above with \(k = 1\) and \(\Gamma(\tfrac12) = \sqrt\pi\).</p>
+  <ul>
+    <li><strong>Two degrees of freedom is an exponential.</strong> \(\chi^2_2 = \text{Gamma}(1, \tfrac12)\), the <a href="exponential.html">exponential</a> with mean 2. That is why the exponential tutorial can say \(2\lambda T \sim \chi^2_2\).</li>
+    <li><strong>Degrees of freedom add.</strong> Gammas with the same rate add their shapes, so for independent pieces \(\chi^2_a + \chi^2_b = \chi^2_{a+b}\). This is just “more squares”.</li>
+    <li><strong>Any positive \(k\) works.</strong> The formula makes sense for fractional \(k\), but in practice \(k\) is almost always a whole number of squares.</li>
+  </ul>
+  <p>Scaling is the one thing to watch. \(\sigma^2\chi^2_k\), a sum of squares of normals with standard deviation \(\sigma\), is a gamma with rate \(1/(2\sigma^2)\) but not a chi-square. Chi-square means “squares of <em>standard</em> normals”.</p>
+</section>
+
+<!-- 4 -->
+<section id="geometry">
+  <div class="secnum">04</div>
+  <h2>Distance from the center</h2>
+  <p>Put the \(k\) normal numbers together as the coordinates of a random point \((Z_1, \dots, Z_k)\). Its squared distance from the origin is \(Z_1^2 + \dots + Z_k^2\), by Pythagoras. So <strong>chi-square is the squared distance of a random normal point from the center</strong>.</p>
+  <p>In two dimensions this is a dart thrower whose horizontal and vertical errors are independent standard normals. The chance of landing within radius \(r\) of the bullseye is \(P(\chi^2_2 \le r^2) = 1 - e^{-r^2/2}\).</p>
+
+  <div class="widget">
+    <p class="widget-title">Darts with normal errors</p>
+    <div class="controls">
+      <label class="ctrl">radius \(r\) <input type="range" id="dtR" min="0.2" max="3" step="0.02" value="1.18"><output id="dtROut"></output></label>
+      <button class="btn" id="dtMore">+500 darts</button>
+      <button class="btn" id="dtClear">Clear</button>
+    </div>
+    <canvas id="dtChart" style="height:320px" role="img" aria-label="Darts scattered around the center with a circle of radius r; darts inside the circle highlighted"></canvas>
+    <div class="legend"><span><i class="sw dot" style="background:var(--accent)"></i><span>inside the circle</span></span><span><i class="sw dot" style="background:var(--ink-3)"></i><span>outside</span></span><span><i class="sw line" style="border-color:var(--gold)"></i><span>circle of radius \(r\)</span></span></div>
+    <div class="readout" id="dtRead" style="margin-top:8px"></div>
+  </div>
+  <p>Half of the darts land within \(r = \sqrt{2\ln 2} \approx 1.18\) standard deviations, the starting radius. Navigation engineers call this radius the <em class="term">circular error probable</em>: for a GPS fix or a guided shell with independent normal errors of size \(\sigma\) in each direction, half the shots land within \(1.18\,\sigma\) of the target.</p>
+</section>
+
+<!-- 5 -->
+<section id="chi">
+  <div class="secnum">05</div>
+  <h2>The chi distribution</h2>
+  <p>The distance itself, not squared, is \(R = \sqrt{Q}\). It follows the <em class="term">chi distribution</em> with \(k\) degrees of freedom, with density</p>
+  $$f(r) = \frac{r^{k-1}\,e^{-r^2/2}}{2^{k/2 - 1}\,\Gamma(k/2)}, \qquad r > 0$$
+  <p>Three cases are famous enough to have their own names:</p>
+  <ul>
+    <li><strong>\(k = 1\): the half-normal.</strong> The size \(|Z|\) of a single normal error.</li>
+    <li><strong>\(k = 2\): the Rayleigh distribution.</strong> The miss distance of a dart or a GPS fix, the size of the wind’s velocity when its two components are normal, and the strength of a radio signal that reaches you along many scattered paths (Rayleigh fading).</li>
+    <li><strong>\(k = 3\): the Maxwell distribution.</strong> In a gas each velocity component of a molecule is normal, so its speed is chi with 3 degrees of freedom, scaled by \(\sqrt{k_B T/m}\). That is the Maxwell–Boltzmann distribution of molecular speeds.</li>
+  </ul>
+
+  <div class="widget">
+    <p class="widget-title">Lengths of random vectors</p>
+    <div class="controls">
+      <label class="ctrl">dimensions \(k\) <input type="range" id="chK" min="0" max="11" step="1" value="2"><output id="chKOut"></output></label>
+    </div>
+    <canvas id="chChart" style="height:230px" role="img" aria-label="Histogram of the lengths of simulated random vectors in k dimensions, with the chi density and the square root of k marked"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i><span>lengths of simulated vectors</span></span><span><i class="sw line" style="border-color:var(--gold)"></i><span>chi density</span></span><span><i class="sw dash" style="border-color:var(--ink-2);width:24px"></i><span>\(\sqrt k\)</span></span></div>
+    <div class="readout" id="chRead" style="margin-top:8px"></div>
+  </div>
+  <p>Push \(k\) up and something strange happens. The lengths pile up just below \(\sqrt k\), and their spread does not grow: it settles at about \(1/\sqrt2 \approx 0.71\) however many dimensions there are. A random normal point in high dimensions almost never lies near the center, where the density is highest. It lies in a thin shell of radius about \(\sqrt k\). This <em class="term">concentration of measure</em> is why distances behave strangely in high-dimensional data: random points are all at nearly the same distance from the center, and from each other.</p>
+</section>
+
+<!-- 6 -->
+<section id="variance">
+  <div class="secnum">06</div>
+  <h2>The spread of a sample</h2>
+  <p>The most common place to meet the chi-square is inside a sample variance. Take \(n\) independent draws \(X_1, \dots, X_n\) from \(\mathcal N(\mu, \sigma^2)\), with sample mean \(\bar X\) and sample variance</p>
+  $$s^2 = \frac{1}{n - 1}\sum_{i=1}^{n} (X_i - \bar X)^2$$
+  <p>Then the sum of squared deviations, measured in units of \(\sigma^2\), is chi-square, with one degree of freedom fewer than you might expect:</p>
+  $$\frac{(n - 1)\,s^2}{\sigma^2} \sim \chi^2_{n-1}$$
+  <p>and it is independent of \(\bar X\), a special property of normal samples. With the true mean \(\mu\) in place of \(\bar X\) it would be \(\chi^2_n\), \(n\) standardized squares. Using \(\bar X\) costs one degree of freedom: the deviations \(X_i - \bar X\) always add to 0, so once \(n - 1\) of them are known the last one is fixed. Only \(n - 1\) directions are free.</p>
+
+  <div class="widget">
+    <p class="widget-title">Sample variances from a normal</p>
+    <div class="controls">
+      <label class="ctrl">sample size \(n\) <input type="range" id="svN" min="2" max="30" step="1" value="5"><output id="svNOut"></output></label>
+      <button class="btn" id="svNew">New samples</button>
+    </div>
+    <canvas id="svChart" style="height:230px" role="img" aria-label="Histogram of (n minus 1) times the sample variance over sigma squared, with the chi-square densities for n minus 1 and n degrees of freedom"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i><span>\((n-1)s^2/\sigma^2\), 20,000 samples</span></span><span><i class="sw line" style="border-color:var(--gold)"></i><span>\(\chi^2_{n-1}\)</span></span><span><i class="sw dash" style="border-color:var(--zero);width:24px"></i><span>\(\chi^2_{n}\), one too many</span></span></div>
+    <div class="readout" id="svRead" style="margin-top:8px"></div>
+  </div>
+  <p>Since \(E[\chi^2_{n-1}] = n - 1\), the average of \(s^2\) is exactly \(\sigma^2\): dividing by \(n - 1\) rather than \(n\) makes \(s^2\) <em>unbiased</em>. Its square root is not. The square root bends large values down more than small ones, so \(E[s] = c_4\,\sigma\) with \(c_4 = \sqrt{\tfrac{2}{n-1}}\,\Gamma(\tfrac n2)/\Gamma(\tfrac{n-1}{2})\), which is below 1: about 0.80 for \(n = 2\), 0.94 for \(n = 5\) and 0.97 for \(n = 10\). Quality-control charts divide by \(c_4\) to correct for it.</p>
+  <p>The same fact gives exact confidence intervals for \(\sigma^2\), and sums of squared differences like this one are behind the chi-square tests that compare observed counts with expected ones (used in the <a href="poisson.html#data">Poisson tutorial</a>). Both belong to statistical inference, which is planned as a later series. Unlike the central limit theorem, the result here needs normal data: for heavy-tailed data the sample variance varies much more than \(\chi^2_{n-1}\) says.</p>
+</section>
+
+<!-- 7 -->
+<section id="props">
+  <div class="secnum">07</div>
+  <h2>All the properties</h2>
+  <p>Here are the main facts about \(Q \sim \chi^2_k\) in one place. Drag the slider to update every value.</p>
+
+  <div class="sticky-ctrl">
+    <label class="ctrl">\(k\) <input type="range" id="prK" min="1" max="60" step="1" value="5"><output id="prKOut"></output></label>
+  </div>
+
+  <div class="pair" style="margin-top:16px">
+    <div class="mini"><div class="mcap">PDF</div><canvas id="miniPDF" style="height:130px" role="img" aria-label="Density for the current degrees of freedom, with the mean marked"></canvas></div>
+    <div class="mini"><div class="mcap">CDF</div><canvas id="miniCDF" style="height:130px" role="img" aria-label="Cumulative distribution function for the current degrees of freedom, with the median marked"></canvas></div>
+  </div>
+
+  <h3>The numbers</h3>
+  <div class="cards">
+    <div class="card"><h4>Support and parameter</h4><div class="f">\(x \ge 0\); \(k > 0\)</div><div class="v" id="cPar"></div></div>
+    <div class="card"><h4>PDF</h4><div class="f">\(\frac{x^{k/2-1}e^{-x/2}}{2^{k/2}\Gamma(k/2)}\)</div><div class="v" id="cPDF"></div></div>
+    <div class="card"><h4>CDF</h4><div class="f">\(P\big(\tfrac k2, \tfrac x2\big)\), regularized incomplete gamma</div><div class="v" id="cCDF"></div></div>
+    <div class="card"><h4>Mean</h4><div class="f">\(k\)</div><div class="v" id="cMean"></div></div>
+    <div class="card"><h4>Variance</h4><div class="f">\(2k\)</div><div class="v" id="cVar"></div></div>
+    <div class="card"><h4>Mode</h4><div class="f">\(\max(k - 2,\ 0)\)</div><div class="v" id="cMode"></div></div>
+    <div class="card"><h4>Median</h4><div class="f">\(\approx k\big(1 - \tfrac{2}{9k}\big)^3\)</div><div class="v" id="cMed"></div></div>
+    <div class="card"><h4>95th percentile</h4><div class="f">no closed form</div><div class="v" id="cQ95"></div></div>
+    <div class="card"><h4>Skewness</h4><div class="f">\(\sqrt{8/k}\)</div><div class="v" id="cSkew"></div></div>
+    <div class="card"><h4>Excess kurtosis</h4><div class="f">\(12/k\)</div><div class="v" id="cKurt"></div></div>
+    <div class="card"><h4>MGF</h4><div class="f">\((1 - 2t)^{-k/2}\), \(t < \tfrac12\)</div><div class="v" id="cMGF"></div></div>
+  </div>
+
+  <h3>Where the formulas come from</h3>
+  <details>
+    <summary>The MGF of one square</summary>
+    <p>Complete the square in the exponent:</p>
+    $$\begin{aligned} E\big[e^{tZ^2}\big] &= \int \frac{1}{\sqrt{2\pi}}\,e^{-(1 - 2t)z^2/2}\,dz \\ &= (1 - 2t)^{-1/2}, \qquad t < \tfrac12 \end{aligned}$$
+    <p>since the integrand is a normal density with variance \(1/(1 - 2t)\), short of that factor. Independent squares multiply their MGFs, giving \((1 - 2t)^{-k/2}\), the MGF of \(\text{Gamma}(k/2, \tfrac12)\). Its cumulants are \(\kappa_j = k\,2^{j-1}(j-1)!\): mean \(k\), variance \(2k\), and skewness \(\kappa_3/\kappa_2^{3/2} = 8k/(2k)^{3/2} = \sqrt{8/k}\).</p>
+  </details>
+  <details>
+    <summary>Why the sample variance loses one degree of freedom</summary>
+    <p>Rotate the coordinates of the sample \((X_1, \dots, X_n)\) so that one axis points along \((1, 1, \dots, 1)/\sqrt n\). The coordinate along that axis is \(\sqrt n\,\bar X\). The other \(n - 1\) coordinates describe the deviations from the mean, and \(\sum (X_i - \bar X)^2\) is their squared length. A rotation of independent normals with equal variance gives independent normals again, so those \(n - 1\) coordinates are independent \(\mathcal N(0, \sigma^2)\) and independent of \(\bar X\). Dividing by \(\sigma^2\) gives \(\chi^2_{n-1}\).</p>
+  </details>
+
+  <h3>Structural facts worth remembering</h3>
+  <ol class="facts">
+    <li><strong>Squares of standard normals.</strong> \(Z_1^2 + \dots + Z_k^2 \sim \chi^2_k\) (section 1).</li>
+    <li><strong>A gamma.</strong> \(\chi^2_k = \text{Gamma}(k/2, \tfrac12)\); with \(k = 2\) it is the exponential with mean 2 (section 3).</li>
+    <li><strong>Degrees of freedom add.</strong> \(\chi^2_a + \chi^2_b = \chi^2_{a+b}\) for independent variables.</li>
+    <li><strong>Large \(k\): normal.</strong> \(\chi^2_k \approx \mathcal N(k, 2k)\), and \((\chi^2_k/k)^{1/3}\) is closer still.</li>
+    <li><strong>Square root: the chi distribution.</strong> Half-normal, Rayleigh and Maxwell for \(k = 1, 2, 3\) (section 5).</li>
+    <li><strong>Sample variance.</strong> \((n-1)s^2/\sigma^2 \sim \chi^2_{n-1}\) for normal samples, independent of \(\bar X\) (section 6).</li>
+  </ol>
+</section>
+
+<!-- 8 -->
+<section id="uses">
+  <div class="secnum">08</div>
+  <h2>Where you will meet it</h2>
+  <div class="cards">
+    <div class="card"><h4>Statistical tests</h4><p>Pearson’s goodness-of-fit and contingency-table statistics, and likelihood-ratio tests in general, are referred to chi-square distributions. A later page on chi-square tests will cover them.</p></div>
+    <div class="card"><h4>Uncertainty of a spread</h4><p>Confidence intervals for a variance, and the limits of control charts for process variability, come straight from \((n-1)s^2/\sigma^2 \sim \chi^2_{n-1}\).</p></div>
+    <div class="card"><h4>Navigation and targeting</h4><p>Position errors in two or three dimensions give Rayleigh and Maxwell miss distances, and the circular error probable is a chi-square quantile.</p></div>
+    <div class="card"><h4>Physics</h4><p>Molecular speeds in a gas follow the Maxwell distribution, and the energy in a normal noise signal, a sum of squared amplitudes, is chi-square.</p></div>
+    <div class="card"><h4>Wireless signals</h4><p>A radio signal that reaches a phone along many reflected paths has a Rayleigh-distributed strength, and its power is exponential, which is \(\chi^2_2\) up to scale.</p></div>
+    <div class="card"><h4>High-dimensional data</h4><p>Squared distances between random points in many dimensions are chi-square, which is why they bunch together and why distance-based methods struggle in high dimensions.</p></div>
+    <div class="card"><h4>When it fails</h4><p>All of this rests on normal pieces. Squares of heavy-tailed or skewed numbers, and variances of non-normal samples, spread out much more than the chi-square predicts.</p></div>
+  </div>
+
+  <h3>Chi-square or not?</h3>
+  <p>Here \(Z_1, Z_2, \dots\) are independent standard normal numbers. Which of these follow a chi-square distribution?</p>
+  <div class="widget">
+    <div class="quiz" id="quiz"></div>
+    <div class="readout" id="quizScore" style="margin-top:10px" aria-live="polite"></div>
+  </div>
+
+  <p>This is the end of the series. It started with a single coin flip, built the counting and waiting distributions, discrete and continuous, reached the bell curve that all those sums approach, and ends with squares of that bell curve. The next series, on statistical inference, will put these distributions to work. <a href="../index.html">Browse all explainers</a>.</p>
+</section>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script>
+(function(){
+'use strict';
+/* ---------- helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const root = document.documentElement;
+const C = n => getComputedStyle(root).getPropertyValue(n).trim();
+const clamp = (x,a,b) => Math.max(a, Math.min(b, x));
+const f1 = x => x.toFixed(1), f2 = x => x.toFixed(2), f3 = x => x.toFixed(3), f4 = x => x.toFixed(4);
+const fmtN = x => Math.abs(x - Math.round(x)) < 1e-9 ? String(Math.round(x)) : String(+x.toFixed(2));
+const pct = x => (100 * x).toFixed(1) + '%';
+const SANS = 'system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';
+const MONO = 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
+const RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+const TAU = Math.PI * 2;
+
+if (window.renderMathInElement) {
+  renderMathInElement(document.body, {
+    delimiters: [{left:'$$', right:'$$', display:true}, {left:'\\(', right:'\\)', display:false}],
+    throwOnError: false
+  });
+}
+function markOverflow(el){
+  if (!el) return;
+  el.classList.toggle('ovf', el.scrollWidth - el.clientWidth - el.scrollLeft > 2);
+}
+function markAllOverflow(){ $$('.katex-display').forEach(markOverflow); }
+document.addEventListener('scroll', e => {
+  if (e.target.classList && e.target.classList.contains('katex-display')) markOverflow(e.target);
+}, true);
+markAllOverflow();
+window.addEventListener('load', markAllOverflow);   // KaTeX web fonts can change widths
+function fit(c){
+  const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+  if (c.width !== w*dpr || c.height !== h*dpr) { c.width = w*dpr; c.height = h*dpr; }
+  const ctx = c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  return {ctx, w, h};
+}
+const redraws = [];
+function redrawAll(){ redraws.forEach(f => f()); markAllOverflow(); }
+let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(redrawAll, 80); });
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+if (mq.addEventListener) mq.addEventListener('change', redrawAll);
+new MutationObserver(redrawAll).observe(root, {attributes:true, attributeFilter:['data-theme']});
+
+function bindRange(input, out, cb, fmt){
+  fmt = fmt || fmtN;
+  const f = () => { const v = parseFloat(input.value); if (out) out.textContent = fmt(v); cb(v); };
+  input.addEventListener('input', f); f();
+}
+function setRange(input, v){ input.value = v; input.dispatchEvent(new Event('input')); }
+function niceTicks(max, count){
+  const raw = max / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const step = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag;
+  const t = []; for (let v = 0; v <= max + 1e-9; v += step) t.push(v); return t;
+}
+function intStep(px, minPx){
+  for (const s of [1,2,5,10,20,25,50,100,200,250,500,1000]) if (s * px >= minPx) return s;
+  return 1000;
+}
+function yGrid(ctx, X0, X1, ys, ticks, fmt){
+  ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ticks.forEach(v => {
+    const y = Math.round(ys(v)) + .5;
+    ctx.strokeStyle = C('--line'); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X0, y); ctx.lineTo(X1, y); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.fillText(fmt(v), X0 - 6, y);
+  });
+}
+function stepFmt(ticks){ const st = ticks.length > 1 ? ticks[1] - ticks[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9)); return v => v.toFixed(d); }
+function roundRect(ctx, x, y, w, h, r){
+  r = Math.max(0, Math.min(r, w/2, Math.abs(h)/2));
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+function dot(ctx, x, y, r){ ctx.beginPath(); ctx.arc(x, y, Math.max(0.5, r), 0, TAU); ctx.fill(); }
+
+/* continuous axes: x from xmin to xmax, y from 0 to ymax (or a custom y-scale) */
+function cax(ctx, w, h, o){
+  const X0 = o.left != null ? o.left : 44, X1 = w - (o.right != null ? o.right : 12);
+  const Y0 = h - (o.bottom != null ? o.bottom : 24), Y1 = o.top != null ? o.top : 12;
+  const xmin = o.xmin || 0, xmax = o.xmax;
+  const xs = x => X0 + (x - xmin) / (xmax - xmin) * (X1 - X0);
+  const ixs = px => xmin + (px - X0) / (X1 - X0) * (xmax - xmin);
+  const ys = o.yscale ? o.yscale(Y0, Y1) : (v => Y0 - v / o.ymax * (Y0 - Y1));
+  if (o.ygrid !== false) {
+    const t = o.yticks || niceTicks(o.ymax, o.ny || 4).filter(v => v <= o.ymax * 1.0001);
+    yGrid(ctx, X0, X1, ys, t, o.yfmt || stepFmt(t));
+  }
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  if (o.xlabels !== false) {
+    // ticks at round multiples of the step, wherever the axis starts
+    const t0 = niceTicks(xmax - xmin, Math.max(2, Math.floor((X1 - X0) / (o.xgap || 58))));
+    const st = t0.length > 1 ? t0[1] - t0[0] : (xmax - xmin), xt = [];
+    for (let v = Math.ceil(xmin / st - 1e-9) * st; v <= xmax + st * 1e-9; v += st) xt.push(Math.abs(v) < st * 1e-9 ? 0 : v);
+    const fmt = o.xfmt || stepFmt(t0);
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    xt.forEach(v => ctx.fillText(fmt(v), xs(v), Y0 + 6));
+  }
+  return {X0, X1, Y0, Y1, xs, ixs, ys};
+}
+function clipTo(ctx, A){ ctx.save(); ctx.beginPath(); ctx.rect(A.X0, A.Y1 - 4, A.X1 - A.X0 + 1, A.Y0 - A.Y1 + 4.5); ctx.clip(); }
+function pathFn(ctx, A, f, x0, x1, n){
+  n = n || 240; ctx.beginPath(); let on = false;
+  for (let i = 0; i <= n; i++) {
+    const x = x0 + (x1 - x0) * i / n, v = f(x);
+    if (!isFinite(v)) { on = false; continue; }
+    const px = A.xs(x), py = A.ys(v);
+    if (on) ctx.lineTo(px, py); else { ctx.moveTo(px, py); on = true; }
+  }
+}
+function fillFn(ctx, A, f, x0, x1, color, n){
+  if (!(x1 > x0)) return;
+  n = n || 160; ctx.beginPath(); ctx.moveTo(A.xs(x0), A.Y0);
+  for (let i = 0; i <= n; i++) { const x = x0 + (x1 - x0) * i / n; ctx.lineTo(A.xs(x), A.ys(f(x))); }
+  ctx.lineTo(A.xs(x1), A.Y0); ctx.closePath(); ctx.fillStyle = color; ctx.fill();
+}
+function vline(ctx, x, y0, y1, color, dash, lw){
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw || 1.5; if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(Math.round(x) + .5, y0); ctx.lineTo(Math.round(x) + .5, y1); ctx.stroke(); ctx.restore();
+}
+/* integer-valued bar charts (counts) */
+function frame(ctx, w, h, o){
+  const X0 = o.left != null ? o.left : 44, X1 = w - 10, Y0 = h - 24, Y1 = o.top != null ? o.top : 12;
+  const span = o.hi - o.lo + 1, bw = (X1 - X0) / span;
+  const xc = k => X0 + bw * (k - o.lo + .5), ys = v => Y0 - (v / o.ymax) * (Y0 - Y1);
+  const t = niceTicks(o.ymax, 4).filter(v => v <= o.ymax * 1.0001); yGrid(ctx, X0, X1, ys, t, o.yfmt || stepFmt(t));
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  const st = intStep(bw, 22);
+  for (let k = Math.ceil(o.lo / st) * st; k <= o.hi; k += st) ctx.fillText(o.lab ? o.lab(k) : k, xc(k), Y0 + 6);
+  return {X0, X1, Y0, Y1, bw, xc, ys};
+}
+function drawBars(ctx, F, lo, hi, val, color, frac){
+  const bwid = Math.max(1, F.bw * (frac == null ? .8 : frac));
+  for (let k = lo; k <= hi; k++) {
+    const v = val(k); if (!(v > 0)) continue;
+    const y = F.ys(v), hh = F.Y0 - y; if (hh < 0.2) continue;
+    const x = F.xc(k) - bwid / 2;
+    ctx.fillStyle = typeof color === 'function' ? color(k) : color;
+    if (bwid >= 6 && hh >= 3) { roundRect(ctx, x, y, bwid, hh, Math.min(3, bwid / 4)); ctx.fill(); }
+    else ctx.fillRect(x, y, bwid, hh);
+  }
+}
+/* histogram of continuous values, drawn as a density */
+function drawHistDensity(ctx, A, counts, bw, n, color){
+  if (!n) return;
+  ctx.fillStyle = color;
+  for (let b = 0; b < counts.length; b++) {
+    if (!counts[b]) continue;
+    const d = counts[b] / (n * bw), x0 = A.xs(b * bw), x1 = A.xs((b + 1) * bw), y = A.ys(d);
+    const g = x1 - x0 > 5 ? 1 : 0;
+    ctx.fillRect(x0 + g / 2, y, Math.max(1, x1 - x0 - g), A.Y0 - y);
+  }
+}
+function histMax(counts, bw, n){ let m = 0; if (!n) return 0; for (const c of counts) m = Math.max(m, c / (n * bw)); return m; }
+/* ---------- special functions ---------- */
+const LF = [0];
+function lf(n){ while (LF.length <= n) { const i = LF.length; LF.push(LF[i-1] + Math.log(i)); } return LF[n]; }
+function lgam(x){
+  const g = 7, c = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+  if (x < 0.5) return Math.log(Math.PI / Math.abs(Math.sin(Math.PI * x))) - lgam(1 - x);
+  x -= 1; let a = c[0]; const t = x + g + 0.5;
+  for (let i = 1; i < 9; i++) a += c[i] / (x + i);
+  return 0.5 * Math.log(TAU) + (x + 0.5) * Math.log(t) - t + Math.log(a);
+}
+function gammaPQ(a, x){   // regularized incomplete gamma: [P(a, x), Q(a, x)], each accurate in its own tail
+  if (x <= 0) return [0, 1];
+  const lead = Math.exp(-x + a * Math.log(x) - lgam(a));
+  if (x < a + 1) {
+    let ap = a, del = 1 / a, sum = del;
+    for (let i = 0; i < 4000; i++) { ap += 1; del *= x / ap; sum += del; if (Math.abs(del) < Math.abs(sum) * 1e-16) break; }
+    const P = Math.min(1, sum * lead); return [P, 1 - P];
+  }
+  const TINY = 1e-300; let b = x + 1 - a, c = 1 / TINY, d = 1 / b, hh = d;
+  for (let i = 1; i < 4000; i++) {
+    const an = -i * (i - a); b += 2;
+    d = an * d + b; if (Math.abs(d) < TINY) d = TINY;
+    c = b + an / c; if (Math.abs(c) < TINY) c = TINY;
+    d = 1 / d; const del = d * c; hh *= del; if (Math.abs(del - 1) < 1e-16) break;
+  }
+  const Q = Math.max(0, lead * hh); return [1 - Q, Q];
+}
+const gammaP = (a, x) => gammaPQ(a, x)[0];
+function gammaQuantile(a, p){   // quantile of Gamma(shape a, rate 1), by bisection
+  let lo = 0, hi = Math.max(1, 2 * a);
+  while (gammaP(a, hi) < p) hi *= 2;
+  for (let i = 0; i < 200; i++) { const m = (lo + hi) / 2; if (gammaP(a, m) < p) lo = m; else hi = m; if (hi - lo < 1e-12 * hi) break; }
+  return (lo + hi) / 2;
+}
+function gPDF(t, a, l){   // Gamma(shape a, rate l) density, in log space
+  if (t <= 0) return a < 1 ? Infinity : a === 1 ? l : 0;
+  return Math.exp(a * Math.log(l) + (a - 1) * Math.log(t) - l * t - lgam(a));
+}
+const gCDF = (t, a, l) => gammaP(a, l * t);
+const gQ = (a, l, p) => gammaQuantile(a, p) / l;
+const SQ2PI = Math.sqrt(TAU);
+const phi = z => Math.exp(-z * z / 2) / SQ2PI;
+const nPDF = (x, m, s) => phi((x - m) / s) / s;
+function poisPMF(l, k){ return k < 0 ? 0 : l <= 0 ? (k === 0 ? 1 : 0) : Math.exp(-l + k * Math.log(l) - lf(k)); }
+
+/* ---------- samplers ---------- */
+const expS = () => -Math.log(1 - Math.random());
+function gaussS(){ let u = 0; while (u === 0) u = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(TAU * Math.random()); }
+function gammaS(a){   // Marsaglia–Tsang, shape a, rate 1
+  if (a < 1) { let u = 0; while (u === 0) u = Math.random(); return gammaS(a + 1) * Math.pow(u, 1 / a); }
+  const d = a - 1 / 3, c = 1 / Math.sqrt(9 * d);
+  for (;;) {
+    let x, v;
+    do { x = gaussS(); v = 1 + c * x; } while (v <= 0);
+    v = v * v * v; const u = Math.random();
+    if (u < 1 - 0.0331 * x * x * x * x) return d * v;
+    if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) return d * v;
+  }
+}
+function poisS(l){   // exact Poisson sampler
+  if (!(l > 0)) return 0;
+  if (l < 30) { let k = 0, s = expS(); while (s < l) { k++; s += expS(); } return k; }
+  const m = Math.floor(l), u = Math.random();
+  let F = 1 - gammaP(m + 1, l), pm = poisPMF(l, m), p = pm, k = m;
+  if (u <= F) { while (k > 0 && u <= F - p) { F -= p; p = p * k / l; k--; } return k; }
+  while (u > F && p > 0 && k < m + 1e6) { k++; p = p * l / k; F += p; }
+  return k;
+}
+
+/* ---------- formatting and small tools ---------- */
+const nf = n => n.toLocaleString('en-US');
+const fmtSig = x => { const a = Math.abs(x); if (Math.abs(x - Math.round(x)) < 1e-9) return nf(Math.round(x)); return a >= 1e4 ? nf(Math.round(x)) : a >= 100 ? x.toFixed(0) : a >= 1 ? x.toFixed(2) : x.toFixed(3); };
+const pp = x => (100 * x).toFixed(2) + '%';
+function pickBtns(attr, cb){
+  const bs = $$('[data-' + attr + ']');
+  bs.forEach(b => b.addEventListener('click', () => {
+    bs.forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
+    cb(b.dataset[attr]);
+  }));
+  return bs;
+}
+function onScreen(el, cb){
+  if ('IntersectionObserver' in window) new IntersectionObserver(es => cb(es[0].isIntersecting)).observe(el);
+}
+function histDraw(ctx, A, counts, x0, bw, n, color){
+  ctx.fillStyle = color;
+  counts.forEach((c, b) => {
+    if (!c) return;
+    const xa = A.xs(x0 + b * bw), xb = A.xs(x0 + (b + 1) * bw), y = A.ys(c / (n * bw)), g = xb - xa > 5 ? 1 : 0;
+    ctx.fillRect(xa + g / 2, y, Math.max(1, xb - xa - g), A.Y0 - y);
+  });
+}
+/* y-axis top for a gamma density on [0, x1]: the peak, or for shape < 1 (infinite at 0) a value that shows the body */
+function gYmax(a, l, x1){
+  if (a >= 1) return gPDF(a === 1 ? 0 : (a - 1) / l, a, l);
+  return gPDF(x1 * 0.03, a, l);   // the spike at 0 runs off the top; the rest of the curve stays readable
+}
+
+/* ---------- chi-square and chi ---------- */
+const c2PDF = (x, k) => gPDF(x, k / 2, 0.5);
+const c2CDF = (x, k) => gammaP(k / 2, x / 2);
+const c2Q = (k, p) => 2 * gammaQuantile(k / 2, p);
+function chiPDF(r, k){   // chi distribution, in log space
+  if (r <= 0) return k < 1 ? Infinity : k === 1 ? Math.sqrt(2 / Math.PI) : 0;
+  return Math.exp((k - 1) * Math.log(r) - r * r / 2 - (k / 2 - 1) * Math.LN2 - lgam(k / 2));
+}
+const chiMean = k => Math.SQRT2 * Math.exp(lgam((k + 1) / 2) - lgam(k / 2));
+const fmt3 = x => Math.abs(x - Math.round(x)) < 1e-9 ? String(Math.round(x)) : f3(x);
+window.__cs = {c2PDF, c2CDF, c2Q, chiPDF, chiMean};
+
+/* ---------- 0. hero: square three normals ---------- */
+(function(){
+  const sc = $('#heroSq'), hc = $('#heroHist'), go = $('#heroGo'), hint = $('#heroHint');
+  const K = 3, XMAX = 16, BW = 0.4, NB = Math.round(XMAX / BW), MAX = 200000, STEP_MS = 650;
+  let counts = new Array(NB).fill(0), over = 0, n = 0, s1 = 0, s2 = 0, last = null;
+  let running = !RM, raf = 0, prev = 0, acc = 0, visible = true;
+  function draw1(){
+    const z = []; let q = 0;
+    for (let i = 0; i < K; i++) { const v = gaussS(); z.push(v); q += v * v; }
+    if (q >= XMAX) over++; else counts[Math.floor(q / BW)]++;
+    n++; s1 += q; s2 += q * q; return {z, q};
+  }
+  function drawSq(){
+    const {ctx, w, h} = fit(sc);
+    if (!last) { ctx.fillStyle = C('--ink-3'); ctx.font = '13px ' + SANS; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('Press play to draw', w / 2, h / 2); return; }
+    const base = h - 22, S = Math.min(36, (base - 6) / 3.2), gap = 14, labW = 76;
+    const sides = last.z.map(v => Math.min(Math.abs(v), 3.2) * S), tot = sides.reduce((a, b) => a + Math.max(b, 30), 0) + gap * (K - 1) + labW;
+    let x = Math.max(4, (w - tot) / 2);
+    last.z.forEach((v, i) => {
+      const s = sides[i], cell = Math.max(s, 30);
+      ctx.fillStyle = C('--accent-soft'); ctx.strokeStyle = C('--accent'); ctx.lineWidth = 1.5;
+      const x0 = x + (cell - s) / 2;
+      ctx.fillRect(x0, base - s, s, s); ctx.strokeRect(x0 + .5, base - s + .5, Math.max(0, s - 1), Math.max(0, s - 1));
+      ctx.fillStyle = C('--ink-2'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.fillText((v < 0 ? '−' : '') + Math.abs(v).toFixed(2), x + cell / 2, base + 5);
+      if (s > 26) { ctx.fillStyle = C('--accent'); ctx.textBaseline = 'middle'; ctx.fillText((v * v).toFixed(2), x + cell / 2, base - s / 2); }
+      x += cell + gap;
+    });
+    ctx.fillStyle = C('--accent'); ctx.font = '600 18px ' + MONO; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillText('= ' + last.q.toFixed(2), x - gap + 8, base - 14);
+  }
+  function drawHist(){
+    const {ctx, w, h} = fit(hc);
+    let ym = c2PDF(1, K); if (n) counts.forEach(c => ym = Math.max(ym, c / (n * BW)));
+    const A = cax(ctx, w, h, {xmin: 0, xmax: XMAX, ymax: ym * 1.15, left: 40, xgap: 40});
+    clipTo(ctx, A);
+    if (n) histDraw(ctx, A, counts, 0, BW, n, C('--accent'));
+    ctx.strokeStyle = C('--gold'); ctx.lineWidth = 2; pathFn(ctx, A, x => c2PDF(x, K), 1e-4, XMAX, 300); ctx.stroke();
+    ctx.restore();
+  }
+  function setHint(){
+    if (!n) { hint.textContent = 'Draw three standard normal numbers, square them and add up the areas.'; return; }
+    const m = s1 / n, v = n > 1 ? Math.max(0, (s2 - s1 * s1 / n) / (n - 1)) : 0;
+    hint.innerHTML = `<b>${nf(n)}</b> sums · average <b>${f2(m)}</b> (theory 3) · variance <b>${f2(v)}</b> (theory 6)` +
+      (over ? ` · ${nf(over)} above 16 not shown` : '') + (n >= MAX ? ' · limit of 200,000 reached, press Clear' : '');
+  }
+  function drawAll(){ drawSq(); drawHist(); }
+  function tick(t){
+    raf = 0; if (!running || !visible) return;
+    if (prev) acc += Math.min(500, t - prev); prev = t;
+    let did = false;
+    while (acc >= STEP_MS) { acc -= STEP_MS; if (n < MAX) { last = draw1(); did = true; } }
+    if (n >= MAX) setRunning(false);
+    if (did) { drawAll(); setHint(); }
+    raf = requestAnimationFrame(tick);
+  }
+  function kick(){ if (!raf && running && visible) { prev = 0; raf = requestAnimationFrame(tick); } }
+  function setRunning(v){ running = v; go.textContent = v ? '❚❚ Pause' : '▶ Play'; if (v) kick(); }
+  go.addEventListener('click', () => setRunning(!running));
+  $('#heroMany').addEventListener('click', () => { for (let i = 0; i < 1000 && n < MAX; i++) last = draw1(); drawAll(); setHint(); });
+  $('#heroClear').addEventListener('click', () => { counts.fill(0); over = 0; n = 0; s1 = 0; s2 = 0; last = null; drawAll(); setHint(); });
+  onScreen(hc, v => { visible = v; kick(); });
+  for (let i = 0; i < 300; i++) last = draw1();
+  setHint(); if (RM) setRunning(false);
+  redraws.push(drawAll); drawAll(); kick();
+})();
+
+/* ---------- 1. square and add ---------- */
+(function(){
+  const NBIN = 60, BATCH = 20000, CAP = 200000;
+  let k = 4, x1, counts, n = 0, over = 0, s1 = 0, s2 = 0;
+  function reset(){ x1 = c2Q(k, 0.997) * 1.04; counts = new Array(NBIN).fill(0); n = 0; over = 0; s1 = 0; s2 = 0; }
+  function add(m){
+    for (let i = 0; i < m && n < CAP; i++) {
+      let q = 0; for (let j = 0; j < k; j++) { const z = gaussS(); q += z * z; }
+      if (q >= x1) over++; else counts[Math.floor(q / x1 * NBIN)]++;
+      n++; s1 += q; s2 += q * q;
+    }
+  }
+  function draw(){
+    const c = $('#bdChart'), {ctx, w, h} = fit(c), bw = x1 / NBIN;
+    let ym = gYmax(k / 2, 0.5, x1); counts.forEach(cn => ym = Math.max(ym, cn / (n * bw)));
+    const A = cax(ctx, w, h, {xmin: 0, xmax: x1, ymax: ym * 1.12, left: 44, xgap: 44});
+    clipTo(ctx, A);
+    histDraw(ctx, A, counts, 0, bw, n, C('--accent'));
+    ctx.strokeStyle = C('--gold'); ctx.lineWidth = 2.2; pathFn(ctx, A, x => c2PDF(x, k), x1 * 1e-4, x1, 400); ctx.stroke();
+    ctx.restore();
+    vline(ctx, A.xs(k), A.Y1, A.Y0, C('--ink-2'), [5, 4], 1.5);
+  }
+  function readout(){
+    const m = s1 / n, v = Math.max(0, (s2 - s1 * s1 / n) / (n - 1));
+    $('#bdRead').innerHTML = `${nf(n)} sums of ${k} ${k === 1 ? 'square' : 'squares'} · mean <b>${f2(m)}</b> (theory ${k}) · variance <b>${f2(v)}</b> (theory ${2 * k})` +
+      (over ? ` · ${nf(over)} beyond ${f1(x1)}, off the chart` : '') + (n >= CAP ? ' · limit of 200,000 sums reached; move the slider to start over' : '');
+    $('#bdMore').disabled = n >= CAP;
+  }
+  bindRange($('#bdK'), $('#bdKOut'), v => { k = v; reset(); add(BATCH); draw(); readout(); });
+  $('#bdMore').addEventListener('click', () => { add(BATCH); draw(); readout(); });
+  redraws.push(draw);
+})();
+
+/* ---------- 2. shape by degrees of freedom ---------- */
+(function(){
+  const KS = [1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 30, 50, 100, 200];
+  let k = 5;
+  function draw(){
+    const c = $('#shChart'), {ctx, w, h} = fit(c);
+    const x1 = Math.max(c2Q(k, 0.998), k + 4 * Math.sqrt(2 * k)) * 1.03, x0 = k >= 30 ? Math.max(0, k - 4.5 * Math.sqrt(2 * k)) : 0;
+    const ym = Math.max(gYmax(k / 2, 0.5, x1), nPDF(k, k, Math.sqrt(2 * k)));
+    const A = cax(ctx, w, h, {xmin: x0, xmax: x1, ymax: ym * 1.15, left: 44, xgap: 44});
+    const q95 = c2Q(k, 0.95);
+    clipTo(ctx, A);
+    fillFn(ctx, A, x => Math.min(c2PDF(x, k), ym * 3), q95, x1, C('--gold-soft'), 200);
+    ctx.save(); ctx.setLineDash([5, 4]); ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1.6; pathFn(ctx, A, x => nPDF(x, k, Math.sqrt(2 * k)), x0, x1, 300); ctx.stroke(); ctx.restore();
+    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2.2; pathFn(ctx, A, x => c2PDF(x, k), Math.max(x0, x1 * 1e-4), x1, 500); ctx.stroke();
+    ctx.restore();
+    vline(ctx, A.xs(q95), A.Y1, A.Y0, C('--gold'), null, 1.5);
+  }
+  function readout(){
+    const q = c2Q(k, 0.95), z = 1.6448536, nq = k + z * Math.sqrt(2 * k), wh = k * Math.pow(1 - 2 / (9 * k) + z * Math.sqrt(2 / (9 * k)), 3);
+    const e = x => Math.abs(x - q) < 0.005 ? '0.00' : (x - q > 0 ? '+' : '−') + Math.abs(x - q).toFixed(2);
+    $('#shRead').innerHTML = `k = ${k} · mean <b>${k}</b> · variance <b>${2 * k}</b> · peak at <b>${Math.max(k - 2, 0)}</b> · skewness √(8/k) = <b>${f2(Math.sqrt(8 / k))}</b>` +
+      `<br>95th percentile: exact <b>${f2(q)}</b> · normal ${f2(nq)} (${e(nq)}) · Wilson–Hilferty ${f2(wh)} (${e(wh)})`;
+  }
+  bindRange($('#shK'), $('#shKOut'), v => { k = KS[v]; draw(); readout(); }, v => String(KS[v]));
+  redraws.push(draw);
+})();
+
+/* ---------- 4. darts ---------- */
+(function(){
+  const c = $('#dtChart'), CAP = 20000, LIM = 3.5;
+  let pts = [], r = 1.18;
+  function add(m){ for (let i = 0; i < m && pts.length < CAP; i++) pts.push([gaussS(), gaussS()]); }
+  function draw(){
+    const W = c.getBoundingClientRect().width || 300, H = Math.round(clamp(W * 0.8, 260, 380));
+    if (Math.abs(c.getBoundingClientRect().height - H) > 1) c.style.height = H + 'px';
+    const {ctx, w, h} = fit(c), size = Math.min(w, h) - 16, cx = w / 2, cy = h / 2, s = size / (2 * LIM);
+    ctx.strokeStyle = C('--line'); ctx.lineWidth = 1;
+    for (let v = -3; v <= 3; v++) {
+      ctx.beginPath(); ctx.moveTo(cx + v * s + .5, cy - LIM * s); ctx.lineTo(cx + v * s + .5, cy + LIM * s); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx - LIM * s, cy + v * s + .5); ctx.lineTo(cx + LIM * s, cy + v * s + .5); ctx.stroke();
+    }
+    ctx.fillStyle = C('--ink-3'); ctx.font = '10px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    for (let v = -3; v <= 3; v++) if (v) ctx.fillText((v < 0 ? '−' : '') + Math.abs(v), cx + v * s, cy + 3);
+    const rad = Math.max(1.4, Math.min(2.4, size / 200)), r2 = r * r;
+    ctx.globalAlpha = .55;
+    pts.forEach(([x, y]) => {
+      if (Math.abs(x) > LIM || Math.abs(y) > LIM) return;
+      ctx.fillStyle = C(x * x + y * y <= r2 ? '--accent' : '--ink-3'); dot(ctx, cx + x * s, cy - y * s, rad);
+    });
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = C('--gold'); ctx.lineWidth = 2.2; ctx.beginPath(); ctx.arc(cx, cy, r * s, 0, TAU); ctx.stroke();
+  }
+  function readout(){
+    const r2 = r * r, inside = pts.filter(([x, y]) => x * x + y * y <= r2).length;
+    $('#dtRead').innerHTML = `${nf(pts.length)} darts · inside radius ${fmtN(r)}: <b>${(100 * inside / pts.length).toFixed(1)}%</b> · theory P(χ²₂ ≤ r²) = 1 − e<sup>−r²/2</sup> = <b>${(100 * (1 - Math.exp(-r2 / 2))).toFixed(1)}%</b>` +
+      (pts.length >= CAP ? ' · limit of 20,000 darts reached, press Clear' : '');
+    $('#dtMore').disabled = pts.length >= CAP;
+  }
+  bindRange($('#dtR'), $('#dtROut'), v => { r = v; draw(); readout(); }, v => v.toFixed(2));
+  $('#dtMore').addEventListener('click', () => { add(500); draw(); readout(); });
+  $('#dtClear').addEventListener('click', () => { pts = []; add(500); draw(); readout(); });
+  add(1000); draw(); readout();
+  redraws.push(draw);
+})();
+
+/* ---------- 5. chi: lengths of random vectors ---------- */
+(function(){
+  const KS = [1, 2, 3, 4, 5, 10, 20, 50, 100, 200, 500, 1000], DRAWS = 2e6, NBIN = 60;
+  const NAMES = {1: 'the half-normal', 2: 'the Rayleigh distribution', 3: 'the Maxwell distribution'};
+  let k = 3, N = 0, L = null;
+  function sim(){
+    N = Math.min(20000, Math.floor(DRAWS / k)); L = new Float64Array(N);
+    for (let i = 0; i < N; i++) { let q = 0; for (let j = 0; j < k; j++) { const z = gaussS(); q += z * z; } L[i] = Math.sqrt(q); }
+  }
+  const range = () => { const m = Math.sqrt(k); return k >= 20 ? [m - 4, m + 3.5] : [0, Math.max(4.2, m + 3.5)]; };
+  function draw(){
+    const c = $('#chChart'), {ctx, w, h} = fit(c), [x0, x1] = range(), bw = (x1 - x0) / NBIN, counts = new Array(NBIN).fill(0);
+    for (let i = 0; i < N; i++) { const v = L[i]; if (v >= x0 && v < x1) counts[Math.floor((v - x0) / bw)]++; }
+    let ym = histMax(counts, bw, N); for (let i = 0; i <= 200; i++) { const v = chiPDF(x0 + (x1 - x0) * i / 200, k); if (isFinite(v)) ym = Math.max(ym, v); }
+    const A = cax(ctx, w, h, {xmin: x0, xmax: x1, ymax: ym * 1.12, left: 44, xgap: 44});
+    clipTo(ctx, A);
+    histDraw(ctx, A, counts, x0, bw, N, C('--accent'));
+    ctx.strokeStyle = C('--gold'); ctx.lineWidth = 2.2; pathFn(ctx, A, r => chiPDF(r, k), Math.max(x0, 1e-4), x1, 400); ctx.stroke();
+    ctx.restore();
+    vline(ctx, A.xs(Math.sqrt(k)), A.Y1, A.Y0, C('--ink-2'), [5, 4], 1.5);
+  }
+  function readout(){
+    let s = 0, q = 0; for (let i = 0; i < N; i++) { s += L[i]; q += L[i] * L[i]; }
+    const m = s / N, sd = Math.sqrt(Math.max(0, (q - s * s / N) / (N - 1))), tm = chiMean(k), tsd = Math.sqrt(Math.max(0, k - tm * tm));
+    $('#chRead').innerHTML = `${nf(N)} random vectors in ${nf(k)} ${k === 1 ? 'dimension' : 'dimensions'}${NAMES[k] ? ` · this is ${NAMES[k]}` : ''}` +
+      (N < 20000 ? ' (fewer vectors in high dimensions, to keep it fast)' : '') +
+      `<br>average length <b>${f3(m)}</b> (theory ${f3(tm)}, √k = ${f3(Math.sqrt(k))}) · sd <b>${f3(sd)}</b> (theory ${f3(tsd)}; tends to 1/√2 = 0.707)`;
+  }
+  bindRange($('#chK'), $('#chKOut'), v => { k = KS[v]; sim(); draw(); readout(); }, v => nf(KS[v]));
+  redraws.push(draw);
+})();
+
+/* ---------- 6. sample variances ---------- */
+(function(){
+  const R = 20000, NBIN = 60;
+  let n = 5, Q = new Float64Array(R), S = new Float64Array(R);
+  function sim(){
+    for (let i = 0; i < R; i++) {
+      let s = 0, ss = 0;
+      for (let j = 0; j < n; j++) { const x = 10 + 2 * gaussS(); s += x; ss += x * x; }   // μ = 10, σ = 2
+      const v = Math.max(0, (ss - s * s / n) / (n - 1)); S[i] = v; Q[i] = (n - 1) * v / 4;
+    }
+  }
+  function draw(){
+    const c = $('#svChart'), {ctx, w, h} = fit(c), k = n - 1, x1 = c2Q(n, 0.997) * 1.04, bw = x1 / NBIN, counts = new Array(NBIN).fill(0);
+    for (let i = 0; i < R; i++) if (Q[i] < x1) counts[Math.floor(Q[i] / bw)]++;
+    const ym = Math.max(histMax(counts, bw, R), gYmax(k / 2, 0.5, x1)) * 1.1;
+    const A = cax(ctx, w, h, {xmin: 0, xmax: x1, ymax: ym, left: 44, xgap: 44});
+    clipTo(ctx, A);
+    histDraw(ctx, A, counts, 0, bw, R, C('--accent'));
+    ctx.strokeStyle = C('--gold'); ctx.lineWidth = 2.4; pathFn(ctx, A, x => c2PDF(x, k), x1 * 1e-4, x1, 400); ctx.stroke();
+    ctx.save(); ctx.setLineDash([6, 5]); ctx.strokeStyle = C('--zero'); ctx.lineWidth = 2; pathFn(ctx, A, x => c2PDF(x, n), x1 * 1e-4, x1, 400); ctx.stroke(); ctx.restore();
+    ctx.restore();
+  }
+  function readout(){
+    let mv = 0, ms = 0, mq = 0; for (let i = 0; i < R; i++) { mv += S[i]; ms += Math.sqrt(S[i]); mq += Q[i]; }
+    mv /= R; ms /= R; mq /= R;
+    const c4 = Math.sqrt(2 / (n - 1)) * Math.exp(lgam(n / 2) - lgam((n - 1) / 2));
+    $('#svRead').innerHTML = `samples of n = ${n} from N(10, 2²) · average of (n−1)s²/σ² <b>${f2(mq)}</b> (χ²<sub>${n - 1}</sub> mean ${n - 1}, χ²<sub>${n}</sub> mean ${n})` +
+      `<br>average s² <b>${f3(mv)}</b> (σ² = 4: unbiased) · dividing by n instead gives ${f3(mv * (n - 1) / n)}` +
+      `<br>average s <b>${f3(ms)}</b> (σ = 2) · theory c₄σ = ${f3(c4)} × 2 = ${f3(2 * c4)}`;
+  }
+  const upd = () => { sim(); draw(); readout(); };
+  bindRange($('#svN'), $('#svNOut'), v => { n = v; upd(); });
+  $('#svNew').addEventListener('click', upd);
+  redraws.push(draw);
+})();
+
+/* ---------- 7. properties dashboard ---------- */
+(function(){
+  let k = 5;
+  const x1 = () => Math.max(c2Q(k, 0.997), k + 4 * Math.sqrt(2 * k)) * 1.03;
+  function drawPDF(){
+    const c = $('#miniPDF'), {ctx, w, h} = fit(c), X = x1(), ym = gYmax(k / 2, 0.5, X);
+    const A = cax(ctx, w, h, {xmin: 0, xmax: X, ymax: ym * 1.15, left: 40, xgap: 40});
+    clipTo(ctx, A);
+    fillFn(ctx, A, x => Math.min(c2PDF(x, k), ym * 3), X * 1e-4, X, C('--accent-soft'), 300);
+    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2; pathFn(ctx, A, x => c2PDF(x, k), X * 1e-4, X, 400); ctx.stroke();
+    ctx.restore();
+    vline(ctx, A.xs(k), A.Y1, A.Y0, C('--gold'), [4, 3], 1.5);
+  }
+  function drawCDF(){
+    const c = $('#miniCDF'), {ctx, w, h} = fit(c), X = x1();
+    const A = cax(ctx, w, h, {xmin: 0, xmax: X, ymax: 1, left: 40, xgap: 40});
+    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2; pathFn(ctx, A, x => c2CDF(x, k), 0, X, 300); ctx.stroke();
+    ctx.save(); ctx.strokeStyle = C('--ink-3'); ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(A.X0, A.ys(.5)); ctx.lineTo(A.X1, A.ys(.5)); ctx.stroke(); ctx.restore();
+    vline(ctx, A.xs(c2Q(k, .5)), A.ys(.5), A.Y0, C('--gold'), [4, 3], 1.5);
+  }
+  function cards(){
+    $('#cPar').textContent = `k = ${k} = Gamma(${fmtN(k / 2)}, ½)`;
+    $('#cPDF').textContent = k > 2 ? `peak f(${k - 2}) = ${f4(c2PDF(k - 2, k))}` : k === 2 ? 'f(0) = 0.5' : 'infinite at 0';
+    $('#cCDF').textContent = `P(Q ≤ k) = ${f4(c2CDF(k, k))}`;
+    $('#cMean').textContent = String(k);
+    $('#cVar').textContent = `${2 * k} · sd ${f3(Math.sqrt(2 * k))}`;
+    $('#cMode').textContent = String(Math.max(k - 2, 0));
+    $('#cMed').textContent = `${f3(c2Q(k, .5))} · approx ${f3(k * Math.pow(1 - 2 / (9 * k), 3))}`;
+    $('#cQ95').textContent = f3(c2Q(k, .95));
+    $('#cSkew').textContent = fmt3(Math.sqrt(8 / k));
+    $('#cKurt').textContent = fmt3(12 / k);
+    $('#cMGF').textContent = 'finite for t < ½';
+  }
+  const upd = () => { drawPDF(); drawCDF(); cards(); };
+  bindRange($('#prK'), $('#prKOut'), v => { k = v; upd(); });
+  redraws.push(() => { drawPDF(); drawCDF(); });
+})();
+
+/* ---------- 8. quiz ---------- */
+(function(){
+  const Q = [
+    {s: 'Z₁² + Z₂² + Z₃²', a: true, e: 'Three squared standard normals: χ² with 3 degrees of freedom.'},
+    {s: '(Z₁ + Z₂)²', a: false, e: 'Z₁ + Z₂ is normal with variance 2, not 1, so its square is 2 × χ²₁. A chi-square needs squares of <em>standard</em> normals.'},
+    {s: 'The squared distance from the origin of a random point in 10 dimensions whose coordinates are independent standard normals.', a: true, e: 'By Pythagoras it is Z₁² + … + Z₁₀²: χ² with 10 degrees of freedom (section 4).'},
+    {s: '(n − 1)s²/σ² for a sample of 8 from a normal distribution.', a: true, e: 'χ² with 7 degrees of freedom: one is lost to the sample mean (section 6).'},
+    {s: '(n − 1)s²/σ² for a sample of 8 from an exponential distribution.', a: false, e: 'The result needs normal data. Exponential data are skewed with heavy tails, and their sample variance spreads out much more than χ²₇.'},
+    {s: 'The sum of the squares of 5 die rolls.', a: false, e: 'Die rolls are not standard normal: they are whole numbers from 1 to 6. Their squares follow no chi-square.'},
+    {s: '2λT, where T is an exponential waiting time with rate λ.', a: true, e: '2λT is exponential with mean 2, which is exactly χ²₂ (section 3).'},
+    {s: 'The distance (not squared) from the origin of a random point in 3 dimensions with independent standard normal coordinates.', a: false, e: 'The distance is the square root of a χ²₃: the chi distribution with 3 degrees of freedom, also called the Maxwell distribution (section 5).'}
+  ];
+  const box = $('#quiz'); let answered = 0, right = 0;
+  Q.forEach(q => {
+    const d = document.createElement('div'); d.className = 'qitem';
+    d.innerHTML = `<p>${q.s}</p><div class="qbtns"><button class="btn" data-a="1">Chi-square</button><button class="btn" data-a="0">Not chi-square</button></div><p class="qexp" hidden></p>`;
+    const exp = d.querySelector('.qexp');
+    d.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      const pick = b.dataset.a === '1', ok = pick === q.a;
+      if (!d.dataset.done) { d.dataset.done = '1'; answered++; if (ok) right++; }
+      d.querySelectorAll('button').forEach(x => x.classList.remove('right', 'wrong'));
+      b.classList.add(ok ? 'right' : 'wrong');
+      exp.hidden = false; exp.innerHTML = `<b>${ok ? '✓ Right.' : '✗ Not quite.'}</b> ${q.e}`;
+      $('#quizScore').textContent = `${answered} of ${Q.length} answered · ${right} right on the first try`;
+    }));
+    box.appendChild(d);
+  });
+})();
+
+redrawAll();
+})();
+</script>
+</body>
+</html>

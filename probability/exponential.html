@@ -435,7 +435,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
   <h3>An exact confidence interval</h3>
   <p>The total \(\lambda \sum t_i\) is a sum of \(n\) independent \(\text{Exp}(1)\) waits, so it follows a gamma distribution with shape \(n\), whatever \(\lambda\) is. If \(g_{0.025}\) and \(g_{0.975}\) are the 2.5% and 97.5% points of that gamma distribution, then</p>
   $$\left[\frac{g_{0.025}}{\sum t_i},\; \frac{g_{0.975}}{\sum t_i}\right]$$
-  <p>is a 95% confidence interval for \(\lambda\). Textbooks often state the same fact as \(2\lambda\sum t_i \sim \chi^2_{2n}\). Unlike the binomial intervals, this one needs no approximation. It covers the true rate exactly 95% of the time, even for \(n = 1\). For example, 10 waits that add up to 12.5 minutes give \(\hat\lambda = 0.8\) per minute, with 95% interval \([0.38, 1.37]\).</p>
+  <p>is a 95% confidence interval for \(\lambda\). Textbooks often state the same fact as \(2\lambda\sum t_i \sim \chi^2_{2n}\), a <a href="chi-square.html">chi-square</a> with \(2n\) degrees of freedom. Unlike the binomial intervals, this one needs no approximation. It covers the true rate exactly 95% of the time, even for \(n = 1\). For example, 10 waits that add up to 12.5 minutes give \(\hat\lambda = 0.8\) per minute, with 95% interval \([0.38, 1.37]\).</p>
 
   <div class="widget">
     <p class="widget-title">Estimate the rate from data</p>

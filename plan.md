@@ -3,13 +3,6 @@
 Pages still to be written, by category and series. When a series is fully
 implemented, remove it from this file.
 
-## Probability
-
-### Probability distributions
-Already written: Bernoulli, Binomial, Geometric, Exponential, Poisson, Negative binomial, Normal, Gamma
-
-1. Chi-square distribution (sums of squared normals; the chi distribution as a section)
-
 ## Statistics
 
 ### Statistical inference

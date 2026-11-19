@@ -29,8 +29,8 @@ window.EXPLAINERS = {
         {
           "id": "distributions",
           "title": "Probability distributions",
-          "blurb": "From a single coin flip to counting events and waiting for them, in steps and in continuous time, and the bell curve that all those sums lead to. Each one builds on the last.",
-          "topics": ["bernoulli", "binomial", "geometric", "exponential", "poisson", "negative-binomial", "normal", "gamma"]
+          "blurb": "From a single coin flip to counting events and waiting for them, in steps and in continuous time, to the bell curve that all those sums lead to and the squares of that bell. Each one builds on the last.",
+          "topics": ["bernoulli", "binomial", "geometric", "exponential", "poisson", "negative-binomial", "normal", "gamma", "chi-square"]
         }
       ],
       "topics": [
@@ -105,6 +105,15 @@ window.EXPLAINERS = {
           "summary": "How long until the k-th event? Sums of exponential waits, the Poisson link, the gamma function and the go-to model for an uncertain rate.",
           "tags": ["waiting time", "Erlang", "gamma function", "conjugate prior", "chi-square"],
           "preview": { "select": ".hero-play", "click": ["#heroMany", "#heroMany", "#heroMany"] }
+        },
+        {
+          "id": "chi-square",
+          "title": "The Chi-Square Distribution",
+          "short": "Chi-square",
+          "path": "probability/chi-square.html",
+          "summary": "Square some normal numbers and add them up: degrees of freedom, distances in many dimensions, the chi distribution and the spread of a sample.",
+          "tags": ["sum of squares", "degrees of freedom", "Rayleigh", "sample variance", "high dimensions"],
+          "preview": { "select": ".hero-play", "click": ["#heroMany", "#heroMany"] }
         }
       ]
     }
