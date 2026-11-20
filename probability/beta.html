@@ -141,7 +141,6 @@ table.summary td:not(:first-child),table.summary th:not(:first-child){text-align
 .qexp{font-size:15px;color:var(--ink-2);margin:10px 0 0!important}
 .controls[hidden]{display:none}
 .mcap .katex{text-transform:none}
-@media (max-width:640px){
 @media (max-width:480px){
   main{padding:0 16px 80px}
   .widget{padding:14px}
@@ -223,7 +222,7 @@ table.summary td:not(:first-child),table.summary th:not(:first-child){text-align
   </div>
   <ul>
     <li><strong>\(\alpha = \beta = 1\): flat.</strong> \(\text{Beta}(1, 1)\) is the uniform distribution: every \(p\) equally plausible.</li>
-    <li><strong>Both below 1: U-shaped.</strong> The density piles up at 0 and 1. The belief is “the coin is almost always heads or almost always tails, but I don’t know which”. \(\text{Beta}(\tfrac12, \tfrac12)\) is called the arcsine distribution.</li>
+    <li><strong>Both below 1: U-shaped.</strong> The density piles up at 0 and 1. The belief is “the coin is almost always heads or almost always tails, but I don’t know which”. \(\text{Beta}(\tfrac12, \tfrac12)\) is called the <a href="field-guide.html#c-arcsine">arcsine distribution</a>.</li>
     <li><strong>Both above 1: a hump</strong> with its peak at \((\alpha - 1)/(\alpha + \beta - 2)\). Equal parameters give a symmetric hump around ½; unequal ones lean toward the smaller parameter’s end.</li>
     <li><strong>One below 1, one above: J-shaped</strong>, rising without limit at one end.</li>
   </ul>
@@ -276,7 +275,7 @@ table.summary td:not(:first-child),table.summary th:not(:first-child){text-align
     <div class="legend"><span><i class="sw" style="background:var(--accent)"></i><span>\(X/(X+Y)\), 20,000 pairs</span></span><span><i class="sw line" style="border-color:var(--gold)"></i><span>\(\text{Beta}(\alpha, \beta)\)</span></span></div>
     <div class="readout" id="gsRead" style="margin-top:8px"></div>
   </div>
-  <p>This is how software draws beta random numbers: draw two gammas and take the ratio. It is also where \(B(\alpha, \beta) = \Gamma(\alpha)\Gamma(\beta)/\Gamma(\alpha + \beta)\) comes from (see section 6). With more than two gammas, the shares \(X_i/\sum X_j\) follow the <em class="term">Dirichlet distribution</em>, the beta’s generalization to several proportions that add up to 1.</p>
+  <p>This is how software draws beta random numbers: draw two gammas and take the ratio. It is also where \(B(\alpha, \beta) = \Gamma(\alpha)\Gamma(\beta)/\Gamma(\alpha + \beta)\) comes from (see section 6). With more than two gammas, the shares \(X_i/\sum X_j\) follow the <a href="field-guide.html#c-dirichlet">Dirichlet distribution</a>, the beta’s generalization to several proportions that add up to 1.</p>
 </section>
 
 <!-- 5 -->
@@ -386,6 +385,7 @@ table.summary td:not(:first-child),table.summary th:not(:first-child){text-align
   </div>
 
   <p>The series started with a single coin flip whose probability was simply given, built the counting and waiting distributions and the bell curve and its squares, and has now reached a distribution for that probability itself. The planned series on statistical and Bayesian inference will put all of them to work. Next in the series: the largest of many values, which has universal laws of its own. That is <a href="extreme-values.html">Extreme Value Distributions</a>.</p>
+  <p class="muted small">Looking for a distribution without a page of its own? <a href="field-guide.html">A Field Guide to Distributions</a> sorts two dozen more by how they arise.</p>
 </section>
 
 </main>

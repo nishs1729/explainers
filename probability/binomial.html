@@ -236,7 +236,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
     <div class="readout" id="quizScore" style="margin-top:10px" aria-live="polite"></div>
   </div>
 
-  <div class="callout"><p>Drawing <strong>without replacement</strong> is the most common way to break the rules. Each draw changes what is left, so \(p\) shifts from trial to trial. The exact count then follows the <em>hypergeometric</em> distribution. When the population is much larger than the sample, such as polling 1,000 people out of millions, the shift is tiny and the binomial is an excellent approximation.</p></div>
+  <div class="callout"><p>Drawing <strong>without replacement</strong> is the most common way to break the rules. Each draw changes what is left, so \(p\) shifts from trial to trial. The exact count then follows the <a href="field-guide.html#c-hypergeometric">hypergeometric</a> distribution. When the population is much larger than the sample, such as polling 1,000 people out of millions, the shift is tiny and the binomial is an excellent approximation.</p></div>
 </section>
 
 <!-- 2 -->
@@ -643,6 +643,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
     <div class="card"><h4>Reliability</h4><p>A system of 5 independent parts keeps working if at least 3 of them do. If each part works with probability \(r\), the system works with probability \(P(Y \ge 3)\) for \(Y \sim \text{Bin}(5, r)\).</p></div>
     <div class="card"><h4>Machine learning</h4><p>A classifier’s number of correct answers on \(n\) test examples is binomial. An accuracy of 0.92 on 200 examples carries an uncertainty of about ±0.04, which is often larger than the gap between two models being compared.</p></div>
   </div>
+  <p class="muted small">Looking for a distribution without a page of its own? <a href="field-guide.html">A Field Guide to Distributions</a> sorts two dozen more by how they arise.</p>
 </section>
 
 </main>

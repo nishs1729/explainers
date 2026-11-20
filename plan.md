@@ -15,7 +15,7 @@
 - [x] [Beta](https://nishs1729.github.io/explainers/probability/beta.html)
 - [x] [Extreme values](https://nishs1729.github.io/explainers/probability/extreme-values.html)
 - [x] [Power laws](https://nishs1729.github.io/explainers/probability/power-laws.html)
-- [ ] [A Field Guide to Distributions](#field-guide)
+- [x] [A Field Guide to Distributions](https://nishs1729.github.io/explainers/probability/field-guide.html)
 
 ## Statistics
 ### [Statistical inference](#statistical-inference)
@@ -59,34 +59,6 @@
 From a single coin flip to counting, waiting, the bell curve and its squares.
 The remaining pages widen the view: proportions, extremes, power laws, and a
 guide to everything else. Each page builds on the earlier ones.
-
-<a id="field-guide"></a>
-### **A Field Guide to Distributions**
-
-> **Idea:** short cards for the less common distributions, grouped by what produces them, so the reader can recognize them in the wild. Ends the series.
->
-> **Sections:**
->   - **Family map at the top**: an interactive diagram of how all the distributions relate, with series pages as solid nodes and cards as clickable ones
->   - Sections, by origin story. Distributions with their own page in the series (in brackets) are only mentioned and linked, not described, so the guide covers everything:
->     - **Flip and count**: [Bernoulli, binomial, geometric, negative binomial]; hypergeometric, Skellam, zero-inflated Poisson, Benford
->     - **Wait for it**: [exponential, Poisson, gamma]; inverse Gaussian, Lévy, Gompertz, hyperexponential
->     - **Add it up**: [normal]
->     - **Square it**: [chi-square]
->     - **Multiply instead of add**: lognormal
->     - **Divide**: Cauchy
->     - **Stay in bounds**: [beta]; Dirichlet, Kumaraswamy, triangular, arcsine
->     - **Go around in circles**: von Mises
->     - **Take the biggest**: [extreme values]
->     - **Rich get richer**: [power laws]
->     - **Never settle**: stable, Laplace, logistic
->     - **Random matrices**: Wigner semicircle, Marchenko–Pastur, Tracy–Widom
->   - Ends with a "Which distribution?" quiz: match a histogram or scenario to its distribution
->
-> **Widgets:**
->   - Each card: name and one-line idea, a small live plot with one slider (built by simulating the mechanism where possible), 2–3 real examples, "when to suspect it", and links to related pages
->   - Cards come from a single JS list, so adding one is a one-entry change; each card draws only when scrolled into view
->
-> **Links:** every page in the series links here from its ending; this page links back to all of them.
 
 ---
 

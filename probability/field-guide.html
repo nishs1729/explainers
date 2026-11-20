@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A Field Guide to Distributions — a visual introduction</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<style>
+:root{
+  --bg:#faf8f4; --surface:#ffffff; --surface-2:#f2efe8; --ink:#1c1c1e; --ink-2:#4c4e55; --ink-3:#8b8d93; --line:#e3dfd5;
+  --one:#16917c; --one-soft:rgba(22,145,124,.15);
+  --zero:#d9573a; --zero-soft:rgba(217,87,58,.15);
+  --accent:#3654c9; --accent-soft:rgba(54,84,201,.11);
+  --gold:#b98317; --gold-soft:rgba(185,131,23,.22);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+    --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+    --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+    --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+    --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+  --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+  --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+  --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+  --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.68 var(--sans);-webkit-font-smoothing:antialiased}
+main{max-width:820px;margin:0 auto;padding:0 20px 80px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;letter-spacing:-.01em}
+h1{font-size:clamp(2.2rem,6vw,3.4rem);margin:.2em 0 .3em}
+h2{font-size:clamp(1.6rem,4vw,2.1rem);margin:0 0 .5em}
+h3{font-size:1.2rem;margin:1.6em 0 .4em}
+p{margin:0 0 1em}
+a{color:var(--accent)}
+strong{font-weight:650}
+em.term{font-style:normal;font-weight:650;color:var(--accent)}
+.muted{color:var(--ink-2)}
+small,.small{font-size:14px}
+
+/* hero */
+.hero{text-align:center;padding:64px 0 24px}
+.kicker{text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--ink-3);margin:0}
+.lede{font-size:1.2rem;color:var(--ink-2);max-width:620px;margin:0 auto}
+.hero-play{max-width:600px;margin:30px auto 0;text-align:left}
+.hero-play .controls{justify-content:center}
+.hint{font-size:15px;color:var(--ink-2);min-height:3.2em;margin:6px 0 0;text-align:center}
+
+.toc{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;margin:28px 0 8px}
+.toc ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 20px;counter-reset:t}
+.toc li{counter-increment:t;font-size:15px}
+.toc li::before{content:counter(t,decimal-leading-zero);font-family:var(--mono);color:var(--ink-3);margin-right:10px;font-size:13px}
+.toc a{color:var(--ink);text-decoration:none}
+.toc a:hover{color:var(--accent)}
+
+section{padding-top:56px}
+.secnum{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.08em;margin-bottom:4px}
+
+.widget{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin:26px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.widget-title{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);margin:0 0 12px;font-weight:600}
+.controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:12px 0}
+.ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:15px}
+.ctrl output{font-family:var(--mono);font-size:14px;min-width:3.2em;color:var(--ink)}
+input[type=range]{accent-color:var(--accent);width:170px;max-width:100%}
+.btn{font:inherit;font-size:14px;line-height:1.2;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;transition:background .15s,transform .1s}
+.btn:hover{border-color:var(--ink-3)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.lh{font-family:var(--serif);font-style:italic;font-size:1.08em}
+.readout{font-family:var(--mono);font-size:14px;color:var(--ink-2);line-height:1.6}
+.readout b{color:var(--ink);font-weight:600}
+.readout .ok{color:var(--one);font-weight:600}
+.readout .warn{color:var(--zero);font-weight:600}
+canvas{display:block;width:100%}
+canvas.pick{cursor:ew-resize;touch-action:pan-y}
+.cap{font-size:13px;color:var(--ink-3);margin:2px 0 6px}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:20px 0}
+.callout p:last-child{margin-bottom:0}
+.katex-display{overflow-x:auto;overflow-y:hidden;padding:4px 0}
+.mathbox{overflow-x:auto;padding:6px 0}
+.katex-display.ovf,.mathbox.ovf{-webkit-mask-image:linear-gradient(to right,#000 82%,transparent);mask-image:linear-gradient(to right,#000 82%,transparent)}
+details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:14px 0;background:var(--surface)}
+details summary{cursor:pointer;font-weight:600;font-size:15px;color:var(--ink-2)}
+details[open] summary{margin-bottom:8px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin-top:8px}
+.legend > span{display:inline-block}
+.legend .sw{vertical-align:middle;margin:0 6px 2px 0}
+.sw{display:inline-block;width:16px;height:10px;border-radius:2px}
+.sw.dot{width:8px;height:8px;border-radius:50%}
+.sw.dash{height:0;border-top:2px dashed var(--ink)}
+.sw.line{height:0;border-top:2px solid var(--ink)}
+
+/* properties */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:18px 0}
+.card{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
+.card h4{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+.card .f{overflow-x:auto;overflow-y:hidden;font-size:15px;min-height:1.8em}
+.card .v{font:600 15px var(--mono);color:var(--accent);margin-top:6px}
+.card p{font-size:15px;margin:0;color:var(--ink-2)}
+.sticky-ctrl{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:6px 22px}
+.minis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:640px){.minis{grid-template-columns:1fr}}
+.mini{border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--surface)}
+.mini .mcap{font-size:13px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.facts{counter-reset:f;list-style:none;padding:0;margin:18px 0}
+.facts li{counter-increment:f;position:relative;padding:12px 0 12px 44px;border-bottom:1px solid var(--line)}
+.facts li::before{content:counter(f);position:absolute;left:0;top:12px;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:600 13px var(--mono)}
+.facts li strong{display:block}
+.table-wrap{overflow-x:auto}
+table.summary{border-collapse:collapse;width:100%;font-size:15px;margin:14px 0}
+table.summary td,table.summary th{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:middle}
+table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3)}
+canvas.tap{cursor:pointer}
+@media (max-width:480px){table.summary td,table.summary th{padding:8px 5px}}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+@media (max-width:640px){.pair{grid-template-columns:1fr}}
+.pair .mcap{font-size:13px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+table.summary td:not(:first-child),table.summary th:not(:first-child){text-align:right;font-family:var(--mono);font-size:14px}
+.btn.right{background:var(--one-soft);border-color:var(--one);color:var(--one)}
+.btn.wrong{background:var(--zero-soft);border-color:var(--zero);color:var(--zero)}
+/* quiz */
+.quiz{display:grid;gap:10px}
+.qitem{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg)}
+.qitem p{margin:0 0 8px;font-size:16px}
+.qbtns{display:flex;flex-wrap:wrap;gap:8px}
+.qexp{font-size:15px;color:var(--ink-2);margin:10px 0 0!important}
+.controls[hidden]{display:none}
+.mcap .katex,.card h4 .katex{text-transform:none}
+@media (max-width:480px){
+  main{padding:0 16px 80px}
+  .widget{padding:14px}
+  .katex-display{font-size:.92em}
+  input[type=range]{width:150px}
+}
+/* field guide */
+.fmap{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0 6px}
+@media (max-width:760px){.fmap{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:480px){.fmap{grid-template-columns:1fr}}
+.fmap svg{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.fmap path{fill:none;stroke:var(--ink-3);stroke-opacity:.28;stroke-width:1.1}
+.fmap path.hl{stroke:var(--accent);stroke-opacity:1;stroke-width:2.2}
+.lane{position:relative;border:1px dashed var(--line);border-radius:12px;padding:8px 10px 6px}
+.lane-t{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);text-decoration:none;font-weight:600;margin-bottom:4px}
+.lane-t:hover{color:var(--accent)}
+.chip{display:inline-block;margin:3px 5px 3px 0;padding:3px 10px;border-radius:999px;font-size:13px;line-height:1.5;text-decoration:none;position:relative;transition:opacity .15s}
+.chip.series{background:var(--accent);color:var(--surface);border:1px solid var(--accent)}
+.chip.card{background:var(--surface);color:var(--accent);border:1px solid var(--accent)}
+.chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.fmap.focus .chip:not(.nb){opacity:.3}
+.seen{font-size:15px;color:var(--ink-2)}
+.seen .chip{margin-left:4px}
+.fg-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin:18px 0}
+.fgcard{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--surface);scroll-margin-top:16px;min-width:0}
+.fgcard h3{margin:0 0 2px;font-size:1.2rem}
+.fgcard .idea{font-size:15px;color:var(--ink-2);margin:0 0 8px}
+.fgcard canvas{height:170px}
+.fgcard .controls{margin:6px 0}
+.fgcard .ctrl{font-size:14px}
+.fgcard input[type=range]{width:130px}
+.fgcard .readout{font-size:13px;min-height:3em}
+.fgcard .fg-h{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600;margin:10px 0 2px}
+.fgcard ul{font-size:14px;padding-left:18px;margin:2px 0 8px;color:var(--ink-2)}
+.fgcard .sus{font-size:14px;margin:0 0 6px}
+.fgcard .lk{font-size:13px;color:var(--ink-3);margin:0}
+.qitem canvas{max-width:420px}
+</style>
+<script>try{var t=localStorage.getItem('xp-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/catalog.js" defer></script>
+<script src="../assets/site.js" defer></script>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <p class="kicker">A visual introduction</p>
+  <h1>A Field Guide to Distributions</h1>
+  <p class="lede">The series gave a page each to a dozen distributions. Out in the wild there are many more, and almost all of them come from a handful of origin stories: counting, waiting, adding, multiplying, dividing, staying in bounds, going round in circles. This guide sorts them by how they arise, so you can recognize one when you meet it.</p>
+</header>
+
+<section id="map" style="padding-top:8px">
+  <h2>The family map</h2>
+  <p>Each box is an origin story. Solid chips have their own page in the series; outlined chips have a card further down. Lines join distributions that turn into one another: a sum, a limit, a ratio, a special case. Hover over or focus a chip to pick out its relatives.</p>
+  <div class="fmap" id="familyMap" role="navigation" aria-label="Family map of distributions"></div>
+  <div class="legend"><span><i class="sw" style="background:var(--accent)"></i><span>has its own page</span></span><span><i class="sw" style="background:var(--surface);border:1px solid var(--accent)"></i><span>card on this page</span></span><span><i class="sw line" style="border-color:var(--ink-3)"></i><span>related: a sum, limit, ratio or special case</span></span></div>
+</section>
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#flip">Flip and count</a></li>
+    <li><a href="#wait">Wait for it</a></li>
+    <li><a href="#add">Add it up</a></li>
+    <li><a href="#square">Square it</a></li>
+    <li><a href="#multiply">Multiply instead of add</a></li>
+    <li><a href="#divide">Divide</a></li>
+    <li><a href="#bounds">Stay in bounds</a></li>
+    <li><a href="#circles">Go around in circles</a></li>
+    <li><a href="#biggest">Take the biggest</a></li>
+    <li><a href="#rich">Rich get richer</a></li>
+    <li><a href="#settle">Never settle</a></li>
+    <li><a href="#matrices">Random matrices</a></li>
+    <li><a href="#quiz-sec">Which distribution?</a></li>
+  </ol>
+</nav>
+
+<section id="flip">
+  <div class="secnum">01</div>
+  <h2>Flip and count</h2>
+  <p>Repeat a yes/no experiment and count. Change how the trials are drawn, what is counted or how the counts are combined, and a whole family appears.</p>
+  <p class="seen">Own pages: <a class="chip series" href="bernoulli.html">Bernoulli</a><a class="chip series" href="binomial.html">Binomial</a><a class="chip series" href="geometric.html">Geometric</a><a class="chip series" href="negative-binomial.html">Negative binomial</a></p>
+  <div class="fg-cards" data-group="flip"><article class="fgcard" id="c-hypergeometric"></article><article class="fgcard" id="c-skellam"></article><article class="fgcard" id="c-zip"></article><article class="fgcard" id="c-benford"></article></div>
+</section>
+
+<section id="wait">
+  <div class="secnum">02</div>
+  <h2>Wait for it</h2>
+  <p>How long until something happens? A constant rate gives the exponential; rates that change with age, mixtures of rates and random walks that must reach a line give the rest.</p>
+  <p class="seen">Own pages: <a class="chip series" href="exponential.html">Exponential</a><a class="chip series" href="poisson.html">Poisson</a><a class="chip series" href="gamma.html">Gamma</a></p>
+  <div class="fg-cards" data-group="wait"><article class="fgcard" id="c-inverse-gaussian"></article><article class="fgcard" id="c-levy"></article><article class="fgcard" id="c-gompertz"></article><article class="fgcard" id="c-hyperexponential"></article></div>
+</section>
+
+<section id="add">
+  <div class="secnum">03</div>
+  <h2>Add it up</h2>
+  <p>Add many independent pieces, none of them dominant, and the total becomes a bell curve: the central limit theorem. This one has a page of its own.</p>
+  <p class="seen">Own page: <a class="chip series" href="normal.html">Normal</a></p>
+</section>
+
+<section id="square">
+  <div class="secnum">04</div>
+  <h2>Square it</h2>
+  <p>Square normal numbers and add them, and you get squared distances, sums of squared errors and sample variances.</p>
+  <p class="seen">Own page: <a class="chip series" href="chi-square.html">Chi-square</a></p>
+</section>
+
+<section id="multiply">
+  <div class="secnum">05</div>
+  <h2>Multiply instead of add</h2>
+  <p>When effects compound, each one a percentage of what is already there, the logarithm turns the product into a sum, and the sum into a bell. The result leans right and never goes below zero.</p>
+  <div class="fg-cards" data-group="multiply"><article class="fgcard" id="c-lognormal"></article></div>
+</section>
+
+<section id="divide">
+  <div class="secnum">06</div>
+  <h2>Divide</h2>
+  <p>Divide one noisy number by another that can come close to zero, and now and then the result is enormous. Ratios can be wilder than either of their parts.</p>
+  <div class="fg-cards" data-group="divide"><article class="fgcard" id="c-cauchy"></article></div>
+</section>
+
+<section id="bounds">
+  <div class="secnum">07</div>
+  <h2>Stay in bounds</h2>
+  <p>Proportions, probabilities and anything else with a hard floor and ceiling need distributions that live on an interval.</p>
+  <p class="seen">Own page: <a class="chip series" href="beta.html">Beta</a></p>
+  <div class="fg-cards" data-group="bounds"><article class="fgcard" id="c-dirichlet"></article><article class="fgcard" id="c-kumaraswamy"></article><article class="fgcard" id="c-triangular"></article><article class="fgcard" id="c-arcsine"></article></div>
+</section>
+
+<section id="circles">
+  <div class="secnum">08</div>
+  <h2>Go around in circles</h2>
+  <p>Directions, times of day and dates in the year wrap around: 359° is next to 1°, and 23:59 is next to midnight. They need distributions on a circle.</p>
+  <div class="fg-cards" data-group="circles"><article class="fgcard" id="c-von-mises"></article></div>
+</section>
+
+<section id="biggest">
+  <div class="secnum">09</div>
+  <h2>Take the biggest</h2>
+  <p>The largest (or smallest) of many values has its own universal shapes: Gumbel, Fréchet and Weibull.</p>
+  <p class="seen">Own page: <a class="chip series" href="extreme-values.html">Extreme values</a></p>
+</section>
+
+<section id="rich">
+  <div class="secnum">10</div>
+  <h2>Rich get richer</h2>
+  <p>When size breeds size, there is no typical value: power laws, Pareto and Zipf.</p>
+  <p class="seen">Own page: <a class="chip series" href="power-laws.html">Power laws</a></p>
+</section>
+
+<section id="settle">
+  <div class="secnum">11</div>
+  <h2>Never settle</h2>
+  <p>Sums of heavy-tailed pieces never become a bell, and differences of waits and maxima give bells with fatter, straighter tails. These are the normal’s wilder cousins.</p>
+  <div class="fg-cards" data-group="settle"><article class="fgcard" id="c-stable"></article><article class="fgcard" id="c-laplace"></article><article class="fgcard" id="c-logistic"></article></div>
+</section>
+
+<section id="matrices">
+  <div class="secnum">12</div>
+  <h2>Random matrices</h2>
+  <p>Fill a big matrix with noise and look at its eigenvalues. They don’t scatter like independent numbers; they repel each other and settle into shapes of their own, which turn up in physics, statistics and data science.</p>
+  <div class="fg-cards" data-group="matrices"><article class="fgcard" id="c-wigner"></article><article class="fgcard" id="c-marchenko-pastur"></article><article class="fgcard" id="c-tracy-widom"></article></div>
+</section>
+
+<section id="quiz-sec">
+  <div class="secnum">13</div>
+  <h2>Which distribution?</h2>
+  <p>Match each histogram or scenario to its most likely distribution. Some answers have their own page; others are cards above.</p>
+  <div class="widget">
+    <div class="quiz" id="quiz"></div>
+    <div class="readout" id="quizScore" style="margin-top:10px" aria-live="polite"></div>
+  </div>
+
+  <p>This is the end of the series. It began with a <a href="bernoulli.html">single coin flip</a> and went through <a href="binomial.html">counting</a>, <a href="geometric.html">waiting in steps</a> and <a href="exponential.html">in continuous time</a>, <a href="poisson.html">rare events</a>, <a href="negative-binomial.html">overdispersion</a>, the <a href="normal.html">bell curve</a>, <a href="gamma.html">sums of waits</a>, <a href="chi-square.html">squares</a>, <a href="beta.html">proportions</a>, <a href="extreme-values.html">extremes</a> and <a href="power-laws.html">power laws</a>, ending with this field guide. <a href="../index.html">Browse all explainers</a>.</p>
+</section>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script>
+(function(){
+'use strict';
+/* ---------- helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const root = document.documentElement;
+const C = n => getComputedStyle(root).getPropertyValue(n).trim();
+const clamp = (x,a,b) => Math.max(a, Math.min(b, x));
+const f1 = x => x.toFixed(1), f2 = x => x.toFixed(2), f3 = x => x.toFixed(3), f4 = x => x.toFixed(4);
+const fmtN = x => Math.abs(x - Math.round(x)) < 1e-9 ? String(Math.round(x)) : String(+x.toFixed(2));
+const pct = x => (100 * x).toFixed(1) + '%';
+const SANS = 'system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';
+const MONO = 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
+const RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+const TAU = Math.PI * 2;
+
+if (window.renderMathInElement) {
+  renderMathInElement(document.body, {
+    delimiters: [{left:'$$', right:'$$', display:true}, {left:'\\(', right:'\\)', display:false}],
+    throwOnError: false
+  });
+}
+function markOverflow(el){
+  if (!el) return;
+  el.classList.toggle('ovf', el.scrollWidth - el.clientWidth - el.scrollLeft > 2);
+}
+function markAllOverflow(){ $$('.katex-display').forEach(markOverflow); }
+document.addEventListener('scroll', e => {
+  if (e.target.classList && e.target.classList.contains('katex-display')) markOverflow(e.target);
+}, true);
+markAllOverflow();
+window.addEventListener('load', markAllOverflow);   // KaTeX web fonts can change widths
+function fit(c){
+  const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+  if (c.width !== w*dpr || c.height !== h*dpr) { c.width = w*dpr; c.height = h*dpr; }
+  const ctx = c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  return {ctx, w, h};
+}
+const redraws = [];
+function redrawAll(){ redraws.forEach(f => f()); markAllOverflow(); }
+let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(redrawAll, 80); });
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+if (mq.addEventListener) mq.addEventListener('change', redrawAll);
+new MutationObserver(redrawAll).observe(root, {attributes:true, attributeFilter:['data-theme']});
+
+function bindRange(input, out, cb, fmt){
+  fmt = fmt || fmtN;
+  const f = () => { const v = parseFloat(input.value); if (out) out.textContent = fmt(v); cb(v); };
+  input.addEventListener('input', f); f();
+}
+function setRange(input, v){ input.value = v; input.dispatchEvent(new Event('input')); }
+function niceTicks(max, count){
+  const raw = max / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const step = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag;
+  const t = []; for (let v = 0; v <= max + 1e-9; v += step) t.push(v); return t;
+}
+function intStep(px, minPx){
+  for (const s of [1,2,5,10,20,25,50,100,200,250,500,1000]) if (s * px >= minPx) return s;
+  return 1000;
+}
+function yGrid(ctx, X0, X1, ys, ticks, fmt){
+  ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ticks.forEach(v => {
+    const y = Math.round(ys(v)) + .5;
+    ctx.strokeStyle = C('--line'); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X0, y); ctx.lineTo(X1, y); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.fillText(fmt(v), X0 - 6, y);
+  });
+}
+function stepFmt(ticks){ const st = ticks.length > 1 ? ticks[1] - ticks[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9)); return v => v.toFixed(d); }
+function roundRect(ctx, x, y, w, h, r){
+  r = Math.max(0, Math.min(r, w/2, Math.abs(h)/2));
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+function dot(ctx, x, y, r){ ctx.beginPath(); ctx.arc(x, y, Math.max(0.5, r), 0, TAU); ctx.fill(); }
+
+/* continuous axes: x from xmin to xmax, y from 0 to ymax (or a custom y-scale) */
+function cax(ctx, w, h, o){
+  const X0 = o.left != null ? o.left : 44, X1 = w - (o.right != null ? o.right : 12);
+  const Y0 = h - (o.bottom != null ? o.bottom : 24), Y1 = o.top != null ? o.top : 12;
+  const xmin = o.xmin || 0, xmax = o.xmax;
+  const xs = x => X0 + (x - xmin) / (xmax - xmin) * (X1 - X0);
+  const ixs = px => xmin + (px - X0) / (X1 - X0) * (xmax - xmin);
+  const ys = o.yscale ? o.yscale(Y0, Y1) : (v => Y0 - v / o.ymax * (Y0 - Y1));
+  if (o.ygrid !== false) {
+    const t = o.yticks || niceTicks(o.ymax, o.ny || 4).filter(v => v <= o.ymax * 1.0001);
+    yGrid(ctx, X0, X1, ys, t, o.yfmt || stepFmt(t));
+  }
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  if (o.xlabels !== false) {
+    // ticks at round multiples of the step, wherever the axis starts
+    const t0 = niceTicks(xmax - xmin, Math.max(2, Math.floor((X1 - X0) / (o.xgap || 58))));
+    const st = t0.length > 1 ? t0[1] - t0[0] : (xmax - xmin), xt = [];
+    for (let v = Math.ceil(xmin / st - 1e-9) * st; v <= xmax + st * 1e-9; v += st) xt.push(Math.abs(v) < st * 1e-9 ? 0 : v);
+    const fmt = o.xfmt || stepFmt(t0);
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    xt.forEach(v => ctx.fillText(fmt(v), xs(v), Y0 + 6));
+  }
+  return {X0, X1, Y0, Y1, xs, ixs, ys};
+}
+function clipTo(ctx, A){ ctx.save(); ctx.beginPath(); ctx.rect(A.X0, A.Y1 - 4, A.X1 - A.X0 + 1, A.Y0 - A.Y1 + 4.5); ctx.clip(); }
+function pathFn(ctx, A, f, x0, x1, n){
+  n = n || 240; ctx.beginPath(); let on = false;
+  for (let i = 0; i <= n; i++) {
+    const x = x0 + (x1 - x0) * i / n, v = f(x);
+    if (!isFinite(v)) { on = false; continue; }
+    const px = A.xs(x), py = A.ys(v);
+    if (on) ctx.lineTo(px, py); else { ctx.moveTo(px, py); on = true; }
+  }
+}
+function fillFn(ctx, A, f, x0, x1, color, n){
+  if (!(x1 > x0)) return;
+  n = n || 160; ctx.beginPath(); ctx.moveTo(A.xs(x0), A.Y0);
+  for (let i = 0; i <= n; i++) { const x = x0 + (x1 - x0) * i / n; ctx.lineTo(A.xs(x), A.ys(f(x))); }
+  ctx.lineTo(A.xs(x1), A.Y0); ctx.closePath(); ctx.fillStyle = color; ctx.fill();
+}
+function vline(ctx, x, y0, y1, color, dash, lw){
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw || 1.5; if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(Math.round(x) + .5, y0); ctx.lineTo(Math.round(x) + .5, y1); ctx.stroke(); ctx.restore();
+}
+/* integer-valued bar charts (counts) */
+function frame(ctx, w, h, o){
+  const X0 = o.left != null ? o.left : 44, X1 = w - 10, Y0 = h - 24, Y1 = o.top != null ? o.top : 12;
+  const span = o.hi - o.lo + 1, bw = (X1 - X0) / span;
+  const xc = k => X0 + bw * (k - o.lo + .5), ys = v => Y0 - (v / o.ymax) * (Y0 - Y1);
+  const t = niceTicks(o.ymax, 4).filter(v => v <= o.ymax * 1.0001); yGrid(ctx, X0, X1, ys, t, o.yfmt || stepFmt(t));
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  const st = intStep(bw, 22);
+  for (let k = Math.ceil(o.lo / st) * st; k <= o.hi; k += st) ctx.fillText(o.lab ? o.lab(k) : k, xc(k), Y0 + 6);
+  return {X0, X1, Y0, Y1, bw, xc, ys};
+}
+function drawBars(ctx, F, lo, hi, val, color, frac){
+  const bwid = Math.max(1, F.bw * (frac == null ? .8 : frac));
+  for (let k = lo; k <= hi; k++) {
+    const v = val(k); if (!(v > 0)) continue;
+    const y = F.ys(v), hh = F.Y0 - y; if (hh < 0.2) continue;
+    const x = F.xc(k) - bwid / 2;
+    ctx.fillStyle = typeof color === 'function' ? color(k) : color;
+    if (bwid >= 6 && hh >= 3) { roundRect(ctx, x, y, bwid, hh, Math.min(3, bwid / 4)); ctx.fill(); }
+    else ctx.fillRect(x, y, bwid, hh);
+  }
+}
+/* histogram of continuous values, drawn as a density */
+function drawHistDensity(ctx, A, counts, bw, n, color){
+  if (!n) return;
+  ctx.fillStyle = color;
+  for (let b = 0; b < counts.length; b++) {
+    if (!counts[b]) continue;
+    const d = counts[b] / (n * bw), x0 = A.xs(b * bw), x1 = A.xs((b + 1) * bw), y = A.ys(d);
+    const g = x1 - x0 > 5 ? 1 : 0;
+    ctx.fillRect(x0 + g / 2, y, Math.max(1, x1 - x0 - g), A.Y0 - y);
+  }
+}
+function histMax(counts, bw, n){ let m = 0; if (!n) return 0; for (const c of counts) m = Math.max(m, c / (n * bw)); return m; }
+/* ---------- special functions ---------- */
+const LF = [0];
+function lf(n){ while (LF.length <= n) { const i = LF.length; LF.push(LF[i-1] + Math.log(i)); } return LF[n]; }
+function lgam(x){
+  const g = 7, c = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+  if (x < 0.5) return Math.log(Math.PI / Math.abs(Math.sin(Math.PI * x))) - lgam(1 - x);
+  x -= 1; let a = c[0]; const t = x + g + 0.5;
+  for (let i = 1; i < 9; i++) a += c[i] / (x + i);
+  return 0.5 * Math.log(TAU) + (x + 0.5) * Math.log(t) - t + Math.log(a);
+}
+function gammaPQ(a, x){   // regularized incomplete gamma: [P(a, x), Q(a, x)], each accurate in its own tail
+  if (x <= 0) return [0, 1];
+  const lead = Math.exp(-x + a * Math.log(x) - lgam(a));
+  if (x < a + 1) {
+    let ap = a, del = 1 / a, sum = del;
+    for (let i = 0; i < 4000; i++) { ap += 1; del *= x / ap; sum += del; if (Math.abs(del) < Math.abs(sum) * 1e-16) break; }
+    const P = Math.min(1, sum * lead); return [P, 1 - P];
+  }
+  const TINY = 1e-300; let b = x + 1 - a, c = 1 / TINY, d = 1 / b, hh = d;
+  for (let i = 1; i < 4000; i++) {
+    const an = -i * (i - a); b += 2;
+    d = an * d + b; if (Math.abs(d) < TINY) d = TINY;
+    c = b + an / c; if (Math.abs(c) < TINY) c = TINY;
+    d = 1 / d; const del = d * c; hh *= del; if (Math.abs(del - 1) < 1e-16) break;
+  }
+  const Q = Math.max(0, lead * hh); return [1 - Q, Q];
+}
+const gammaP = (a, x) => gammaPQ(a, x)[0];
+function gammaQuantile(a, p){   // quantile of Gamma(shape a, rate 1), by bisection
+  let lo = 0, hi = Math.max(1, 2 * a);
+  while (gammaP(a, hi) < p) hi *= 2;
+  for (let i = 0; i < 200; i++) { const m = (lo + hi) / 2; if (gammaP(a, m) < p) lo = m; else hi = m; if (hi - lo < 1e-12 * hi) break; }
+  return (lo + hi) / 2;
+}
+function gPDF(t, a, l){   // Gamma(shape a, rate l) density, in log space
+  if (t <= 0) return a < 1 ? Infinity : a === 1 ? l : 0;
+  return Math.exp(a * Math.log(l) + (a - 1) * Math.log(t) - l * t - lgam(a));
+}
+const gCDF = (t, a, l) => gammaP(a, l * t);
+const gQ = (a, l, p) => gammaQuantile(a, p) / l;
+const SQ2PI = Math.sqrt(TAU);
+const phi = z => Math.exp(-z * z / 2) / SQ2PI;
+const nPDF = (x, m, s) => phi((x - m) / s) / s;
+function poisPMF(l, k){ return k < 0 ? 0 : l <= 0 ? (k === 0 ? 1 : 0) : Math.exp(-l + k * Math.log(l) - lf(k)); }
+
+/* ---------- samplers ---------- */
+const expS = () => -Math.log(1 - Math.random());
+function gaussS(){ let u = 0; while (u === 0) u = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(TAU * Math.random()); }
+function gammaS(a){   // Marsaglia–Tsang, shape a, rate 1
+  if (a < 1) { let u = 0; while (u === 0) u = Math.random(); return gammaS(a + 1) * Math.pow(u, 1 / a); }
+  const d = a - 1 / 3, c = 1 / Math.sqrt(9 * d);
+  for (;;) {
+    let x, v;
+    do { x = gaussS(); v = 1 + c * x; } while (v <= 0);
+    v = v * v * v; const u = Math.random();
+    if (u < 1 - 0.0331 * x * x * x * x) return d * v;
+    if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) return d * v;
+  }
+}
+function poisS(l){   // exact Poisson sampler
+  if (!(l > 0)) return 0;
+  if (l < 30) { let k = 0, s = expS(); while (s < l) { k++; s += expS(); } return k; }
+  const m = Math.floor(l), u = Math.random();
+  let F = 1 - gammaP(m + 1, l), pm = poisPMF(l, m), p = pm, k = m;
+  if (u <= F) { while (k > 0 && u <= F - p) { F -= p; p = p * k / l; k--; } return k; }
+  while (u > F && p > 0 && k < m + 1e6) { k++; p = p * l / k; F += p; }
+  return k;
+}
+
+/* ---------- formatting and small tools ---------- */
+const nf = n => n.toLocaleString('en-US');
+const fmtSig = x => { const a = Math.abs(x); if (Math.abs(x - Math.round(x)) < 1e-9) return nf(Math.round(x)); return a >= 1e4 ? nf(Math.round(x)) : a >= 100 ? x.toFixed(0) : a >= 1 ? x.toFixed(2) : x.toFixed(3); };
+const pp = x => (100 * x).toFixed(2) + '%';
+function pickBtns(attr, cb){
+  const bs = $$('[data-' + attr + ']');
+  bs.forEach(b => b.addEventListener('click', () => {
+    bs.forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
+    cb(b.dataset[attr]);
+  }));
+  return bs;
+}
+function onScreen(el, cb){
+  if ('IntersectionObserver' in window) new IntersectionObserver(es => cb(es[0].isIntersecting)).observe(el);
+}
+function histDraw(ctx, A, counts, x0, bw, n, color){
+  ctx.fillStyle = color;
+  counts.forEach((c, b) => {
+    if (!c) return;
+    const xa = A.xs(x0 + b * bw), xb = A.xs(x0 + (b + 1) * bw), y = A.ys(c / (n * bw)), g = xb - xa > 5 ? 1 : 0;
+    ctx.fillRect(xa + g / 2, y, Math.max(1, xb - xa - g), A.Y0 - y);
+  });
+}
+/* y-axis top for a gamma density on [0, x1]: the peak, or for shape < 1 (infinite at 0) a value that shows the body */
+function gYmax(a, l, x1){
+  if (a >= 1) return gPDF(a === 1 ? 0 : (a - 1) / l, a, l);
+  return gPDF(x1 * 0.03, a, l);   // the spike at 0 runs off the top; the rest of the curve stays readable
+}
+
+/* ---------- symmetric eigenvalues: Householder to tridiagonal, then implicit QL ---------- */
+function tridiag(a, n){   // a: array of Float64Array rows (destroyed); returns {d, e} with e[i] coupling i-1 and i
+  const d = new Float64Array(n), e = new Float64Array(n);
+  for (let i = n - 1; i > 0; i--) {
+    const l = i - 1; let h = 0, scale = 0;
+    if (l > 0) {
+      for (let k = 0; k <= l; k++) scale += Math.abs(a[i][k]);
+      if (scale === 0) e[i] = a[i][l];
+      else {
+        for (let k = 0; k <= l; k++) { a[i][k] /= scale; h += a[i][k] * a[i][k]; }
+        let f = a[i][l]; let g = f >= 0 ? -Math.sqrt(h) : Math.sqrt(h);
+        e[i] = scale * g; h -= f * g; a[i][l] = f - g; f = 0;
+        for (let j = 0; j <= l; j++) {
+          g = 0;
+          for (let k = 0; k <= j; k++) g += a[j][k] * a[i][k];
+          for (let k = j + 1; k <= l; k++) g += a[k][j] * a[i][k];
+          e[j] = g / h; f += e[j] * a[i][j];
+        }
+        const hh = f / (h + h);
+        for (let j = 0; j <= l; j++) {
+          f = a[i][j]; e[j] = g = e[j] - hh * f;
+          for (let k = 0; k <= j; k++) a[j][k] -= (f * e[k] + g * a[i][k]);
+        }
+      }
+    } else e[i] = a[i][l];
+  }
+  for (let i = 0; i < n; i++) d[i] = a[i][i];
+  return {d, e};
+}
+function tqli(d, e, n){   // eigenvalues of the tridiagonal (d, e) into d; e[i] couples i-1 and i on entry
+  for (let i = 1; i < n; i++) e[i - 1] = e[i];
+  e[n - 1] = 0;
+  for (let l = 0; l < n; l++) {
+    let iter = 0, m;
+    do {
+      for (m = l; m < n - 1; m++) { const dd = Math.abs(d[m]) + Math.abs(d[m + 1]); if (Math.abs(e[m]) <= 1e-15 * dd) break; }
+      if (m !== l) {
+        if (iter++ === 60) break;
+        let g = (d[l + 1] - d[l]) / (2 * e[l]), r = Math.hypot(g, 1);
+        g = d[m] - d[l] + e[l] / (g + (g >= 0 ? Math.abs(r) : -Math.abs(r)));
+        let s = 1, c = 1, p = 0, i;
+        for (i = m - 1; i >= l; i--) {
+          let f = s * e[i]; const b = c * e[i];
+          e[i + 1] = (r = Math.hypot(f, g));
+          if (r === 0) { d[i + 1] -= p; e[m] = 0; break; }
+          s = f / r; c = g / r; g = d[i + 1] - p; r = (d[i] - g) * s + 2 * c * b; d[i + 1] = g + (p = s * r); g = c * r - b;
+        }
+        if (r === 0 && i >= l) continue;
+        d[l] -= p; e[l] = g; e[m] = 0;
+      }
+    } while (m !== l);
+  }
+  return d;
+}
+function symEig(rows, n){ const {d, e} = tridiag(rows, n); return tqli(d, e, n); }
+/* ---------- small tools ---------- */
+const lC = (n, k) => k < 0 || k > n ? -Infinity : lf(n) - lf(k) - lf(n - k);
+const pctD = (x, d) => (100 * x).toFixed(d == null ? (x < 0.01 && x > 0 ? 2 : 1) : d) + '%';
+const sgn = (x, d) => (x < 0 && Math.abs(x) >= 0.5 * Math.pow(10, -d) ? '−' : '') + Math.abs(x).toFixed(d);
+function besselI(nu, z){ let s = 0; for (let m = 0; m < 80; m++) { const t = Math.exp((2 * m + nu) * Math.log(z / 2 || 1e-300) - lf(m) - lf(m + nu)); s += t; if (t < s * 1e-16) break; } return z === 0 ? (nu === 0 ? 1 : 0) : s; }
+const chiS = k => Math.sqrt(2 * gammaS(k / 2));
+const N_SIM = 4000;
+/* histogram (as a density) of continuous samples against an exact density */
+function histPdf(ctx, w, h, o){
+  const B = o.bins || 40, bw = (o.x1 - o.x0) / B, counts = new Array(B).fill(0); let off = 0;
+  for (const v of o.data) { if (v < o.x0 || v >= o.x1) { off++; continue; } counts[Math.floor((v - o.x0) / bw)]++; }
+  let ym = histMax(counts, bw, o.data.length);
+  if (o.pdf) for (let i = 0; i <= 200; i++) { const v = o.pdf(o.x0 + (o.x1 - o.x0) * i / 200); if (isFinite(v)) ym = Math.max(ym, v); }
+  if (o.ycap) ym = Math.min(ym, o.ycap);
+  const A = cax(ctx, w, h, {xmin: o.x0, xmax: o.x1, ymax: ym * 1.12, left: 38, xgap: 44, ny: 3, xfmt: o.xfmt});
+  clipTo(ctx, A);
+  histDraw(ctx, A, counts, o.x0, bw, o.data.length, C('--accent'));
+  if (o.pdf) { ctx.strokeStyle = C('--gold'); ctx.lineWidth = 2.2; pathFn(ctx, A, o.pdf, o.x0 + 1e-9, o.x1 - 1e-9, 400); ctx.stroke(); }
+  ctx.restore();
+  if (o.marks) o.marks.forEach(([x, col]) => { if (x >= o.x0 && x <= o.x1) vline(ctx, A.xs(x), A.Y1, A.Y0, C(col), [5, 4], 1.6); });
+  return {A, off};
+}
+/* bars for whole-number samples against exact probabilities */
+function histPmf(ctx, w, h, o){
+  const cnt = {}; for (const v of o.data) cnt[v] = (cnt[v] || 0) + 1;
+  let ym = 0; for (let k = o.k0; k <= o.k1; k++) ym = Math.max(ym, (cnt[k] || 0) / o.data.length, o.pmf(k));
+  const F = frame(ctx, w, h, {lo: o.k0, hi: o.k1, ymax: ym * 1.15, left: 38, lab: o.lab});
+  drawBars(ctx, F, o.k0, o.k1, k => (cnt[k] || 0) / o.data.length, C('--accent'), .62);
+  ctx.fillStyle = C('--gold'); for (let k = o.k0; k <= o.k1; k++) dot(ctx, F.xc(k), F.ys(o.pmf(k)), 3.6);
+  return F;
+}
+const sample = (n, f) => { const a = new Float64Array(n); for (let i = 0; i < n; i++) a[i] = f(); return a; };
+const mean = a => { let s = 0; for (const v of a) s += v; return s / a.length; };
+const sdv = a => { const m = mean(a); let s = 0; for (const v of a) s += (v - m) ** 2; return Math.sqrt(s / (a.length - 1)); };
+const sorted = a => Float64Array.from(a).sort();
+const quant = (s, p) => s[Math.min(s.length - 1, Math.floor(p * s.length))];
+
+/* ---------- the cards: one entry each ---------- */
+const CARDS = [
+/* Flip and count */
+{id: 'hypergeometric', name: 'Hypergeometric', group: 'flip',
+ idea: 'Count successes when you draw without putting anything back.',
+ slider: {label: 'draws \\(n\\) from 50 (20 marked)', min: 1, max: 50, step: 1, value: 10},
+ leg: [['bar', 'simulated draws'], ['dot', 'exact probabilities']],
+ run(n){
+   const N = 50, K = 20, data = new Int32Array(N_SIM);
+   for (let r = 0; r < N_SIM; r++) { let rk = K, rn = N, c = 0; for (let i = 0; i < n; i++) { if (Math.random() < rk / rn) { c++; rk--; } rn--; } data[r] = c; }
+   const pmf = k => Math.exp(lC(K, k) + lC(N - K, n - k) - lC(N, n));
+   const vb = n * .4 * .6, vh = vb * (N - n) / (N - 1);
+   return {draw: (ctx, w, h) => histPmf(ctx, w, h, {data, k0: Math.max(0, n - 30), k1: Math.min(n, K), pmf}),
+     read: `marked items in ${n} ${n === 1 ? 'draw' : 'draws'}: mean <b>${f2(n * .4)}</b> · variance <b>${f2(vh)}</b>, against ${f2(vb)} for the binomial (with replacement)` + (n === 50 ? ' · drawing all 50 always finds exactly 20' : '')};
+ },
+ ex: ['The number of hearts in a five-card poker hand.', 'Defective items in a sample checked from a small batch.', 'How many of your lottery numbers are drawn.'],
+ sus: 'you sample without replacement from a small, fixed population, so every draw changes the odds for the next one.',
+ links: [['binomial.html', 'Binomial']]},
+{id: 'skellam', name: 'Skellam', group: 'flip',
+ idea: 'The difference between two independent Poisson counts.',
+ slider: {label: 'away team’s mean goals', min: 0.2, max: 3, step: 0.1, value: 1.1},
+ leg: [['bar', 'simulated goal differences'], ['dot', 'exact probabilities']],
+ run(l2){
+   const l1 = 1.5, data = new Int32Array(N_SIM);
+   for (let r = 0; r < N_SIM; r++) data[r] = poisS(l1) - poisS(l2);
+   const pmf = k => Math.exp(-(l1 + l2) + k / 2 * Math.log(l1 / l2)) * besselI(Math.abs(k), 2 * Math.sqrt(l1 * l2));
+   let pw = 0, pd = pmf(0); for (let k = 1; k < 40; k++) pw += pmf(k);
+   return {draw: (ctx, w, h) => histPmf(ctx, w, h, {data, k0: -6, k1: 6, pmf, lab: k => k < 0 ? '−' + (-k) : String(k)}),
+     read: `home team scores 1.5 on average · home win <b>${pctD(pw)}</b> · draw <b>${pctD(pd)}</b> · away win <b>${pctD(1 - pw - pd)}</b> · mean difference ${sgn(l1 - l2, 1)}, variance ${f1(l1 + l2)}`};
+ },
+ ex: ['Goal difference in a football match, in simple models where each side’s goals are Poisson.', 'The difference between photon counts in two detectors, as in background subtraction.'],
+ sus: 'you subtract one count from another, so the result can be negative.',
+ links: [['poisson.html', 'Poisson']]},
+{id: 'zip', name: 'Zero-inflated Poisson', group: 'flip',
+ idea: 'A Poisson count, except that some units can never have an event at all.',
+ slider: {label: 'share of “never” units \\(\\pi\\)', min: 0, max: 0.8, step: 0.05, value: 0.3},
+ leg: [['bar', 'simulated counts'], ['dot', 'exact probabilities']],
+ run(pz){
+   const L = 3, data = new Int32Array(N_SIM);
+   for (let r = 0; r < N_SIM; r++) data[r] = Math.random() < pz ? 0 : poisS(L);
+   const pmf = k => (k === 0 ? pz : 0) + (1 - pz) * Math.exp(-L + k * Math.log(L) - lf(k));
+   const m = (1 - pz) * L;
+   return {draw: (ctx, w, h) => histPmf(ctx, w, h, {data, k0: 0, k1: 10, pmf}),
+     read: `others are Poisson(3) · zeros <b>${pctD(pmf(0))}</b>, where a Poisson with the same mean ${f2(m)} gives ${pctD(Math.exp(-m))} · variance/mean = 1 + πλ = <b>${f2(1 + pz * L)}</b>`};
+ },
+ ex: ['Cigarettes smoked yesterday, in a survey that includes non-smokers.', 'Fish caught per visitor at a lake, when some visitors never fish.', 'Insurance claims, when some policies can never lead to one.'],
+ sus: 'there are far more zeros than a Poisson with the same mean allows, and the zeros plausibly come from units that “can’t”.',
+ links: [['poisson.html#overdispersion', 'Poisson'], ['negative-binomial.html', 'Negative binomial']]},
+{id: 'benford', name: 'Benford’s law', group: 'flip',
+ idea: 'The leading digit of numbers spread over many orders of magnitude is 1 about 30% of the time.',
+ slider: {label: 'spread, in powers of ten', min: 0.05, max: 2, step: 0.05, value: 0.4},
+ leg: [['bar', 'leading digits of 4,000 simulated numbers'], ['dot', 'Benford: \\(\\log_{10}(1 + 1/d)\\)']],
+ run(s){
+   const data = new Int32Array(N_SIM);
+   for (let r = 0; r < N_SIM; r++) { const l = s * gaussS() + 0.3, f = l - Math.floor(l); data[r] = Math.min(9, Math.floor(Math.pow(10, f))); }
+   const pmf = d => Math.log10(1 + 1 / d), ones = data.filter(d => d === 1).length / N_SIM;
+   return {draw: (ctx, w, h) => histPmf(ctx, w, h, {data, k0: 1, k1: 9, pmf}),
+     read: `numbers spread over about ${fmtN(+(4 * s).toFixed(1))} powers of ten · leading 1s <b>${pctD(ones)}</b> (Benford 30.1%) · leading 9s <b>${pctD(data.filter(d => d === 9).length / N_SIM)}</b> (Benford 4.6%)` + (s < 0.4 ? ' · too narrow a spread: the digits follow the bell, not Benford' : '')};
+ },
+ ex: ['Populations of towns and countries.', 'Amounts in large sets of financial records, which is why auditors use it to flag possible fabrication.', 'Many physical and scientific measurements spanning several orders of magnitude.'],
+ sus: 'the data span several powers of ten and come from growth or multiplication. It fails for numbers with a narrow range, such as heights or prices set to end in .99.',
+ links: [['power-laws.html', 'Power laws'], ['normal.html#fails', 'Normal (lognormal)']]},
+/* Wait for it */
+{id: 'inverse-gaussian', name: 'Inverse Gaussian', group: 'wait',
+ idea: 'The time for a drifting random walk to first reach a fixed level.',
+ slider: {label: 'drift \\(\\nu\\) toward the level', min: 0.3, max: 3, step: 0.1, value: 1},
+ leg: [['bar', 'simulated first-passage times'], ['line', 'exact density']],
+ run(nu){
+   const R = 1500, dt = 0.004, sq = Math.sqrt(dt), TMAX = 30, data = new Float64Array(R); let cens = 0;
+   for (let r = 0; r < R; r++) { let x = 0, t = 0; while (x < 1 && t < TMAX) { x += nu * dt + sq * gaussS(); t += dt; } if (x < 1) cens++; data[r] = t; }
+   const pdf = t => t <= 0 ? 0 : Math.exp(-((1 - nu * t) ** 2) / (2 * t)) / Math.sqrt(TAU * t ** 3);
+   const x1 = Math.min(TMAX, 1 / nu + 5 * Math.sqrt(1 / nu ** 3));
+   return {draw: (ctx, w, h) => histPdf(ctx, w, h, {data, x0: 0, x1, pdf}),
+     read: `1,500 random walks (time step 0.004) to level 1 · average time <b>${f2(mean(data))}</b> (theory 1/ν = ${f2(1 / nu)}) · sd theory ${f2(Math.sqrt(1 / nu ** 3))}` + (cens ? ` · ${cens} stopped at time 30` : '')};
+ },
+ ex: ['Reaction times in drift–diffusion models of decisions.', 'Time until a slowly degrading part crosses a failure threshold.', 'Durations of strikes or hospital stays, as a right-skewed alternative to the lognormal.'],
+ sus: 'something accumulates noisily toward a threshold, and you are timing how long it takes to get there.',
+ links: [['normal.html', 'Normal'], ['exponential.html', 'Exponential']]},
+{id: 'levy', name: 'Lévy', group: 'wait',
+ idea: 'The first-passage time with no drift: you get there for sure, but its average wait is infinite.',
+ slider: {label: 'scale \\(c\\)', min: 0.2, max: 3, step: 0.1, value: 1},
+ leg: [['bar', 'simulated \\(c/Z^2\\)'], ['line', 'exact density']],
+ run(c){
+   const data = sample(N_SIM, () => c / gaussS() ** 2);
+   const pdf = x => x <= 0 ? 0 : Math.sqrt(c / TAU) * Math.pow(x, -1.5) * Math.exp(-c / (2 * x));
+   const s = sorted(data), far = data.filter(v => v > 10).length / N_SIM;
+   return {draw: (ctx, w, h) => histPdf(ctx, w, h, {data, x0: 0, x1: 10, pdf, bins: 50}),
+     read: `median <b>${f2(quant(s, .5))}</b> (theory 2.20c = ${f2(2.198 * c)}) · ${pctD(far)} beyond 10 (off the chart) · largest of 4,000: <b>${fmtSig(s[N_SIM - 1])}</b> · no mean exists`};
+ },
+ ex: ['The time for a fair random walk to first reach a level above its start.', 'Lévy-flight models of animal search, in which most moves are short and a few are very long (a debated idea).'],
+ sus: 'you are timing a fair, driftless process until it first reaches a level: the waits are usually short but sometimes astronomically long.',
+ links: [['power-laws.html#averages', 'Power laws'], ['normal.html', 'Normal']]},
+{id: 'gompertz', name: 'Gompertz', group: 'wait',
+ idea: 'Lifetimes when the death rate grows by a fixed percentage every year.',
+ slider: {label: 'growth of the death rate \\(c\\) per year', min: 0.05, max: 0.15, step: 0.005, value: 0.085},
+ leg: [['bar', 'simulated ages at death'], ['line', 'exact density']],
+ run(c){
+   const b = 5e-5, data = sample(N_SIM, () => Math.log(1 - c * Math.log(1 - Math.random()) / b) / c);
+   const pdf = t => b * Math.exp(c * t) * Math.exp(-b / c * (Math.exp(c * t) - 1));
+   const med = Math.log(1 + c * Math.LN2 / b) / c;
+   return {draw: (ctx, w, h) => histPdf(ctx, w, h, {data, x0: 0, x1: 130, pdf, bins: 52}),
+     read: `death rate starts at 0.00005 per year and doubles every <b>${f1(Math.LN2 / c)}</b> years · median age at death <b>${f1(med)}</b> · sd ${f1(sdv(data))} years`};
+ },
+ ex: ['Adult human mortality, whose death rate roughly doubles every eight years or so.', 'Life tables used by actuaries for ages from about 30 to 90.', 'Lifetimes of many animals kept in captivity.'],
+ sus: 'the risk of failure rises steadily with age by a constant percentage, unlike the exponential’s constant risk.',
+ links: [['exponential.html', 'Exponential'], ['extreme-values.html#weakest', 'Weibull']]},
+{id: 'hyperexponential', name: 'Hyperexponential', group: 'wait',
+ idea: 'A mixture of exponential waits with different rates: more variable than any single exponential.',
+ slider: {label: 'share of slow jobs (mean 10)', min: 0, max: 1, step: 0.05, value: 0.2},
+ leg: [['bar', 'simulated waits'], ['line', 'exact density']],
+ run(p){
+   const data = sample(N_SIM, () => Math.random() < p ? 10 * expS() : expS());
+   const pdf = t => t < 0 ? 0 : p * 0.1 * Math.exp(-0.1 * t) + (1 - p) * Math.exp(-t);
+   const m = p * 10 + (1 - p), v = 2 * (p * 100 + (1 - p)) - m * m;
+   return {draw: (ctx, w, h) => histPdf(ctx, w, h, {data, x0: 0, x1: 30, pdf, bins: 60}),
+     read: `fast jobs have mean 1 · mean <b>${f2(m)}</b> · coefficient of variation sd/mean = <b>${f2(Math.sqrt(v) / m)}</b> (a single exponential has exactly 1)`};
+ },
+ ex: ['Call-centre call lengths, when a few calls are long support cases.', 'Service times when two kinds of jobs share one queue.', 'Times between computer requests from a mix of busy and idle users.'],
+ sus: 'waits are more variable than an exponential (sd larger than the mean), with a sharp spike near zero and a long tail that bends on a log-scale survival plot.',
+ links: [['exponential.html', 'Exponential'], ['negative-binomial.html#mixture', 'Negative binomial (another mixture)']]},
+/* Multiply */
+{id: 'lognormal', name: 'Lognormal', group: 'multiply',
+ idea: 'The product of many random factors: its logarithm is normal.',
+ slider: {label: 'number of factors \\(n\\)', min: 1, max: 60, step: 1, value: 15},
+ leg: [['bar', 'simulated products of \\(n\\) factors from 0.7 to 1.3'], ['line', 'lognormal density']],
+ run(n){
+   const lo = 0.7, hi = 1.3, F1 = x => x * Math.log(x) - x, F2 = x => x * (Math.log(x) ** 2 - 2 * Math.log(x) + 2);
+   const el = (F1(hi) - F1(lo)) / (hi - lo), vl = (F2(hi) - F2(lo)) / (hi - lo) - el * el, m = n * el, s = Math.sqrt(n * vl);
+   const data = sample(N_SIM, () => { let p = 1; for (let i = 0; i < n; i++) p *= lo + (hi - lo) * Math.random(); return p; });
+   const pdf = x => x <= 0 ? 0 : Math.exp(-((Math.log(x) - m) ** 2) / (2 * s * s)) / (x * s * Math.sqrt(TAU));
+   const srt = sorted(data);
+   return {draw: (ctx, w, h) => histPdf(ctx, w, h, {data, x0: 0, x1: Math.exp(m + 2.6 * s), pdf, bins: 50}),
+     read: `median <b>${f3(quant(srt, .5))}</b> · mean <b>${f3(mean(data))}</b> (each factor averages 1, so the true mean is 1) · ${pctD(data.filter(v => v < 1).length / N_SIM)} end below 1` + (n < 4 ? ' · with so few factors the lognormal is only a rough fit' : '')};
+ },
+ ex: ['The bulk of personal incomes (the top tail is closer to a power law).', 'Sizes of particles after repeated breaking up, and of many biological measurements.', 'Incubation periods of many infectious diseases.'],
+ sus: 'the values are positive and right-skewed, and their logarithms look bell-shaped. On a log–log plot it can pass for a power law.',
+ links: [['normal.html#fails', 'Normal'], ['power-laws.html#loglog', 'Power laws']]},
+/* Divide */
+{id: 'cauchy', name: 'Cauchy', group: 'divide',
+ idea: 'Where a randomly aimed beam hits a wall, or the ratio of two normals: so heavy-tailed it has no mean.',
+ slider: {label: 'lighthouse distance from shore \\(d\\)', min: 0.2, max: 3, step: 0.1, value: 1},
+ leg: [['bar', 'simulated beam positions \\(d\\tan\\theta\\)'], ['line', 'exact density']],
+ run(d){
+   const data = sample(N_SIM, () => d * Math.tan(Math.PI * (Math.random() - 0.5)));
+   const pdf = x => d / (Math.PI * (d * d + x * x));
+   return {draw: (ctx, w, h) => histPdf(ctx, w, h, {data, x0: -10, x1: 10, pdf, bins: 50, xfmt: v => sgn(v, 0)}),
+     read: `half the beams land within ±d = ±${fmtN(d)} · <b>${pctD(data.filter(v => Math.abs(v) > 10).length / N_SIM)}</b> land beyond ±10 (off the chart) · average of these 4,000 positions: <b>${sgn(mean(data), 2)}</b>, which changes wildly from sample to sample`};
+ },
+ ex: ['The shape of spectral lines broadened by collisions or short lifetimes (the Lorentzian line shape).', 'Ratios of two noisy measurements whose denominator can be near zero.', 'The point where a lighthouse beam, spun to a random angle, meets a straight shore.'],
+ sus: 'you divide by something that can be close to zero, or sample averages refuse to settle as data accumulate.',
+ links: [['normal.html#fails', 'Normal (when the bell fails)']]},
+/* Stay in bounds */
+{id: 'dirichlet', name: 'Dirichlet', group: 'bounds', kind: 'simplex',
+ idea: 'Random shares of several categories that always add up to 1: the beta for more than two parts.',
+ slider: {label: 'concentration \\(\\alpha\\) (same for all three)', min: 0.2, max: 20, step: 0.2, value: 2},
+ leg: [['pt', 'one draw of three shares (1,500 draws)']],
+ run(a){
+   const P = [];
+   for (let r = 0; r < 1500; r++) { const g = [gammaS(a), gammaS(a), gammaS(a)], s = g[0] + g[1] + g[2]; P.push(g.map(v => v / s)); }
+   const sd = Math.sqrt((1 / 3) * (2 / 3) / (3 * a + 1));
+   return {draw: (ctx, w, h) => {
+       const pad = 18, side = Math.min(w - 2 * pad, (h - 2 * pad) / 0.866), x0 = (w - side) / 2, y0 = h - pad;
+       const xy = p => [x0 + side * (p[1] + p[2] / 2), y0 - side * 0.866 * p[2]];
+       ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x0 + side, y0); ctx.lineTo(x0 + side / 2, y0 - side * .866); ctx.closePath(); ctx.stroke();
+       ctx.fillStyle = C('--accent'); ctx.globalAlpha = .45; P.forEach(p => { const [x, y] = xy(p); dot(ctx, x, y, 1.6); }); ctx.globalAlpha = 1;
+       ctx.fillStyle = C('--ink-2'); ctx.font = '11px ' + SANS; ctx.textBaseline = 'top'; ctx.textAlign = 'right'; ctx.fillText('all A', x0 - 2, y0 - 6);
+       ctx.textAlign = 'left'; ctx.fillText('all B', x0 + side + 2, y0 - 6); ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillText('all C', x0 + side / 2, y0 - side * .866 - 3);
+     },
+     read: `each share on its own is Beta(${fmtN(a)}, ${fmtN(2 * a)}): mean 1/3, sd <b>${f3(sd)}</b>` + (a < 1 ? ' · below 1 the draws crowd into the corners: one category takes most' : a > 5 ? ' · large α: shares cluster near an even split' : '')};
+ },
+ ex: ['Topic proportions in documents, in topic models such as latent Dirichlet allocation.', 'Shares of time spent on several activities, or of a budget across categories.', 'Frequencies of several alleles of a gene across populations.'],
+ sus: 'you have several proportions that must add up to 1, or a belief about the probabilities of several outcomes.',
+ links: [['beta.html#gammas', 'Beta'], ['gamma.html', 'Gamma']]},
+{id: 'kumaraswamy', name: 'Kumaraswamy', group: 'bounds',
+ idea: 'A beta look-alike on 0 to 1 whose cumulative distribution has a simple closed form.',
+ slider: {label: 'shape \\(a\\) (with \\(b = 3\\))', min: 0.5, max: 5, step: 0.1, value: 2},
+ leg: [['bar', 'simulated from its quantile function'], ['line', 'exact density']],
+ run(a){
+   const b = 3, data = sample(N_SIM, () => Math.pow(1 - Math.pow(1 - Math.random(), 1 / b), 1 / a));
+   const pdf = x => x <= 0 || x >= 1 ? 0 : a * b * Math.pow(x, a - 1) * Math.pow(1 - Math.pow(x, a), b - 1);
+   return {draw: (ctx, w, h) => histPdf(ctx, w, h, {data, x0: 0, x1: 1, pdf, bins: 40, ycap: 6}),
+     read: `CDF \\(1 - (1 - x^a)^b\\) · median (1 − 2<sup>−1/b</sup>)<sup>1/a</sup> = <b>${f3(Math.pow(1 - Math.pow(2, -1 / b), 1 / a))}</b> · sample mean ${f3(mean(data))}`};
+ },
+ ex: ['Hydrology, where Kumaraswamy proposed it for variables with lower and upper bounds.', 'Simulation and machine learning, as an easy-to-sample stand-in for the beta.'],
+ sus: 'you want a beta-like shape on an interval but need to compute probabilities or draw samples without special functions.',
+ links: [['beta.html', 'Beta']]},
+{id: 'triangular', name: 'Triangular', group: 'bounds',
+ idea: 'Lowest, most likely and highest value, joined by straight lines.',
+ slider: {label: 'most likely value \\(c\\) on 0 to 1', min: 0, max: 1, step: 0.05, value: 0.3},
+ leg: [['bar', 'simulated from its quantile function'], ['line', 'exact density']],
+ run(c){
+   const data = sample(N_SIM, () => { const u = Math.random(); return u < c ? Math.sqrt(u * c) : 1 - Math.sqrt((1 - u) * (1 - c)); });
+   const pdf = x => x < 0 || x > 1 ? 0 : x < c ? 2 * x / c : 2 * (1 - x) / (1 - c);
+   return {draw: (ctx, w, h) => histPdf(ctx, w, h, {data, x0: 0, x1: 1, pdf, bins: 40}),
+     read: `mean (0 + 1 + c)/3 = <b>${f3((1 + c) / 3)}</b> · sample mean ${f3(mean(data))}` + (Math.abs(c - .5) < 1e-9 ? ' · with c = ½ this is the average of two uniform numbers' : '')};
+ },
+ ex: ['Quick project and cost estimates from a minimum, a best guess and a maximum.', 'The average of two random numbers between 0 and 1 (the symmetric case).', 'Rough inputs to risk simulations when data are scarce.'],
+ sus: 'all you really know is a floor, a ceiling and a most likely value.',
+ links: [['beta.html#uses', 'Beta (PERT)']]},
+{id: 'arcsine', name: 'Arcsine', group: 'bounds',
+ idea: 'The share of time a fair game spends in the lead: usually close to 0 or 1, rarely half.',
+ slider: {label: 'length of the game, steps', min: 10, max: 1000, step: 10, value: 200},
+ leg: [['bar', 'simulated share of time ahead'], ['line', 'arcsine density, Beta(½, ½)']],
+ run(n){
+   const R = Math.min(4000, Math.floor(1e6 / n)), data = new Float64Array(R);
+   for (let r = 0; r < R; r++) { let s = 0, prev = 0, up = 0; for (let i = 0; i < n; i++) { s += Math.random() < .5 ? 1 : -1; if (s > 0 || (s === 0 && prev > 0)) up++; prev = s; } data[r] = up / n; }
+   const pdf = x => x <= 0 || x >= 1 ? Infinity : 1 / (Math.PI * Math.sqrt(x * (1 - x)));
+   const ext = data.filter(v => v < .1 || v > .9).length / R;
+   return {draw: (ctx, w, h) => histPdf(ctx, w, h, {data, x0: 0, x1: 1, pdf, bins: 20, ycap: 3.5}),
+     read: `${nf(R)} games of ${n} fair coin tosses · one player ahead at least 90% of the time in <b>${pctD(ext)}</b> of games (arcsine law: 41.0%) · ahead between 40% and 60% of the time: <b>${pctD(data.filter(v => v >= .4 && v <= .6).length / R)}</b> (12.8%)`};
+ },
+ ex: ['Which side of a long fair game is ahead, and for how long.', 'The position of a pendulum or spring seen at a random moment: it lingers near the ends.'],
+ sus: 'a quantity spends most of its time near its extremes and rarely in the middle.',
+ links: [['beta.html#shapes', 'Beta'], ['binomial.html', 'Binomial']]},
+/* Circles */
+{id: 'von-mises', name: 'Von Mises', group: 'circles', kind: 'rose',
+ idea: 'The bell curve wrapped around a circle, for directions and times of day.',
+ slider: {label: 'concentration \\(\\kappa\\)', min: 0, max: 10, step: 0.1, value: 2},
+ leg: [['bar', 'simulated directions, 36 sectors'], ['line', 'exact density']],
+ run(k){
+   const vm = () => {
+     if (k < 1e-6) return Math.PI * (2 * Math.random() - 1);
+     const a = 1 + Math.sqrt(1 + 4 * k * k), b = (a - Math.sqrt(2 * a)) / (2 * k), r = (1 + b * b) / (2 * b);
+     for (;;) {
+       const z = Math.cos(Math.PI * Math.random()), f = (1 + r * z) / (r + z), c = k * (r - f), u2 = Math.random();
+       if (c * (2 - c) - u2 > 0 || Math.log(c / u2) + 1 - c >= 0) return (Math.random() < .5 ? -1 : 1) * Math.acos(Math.max(-1, Math.min(1, f)));
+     }
+   };
+   const data = sample(N_SIM, vm), I0 = besselI(0, k), pdf = t => Math.exp(k * Math.cos(t)) / (TAU * I0);
+   let cs = 0, sn = 0; for (const t of data) { cs += Math.cos(t); sn += Math.sin(t); } const Rl = Math.hypot(cs, sn) / N_SIM;
+   const B = 36, counts = new Array(B).fill(0); for (const t of data) counts[Math.min(B - 1, Math.floor((t + Math.PI) / TAU * B))]++;
+   return {draw: (ctx, w, h) => {
+       const cx = w / 2, cy = h / 2, R = h / 2 - 8, bw = TAU / B;
+       let mx = pdf(0); counts.forEach(c => mx = Math.max(mx, c / (N_SIM * bw)));
+       const rad = d => R * Math.sqrt(d / mx);
+       ctx.strokeStyle = C('--line'); ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU); ctx.stroke();
+       ctx.fillStyle = C('--accent');
+       counts.forEach((c, i) => { const t0 = -Math.PI + i * bw, rr = rad(c / (N_SIM * bw)); ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, rr, t0 - Math.PI / 2 + .01, t0 + bw - Math.PI / 2 - .01); ctx.closePath(); ctx.fill(); });
+       ctx.strokeStyle = C('--gold'); ctx.lineWidth = 2; ctx.beginPath();
+       for (let i = 0; i <= 200; i++) { const t = -Math.PI + TAU * i / 200, rr = rad(pdf(t)), x = cx + rr * Math.cos(t - Math.PI / 2), y = cy + rr * Math.sin(t - Math.PI / 2); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+       ctx.stroke();
+       ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + SANS; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText('mean direction ↑', cx + R + 8 > w - 90 ? 4 : cx + R + 8, 4);
+     },
+     read: `mean resultant length (1 = all in one direction, 0 = no preferred direction): <b>${f3(Rl)}</b> · theory I<sub>1</sub>(κ)/I<sub>0</sub>(κ) = ${f3(k ? besselI(1, k) / I0 : 0)}` + (k === 0 ? ' · κ = 0: uniform around the circle' : '')};
+ },
+ ex: ['Wind directions at a site, roughly, when one direction prevails.', 'Times of day of events, such as hospital admissions or births, on a 24-hour circle.', 'Headings of migrating animals.'],
+ sus: 'the data are angles, directions or times of day or year, where the two ends of the scale meet.',
+ links: [['normal.html', 'Normal']]},
+/* Never settle */
+{id: 'stable', name: 'Stable (Lévy alpha-stable)', group: 'settle', heavy: true,
+ idea: 'What sums of heavy-tailed pieces settle into when the bell curve can’t: a family that includes the normal and the Cauchy.',
+ slider: {label: 'stability index \\(\\alpha\\)', min: 0.5, max: 2, step: 0.05, value: 1.5},
+ leg: [['bar', 'simulated (Chambers–Mallows–Stuck)'], ['line', 'density, computed numerically']],
+ run(a){
+   const data = sample(N_SIM, () => {
+     const V = Math.PI * (Math.random() - .5), W = expS();
+     if (Math.abs(a - 1) < 1e-9) return Math.tan(V);
+     return Math.sin(a * V) / Math.pow(Math.cos(V), 1 / a) * Math.pow(Math.cos((1 - a) * V) / W, (1 - a) / a);
+   });
+   const T = Math.pow(18.4, 1 / a), dt = 0.01, nT = Math.ceil(T / dt), wt = new Float64Array(nT), tt = new Float64Array(nT);
+   for (let i = 0; i < nT; i++) { tt[i] = (i + .5) * dt; wt[i] = Math.exp(-Math.pow(tt[i], a)) * dt; }
+   const cache = new Map();
+   const pdf = x => { const key = x.toFixed(3); if (cache.has(key)) return cache.get(key); let s = 0; for (let i = 0; i < nT; i++) s += Math.cos(tt[i] * x) * wt[i]; s /= Math.PI; cache.set(key, s); return s; };
+   const name = Math.abs(a - 2) < 1e-9 ? ' · α = 2: the normal (variance 2)' : Math.abs(a - 1) < 1e-9 ? ' · α = 1: the Cauchy' : Math.abs(a - .5) < 1e-9 ? ' · α = ½: symmetric relative of the Lévy' : '';
+   return {draw: (ctx, w, h) => histPdf(ctx, w, h, {data, x0: -6, x1: 6, pdf, bins: 48, xfmt: v => sgn(v, 0)}),
+     read: `<b>${pctD(data.filter(v => Math.abs(v) > 6).length / N_SIM)}</b> of draws beyond ±6 (off the chart) · tail like \\(|x|^{-1-\\alpha}\\)` + (a < 2 ? ', so the variance is infinite' : '') + (a <= 1 ? ' and so is the mean' : '') + name};
+ },
+ ex: ['Mandelbrot’s 1963 model for changes in cotton prices.', 'The random gravitational pull on a star from its neighbours (the Holtsmark distribution, α = 3/2).', 'Sums of many power-law pieces with tail exponent below 2.'],
+ sus: 'a quantity is a sum of many pieces with power-law tails, so the central limit theorem doesn’t apply; the rescaled sum keeps the same heavy-tailed shape.',
+ links: [['normal.html#fails', 'Normal'], ['power-laws.html#averages', 'Power laws']]},
+{id: 'laplace', name: 'Laplace', group: 'settle',
+ idea: 'The difference of two exponential waits: a sharp peak with straight, exponential tails.',
+ slider: {label: 'scale \\(b\\)', min: 0.3, max: 2, step: 0.1, value: 1},
+ leg: [['bar', 'simulated differences of two exponentials'], ['line', 'exact density']],
+ run(b){
+   const data = sample(N_SIM, () => b * (expS() - expS()));
+   const pdf = x => Math.exp(-Math.abs(x) / b) / (2 * b);
+   return {draw: (ctx, w, h) => histPdf(ctx, w, h, {data, x0: -6, x1: 6, pdf, bins: 48, xfmt: v => sgn(v, 0)}),
+     read: `sd b√2 = ${f2(b * Math.SQRT2)} · beyond 3 sd: <b>${pctD(data.filter(v => Math.abs(v) > 3 * b * Math.SQRT2).length / N_SIM)}</b> (theory 1.44%, against 0.27% for a normal)`};
+ },
+ ex: ['The noise added to statistics in differential privacy.', 'Errors behind least-absolute-deviation (median) regression, which is the best fit when errors are Laplace.', 'Day-to-day changes in some prices and measurements: peakier than a normal.'],
+ sus: 'the histogram has a sharp, pointed peak, and on a log scale the tails are straight lines rather than a parabola.',
+ links: [['exponential.html', 'Exponential'], ['normal.html', 'Normal']]},
+{id: 'logistic', name: 'Logistic', group: 'settle',
+ idea: 'The difference of two Gumbel maxima: a bell with heavier tails, whose CDF is the logistic curve.',
+ slider: {label: 'scale \\(s\\)', min: 0.3, max: 2, step: 0.1, value: 1},
+ leg: [['bar', 'simulated differences of two Gumbels'], ['line', 'exact density']],
+ run(s){
+   const g = () => -Math.log(-Math.log(Math.random() || 1e-300));
+   const data = sample(N_SIM, () => s * (g() - g()));
+   const pdf = x => { const e = Math.exp(-Math.abs(x) / s); return e / (s * (1 + e) ** 2); };
+   const sd = s * Math.PI / Math.sqrt(3);
+   return {draw: (ctx, w, h) => histPdf(ctx, w, h, {data, x0: -8, x1: 8, pdf, bins: 48, xfmt: v => sgn(v, 0)}),
+     read: `sd sπ/√3 = ${f2(sd)} · beyond 3 sd: <b>${pctD(data.filter(v => Math.abs(v) > 3 * sd).length / N_SIM)}</b> (theory 0.86%, against 0.27% for a normal)`};
+ },
+ ex: ['Logistic regression, which models log-odds; its link function is this CDF.', 'Random-utility choice models, where the difference of two Gumbel-distributed utilities is logistic.', 'Chess-style ratings, where the expected score is often a logistic function of the rating gap.'],
+ sus: 'a probability is modelled through log-odds, or you compare two noisy maxima.',
+ links: [['extreme-values.html', 'Extreme values'], ['normal.html', 'Normal']]},
+/* Random matrices */
+{id: 'wigner', name: 'Wigner semicircle', group: 'matrices', heavy: true,
+ idea: 'The eigenvalues of a big random symmetric matrix fill a semicircle.',
+ slider: {label: 'matrix size \\(n\\)', min: 2, max: 50, step: 1, value: 20},
+ leg: [['bar', 'eigenvalues ÷ √n of random symmetric matrices'], ['line', 'semicircle \\(\\sqrt{4 - x^2}/2\\pi\\)']],
+ run(n){
+   const M = Math.ceil(2000 / n), ev = [];
+   for (let m = 0; m < M; m++) {
+     const A = Array.from({length: n}, () => new Float64Array(n));
+     for (let i = 0; i < n; i++) { A[i][i] = Math.SQRT2 * gaussS(); for (let j = 0; j < i; j++) A[i][j] = A[j][i] = gaussS(); }
+     symEig(A, n).forEach(v => ev.push(v / Math.sqrt(n)));
+   }
+   const data = Float64Array.from(ev), pdf = x => Math.abs(x) >= 2 ? 0 : Math.sqrt(4 - x * x) / (2 * Math.PI);
+   return {draw: (ctx, w, h) => histPdf(ctx, w, h, {data, x0: -3, x1: 3, pdf, bins: 40, xfmt: v => sgn(v, 0)}),
+     read: `${nf(data.length)} eigenvalues from ${M} ${M === 1 ? 'matrix' : 'matrices'} of size ${n} · outside ±2: <b>${pctD(data.filter(v => Math.abs(v) > 2).length / data.length)}</b>` + (n < 10 ? ' · small matrices have soft edges; the semicircle is the large-n limit' : '')};
+ },
+ ex: ['Energy levels of heavy atomic nuclei, which Wigner modelled with random matrices in the 1950s.', 'Spectra of large random networks and of noise in big data matrices.'],
+ sus: 'you look at the eigenvalues of a large symmetric matrix of independent noise.',
+ links: [['normal.html', 'Normal'], ['chi-square.html#chi', 'Chi-square (high dimensions)']]},
+{id: 'marchenko-pastur', name: 'Marchenko–Pastur', group: 'matrices', heavy: true,
+ idea: 'The eigenvalues of a sample covariance matrix of pure noise: spread out, although every true eigenvalue is 1.',
+ slider: {label: 'variables \\(p\\) for 100 samples', min: 5, max: 100, step: 5, value: 30},
+ leg: [['bar', 'eigenvalues of simulated sample covariances'], ['line', 'Marchenko–Pastur density'], ['dash', 'true value: every eigenvalue is 1']],
+ run(p){
+   const n = 100, lam = p / n, a = (1 - Math.sqrt(lam)) ** 2, b = (1 + Math.sqrt(lam)) ** 2, M = Math.ceil(1500 / p), ev = [];
+   for (let m = 0; m < M; m++) {
+     const X = Array.from({length: n}, () => Float64Array.from({length: p}, gaussS));
+     const S = Array.from({length: p}, () => new Float64Array(p));
+     for (let i = 0; i < p; i++) for (let j = 0; j <= i; j++) { let s = 0; for (let r = 0; r < n; r++) s += X[r][i] * X[r][j]; S[i][j] = S[j][i] = s / n; }
+     symEig(S, p).forEach(v => ev.push(v));
+   }
+   const data = Float64Array.from(ev), pdf = x => x <= a || x >= b ? 0 : Math.sqrt((b - x) * (x - a)) / (2 * Math.PI * lam * x);
+   const srt = sorted(data);
+   return {draw: (ctx, w, h) => histPdf(ctx, w, h, {data, x0: 0, x1: b * 1.15 + .1, pdf, bins: 40, marks: [[1, '--ink-2']]}),
+     read: `ratio p/n = ${fmtN(lam)} · eigenvalues range from <b>${f2(srt[0])}</b> to <b>${f2(srt[srt.length - 1])}</b> (theory ${f2(a)} to ${f2(b)}), though the true covariance has every eigenvalue equal to 1`};
+ },
+ ex: ['Principal component analysis on many variables, where noise alone produces large “components”.', 'Correlation matrices of many stock returns, compared against this law to separate signal from noise.', 'Capacity of wireless systems with many antennas.'],
+ sus: 'you estimate a covariance or correlation matrix from not many more observations than variables.',
+ links: [['chi-square.html#variance', 'Chi-square (sample variance)'], ['normal.html', 'Normal']]},
+{id: 'tracy-widom', name: 'Tracy–Widom', group: 'matrices', heavy: true, kind: 'sim',
+ idea: 'The fluctuations of the largest eigenvalue of a big random matrix: a lopsided bell of its own.',
+ slider: {label: 'matrix size \\(n\\)', min: 5, max: 60, step: 5, value: 30},
+ leg: [['bar', 'rescaled largest eigenvalues, 800 matrices'], ['dash', 'known mean, about −1.21']],
+ run(n){
+   const M = 800, data = new Float64Array(M);
+   for (let m = 0; m < M; m++) {
+     // a random symmetric matrix reduced to tridiagonal form has normal diagonal and chi-distributed neighbours (Dumitriu–Edelman)
+     const d = new Float64Array(n), e = new Float64Array(n);
+     for (let i = 0; i < n; i++) { d[i] = Math.SQRT2 * gaussS(); if (i) e[i] = chiS(n - i); }
+     const ev = tqli(d, e, n); let mx = -Infinity; for (const v of ev) if (v > mx) mx = v;
+     data[m] = (mx - 2 * Math.sqrt(n)) * Math.pow(n, 1 / 6);
+   }
+   return {draw: (ctx, w, h) => histPdf(ctx, w, h, {data, x0: -5, x1: 3, bins: 32, marks: [[-1.2065, '--ink-2']], xfmt: v => sgn(v, 0)}),
+     read: `largest eigenvalue λ<sub>max</sub> of ${M} random ${n}×${n} symmetric matrices, rescaled as (λ<sub>max</sub> − 2√n)·n<sup>1/6</sup> · mean <b>${sgn(mean(data), 2)}</b>, sd <b>${f2(sdv(data))}</b> (Tracy–Widom: about −1.21 and 1.27; small matrices are biased low, and the gap closes slowly as n grows) · simulation only: this density has no simple formula`};
+ },
+ ex: ['Tests for whether the top principal component of a data set is more than noise.', 'The length of the longest increasing run in a random shuffle (a close relative of this law).', 'Fluctuations in certain random growth processes, such as some burning or crystal fronts.'],
+ sus: 'you look at the largest of many strongly interacting values, such as the top eigenvalue of a noise matrix.',
+ links: [['extreme-values.html', 'Extreme values']]}
+];
+window.__fg = {CARDS, symEig, tqli, fit};
+
+/* ---------- the family map ---------- */
+(function(){
+  const S = (id, label, page) => ({id, label, href: (page || id) + '.html', series: true});
+  const K = id => { const c = CARDS.find(x => x.id === id); return {id, label: c.name.replace(' (Lévy alpha-stable)', ''), href: '#c-' + id, series: false}; };
+  const LANES = [
+    ['flip', 'Flip and count', [S('bernoulli', 'Bernoulli'), S('binomial', 'Binomial'), S('geometric', 'Geometric'), S('negative-binomial', 'Negative binomial'), K('hypergeometric'), K('skellam'), K('zip'), K('benford')]],
+    ['wait', 'Wait for it', [S('exponential', 'Exponential'), S('poisson', 'Poisson'), S('gamma', 'Gamma'), K('inverse-gaussian'), K('levy'), K('gompertz'), K('hyperexponential')]],
+    ['add', 'Add it up', [S('normal', 'Normal')]],
+    ['square', 'Square it', [S('chi-square', 'Chi-square')]],
+    ['multiply', 'Multiply', [K('lognormal')]],
+    ['divide', 'Divide', [K('cauchy')]],
+    ['bounds', 'Stay in bounds', [S('beta', 'Beta'), K('dirichlet'), K('kumaraswamy'), K('triangular'), K('arcsine')]],
+    ['circles', 'Circles', [K('von-mises')]],
+    ['biggest', 'Take the biggest', [S('extreme-values', 'Extreme values')]],
+    ['rich', 'Rich get richer', [S('power-laws', 'Power laws')]],
+    ['settle', 'Never settle', [K('stable'), K('laplace'), K('logistic')]],
+    ['matrices', 'Random matrices', [K('wigner'), K('marchenko-pastur'), K('tracy-widom')]]
+  ];
+  const EDGES = [
+    ['bernoulli', 'binomial'], ['binomial', 'poisson'], ['binomial', 'normal'], ['binomial', 'hypergeometric'], ['geometric', 'negative-binomial'],
+    ['geometric', 'exponential'], ['exponential', 'gamma'], ['exponential', 'poisson'], ['poisson', 'negative-binomial'], ['gamma', 'negative-binomial'],
+    ['poisson', 'skellam'], ['poisson', 'zip'], ['gamma', 'chi-square'], ['normal', 'chi-square'], ['normal', 'lognormal'], ['normal', 'cauchy'],
+    ['gamma', 'beta'], ['beta', 'dirichlet'], ['beta', 'kumaraswamy'], ['beta', 'arcsine'], ['beta', 'triangular'], ['normal', 'von-mises'],
+    ['normal', 'stable'], ['cauchy', 'stable'], ['levy', 'stable'], ['exponential', 'laplace'], ['extreme-values', 'logistic'],
+    ['exponential', 'hyperexponential'], ['exponential', 'gompertz'], ['normal', 'inverse-gaussian'], ['inverse-gaussian', 'levy'],
+    ['lognormal', 'benford'], ['lognormal', 'power-laws'], ['extreme-values', 'power-laws'], ['exponential', 'extreme-values'],
+    ['normal', 'wigner'], ['wigner', 'tracy-widom'], ['chi-square', 'marchenko-pastur'], ['marchenko-pastur', 'tracy-widom'], ['tracy-widom', 'extreme-values']
+  ];
+  const map = $('#familyMap'), NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('aria-hidden', 'true'); map.appendChild(svg);
+  const chips = {};
+  LANES.forEach(([sec, title, items]) => {
+    const lane = document.createElement('div'); lane.className = 'lane';
+    lane.innerHTML = `<a class="lane-t" href="#${sec}">${title}</a>`;
+    items.forEach(it => {
+      const a = document.createElement('a'); a.className = 'chip ' + (it.series ? 'series' : 'card'); a.href = it.href; a.textContent = it.label; a.dataset.id = it.id;
+      lane.appendChild(a); chips[it.id] = a;
+    });
+    map.appendChild(lane);
+  });
+  const paths = EDGES.map(([a, b]) => { const p = document.createElementNS(NS, 'path'); p.dataset.a = a; p.dataset.b = b; svg.appendChild(p); return p; });
+  function layout(){
+    const R = map.getBoundingClientRect();
+    svg.setAttribute('viewBox', `0 0 ${R.width} ${R.height}`);
+    paths.forEach(p => {
+      const A = chips[p.dataset.a].getBoundingClientRect(), B = chips[p.dataset.b].getBoundingClientRect();
+      const x1 = A.left + A.width / 2 - R.left, y1 = A.top + A.height / 2 - R.top, x2 = B.left + B.width / 2 - R.left, y2 = B.top + B.height / 2 - R.top;
+      const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, dx = x2 - x1, dy = y2 - y1, k = 0.15;
+      p.setAttribute('d', `M${x1},${y1} Q${mx - dy * k},${my + dx * k} ${x2},${y2}`);
+    });
+  }
+  function focus(id){
+    map.classList.toggle('focus', !!id);
+    Object.values(chips).forEach(c => c.classList.remove('nb'));
+    paths.forEach(p => { const on = id && (p.dataset.a === id || p.dataset.b === id); p.classList.toggle('hl', !!on); if (on) { chips[p.dataset.a].classList.add('nb'); chips[p.dataset.b].classList.add('nb'); } });
+    if (id) chips[id].classList.add('nb');
+  }
+  Object.values(chips).forEach(c => {
+    c.addEventListener('mouseenter', () => focus(c.dataset.id)); c.addEventListener('mouseleave', () => focus(null));
+    c.addEventListener('focus', () => focus(c.dataset.id)); c.addEventListener('blur', () => focus(null));
+  });
+  layout(); redraws.push(layout); window.addEventListener('load', layout);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
+})();
+
+/* ---------- build the cards, draw each one when it scrolls into view ---------- */
+(function(){
+  const KOPT = {delimiters: [{left: '$$', right: '$$', display: true}, {left: '\\(', right: '\\)', display: false}], throwOnError: false};
+  const swatch = t => t === 'bar' ? '<i class="sw" style="background:var(--accent)"></i>' : t === 'line' ? '<i class="sw line" style="border-color:var(--gold)"></i>'
+    : t === 'dot' ? '<i class="sw dot" style="background:var(--gold)"></i>' : t === 'pt' ? '<i class="sw dot" style="background:var(--accent)"></i>'
+    : '<i class="sw" style="width:24px;height:2px;border-radius:0;background:repeating-linear-gradient(90deg,var(--ink-2) 0 5px,transparent 5px 9px)"></i>';
+  const live = [];
+  CARDS.forEach(spec => {
+    let el = document.getElementById('c-' + spec.id);   // a static placeholder keeps the anchor in the HTML
+    if (!el) { const host = $(`.fg-cards[data-group="${spec.group}"]`); if (!host) return; el = document.createElement('article'); el.className = 'fgcard'; el.id = 'c-' + spec.id; host.appendChild(el); }
+    const s = spec.slider;
+    el.innerHTML = `<h3>${spec.name}</h3><p class="idea">${spec.idea}</p>` +
+      `<canvas role="img" aria-label="${spec.name}: simulated values against the exact distribution, updated by the slider"></canvas>` +
+      `<div class="legend">${spec.leg.map(([t, l]) => `<span>${swatch(t)}<span>${l}</span></span>`).join('')}</div>` +
+      `<div class="controls"><label class="ctrl">${s.label} <input type="range" min="${s.min}" max="${s.max}" step="${s.step}" value="${s.value}"><output></output></label></div>` +
+      `<div class="readout">Scroll here to run the simulation.</div>` +
+      `<p class="fg-h">Seen in</p><ul>${spec.ex.map(x => `<li>${x}</li>`).join('')}</ul>` +
+      `<p class="sus"><b>Suspect it when</b> ${spec.sus}</p>` +
+      `<p class="lk">Related: ${spec.links.map(([h, l]) => `<a href="${h}">${l}</a>`).join(' · ')}</p>`;
+    if (window.renderMathInElement) renderMathInElement(el, KOPT);
+    const cv = $('canvas', el), inp = $('input', el), out = $('output', el), rd = $('.readout', el);
+    const st = {spec, cv, res: null, v: +s.value, seen: false, pending: false};
+    const fmt = v => fmtN(+v);
+    out.textContent = fmt(st.v);
+    function draw(){ if (!st.res) return; const {ctx, w, h} = fit(cv); st.res.draw(ctx, w, h); }
+    function run(){ st.res = spec.run(st.v); draw(); rd.innerHTML = st.res.read; if (/\\\(/.test(st.res.read) && window.renderMathInElement) renderMathInElement(rd, KOPT); }
+    const sched = () => { if (st.pending) return; st.pending = true; requestAnimationFrame(() => { st.pending = false; if (st.seen) run(); }); };
+    inp.addEventListener('input', () => { st.v = +inp.value; out.textContent = fmt(st.v); if (!spec.heavy) sched(); });
+    inp.addEventListener('change', () => { if (spec.heavy) sched(); });
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver((es, ob) => { if (es[0].isIntersecting && !st.seen) { st.seen = true; ob.disconnect(); run(); } }, {rootMargin: '150px'}).observe(el);
+    } else { st.seen = true; run(); }
+    live.push(st); st.draw = draw;
+  });
+  redraws.push(() => live.forEach(st => st.draw()));
+})();
+
+/* ---------- quiz ---------- */
+(function(){
+  const g = () => -Math.log(-Math.log(Math.random() || 1e-300));
+  const Q = [
+    {q: 'Which distribution made this histogram of eigenvalues of a large random symmetric matrix?', hist: {gen: () => { const v = []; for (let m = 0; m < 30; m++) { const n = 40, A = Array.from({length: n}, () => new Float64Array(n)); for (let i = 0; i < n; i++) { A[i][i] = Math.SQRT2 * gaussS(); for (let j = 0; j < i; j++) A[i][j] = A[j][i] = gaussS(); } symEig(A, n).forEach(x => v.push(x / Math.sqrt(n))); } return v; }, x0: -2.5, x1: 2.5},
+     opts: ['Normal', 'Wigner semicircle', 'Arcsine'], a: 1, e: 'A flat top and steep edges at ±2: the semicircle. A normal would have tails; an arcsine piles up at the edges instead.'},
+    {q: 'The number of red cards in a five-card hand dealt from one deck.', opts: ['Binomial', 'Hypergeometric', 'Poisson'], a: 1, e: 'Cards are dealt without replacement from 52, so each draw changes the odds: hypergeometric.'},
+    {q: 'This histogram shows, for many fair coin-tossing games, the share of the time player A was ahead.', hist: {gen: () => { const v = []; for (let r = 0; r < 3000; r++) { let s = 0, p = 0, up = 0; for (let i = 0; i < 200; i++) { s += Math.random() < .5 ? 1 : -1; if (s > 0 || (s === 0 && p > 0)) up++; p = s; } v.push(up / 200); } return v; }, x0: 0, x1: 1},
+     opts: ['Uniform', 'Normal around ½', 'Arcsine'], a: 2, e: 'The arcsine law: one player tends to stay ahead most of the game, so the shares pile up near 0 and 1.'},
+    {q: 'The goal difference (home minus away) in football matches.', opts: ['Poisson', 'Skellam', 'Geometric'], a: 1, e: 'A difference of two (roughly) Poisson counts is Skellam; it can be negative, which a Poisson can’t.'},
+    {q: 'The direction the wind blows from at noon, measured on many days.', opts: ['Normal', 'Von Mises', 'Uniform'], a: 1, e: 'Directions wrap around: 359° is next to 1°. With a prevailing direction, the von Mises is the natural model.'},
+    {q: 'Time until a light bulb fails, when its failure risk is the same at every age.', opts: ['Exponential', 'Gompertz', 'Lognormal'], a: 0, e: 'A constant risk means a memoryless wait: the exponential. Gompertz is for a risk that rises with age.'},
+    {q: 'This histogram shows the leading digits of the populations of thousands of towns.', hist: {gen: () => { const v = []; for (let r = 0; r < 4000; r++) { const l = 1.2 * gaussS() + 3.5, f = l - Math.floor(l); v.push(Math.min(9, Math.floor(Math.pow(10, f)))); } return v; }, digits: true},
+     opts: ['Uniform over 1 to 9', 'Benford’s law', 'Poisson'], a: 1, e: 'Data spread over several powers of ten have about 30% leading 1s and fewer than 5% leading 9s.'},
+    {q: 'The ratio of two independent zero-mean normal measurements.', opts: ['Normal', 'Cauchy', 'Chi-square'], a: 1, e: 'The denominator is sometimes near zero, so the ratio is occasionally huge: the Cauchy, which has no mean.'},
+    {q: 'The difference between two independent Gumbel-distributed maxima.', opts: ['Logistic', 'Laplace', 'Gumbel'], a: 0, e: 'The difference of two Gumbels with the same scale is logistic. (Two exponentials would give the Laplace.)'},
+    {q: 'The sum of the squares of five independent standard normal numbers.', opts: ['Gamma with shape 5', 'Chi-square with 5 degrees of freedom', 'Lognormal'], a: 1, e: 'Squares of standard normals add up to a chi-square, which is a gamma with shape 5/2 and rate ½, not shape 5.'}
+  ];
+  const box = $('#quiz'); let answered = 0, right = 0; const hists = [];
+  Q.forEach((q, qi) => {
+    const d = document.createElement('div'); d.className = 'qitem';
+    d.innerHTML = `<p>${q.q}</p>` + (q.hist ? `<canvas style="height:110px;margin:0 0 8px" role="img" aria-label="Histogram for question ${qi + 1}"></canvas>` : '') +
+      `<div class="qbtns">${q.opts.map((o, i) => `<button class="btn" data-a="${i}">${o}</button>`).join('')}</div><p class="qexp" hidden></p>`;
+    box.appendChild(d);
+    if (q.hist) {
+      const data = q.hist.gen(), cv = $('canvas', d);
+      const draw = () => { const {ctx, w, h} = fit(cv); if (q.hist.digits) { const cnt = new Array(10).fill(0); data.forEach(x => cnt[x]++); const F = frame(ctx, w, h, {lo: 1, hi: 9, ymax: Math.max(...cnt) / data.length * 1.15, left: 38}); drawBars(ctx, F, 1, 9, k => cnt[k] / data.length, C('--accent'), .6); } else histPdf(ctx, w, h, {data: Float64Array.from(data), x0: q.hist.x0, x1: q.hist.x1, bins: 30}); };
+      hists.push(draw); draw();
+    }
+    const exp = $('.qexp', d);
+    $$('button', d).forEach(b => b.addEventListener('click', () => {
+      const ok = +b.dataset.a === q.a;
+      if (!d.dataset.done) { d.dataset.done = '1'; answered++; if (ok) right++; }
+      $$('button', d).forEach(x => x.classList.remove('right', 'wrong'));
+      b.classList.add(ok ? 'right' : 'wrong');
+      exp.hidden = false; exp.innerHTML = `<b>${ok ? '✓ Right.' : '✗ Not quite: ' + q.opts[q.a] + '.'}</b> ${q.e}`;
+      $('#quizScore').textContent = `${answered} of ${Q.length} answered · ${right} right on the first try`;
+    }));
+  });
+  redraws.push(() => hists.forEach(f => f()));
+})();
+
+redrawAll();
+})();
+</script>
+</body>
+</html>

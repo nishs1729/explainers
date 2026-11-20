@@ -29,8 +29,8 @@ window.EXPLAINERS = {
         {
           "id": "distributions",
           "title": "Probability distributions",
-          "blurb": "From a single coin flip to counting events and waiting for them, in steps and in continuous time, to the bell curve and its squares, a distribution for an unknown probability, the laws of the largest values and the heavy tails of power laws. Each one builds on the last.",
-          "topics": ["bernoulli", "binomial", "geometric", "exponential", "poisson", "negative-binomial", "normal", "gamma", "chi-square", "beta", "extreme-values", "power-laws"]
+          "blurb": "From a single coin flip to counting events and waiting for them, in steps and in continuous time, to the bell curve and its squares, a distribution for an unknown probability, the laws of the largest values and the heavy tails of power laws, ending with a field guide to all the rest. Each one builds on the last.",
+          "topics": ["bernoulli", "binomial", "geometric", "exponential", "poisson", "negative-binomial", "normal", "gamma", "chi-square", "beta", "extreme-values", "power-laws", "field-guide"]
         }
       ],
       "topics": [
@@ -141,6 +141,15 @@ window.EXPLAINERS = {
           "summary": "When size breeds size there is no typical value: Pareto and Zipf, the log–log trap, the rich get richer, and averages that never settle.",
           "tags": ["Pareto", "Zipf", "heavy tails", "preferential attachment", "80/20 rule"],
           "preview": { "select": ".hero-play", "click": ["#heroMany"] }
+        },
+        {
+          "id": "field-guide",
+          "title": "A Field Guide to Distributions",
+          "short": "Field guide",
+          "path": "probability/field-guide.html",
+          "summary": "Short live cards for two dozen less common distributions, sorted by how they arise, with a map of how every distribution in the series connects.",
+          "tags": ["family map", "lognormal", "Cauchy", "von Mises", "random matrices"],
+          "preview": { "select": "#familyMap", "click": [] }
         }
       ]
     }

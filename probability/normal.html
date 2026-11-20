@@ -351,7 +351,7 @@ table.summary td:not(:first-child),table.summary th:not(:first-child){text-align
 <section id="fails">
   <div class="secnum">06</div>
   <h2>When the bell fails</h2>
-  <p>The central limit theorem has conditions, and the most important is a finite standard deviation. The <em class="term">Cauchy distribution</em> breaks it. It looks harmless, a bell with fatter tails, and is what you get by dividing one standard normal by another. But its tails are so heavy that it has no mean and no standard deviation: now and then a draw is so huge that it outweighs everything before it.</p>
+  <p>The central limit theorem has conditions, and the most important is a finite standard deviation. The <a href="field-guide.html#c-cauchy">Cauchy distribution</a> breaks it. It looks harmless, a bell with fatter tails, and is what you get by dividing one standard normal by another. But its tails are so heavy that it has no mean and no standard deviation: now and then a draw is so huge that it outweighs everything before it.</p>
 
   <div class="widget">
     <p class="widget-title">Running averages</p>
@@ -366,7 +366,7 @@ table.summary td:not(:first-child),table.summary th:not(:first-child){text-align
   <p>The normal average closes in on 0, at the \(1/\sqrt n\) pace of section 4. The Cauchy average never does. It drifts, then jumps when one enormous draw arrives, and the average of 5,000 draws is no more reliable than a single draw. In fact it has exactly the same Cauchy distribution as one draw. Distributions with heavy tails like this, where the variance is infinite, turn up in finance, in insurance losses and in the sizes of cities and earthquakes; for them the bell is the wrong picture (see <a href="power-laws.html#averages">power laws</a>).</p>
 
   <h3>Products instead of sums</h3>
-  <p>Many things grow by multiplying: an investment that gains or loses a percentage each year, a population, a cell that grows by a random factor before dividing. The logarithm turns a product into a sum, \(\ln(U_1 U_2 \cdots U_n) = \ln U_1 + \dots + \ln U_n\), so the <em>log</em> of the product is approximately normal. The product itself is then <em class="term">lognormal</em>: piled up on the left with a long tail to the right.</p>
+  <p>Many things grow by multiplying: an investment that gains or loses a percentage each year, a population, a cell that grows by a random factor before dividing. The logarithm turns a product into a sum, \(\ln(U_1 U_2 \cdots U_n) = \ln U_1 + \dots + \ln U_n\), so the <em>log</em> of the product is approximately normal. The product itself is then <a href="field-guide.html#c-lognormal">lognormal</a>: piled up on the left with a long tail to the right.</p>
 
   <div class="widget">
     <p class="widget-title">Twenty years of random growth</p>
@@ -490,6 +490,7 @@ table.summary td:not(:first-child),table.summary th:not(:first-child){text-align
   </div>
 
   <p>The series started with a single coin flip, built the counting and waiting distributions from it, and has now reached the place all those sums lead: the bell curve. Next in the series: the continuous wait for the \(k\)-th event, which ties the <a href="exponential.html">exponential</a> to the <a href="negative-binomial.html">negative binomial</a> and, as \(k\) grows, turns into a bell as well. That is <a href="gamma.html">The Gamma Distribution</a>.</p>
+  <p class="muted small">Looking for a distribution without a page of its own? <a href="field-guide.html">A Field Guide to Distributions</a> sorts two dozen more by how they arise.</p>
 </section>
 
 </main>
