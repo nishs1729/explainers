@@ -282,7 +282,7 @@ table.twins td:not(:first-child),table.twins th:not(:first-child){text-align:lef
   <h2>Shapes between the whole numbers</h2>
   <p>Waiting for 2.5 events makes no sense, but the formula works for any shape \(\alpha > 0\), and real data often wants a shape that is not a whole number. All it needs is a value for \((\alpha - 1)!\) between the whole numbers. That is the <em class="term">gamma function</em>:</p>
   $$\Gamma(\alpha) = \int_0^\infty x^{\alpha - 1} e^{-x}\,dx$$
-  <p>It is exactly what makes the density integrate to 1. Integration by parts gives \(\Gamma(\alpha + 1) = \alpha\,\Gamma(\alpha)\), and \(\Gamma(1) = 1\), so \(\Gamma(k) = (k - 1)!\) for whole \(k\). In between it is a smooth curve through the factorials, with surprises such as \(\Gamma(\tfrac12) = \sqrt\pi\).</p>
+  <p>It is exactly what makes the density integrate to 1. Integration by parts gives \(\Gamma(\alpha + 1) = \alpha\,\Gamma(\alpha)\), and \(\Gamma(1) = 1\), so \(\Gamma(k) = (k - 1)!\) for whole \(k\). In between it is a smooth curve through the factorials, with surprises such as \(\Gamma(\tfrac12) = \sqrt\pi\). Ratios of gamma functions also give the beta function \(B(\alpha, \beta) = \Gamma(\alpha)\Gamma(\beta)/\Gamma(\alpha + \beta)\), the constant of the <a href="beta.html">beta distribution</a>.</p>
 
   <div class="widget">
     <p class="widget-title">The gamma function</p>
@@ -412,6 +412,7 @@ table.twins td:not(:first-child),table.twins th:not(:first-child){text-align:lef
     <li><strong>Large shape: normal.</strong> \(\text{Gamma}(\alpha, \lambda) \approx \mathcal N(\alpha/\lambda, \alpha/\lambda^2)\) as \(\alpha\) grows (<a href="normal.html">normal tutorial</a>).</li>
     <li><strong>Gamma mixture of Poissons.</strong> A Poisson count with a gamma rate is <a href="negative-binomial.html#mixture">negative binomial</a> (section 5).</li>
     <li><strong>Conjugate prior.</strong> A \(\text{Gamma}(\alpha, \beta)\) belief about a Poisson rate becomes \(\text{Gamma}(\alpha + n, \beta + T)\) after \(n\) events in time \(T\).</li>
+    <li><strong>Shares: the beta.</strong> For independent \(X \sim \text{Gamma}(\alpha, \lambda)\) and \(Y \sim \text{Gamma}(\beta, \lambda)\), the share \(X/(X+Y)\) follows the <a href="beta.html#gammas">beta distribution</a>, independent of \(X + Y\).</li>
     <li><strong>Chi-square.</strong> \(\chi^2_\nu = \text{Gamma}(\nu/2, 1/2)\), the sum of \(\nu\) squared standard normals (<a href="chi-square.html">chi-square tutorial</a>).</li>
   </ol>
 </section>

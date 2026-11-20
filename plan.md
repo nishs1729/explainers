@@ -12,7 +12,7 @@
 - [x] [Normal](https://nishs1729.github.io/explainers/probability/normal.html)
 - [x] [Gamma](https://nishs1729.github.io/explainers/probability/gamma.html)
 - [x] [Chi-square](https://nishs1729.github.io/explainers/probability/chi-square.html)
-- [ ] [Beta](#beta)
+- [x] [Beta](https://nishs1729.github.io/explainers/probability/beta.html)
 - [ ] [Extreme values](#extreme-values)
 - [ ] [Power laws](#power-laws)
 - [ ] [A Field Guide to Distributions](#field-guide)
@@ -59,26 +59,6 @@
 From a single coin flip to counting, waiting, the bell curve and its squares.
 The remaining pages widen the view: proportions, extremes, power laws, and a
 guide to everything else. Each page builds on the earlier ones.
-
-<a id="beta"></a>
-### **Beta**
-
-> **Idea:** a distribution for an unknown probability or proportion, living between 0 and 1.
->
-> **Sections:**
->   - **Probability of a probability**: what it means to be uncertain about a coin's bias
->   - **Shapes**: how α and β give flat, U-shaped, skewed and peaked curves
->   - **Counting origins**: the k-th smallest of n uniform numbers is a beta
->   - **From gammas**: X/(X+Y) for gamma X and Y
->   - **Learning from flips**: α and β as prior successes and failures; posterior = prior + data
->   - Properties, uses (click-through rates, batting averages, project estimates (PERT)), quiz
->
-> **Widgets:**
->   - α/β shape explorer with mean and spread readouts
->   - Order statistics: drop n uniform points, highlight the k-th, histogram vs Beta(k, n−k+1)
->   - Flip a coin of hidden bias and watch the beta posterior narrow
->
-> **Links:** builds on Bernoulli, Binomial, Gamma. Leads into the Bayesian series ([beta–binomial](#beta-binomial)).
 
 <a id="extreme-values"></a>
 ### **Extreme values**
@@ -387,7 +367,7 @@ is not required.
 >   - A/B test: two arms, live posteriors, probability B beats A
 >   - Prediction of the next k trials (the beta–binomial distribution)
 >
-> **Links:** builds on [Beta](#beta), Binomial, Priors and posteriors.
+> **Links:** builds on [Beta](https://nishs1729.github.io/explainers/probability/beta.html), Binomial, Priors and posteriors.
 
 <a id="conjugate-priors"></a>
 ### **Conjugate priors**

@@ -617,7 +617,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
     <li><strong>The fraction of 1s is the best estimate.</strong> \(\hat p = k/n\) is the maximum-likelihood estimate. It is unbiased (\(E[\hat p] = p\)), has variance \(pq/n\), and reaches the Cramér–Rao bound.</li>
     <li><strong>Maximum uncertainty is at \(p = \tfrac12\).</strong> Variance peaks at \(\tfrac14\), entropy peaks at 1 bit, skewness is 0, and excess kurtosis reaches its smallest possible value of −2.</li>
     <li><strong>The edge cases are degenerate.</strong> At \(p=0\) or \(p=1\), \(X\) is a constant and the variance is 0. Skewness, kurtosis and Fisher information are then undefined or infinite, because there is no spread to divide by.</li>
-    <li><strong>It has a conjugate prior (Bayesian view).</strong> If your uncertainty about \(p\) is described by a \(\text{Beta}(a,b)\) distribution, then after seeing \(k\) ones in \(n\) trials it becomes \(\text{Beta}(a+k,\; b+n-k)\). Each 1 adds to \(a\) and each 0 adds to \(b\).</li>
+    <li><strong>It has a conjugate prior (Bayesian view).</strong> If your uncertainty about \(p\) is described by a <a href="beta.html">\(\text{Beta}(a,b)\) distribution</a>, then after seeing \(k\) ones in \(n\) trials it becomes \(\text{Beta}(a+k,\; b+n-k)\). Each 1 adds to \(a\) and each 0 adds to \(b\).</li>
   </ol>
 
   <h3>Bernoulli in one table</h3>

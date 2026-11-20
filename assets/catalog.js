@@ -29,8 +29,8 @@ window.EXPLAINERS = {
         {
           "id": "distributions",
           "title": "Probability distributions",
-          "blurb": "From a single coin flip to counting events and waiting for them, in steps and in continuous time, to the bell curve that all those sums lead to and the squares of that bell. Each one builds on the last.",
-          "topics": ["bernoulli", "binomial", "geometric", "exponential", "poisson", "negative-binomial", "normal", "gamma", "chi-square"]
+          "blurb": "From a single coin flip to counting events and waiting for them, in steps and in continuous time, to the bell curve and its squares, and a distribution for an unknown probability itself. Each one builds on the last.",
+          "topics": ["bernoulli", "binomial", "geometric", "exponential", "poisson", "negative-binomial", "normal", "gamma", "chi-square", "beta"]
         }
       ],
       "topics": [
@@ -113,6 +113,15 @@ window.EXPLAINERS = {
           "path": "probability/chi-square.html",
           "summary": "Square some normal numbers and add them up: degrees of freedom, distances in many dimensions, the chi distribution and the spread of a sample.",
           "tags": ["sum of squares", "degrees of freedom", "Rayleigh", "sample variance", "high dimensions"],
+          "preview": { "select": ".hero-play", "click": ["#heroMany", "#heroMany"] }
+        },
+        {
+          "id": "beta",
+          "title": "The Beta Distribution",
+          "short": "Beta",
+          "path": "probability/beta.html",
+          "summary": "A distribution for an unknown probability: its many shapes, the k-th smallest of n random points, ratios of gammas, and learning a coin's bias from flips.",
+          "tags": ["proportion", "order statistics", "beta function", "conjugate prior", "PERT"],
           "preview": { "select": ".hero-play", "click": ["#heroMany", "#heroMany"] }
         }
       ]
