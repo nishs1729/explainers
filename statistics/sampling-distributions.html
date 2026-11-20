@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sampling Distributions — a visual introduction</title>
+<style>
+:root{
+  --bg:#faf8f4; --surface:#ffffff; --surface-2:#f2efe8; --ink:#1c1c1e; --ink-2:#4c4e55; --ink-3:#8b8d93; --line:#e3dfd5;
+  --one:#16917c; --one-soft:rgba(22,145,124,.15);
+  --zero:#d9573a; --zero-soft:rgba(217,87,58,.15);
+  --accent:#3654c9; --accent-soft:rgba(54,84,201,.11);
+  --gold:#b98317; --gold-soft:rgba(185,131,23,.22);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+    --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+    --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+    --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+    --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+  --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+  --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+  --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+  --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.68 var(--sans);-webkit-font-smoothing:antialiased}
+main{max-width:820px;margin:0 auto;padding:0 20px 80px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;letter-spacing:-.01em}
+h1{font-size:clamp(2.2rem,6vw,3.4rem);margin:.2em 0 .3em}
+h2{font-size:clamp(1.6rem,4vw,2.1rem);margin:0 0 .5em}
+h3{font-size:1.2rem;margin:1.6em 0 .4em}
+p{margin:0 0 1em}
+a{color:var(--accent)}
+strong{font-weight:650}
+em.term{font-style:normal;font-weight:650;color:var(--accent)}
+.muted{color:var(--ink-2)}
+small,.small{font-size:14px}
+
+/* hero */
+.hero{text-align:center;padding:64px 0 24px}
+.kicker{text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--ink-3);margin:0}
+.lede{font-size:1.2rem;color:var(--ink-2);max-width:620px;margin:0 auto}
+.hero-play{max-width:640px;margin:30px auto 0;text-align:left}
+.hero-play .controls{justify-content:center}
+.hint{font-size:15px;color:var(--ink-2);min-height:3.2em;margin:10px 0 0;text-align:center}
+.ask{font-family:var(--serif);font-size:1.25rem;text-align:center;margin:0 0 12px}
+
+.toc{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;margin:28px 0 8px}
+.toc ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 20px;counter-reset:t}
+.toc li{counter-increment:t;font-size:15px}
+.toc li::before{content:counter(t,decimal-leading-zero);font-family:var(--mono);color:var(--ink-3);margin-right:10px;font-size:13px}
+.toc a{color:var(--ink);text-decoration:none}
+.toc a:hover{color:var(--accent)}
+
+section{padding-top:56px}
+.secnum{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.08em;margin-bottom:4px}
+
+.widget{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin:26px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.widget-title{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);margin:0 0 12px;font-weight:600}
+.controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:12px 0}
+.ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:15px}
+.ctrl output{font-family:var(--mono);font-size:14px;min-width:5.5em;color:var(--ink)}
+input[type=range]{accent-color:var(--accent);width:170px;max-width:100%}
+.btn{font:inherit;font-size:14px;line-height:1.2;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;transition:background .15s,transform .1s}
+.btn:hover{border-color:var(--ink-3)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn.guess{background:var(--gold-soft);border-color:var(--gold);color:var(--ink)}
+.btn.right{background:var(--one-soft);border-color:var(--one);color:var(--one)}
+.btn.wrong{background:var(--zero-soft);border-color:var(--zero);color:var(--zero)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:6px}
+.readout{font-family:var(--mono);font-size:14px;color:var(--ink-2);line-height:1.6}
+.readout b{color:var(--ink);font-weight:600}
+.readout .ok{color:var(--one);font-weight:600}
+.readout .warn{color:var(--zero);font-weight:600}
+.readout .gd{color:var(--gold);font-weight:600}
+.msg{font-size:15px;color:var(--ink-2);min-height:3.4em;margin:10px 0 0}
+.msg b{color:var(--ink)}
+canvas{display:block;width:100%}
+.cap{font-size:13px;color:var(--ink-3);margin:2px 0 6px}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:20px 0}
+.callout p:last-child{margin-bottom:0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin-top:8px}
+.legend > span{display:inline-block}
+.legend .sw{vertical-align:middle;margin:0 6px 2px 0}
+.sw{display:inline-block;width:16px;height:10px;border-radius:2px}
+.sw.dot{width:8px;height:8px;border-radius:50%}
+.sw.line{height:0;border-top:2px solid var(--ink)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+@media (max-width:640px){.pair{grid-template-columns:1fr}}
+.mcap{font-size:13px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+
+/* line-up */
+.lineup{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+@media (max-width:520px){.lineup{grid-template-columns:repeat(4,1fr);gap:4px}}
+.lu-cell{all:unset;box-sizing:border-box;position:relative;display:block;border:1px solid var(--line);border-radius:8px;background:var(--surface);cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.lu-cell canvas{width:100%;aspect-ratio:1/1;height:auto;border-radius:8px}
+.lu-cell:hover{border-color:var(--ink-3)}
+.lu-cell:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.lu-n{position:absolute;top:3px;left:6px;font:600 11px var(--mono);color:var(--ink-3)}
+.revealed .lu-cell{cursor:default}
+.revealed .lu-cell:not(.is-real):not(.is-wrong){opacity:.55}
+.lu-cell.is-real{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.lu-cell.is-real .lu-n{color:var(--accent)}
+.lu-cell.is-wrong{border-color:var(--zero);box-shadow:0 0 0 2px var(--zero)}
+.lu-cell.is-wrong .lu-n{color:var(--zero)}
+.lu-tag{position:absolute;bottom:3px;right:5px;font:600 10px var(--mono);text-transform:uppercase;letter-spacing:.06em;padding:1px 5px;border-radius:4px;display:none}
+.is-real .lu-tag{display:block;background:var(--accent);color:var(--bg)}
+.is-wrong .lu-tag{display:block;background:var(--zero);color:var(--bg)}
+
+/* fake coin */
+.seq{font:16px var(--mono);letter-spacing:.12em;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);width:100%;max-width:340px;text-transform:uppercase}
+.seq:focus{outline:2px solid var(--accent);outline-offset:1px}
+
+/* cast */
+.cast-q{font-family:var(--serif);font-size:1.08rem;margin:0 0 10px}
+.datarow{font-family:var(--mono);font-size:14px;color:var(--ink-2);margin:0 0 6px}
+.datarow b{color:var(--ink)}
+
+/* recipe */
+.facts{counter-reset:f;list-style:none;padding:0;margin:18px 0}
+.facts li{counter-increment:f;position:relative;padding:12px 0 12px 44px;border-bottom:1px solid var(--line)}
+.facts li::before{content:counter(f);position:absolute;left:0;top:12px;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:600 13px var(--mono)}
+.facts li strong{display:block}
+.table-wrap{overflow-x:auto}
+table.summary{border-collapse:collapse;width:100%;font-size:15px;margin:14px 0}
+table.summary td,table.summary th{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3)}
+@media (max-width:480px){table.summary td,table.summary th{padding:8px 5px}}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:18px 0}
+.card{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
+.card h4{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+.card p{font-size:15px;margin:0;color:var(--ink-2)}
+
+/* quiz */
+.quiz{display:grid;gap:10px}
+.qitem{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg)}
+.qitem p{margin:0 0 8px;font-size:16px}
+.qbtns{display:flex;flex-wrap:wrap;gap:8px}
+.qexp{font-size:15px;color:var(--ink-2);margin:10px 0 0!important}
+
+@media (max-width:480px){
+  main{padding:0 16px 80px}
+  .widget{padding:14px}
+  input[type=range]{width:150px}
+}
+/* page 2 */
+canvas.paint{cursor:crosshair;touch-action:pan-y}
+canvas.band{cursor:ew-resize;touch-action:pan-y}
+.minis{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+@media (max-width:560px){.minis{grid-template-columns:1fr}}
+.mini{border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--bg)}
+.mini .readout{font-size:13px;margin-top:4px}
+.linkbtn{all:unset;cursor:pointer;font-size:14px;color:var(--accent);text-decoration:underline}
+.linkbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.linkbtn[hidden]{display:none}
+</style>
+<script>try{var t=localStorage.getItem('xp-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/catalog.js" defer></script>
+<script src="../assets/site.js" defer></script>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <p class="kicker">A visual introduction</p>
+  <h1>Sampling Distributions</h1>
+  <p class="lede">Any number you compute from a sample would have come out differently with a different sample. It is a random draw with a distribution of its own, and once you can see that distribution you know how far to trust the number.</p>
+  <div class="hero-play" id="heroPlay">
+    <p class="ask">Two pollsters each ask 1,000 people. One gets 52%, the other 49%. Is one of them wrong?</p>
+    <canvas id="heroField" style="height:210px" role="img" aria-label="A country of 20,000 voters as tiny squares, colored by whether they support the policy; the people asked in the latest poll are highlighted"></canvas>
+    <div class="legend" style="justify-content:center"><span><i class="sw" style="background:var(--one)"></i><span>supports</span></span><span><i class="sw" style="background:var(--zero)"></i><span>doesn’t</span></span><span><span class="muted">bright squares: the 1,000 people asked in the latest poll</span></span></div>
+    <canvas id="heroStrip" style="height:130px;margin-top:10px" role="img" aria-label="Each poll's result as a dot on a scale from 44% to 58%"></canvas>
+    <div class="controls">
+      <button class="btn primary" id="heroPoll">Run a poll</button>
+      <button class="btn" id="heroMany">+20 polls</button>
+      <button class="btn" id="heroTruth">Reveal the truth</button>
+      <button class="btn" id="heroClear">Clear</button>
+    </div>
+    <p class="hint" id="heroHint" aria-live="polite">This country has 20,000 voters. Each poll asks 1,000 of them, chosen at random, whether they support a new policy. Run a few polls.</p>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#machine">Many samples, one distribution</a></li>
+    <li><a href="#wobble">How much it wobbles</a></li>
+    <li><a href="#spread">Spread of data, spread of an estimate</a></li>
+    <li><a href="#others">Not just the mean</a></li>
+    <li><a href="#uses">Where you will meet it</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<section id="machine">
+  <div class="secnum">01</div>
+  <h2>Many samples, one distribution</h2>
+  <p>On the <a href="is-it-real.html">first page</a> the question was always: could chance alone have done this? To answer it you need to know how much a number computed from data moves around by chance. The polls above show it directly. Every pollster did the job properly, yet their answers spread over several points, just because each one happened to ask different people.</p>
+  <p>The same is true of any number computed from a sample: an average, a median, a percentage, the largest value. Draw another sample and you get another number. Draw thousands of samples and the numbers pile up into a distribution, called the <em class="term">sampling distribution</em> of that statistic. It is the distribution of the answers you <em>could</em> have got.</p>
+  <p>The machine below draws samples from a population you choose. The top chart is the population, the middle row is the latest sample, and the bottom chart collects one number from every sample. To start, the population is Galton’s 481 sons from the first page, and each sample picks 25 of them at random.</p>
+
+  <div class="widget">
+    <p class="widget-title">The sample machine</p>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Population">
+        <button class="btn on" data-pop="heights" aria-pressed="true">Heights</button>
+        <button class="btn" data-pop="wait" aria-pressed="false">Waiting times</button>
+        <button class="btn" data-pop="geyser" aria-pressed="false">Geyser</button>
+        <button class="btn" data-pop="flat" aria-pressed="false">Flat</button>
+        <button class="btn" data-pop="own" aria-pressed="false">Draw your own</button>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Statistic">
+        <button class="btn on" data-stat="mean" aria-pressed="true">Mean</button>
+        <button class="btn" data-stat="median" aria-pressed="false">Median</button>
+        <button class="btn" data-stat="max" aria-pressed="false">Largest</button>
+        <button class="btn" data-stat="sd" aria-pressed="false">SD</button>
+      </div>
+      <label class="ctrl">sample size <input type="range" id="smN" min="0" max="13" step="1" value="8"><output id="smNOut"></output></label>
+    </div>
+    <p class="mcap" id="smPopCap">Population</p>
+    <canvas id="smPop" style="height:140px" role="img" aria-label="The population's distribution, with its true value of the chosen statistic marked"></canvas>
+    <p class="mcap" style="margin-top:8px">Latest sample</p>
+    <canvas id="smSamp" style="height:64px" role="img" aria-label="The values in the latest sample, with its statistic marked"></canvas>
+    <p class="mcap" style="margin-top:8px" id="smHistCap">One number from each sample</p>
+    <canvas id="smHist" class="band" style="height:190px" role="img" aria-label="Histogram of the statistic from every sample so far, with your predicted band"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i><span>latest sample</span></span><span><i class="sw" style="background:var(--ink-3)"></i><span>all samples so far</span></span><span><i class="sw" style="background:var(--gold-soft);border:1px solid var(--gold)"></i><span>your 95% guess</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink-2)"></i><span>population value</span></span></div>
+    <div class="controls">
+      <button class="btn primary" id="smOne" disabled>Draw a sample</button>
+      <button class="btn" id="smRun" disabled>▶ Keep drawing</button>
+      <button class="btn" id="smMany" disabled>+1,000</button>
+      <button class="btn" id="smClear">Clear</button>
+      <button class="linkbtn" id="smSkip">skip the guess</button>
+    </div>
+    <div class="readout" id="smRead" aria-live="polite"></div>
+  </div>
+
+  <p>Most people’s first band is far too wide. They expect the averages to spread as much as the heights themselves do, from about 64 to 74 inches. In fact 95% of the averages of 25 sons land within about 1 inch of the population average. One son can easily be 5 inches above average; for 25 sons to average 5 inches above, nearly all of them would have to be tall at once, and that almost never happens. Highs and lows cancel.</p>
+  <p>Now switch to <strong>Waiting times</strong>, a population piled up near zero with a long tail to the right. At sample size 1 the bottom chart just copies that skewed shape. By 25 the averages make a fairly symmetric bell. That is the <a href="../probability/normal.html#clt">central limit theorem</a> from the Normal page, seen from the statistician’s side: whatever the population looks like, averages of reasonably large samples have a roughly normal sampling distribution. The <strong>Geyser</strong> population, with two humps, and one you draw yourself make the same point.</p>
+  <div class="callout">
+    <p><strong>Three distributions, not one.</strong> The <em>population</em> is everything you could sample. A <em>sample</em> is the handful you actually got. The <em>sampling distribution</em> is how a number computed from samples would vary over many repeats. In real life you see one sample and one number, never the other two charts. Statistics is the craft of working out the bottom chart without being able to draw it.</p>
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="wobble">
+  <div class="secnum">02</div>
+  <h2>How much it wobbles</h2>
+  <p>The spread of a sampling distribution is so useful that it has its own name, the <em class="term">standard error</em>. It is simply the standard deviation of the numbers in the bottom chart: a typical distance between one sample’s answer and the truth.</p>
+  <p>For averages there is a formula. If the population has standard deviation σ, the average of <em>n</em> independent values has standard error</p>
+  <p class="lh" style="text-align:center;font-size:1.3rem">standard error of the mean = σ / √n</p>
+  <p>The <a href="../probability/normal.html#sqrtn">square-root law</a> on the Normal page explains why: variances add, so the sum of <em>n</em> values has a spread of σ√n, and dividing by <em>n</em> leaves σ/√n. Check it against brute force:</p>
+
+  <div class="widget">
+    <p class="widget-title">Wobble against sample size</p>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Population">
+        <button class="btn on" data-sepop="heights" aria-pressed="true">Heights</button>
+        <button class="btn" data-sepop="wait" aria-pressed="false">Waiting times</button>
+        <button class="btn" data-sepop="geyser" aria-pressed="false">Geyser</button>
+        <button class="btn" data-sepop="flat" aria-pressed="false">Flat</button>
+      </div>
+      <button class="btn primary" id="seGo">Simulate</button>
+    </div>
+    <canvas id="seChart" style="height:240px" role="img" aria-label="Standard deviation of sample means at each sample size from 1 to 100, measured by simulation, against the curve sigma over root n"></canvas>
+    <div class="legend"><span><i class="sw dot" style="background:var(--ink-2)"></i><span>measured: SD of 3,000 sample means</span></span><span><i class="sw line" style="border-top-color:var(--accent)"></i><span>formula: σ/√n</span></span></div>
+    <div class="readout" id="seRead"></div>
+  </div>
+
+  <p>The dots land on the curve for every population, skewed or not. Read it at sample sizes 1, 4, 16 and 64: each time the sample grows four times, the wobble halves. Precision gets expensive. To halve the uncertainty you need four times the data; to cut it to a tenth you need a hundred times.</p>
+  <h3>Back to the pollsters</h3>
+  <p>A poll is an average too: score each “yes” as 1 and each “no” as 0, and the share who said yes is the average of the scores. A yes/no population with share <em>p</em> has σ = √(p(1−p)), which is 0.5 for a near-even split. So a poll of 1,000 has a standard error of 0.5/√1000 ≈ 0.016, or 1.6 percentage points. About 95% of honest polls land within two standard errors, roughly 3 points, of the truth. That is the “margin of error” newspapers print, and it is why 52% and 49% can both come from good polls.</p>
+  <p>Notice what is missing from the formula: the size of the population. A random sample of 1,000 is about as precise for a city of 100,000 as for a country of 300 million. What matters is how many people you ask and whether they were picked at random, not what fraction of the population they are. (When the sample is a large share of the population, say half of it, the standard error does shrink further. Real polls are nowhere near that.)</p>
+  <div class="callout">
+    <p><strong>There is a catch.</strong> The formula needs σ, the spread of the whole population, which you usually don’t know. In practice you plug in the sample’s own standard deviation instead. For large samples that works fine. For small ones it understates the uncertainty a little, and fixing that is the job of <em>Student’s t</em>, later in the series.</p>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="spread">
+  <div class="secnum">03</div>
+  <h2>Spread of data, spread of an estimate</h2>
+  <p>Two different spreads are now in play, and mixing them up is one of the most common mistakes in reading statistics. The <strong>standard deviation</strong> describes how much individuals vary. The <strong>standard error</strong> describes how much an estimate varies. More data shrinks one of them but not the other.</p>
+
+  <div class="widget">
+    <p class="widget-title">One sample vs many averages</p>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Population">
+        <button class="btn on" data-dvpop="heights" aria-pressed="true">Heights</button>
+        <button class="btn" data-dvpop="wait" aria-pressed="false">Waiting times</button>
+      </div>
+      <label class="ctrl">sample size <input type="range" id="dvN" min="0" max="7" step="1" value="3"><output id="dvNOut"></output></label>
+      <button class="btn" id="dvNew">New sample</button>
+    </div>
+    <div class="pair">
+      <div><p class="mcap">One sample: the data</p><canvas id="dvData" style="height:180px" role="img" aria-label="Histogram of one sample, with the population's shape outlined"></canvas></div>
+      <div><p class="mcap">2,000 samples: their averages</p><canvas id="dvMeans" style="height:180px" role="img" aria-label="Histogram of 2,000 sample averages on the same scale"></canvas></div>
+    </div>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i><span>one sample</span></span><span><i class="sw line" style="border-top-color:var(--ink-3)"></i><span>population shape</span></span><span><i class="sw" style="background:var(--ink-3)"></i><span>sample averages</span></span></div>
+    <div class="readout" id="dvRead"></div>
+  </div>
+
+  <p>Slide the sample size up. On the left, the sample fills in the population’s shape more and more faithfully, but it doesn’t get any narrower: sons vary by about 2.6 inches whether you measure 10 of them or 500. On the right, the averages squeeze in toward the true mean. A bigger sample tells you the <em>average</em> more precisely; it does not make <em>people</em> more alike.</p>
+  <div class="callout">
+    <p><strong>Error bars.</strong> Charts in papers and reports often show a bar around each average without saying which spread it is. An SD bar shows how much individuals vary and stays wide however much data there is. An SE bar shows how precisely the average is known and shrinks as data grows. With 100 people per group an SD bar is 10 times longer than an SE bar, so the same data can look either convincing or hopeless. Always check which one you are looking at.</p>
+  </div>
+</section>
+
+<!-- 4 -->
+<section id="others">
+  <div class="secnum">04</div>
+  <h2>Not just the mean</h2>
+  <p>Everything so far has been about averages, because averages behave so well: centerd on the truth, with a simple formula for the spread and a bell shape for large samples. Other statistics have sampling distributions too, and they are not always so tidy. Here are four of them, from the same 2,000 samples:</p>
+
+  <div class="widget">
+    <p class="widget-title">Four statistics, one set of samples</p>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Population">
+        <button class="btn on" data-fspop="heights" aria-pressed="true">Heights</button>
+        <button class="btn" data-fspop="wait" aria-pressed="false">Waiting times</button>
+      </div>
+      <label class="ctrl">sample size <input type="range" id="fsN" min="0" max="4" step="1" value="2"><output id="fsNOut"></output></label>
+      <button class="btn" id="fsGo">New samples</button>
+    </div>
+    <div class="minis">
+      <div class="mini"><p class="mcap">Mean</p><canvas id="fsMean" style="height:120px" role="img" aria-label="Sampling distribution of the mean"></canvas><div class="readout" id="fsMeanR"></div></div>
+      <div class="mini"><p class="mcap">Median</p><canvas id="fsMedian" style="height:120px" role="img" aria-label="Sampling distribution of the median"></canvas><div class="readout" id="fsMedianR"></div></div>
+      <div class="mini"><p class="mcap">Largest value</p><canvas id="fsMax" style="height:120px" role="img" aria-label="Sampling distribution of the sample's largest value"></canvas><div class="readout" id="fsMaxR"></div></div>
+      <div class="mini"><p class="mcap">Standard deviation</p><canvas id="fsSD" style="height:120px" role="img" aria-label="Sampling distribution of the sample standard deviation"></canvas><div class="readout" id="fsSDR"></div></div>
+    </div>
+    <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>2,000 samples</span></span><span><i class="sw line" style="border-top:2px dashed var(--accent)"></i><span>population value</span></span></div>
+  </div>
+
+  <ul>
+    <li><strong>The median</strong> wobbles more than the mean for bell-shaped data, about 25% more in large samples. For skewed data like the waiting times, small-sample medians also land a little off-center, above the population median on average. The median earns its keep with messy data, where a few wild values would drag the mean around.</li>
+    <li><strong>The largest value</strong> is always at or below the population’s largest value, so on average it falls short. Its distribution is lopsided, with a long tail toward big values; the <a href="../probability/extreme-values.html">Extreme Values</a> page is about exactly this shape. For waiting times the population has no largest value at all, so the sample maximum keeps growing with the sample size.</li>
+    <li><strong>The standard deviation</strong> is skewed to the right for small samples and on average comes out a little below σ, even with the usual <em>n</em> − 1 divisor. Its shape is a stretched <a href="../probability/chi-square.html#variance">chi-square</a>, at least for normal data.</li>
+  </ul>
+  <p>So a sampling distribution can be lopsided, and it can be centerd somewhere other than the truth. A statistic whose sampling distribution is off-center is called <em class="term">biased</em>. Whether that matters, and how to choose between a steady statistic and an unbiased one, is the subject of <em>What makes a good guess</em>. And for statistics with no handy formula, like the median, the <em>bootstrap</em> will estimate the sampling distribution from a single sample. Both pages are coming up in this series.</p>
+</section>
+
+<!-- 5 -->
+<section id="uses">
+  <div class="secnum">05</div>
+  <h2>Where you will meet it</h2>
+  <div class="cards">
+    <div class="card"><h4>Opinion polls</h4><p>The “± 3 points” in a poll report is about two standard errors of a sample of roughly 1,000. It covers chance only: it says nothing about who refused to answer or how the question was worded.</p></div>
+    <div class="card"><h4>A/B tests</h4><p>The button test’s 5.0% and 6.4% are each one draw from a sampling distribution with a standard error of about 0.7 points, which is why their 1.4-point gap is unconvincing.</p></div>
+    <div class="card"><h4>Measuring things</h4><p>Labs repeat a measurement and report the average, because the average of 4 readings has half the random error of one. That is σ/√n at work.</p></div>
+    <div class="card"><h4>Quality control</h4><p>Factories plot the average of small batches over time with limits at about 3 standard errors from the target. A point outside the limits is unlikely to be chance.</p></div>
+    <div class="card"><h4>Clinical trials</h4><p>Trial sizes are planned from the standard error: how many patients are needed before the wobble in the average effect is smaller than the effect worth detecting.</p></div>
+    <div class="card"><h4>Machine learning</h4><p>A model’s accuracy on a test set is a sample statistic. On 500 test cases, an accuracy of 80% has a standard error of about 1.8 points, so a “1-point improvement” may be noise.</p></div>
+  </div>
+
+  <h3>Check yourself</h3>
+  <div class="widget">
+    <div class="quiz" id="quiz"></div>
+    <div class="readout" id="quizScore" style="margin-top:10px" aria-live="polite"></div>
+  </div>
+
+  <p>All of this assumed that each sample was picked at random. Real samples often aren’t: the people who answer polls differ from those who don’t, and the planes that come back differ from those that don’t. A biased sample stays wrong however large it gets. That is the next page, <strong>Who’s Missing?</strong> (coming soon).</p>
+</section>
+
+</main>
+
+<script>
+(function(){
+'use strict';
+/* ---------- helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const root = document.documentElement;
+const C = n => getComputedStyle(root).getPropertyValue(n).trim();
+const f2 = x => x.toFixed(2);
+const fmtN = x => Math.abs(x - Math.round(x)) < 1e-9 ? String(Math.round(x)) : String(+x.toFixed(2));
+const pct = x => (100 * x).toFixed(1) + '%';
+const MONO = 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
+const TAU = Math.PI * 2;
+const comma = n => n.toLocaleString('en-US');
+
+function fit(c){
+  const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+  if (c.width !== w*dpr || c.height !== h*dpr) { c.width = w*dpr; c.height = h*dpr; }
+  const ctx = c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  return {ctx, w, h};
+}
+const redraws = [];
+function redrawAll(){ redraws.forEach(f => f()); }
+let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(redrawAll, 80); });
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+if (mq.addEventListener) mq.addEventListener('change', redrawAll);
+new MutationObserver(redrawAll).observe(root, {attributes:true, attributeFilter:['data-theme']});
+
+function niceTicks(max, count){
+  const raw = max / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const step = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag;
+  const t = []; for (let v = 0; v <= max + 1e-9; v += step) t.push(v); return t;
+}
+function stepFmt(ticks){ const st = ticks.length > 1 ? ticks[1] - ticks[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9)); return v => v.toFixed(d); }
+function yGrid(ctx, X0, X1, ys, ticks, fmt){
+  ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ticks.forEach(v => {
+    const y = Math.round(ys(v)) + .5;
+    ctx.strokeStyle = C('--line'); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X0, y); ctx.lineTo(X1, y); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.fillText(fmt(v), X0 - 6, y);
+  });
+}
+function intStep(px, minPx){
+  for (const s of [1,2,5,10,20,25,50,100]) if (s * px >= minPx) return s;
+  return 100;
+}
+function roundRect(ctx, x, y, w, h, r){
+  r = Math.max(0, Math.min(r, w/2, Math.abs(h)/2));
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+function dot(ctx, x, y, r){ ctx.beginPath(); ctx.arc(x, y, Math.max(0.5, r), 0, TAU); ctx.fill(); }
+function vline(ctx, x, y0, y1, color, dash, lw){
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw || 1.5; if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(Math.round(x) + .5, y0); ctx.lineTo(Math.round(x) + .5, y1); ctx.stroke(); ctx.restore();
+}
+/* integer-valued bar charts: bars at k = lo..hi */
+function frame(ctx, w, h, o){
+  const X0 = o.left != null ? o.left : 40, X1 = w - 10, Y0 = h - 24, Y1 = o.top != null ? o.top : 12;
+  const span = o.hi - o.lo + 1, bw = (X1 - X0) / span;
+  const xc = k => X0 + bw * (k - o.lo + .5), ys = v => Y0 - (v / o.ymax) * (Y0 - Y1);
+  const t = niceTicks(o.ymax, 3).filter(v => v <= o.ymax * 1.0001); yGrid(ctx, X0, X1, ys, t, o.yfmt || stepFmt(t));
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  const st = o.step || intStep(bw, 24);
+  for (let k = Math.ceil(o.lo / st) * st; k <= o.hi; k += st) ctx.fillText(o.lab ? o.lab(k) : k, xc(k), Y0 + 6);
+  return {X0, X1, Y0, Y1, bw, xc, ys};
+}
+function drawBars(ctx, F, lo, hi, val, color, frac){
+  const bwid = Math.max(1, F.bw * (frac == null ? .8 : frac));
+  for (let k = lo; k <= hi; k++) {
+    const v = val(k); if (!(v > 0)) continue;
+    const y = F.ys(v), hh = F.Y0 - y; if (hh < 0.2) continue;
+    const x = F.xc(k) - bwid / 2;
+    ctx.fillStyle = typeof color === 'function' ? color(k) : color;
+    if (bwid >= 6 && hh >= 3) { roundRect(ctx, x, y, bwid, hh, Math.min(3, bwid / 4)); ctx.fill(); }
+    else ctx.fillRect(x, y, bwid, hh);
+  }
+}
+function emptyNote(ctx, w, h, text){
+  ctx.fillStyle = C('--ink-3'); ctx.font = '13px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(text, w / 2, h / 2 - 8);
+}
+
+/* randomness */
+let spare = null;
+function gauss(){
+  if (spare != null) { const s = spare; spare = null; return s; }
+  let u = 0, v = 0; while (u === 0) u = Math.random(); v = Math.random();
+  const r = Math.sqrt(-2 * Math.log(u)); spare = r * Math.sin(TAU * v); return r * Math.cos(TAU * v);
+}
+function shuffled(a){ const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; }
+function corr(x, y){
+  const n = x.length; let mx = 0, my = 0; for (let i = 0; i < n; i++) { mx += x[i]; my += y[i]; } mx /= n; my /= n;
+  let sxy = 0, sxx = 0, syy = 0; for (let i = 0; i < n; i++) { const a = x[i] - mx, b = y[i] - my; sxy += a * b; sxx += a * a; syy += b * b; }
+  return sxy / Math.sqrt(sxx * syy);
+}
+function binom(n, p){ let k = 0; for (let i = 0; i < n; i++) if (Math.random() < p) k++; return k; }
+function flips(n){ const a = new Array(n); for (let i = 0; i < n; i++) a[i] = Math.random() < .5 ? 1 : 0; return a; }
+function longestRun(a){
+  let best = 1, cur = 1, start = 0, bs = 0;
+  for (let i = 1; i < a.length; i++) { if (a[i] === a[i-1]) cur++; else { cur = 1; start = i; } if (cur > best) { best = cur; bs = start; } }
+  return {len: best, start: bs};
+}
+function switches(a){ let s = 0; for (let i = 1; i < a.length; i++) if (a[i] !== a[i-1]) s++; return s; }
+
+/* ---------- Galton's families (Hanley 2004): father mother children, in tenths of an inch; daughters negative ---------- */
+const GALTON = "785 670 732 -692 -690 -690|755 665 735 725 -655 -655|750 640 710 -680|750 640 705 685 -670 -645 -630|750 585 720 690 680 -665 -625 -625|740 680 -695|740 680 765 740 730 730 -705 -640|740 665 -705 -680 -660|745 660 -660|740 655 -655|740 620 740 700 -680 -670 -670 -660 -635 -630|740 610 -650|730 670 710 -620|730 670 680 670|730 665 710 705 -667|730 650 720 705 702 702 692 -687 -665 -645 -635|730 645 740 730 715 625 -665 -623|730 640 -660 -645 -640|732 630 -627|727 690 732 730 727 -700 -690 -685 -680 -660|720 680 730 -685 -680|720 670 730 710 -670|720 650 742 705 695 -660 -655 -650 -650|720 655 -655|720 640 -660 -630|720 630 705 705 690 -650 -630|720 630 690 670 -630|720 630 730 670 -705 -700 -665 -630|725 635 -675 -672 -667|720 620 -640|725 620 710 700 700 -660 -650 -650|720 620 740 720 690 -675 -635|720 620 720 715 715 700 -680|720 610 -657|710 690 780 740 730 720 -670|710 670 732 730 690 -670|710 660 700 -670 -670 -665|710 660 700 690 685 -660 -645 -630|710 660 710 -670|710 660 760 720 710 660 -660|717 655 705|710 655 720 720 710 690 -660 -650|715 655 730 -652|715 650 685 677|710 650 680 680 -620|710 640 -680 -680 -675 -665 -665 -660 -655 -650|717 645 720 710 705 -670|710 640 680 680 680|715 645 720 710 700 -660 -645 -645 -620|710 645 730 -620|712 630 -675 -645|710 635 710 670 -660 -650 -635|710 630 710 700 700 640 -650 -650 -640 -630 -630|710 630 710 710 700 -635|710 620 710 700 -645 -625 -615|710 620 720 705 705 -645 -600|710 625 700 -640 -640 -640 -625|710 620 705 700 690 690 660 -645 -640|710 610 -620|710 580 715 690|700 690 710 700 690 -690|700 690 700 687 -680 -660 -640 -620|700 680 750|700 670 700 690 -660 -640 -600|700 670 -675|700 665 730 720 720 665 -692 -672 -665 -660 -660 -642 -637|705 650 720 702 690 685|705 650 -680 -650 -615 -610 -610|700 650 730 720 705 650 650 -645 -630 -620|700 650 670 650 -645 -625 -625|700 650 700 700 -670 -650 -650 -630|700 650 790 750 710 -690 -670 -657 -620|700 650 730 725 -650|700 650 690 690|700 647 720 700 687 -665 -655 -647 -645|700 640 707 700 680 670 660 650 -670|700 640 700 680 667 -655|700 642 720 700 -625 -612 -601|705 640 740 695 690 680 680 680 -655 -650|705 645 -600|700 640 680 -650 -640 -620|700 640 710 700 700 700 695 685 -690 -650 -640|700 637 700 670 655 -637 -632 -625 -622 -610|705 630 700 685 -655 -635|705 630 725 690 670 -645 -640|700 635 710 675 -675 -635|700 630 680 670 -637 -620|700 630 700 665 -620 -610|705 620 720 700 695 695 680 -650 -640 -630|703 627 707 697 692 652 -640 -635 -632|705 620 720 720 -600|700 610 712 670|700 600 670 645 -650 -630|700 600 -650 -650|700 585 715 645 -630|700 580 720 660 -660 -650 -630|690 685 750 710 700 -660 -660 -655 -650 -650 -640 -640|690 670 -640|690 660 730 720 717 715 -655 -650 -627 -625|690 660 712 710 700|690 667 750 740 720 685|690 660 700 685 680 -650 -630 -625|690 665 730 710 705 705 670 660 -610|695 665 705 675 -645 -640|690 665 710 -685 -675 -660 -630 -630|695 660 710 710 705 705 -665 -655 -645|690 660 730 720 690 690 -665 -655 -655 -650 -640|690 650 700 685 670 -650 -640 -635 -610|695 645 697 680 600 -652 -645 -637 -600|692 640 717 665 -650 -635|690 635 -655|690 630 690 -675 -635|690 630 720|690 630 730 700 700 640 -660 -620|690 635 705 670 660 -650 -630 -620 -610|690 635 705 -637 -630|697 620 -625|695 620 730 720 690|690 620 730 710 710 690 -630|695 620 720 700 678 -652 -647 -645 -635 -635 -625 -620 -615|690 625 710 700 700 690 -635 -625 -625 -620|690 620 720 680 -660 -660|695 610 700 695 690 -630 -620|690 610 680 680 675 640 630 630 -635 -620 -620|690 600 705 -680 -625|690 600 690 660 -617 -605|690 605 695|687 705 710 -617|685 670 730 710 -670|685 665 700 690 690 687 685 685 680 680 680 662 -632|680 650 675 660|680 655 660 -640|680 655 717 715 707 655 -665 -652 -615|680 650 720 720 -680 -660|685 650 692 680 660 660 -620 -615 -610 -600|685 650 720 705 687 685 677 -640 -635 -630|680 640 710 680 680 670 -650 -640 -630 -630 -620 -610|680 640 660 630 -655 -620|680 640 712 712 690 685 -625|680 645 -620|680 640 690 670 660 -660 -660 -650 -650 -650 -640 -630|680 630 705 700 680 660 660 -660 -620 -615|685 635 735 700 695 -655|680 630 670|680 630 700 680 -645 -640|680 630 710 680 660 655 650 -630 -620 -620|680 630 670 670 660 -640 -635 -610|685 635 682|680 630 700|682 635 700 690 670 655 -645|680 625 685|687 620 677 -617|680 625 665|680 610 685 680 640 -635 -630|680 602 667|680 600 640 -610 -610 -600 -600 -600 -560|680 600 675 670 665 -600|685 590 690|680 590 680 650 647 640 640 630 -650 -650 -620 -610|670 662 727 727 715 -655 -635|670 665 710|670 660 730 710 707 700 690 -680 -655 -620|670 650 697 675 -655 -650 -645 -635|670 655 700 690 -655 -655 -630|670 655 700 677 -630 -600|670 650 650 -620 -620|675 650 710 690 -640 -640 -630 -630 -630 -630 -630 -625 -620|670 640 715 700 670 670|670 635 710 702 692 685 680 670 655 -635|670 630 690 680 -630|675 620 700 695 690 685 -660|670 610 670|660 670 705 705 670 660 660 -620 -620 -615|660 670 720 650 650 -670 -640 -640 -620 -600 -600|660 660 660 650 -670 -665 -655|660 660 720 680 -660 -650 -620 -610|665 650 687 685 665 645 -625 -605 -605 -575|660 655 720 710 670 -660 -650|660 630 700|660 635 -645 -620|665 630 672 670 650 -650 -650 -630|665 625 700 680 -635 -625 -625 -625 -625|660 615 700|660 600 680 670 650 -600|660 600 650|660 590 680 670 665 660 657 655 650 -650 -640 -630 -620 -610 -600 -580 -570|650 670 665 660 660 -650|650 670 -630|650 660 630 -630 -630 -600|650 660 670 660 650 -650 -610|650 650 690 680 680 -650 -650 -620 -620 -610 -590|650 655 707 -655|650 650 692 690 680 677 -645 -605|650 640 670 670 -640 -640 -625 -605|650 630 700 -630|650 630 660 660 -630|655 630 710 710 690 -635|655 600 680 680 670 670 -620|640 640 715 680 -655 -640 -620 -620 -610|640 640 705 680 -670 -650 -640 -640 -600|640 630 645|640 600 660 -600|630 635 -685 -635|620 660 640 -620 -610|625 630 665 -570";
+const SONS = [];
+GALTON.split('|').forEach(s => {
+  const a = s.split(' ').map(Number), mp = (a[0] / 10 + 1.08 * a[1] / 10) / 2;
+  for (let i = 2; i < a.length; i++) if (a[i] > 0) SONS.push({mp, h: a[i] / 10});
+});
+const RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+function ticksIn(lo, hi, count){
+  const raw = (hi - lo) / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const st = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag, t = [];
+  for (let v = Math.ceil(lo / st - 1e-9) * st; v <= hi + 1e-9; v += st) t.push(+v.toFixed(10));
+  return t;
+}
+function xAxis(ctx, X0, X1, Y0, lo, hi, fmt){
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  const t = ticksIn(lo, hi, Math.max(2, Math.floor((X1 - X0) / 60)));
+  const st = t.length > 1 ? t[1] - t[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9));
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  t.forEach(v => ctx.fillText(fmt ? fmt(v) : v.toFixed(d), X0 + (v - lo) / (hi - lo) * (X1 - X0), Y0 + 5));
+}
+function label(ctx, x, y, text, color, X0, X1){
+  ctx.font = '600 11px ' + MONO; ctx.fillStyle = color; ctx.textBaseline = 'top';
+  const right = x > (X0 + X1) / 2; ctx.textAlign = right ? 'right' : 'left';
+  ctx.fillText(text, x + (right ? -5 : 5), y);
+}
+function sdOf(a){ let m = 0; a.forEach(v => m += v); m /= a.length; let s = 0; a.forEach(v => s += (v - m) ** 2); return Math.sqrt(s / (a.length - 1)); }
+function meanOf(a){ let m = 0; for (let i = 0; i < a.length; i++) m += a[i]; return m / a.length; }
+function quantile(sorted, q){ const i = Math.min(sorted.length - 1, Math.max(0, Math.round(q * (sorted.length - 1)))); return sorted[i]; }
+
+/* ---------- populations ---------- */
+const SONS_H = SONS.map(s => s.h);
+const OWN_B = 40;
+const ownW = Array.from({length: OWN_B}, (_, i) => Math.exp(-(((i - 11) / 5) ** 2)) + .55 * Math.exp(-(((i - 29) / 3) ** 2)) + .03);
+function drawOwn(){
+  let t = 0; for (let i = 0; i < OWN_B; i++) t += ownW[i];
+  let u = Math.random() * t, i = 0; while (i < OWN_B - 1 && u > ownW[i]) { u -= ownW[i]; i++; }
+  return (i + Math.random()) * (100 / OWN_B);
+}
+const POPS = {
+  heights: {name: 'Galton’s 481 sons (inches)', unit: ' in', xmin: 59, xmax: 81, binW: .5, draw: () => SONS_H[Math.floor(Math.random() * SONS_H.length)], finite: SONS_H},
+  wait: {name: 'Waiting time for the next customer (minutes), 8 on average', unit: ' min', xmin: 0, xmax: 50, draw: () => -8 * Math.log(1 - Math.random()), max: null},
+  geyser: {name: 'Gaps between geyser eruptions (minutes), two humps', unit: ' min', xmin: 30, xmax: 100, draw: () => Math.random() < .36 ? 54 + 6 * gauss() : 80 + 6 * gauss(), max: null},
+  flat: {name: 'Flat: any value from 0 to 100 equally likely', unit: '', xmin: 0, xmax: 100, draw: () => 100 * Math.random(), max: 100},
+  own: {name: 'drawn by you (drag on the chart to reshape it)', unit: '', xmin: 0, xmax: 100, draw: drawOwn, own: true}
+};
+const truthCache = {};
+function truth(key){
+  const P = POPS[key];
+  if (P.own) {   // exact, from the drawn bins (uniform within each bin)
+    const bw = 100 / OWN_B; let t = 0, m = 0, m2 = 0, last = 0;
+    ownW.forEach((w, i) => { const c = (i + .5) * bw; t += w; m += w * c; m2 += w * (c * c + bw * bw / 12); if (w > 1e-9) last = i; });
+    m /= t; m2 /= t;
+    let cum = 0, med = 0; for (let i = 0; i < OWN_B; i++) { if (cum + ownW[i] >= t / 2) { med = (i + (t / 2 - cum) / ownW[i]) * bw; break; } cum += ownW[i]; }
+    return {mean: m, sd: Math.sqrt(Math.max(0, m2 - m * m)), median: med, max: (last + 1) * bw};
+  }
+  if (truthCache[key]) return truthCache[key];
+  let a;
+  if (P.finite) a = Float64Array.from(P.finite);
+  else { a = new Float64Array(100000); for (let i = 0; i < a.length; i++) a[i] = P.draw(); }
+  a.sort();
+  let m = 0; a.forEach(v => m += v); m /= a.length; let v2 = 0; a.forEach(v => v2 += (v - m) ** 2);
+  return (truthCache[key] = {mean: m, sd: Math.sqrt(v2 / a.length), median: a[a.length >> 1], max: P.finite ? a[a.length - 1] : P.max, sorted: a});
+}
+function popBars(key, B){
+  const P = POPS[key];
+  if (P.own) return ownW.map((w, i) => [i * 100 / OWN_B, (i + 1) * 100 / OWN_B, w]);
+  const t = truth(key), bw = (P.xmax - P.xmin) / B, cnt = new Array(B).fill(0);
+  t.sorted.forEach(v => { const k = Math.floor((v - P.xmin) / bw); if (k >= 0 && k < B) cnt[k]++; });
+  return cnt.map((c, k) => [P.xmin + k * bw, P.xmin + (k + 1) * bw, c / t.sorted.length / bw]);
+}
+const STATS = {
+  mean: {label: 'mean', many: 'sample means', f: meanOf},
+  median: {label: 'median', many: 'sample medians', f: a => { const b = Float64Array.from(a).sort(), m = b.length >> 1; return b.length % 2 ? b[m] : (b[m - 1] + b[m]) / 2; }},
+  max: {label: 'largest value', many: 'sample maxima', f: a => { let m = -Infinity; for (const v of a) if (v > m) m = v; return m; }},
+  sd: {label: 'SD', many: 'sample SDs', f: sdOf}
+};
+const fmt1 = (v, P) => v.toFixed(Math.abs(v) < 10 ? 2 : 1) + (P ? P.unit : '');
+
+/* ---------- hero: the polls ---------- */
+(function(){
+  const N = 20000, YES = 10120, ASK = 1000, field = new Uint8Array(N), idx = new Int32Array(N);
+  for (let i = 0; i < N; i++) { field[i] = i < YES ? 1 : 0; idx[i] = i; }
+  for (let i = N - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)), t = field[i]; field[i] = field[j]; field[j] = t; }
+  let asked = null, polls = [], revealed = false;
+  const hint = $('#heroHint');
+  function poll(){
+    for (let i = 0; i < ASK; i++) { const j = i + Math.floor(Math.random() * (N - i)), t = idx[i]; idx[i] = idx[j]; idx[j] = t; }
+    asked = idx.slice(0, ASK); let y = 0; asked.forEach(k => y += field[k]); polls.push(y / ASK);
+  }
+  function drawField(){
+    const {ctx, w, h} = fit($('#heroField'));
+    const cols = Math.round(Math.sqrt(N * w / h)), rows = Math.ceil(N / cols), cell = Math.min(w / cols, h / rows);
+    const ox = (w - cols * cell) / 2, oy = (h - rows * cell) / 2, s = Math.max(.8, cell - .5), one = C('--one'), zero = C('--zero');
+    const put = k => ctx.fillRect(ox + (k % cols) * cell, oy + Math.floor(k / cols) * cell, s, s);
+    ctx.globalAlpha = asked ? .2 : .55;
+    ctx.fillStyle = one; for (let k = 0; k < N; k++) if (field[k]) put(k);
+    ctx.fillStyle = zero; for (let k = 0; k < N; k++) if (!field[k]) put(k);
+    ctx.globalAlpha = 1;
+    if (asked) asked.forEach(k => { ctx.fillStyle = field[k] ? one : zero; put(k); });
+  }
+  function drawStrip(){
+    const {ctx, w, h} = fit($('#heroStrip'));
+    const X0 = 16, X1 = w - 16, Y0 = h - 22, Y1 = 8, lo = 44, hi = 58, xs = v => X0 + (v - lo) / (hi - lo) * (X1 - X0);
+    xAxis(ctx, X0, X1, Y0, lo, hi, v => v + '%');
+    const bin = .25, stacks = {}; let top = 1;
+    const pos = polls.map(p => { const v = p * 100, b = Math.round(v / bin); stacks[b] = (stacks[b] || 0) + 1; top = Math.max(top, stacks[b]); return [b, stacks[b]]; });
+    const r = Math.max(1.5, Math.min(4.5, (Y0 - Y1) / (2 * top + 1), (X1 - X0) / ((hi - lo) / bin) / 2.2));
+    pos.forEach(([b, k], i) => {
+      const latest = i === polls.length - 1;
+      ctx.fillStyle = latest ? C('--accent') : C('--ink-3');
+      dot(ctx, xs(b * bin), Y0 - r - (k - 1) * 2 * r - 1, latest ? r + 1 : r);
+    });
+    if (revealed) {
+      vline(ctx, xs(YES / N * 100), Y1, Y0, C('--ink'), [4, 3], 1.5);
+      label(ctx, xs(YES / N * 100), Y1, 'true support 50.6%', C('--ink'), X0, X1);
+    }
+  }
+  function message(){
+    const n = polls.length, last = polls[n - 1], f = p => (p * 100).toFixed(1) + '%';
+    if (revealed) {
+      const near = polls.filter(p => Math.abs(p - YES / N) <= .03).length;
+      hint.innerHTML = `<b>True support is 50.6%.</b> ${n ? `${near} of your ${n} poll${n === 1 ? '' : 's'} landed within 3 points of it. ` : ''}Polls of 1,000 land within about 3 points of the truth 95% of the time, so 52% and 49% are both what honest polls produce. Neither pollster has to be wrong.`;
+    } else if (n === 0) return;
+    else if (n === 1) hint.innerHTML = `Your pollster asked the 1,000 bright squares: <b>${f(last)}</b> support the policy. Run another poll of the same country.`;
+    else if (n < 10) { const lo = Math.min(...polls), hi = Math.max(...polls); hint.innerHTML = `Same country, same question, same size of poll, yet the results so far range from <b>${f(lo)}</b> to <b>${f(hi)}</b>. Keep going.`; }
+    else { const lo = Math.min(...polls), hi = Math.max(...polls); hint.innerHTML = `<b>${n} polls</b>, from ${f(lo)} to ${f(hi)}, every one a fair random sample. Their spread is the sampling distribution of a poll. When you’re ready, reveal the true support.`; }
+  }
+  function draw(){ drawField(); drawStrip(); }
+  $('#heroPoll').addEventListener('click', () => { poll(); draw(); message(); });
+  $('#heroMany').addEventListener('click', () => { for (let i = 0; i < 20; i++) poll(); draw(); message(); });
+  $('#heroTruth').addEventListener('click', () => { revealed = true; draw(); message(); });
+  const intro = hint.innerHTML;
+  $('#heroClear').addEventListener('click', () => { polls = []; asked = null; revealed = false; hint.innerHTML = intro; draw(); });
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 1. the sample machine ---------- */
+(function(){
+  const NS = [1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100], NB = 160;
+  let pop = 'heights', stat = 'mean', ni = 8, vals = [], last = null, lastStat = null, band = null, guessed = false, running = false, timer = 0;
+  const n = () => NS[ni];
+  const P = () => POPS[pop];
+  const Xs = w => [40, w - 12];
+  function axis(){ return stat === 'sd' ? [0, (P().xmax - P().xmin) / 2.5] : [P().xmin, P().xmax]; }
+  function trueVal(){ const t = truth(pop); return stat === 'sd' ? t.sd : t[stat]; }
+  function one(){ last = Array.from({length: n()}, P().draw); lastStat = STATS[stat].f(last); vals.push(lastStat); }
+  function reset(){ vals = []; last = null; lastStat = null; band = null; }
+
+  function drawPop(){
+    const c = $('#smPop'), {ctx, w, h} = fit(c), [X0, X1] = Xs(w), Y0 = h - 22, Y1 = 8, p = P();
+    const xs = v => X0 + (v - p.xmin) / (p.xmax - p.xmin) * (X1 - X0);
+    const bars = popBars(pop, p.binW ? Math.round((p.xmax - p.xmin) / p.binW) : 48), mx = Math.max(...bars.map(b => b[2])) || 1;
+    ctx.fillStyle = p.own ? C('--gold') : C('--ink-3'); ctx.globalAlpha = p.own ? .55 : .45;
+    bars.forEach(b => { const hh = (Y0 - Y1) * b[2] / mx; ctx.fillRect(xs(b[0]) + .5, Y0 - hh, Math.max(1, xs(b[1]) - xs(b[0]) - 1), hh); });
+    ctx.globalAlpha = 1;
+    xAxis(ctx, X0, X1, Y0, p.xmin, p.xmax);
+    const t = truth(pop);
+    if (stat === 'sd') { ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--ink-2'); ctx.textAlign = 'right'; ctx.textBaseline = 'top'; ctx.fillText(`population SD: ${fmt1(t.sd, p)}`, X1, Y1); }
+    else if (t[stat] == null) { ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--ink-2'); ctx.textAlign = 'right'; ctx.textBaseline = 'top'; ctx.fillText('no largest value: the tail goes on', X1, Y1); }
+    else { const x = xs(t[stat]); vline(ctx, x, Y1, Y0, C('--ink-2'), [4, 3], 1.5); label(ctx, x, Y1, `population ${STATS[stat].label}: ${fmt1(t[stat], p)}`, C('--ink-2'), X0, X1); }
+  }
+  function drawSamp(){
+    const {ctx, w, h} = fit($('#smSamp')), [X0, X1] = Xs(w), p = P();
+    ctx.strokeStyle = C('--line'); ctx.beginPath(); ctx.moveTo(X0, h - 6.5); ctx.lineTo(X1, h - 6.5); ctx.stroke();
+    if (!last) { emptyNote(ctx, w, h + 8, guessed ? 'draw a sample' : 'make your guess below first'); return; }
+    const xs = v => X0 + (v - p.xmin) / (p.xmax - p.xmin) * (X1 - X0), r = n() > 50 ? 3 : 4;
+    ctx.fillStyle = C('--accent'); ctx.globalAlpha = .7;
+    last.forEach((v, i) => { if (v >= p.xmin && v <= p.xmax) dot(ctx, xs(v), 22 + ((i * 37) % 19) / 18 * (h - 40), r); });
+    ctx.globalAlpha = 1;
+    if (stat === 'sd') {
+      const m = meanOf(last), y = h - 12, a = xs(Math.max(p.xmin, m - lastStat)), b = xs(Math.min(p.xmax, m + lastStat));
+      ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(a, y); ctx.lineTo(b, y); ctx.moveTo(a, y - 5); ctx.lineTo(a, y + 5); ctx.moveTo(b, y - 5); ctx.lineTo(b, y + 5); ctx.stroke();
+      ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--accent'); ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+      ctx.fillText(`sample SD: ${fmt1(lastStat, p)} (bar: mean ± SD)`, X1, 2);
+    } else {
+      const x = xs(Math.min(p.xmax, Math.max(p.xmin, lastStat)));
+      vline(ctx, x, 2, h - 6, C('--accent'), null, 2.5);
+      label(ctx, x, 2, `sample ${STATS[stat].label}: ${fmt1(lastStat, p)}`, C('--accent'), X0, X1);
+    }
+  }
+  function drawHist(){
+    const {ctx, w, h} = fit($('#smHist')), [X0, X1] = Xs(w), Y0 = h - 22, Y1 = 14, [lo, hi] = axis(), p = P();
+    const xs = v => X0 + (v - lo) / (hi - lo) * (X1 - X0);
+    if (band) {
+      const a = xs(Math.max(lo, band[0])), b = xs(Math.min(hi, band[1]));
+      ctx.fillStyle = C('--gold-soft'); ctx.fillRect(a, Y1 - 10, b - a, Y0 - Y1 + 10);
+      vline(ctx, a, Y1 - 10, Y0, C('--gold'), null, 1.5); vline(ctx, b, Y1 - 10, Y0, C('--gold'), null, 1.5);
+    }
+    const cnt = new Array(NB).fill(0), bw = (hi - lo) / NB;
+    vals.forEach(v => { const k = Math.floor((v - lo) / bw); if (k >= 0 && k < NB) cnt[k]++; });
+    const mx = Math.max(1, ...cnt), lk = lastStat == null ? -1 : Math.floor((lastStat - lo) / bw), pw = (X1 - X0) / NB;
+    for (let k = 0; k < NB; k++) {
+      if (!cnt[k]) continue; const hh = (Y0 - Y1) * cnt[k] / mx;
+      ctx.fillStyle = k === lk ? C('--accent') : C('--ink-3'); ctx.fillRect(X0 + k * pw + .15, Y0 - hh, Math.max(.8, pw - .3), hh);
+    }
+    const tv = trueVal();
+    if (tv != null) vline(ctx, xs(tv), Y1 - 10, Y0, C('--ink-2'), [4, 3], 1.5);
+    xAxis(ctx, X0, X1, Y0, lo, hi);
+    if (!vals.length) {
+      ctx.fillStyle = C('--ink-2'); ctx.font = '13px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(band ? 'now draw some samples' : `drag across here: where will 95% of the ${STATS[stat].many} land?`, (X0 + X1) / 2, (Y0 + Y1) / 2, X1 - X0 - 10);
+    }
+  }
+  function readout(){
+    const p = P(), N = vals.length, parts = [];
+    if (N) {
+      const m = meanOf(vals), s = N > 1 ? sdOf(vals) : 0, tv = trueVal();
+      parts.push(`samples <b>${comma(N)}</b> · average of the ${STATS[stat].many} <b>${fmt1(m, p)}</b>${tv != null ? ` (population ${STATS[stat].label} ${fmt1(tv, p)})` : ''}`);
+      if (N > 1) parts.push(`their spread (standard error) <b>${fmt1(s, p)}</b>` + (stat === 'mean' ? ` · formula σ/√n = ${fmt1(truth(pop).sd, p)}/√${n()} = <b>${fmt1(truth(pop).sd / Math.sqrt(n()), p)}</b>` : ''));
+      if (band) {
+        const k = vals.filter(v => v >= band[0] && v <= band[1]).length / N;
+        let verdict = '';
+        if (N >= 200) verdict = k > .99 ? ' · <span class="warn">too wide</span>' : k < .88 ? ' · <span class="warn">too narrow</span>' : ' · <span class="ok">well judged</span>';
+        parts.push(`your band ${fmt1(band[0], p)} – ${fmt1(band[1], p)} caught <span class="gd">${pct(k)}</span>${verdict}`);
+      }
+    } else parts.push(band ? 'Guess locked in. Draw samples and see how many land inside it.' : guessed ? 'Draw some samples.' : `Before drawing: drag across the bottom chart to mark where you think 95% of the ${STATS[stat].many} of ${n()} will land.`);
+    $('#smRead').innerHTML = parts.join('<br>');
+  }
+  function draw(){ drawPop(); drawSamp(); drawHist(); readout(); }
+  function unlock(){ guessed = true; ['#smOne', '#smRun', '#smMany'].forEach(s => $(s).disabled = false); $('#smSkip').hidden = true; }
+  function stop(){ running = false; clearTimeout(timer); $('#smRun').textContent = '▶ Keep drawing'; }
+  function tick(){ if (!running) return; one(); draw(); timer = setTimeout(tick, RM ? 200 : 70); }
+
+  /* drag a band on the bottom chart */
+  const hc = $('#smHist'); let drag = null;
+  const toVal = e => { const r = hc.getBoundingClientRect(), [X0, X1] = Xs(r.width), [lo, hi] = axis(); return lo + Math.max(0, Math.min(1, (e.clientX - r.left - X0) / (X1 - X0))) * (hi - lo); };
+  hc.addEventListener('pointerdown', e => { drag = toVal(e); band = [drag, drag]; try { hc.setPointerCapture(e.pointerId); } catch (_) {} draw(); });
+  hc.addEventListener('pointermove', e => { if (drag == null) return; const v = toVal(e); band = [Math.min(drag, v), Math.max(drag, v)]; draw(); });
+  const end = () => { if (drag == null) return; drag = null; const [lo, hi] = axis(); if (band[1] - band[0] < (hi - lo) / 200) band = null; else unlock(); draw(); };
+  hc.addEventListener('pointerup', end); hc.addEventListener('pointercancel', end);
+
+  /* paint your own population */
+  const pc = $('#smPop'); let painting = false, lastBin = null;
+  function paint(e){
+    const r = pc.getBoundingClientRect(), [X0, X1] = Xs(r.width), Y0 = r.height - 22, Y1 = 8;
+    const bin = Math.max(0, Math.min(OWN_B - 1, Math.floor((e.clientX - r.left - X0) / (X1 - X0) * OWN_B)));
+    const mx = Math.max(...ownW), v = Math.max(0, Math.min(1, (Y0 - (e.clientY - r.top)) / (Y0 - Y1))) * Math.max(mx, .2);
+    const a = lastBin == null ? bin : lastBin;
+    for (let i = Math.min(a, bin); i <= Math.max(a, bin); i++) ownW[i] = v;
+    if (ownW.every(x => x < 1e-6)) ownW[bin] = .05;
+    lastBin = bin; vals = []; last = null; lastStat = null; draw();
+  }
+  pc.addEventListener('pointerdown', e => { if (!P().own) return; painting = true; lastBin = null; try { pc.setPointerCapture(e.pointerId); } catch (_) {} paint(e); });
+  pc.addEventListener('pointermove', e => { if (painting) paint(e); });
+  const endPaint = () => { painting = false; lastBin = null; };
+  pc.addEventListener('pointerup', endPaint); pc.addEventListener('pointercancel', endPaint);
+
+  function seg(attr, cb){ $$(`[data-${attr}]`).forEach(b => b.addEventListener('click', () => { $$(`[data-${attr}]`).forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); }); cb(b.dataset[attr]); })); }
+  seg('pop', v => { pop = v; reset(); pc.classList.toggle('paint', !!P().own); $('#smPopCap').textContent = 'Population: ' + P().name; draw(); });
+  seg('stat', v => { stat = v; if (stat === 'sd' && ni === 0) { ni = 1; $('#smN').value = 1; $('#smNOut').textContent = n(); } reset(); $('#smHistCap').textContent = `The ${STATS[stat].label} of each sample`; draw(); });
+  $('#smN').addEventListener('input', e => { ni = +e.target.value; if (stat === 'sd' && ni === 0) { ni = 1; e.target.value = 1; } $('#smNOut').textContent = n(); reset(); draw(); });
+  $('#smOne').addEventListener('click', () => { one(); draw(); });
+  $('#smMany').addEventListener('click', () => { for (let i = 0; i < 1000; i++) one(); draw(); });
+  $('#smRun').addEventListener('click', () => { if (running) stop(); else { running = true; $('#smRun').textContent = '❚❚ Pause'; tick(); } });
+  $('#smClear').addEventListener('click', () => { stop(); reset(); draw(); });
+  $('#smSkip').addEventListener('click', () => { unlock(); draw(); });
+  $('#smNOut').textContent = n(); $('#smPopCap').textContent = 'Population: ' + P().name; $('#smHistCap').textContent = 'The mean of each sample';
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 2. standard error against n ---------- */
+(function(){
+  const NS = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100], K = 3000;
+  let pop = 'heights', res = [], timer = 0;
+  function sim(){
+    clearTimeout(timer); res = []; const P = POPS[pop]; let i = 0;
+    const step = () => {
+      const n = NS[i]; let s = 0, s2 = 0;
+      for (let k = 0; k < K; k++) { let m = 0; for (let j = 0; j < n; j++) m += P.draw(); m /= n; s += m; s2 += m * m; }
+      res.push([n, Math.sqrt(Math.max(0, s2 / K - (s / K) ** 2))]); draw();
+      if (++i < NS.length) timer = setTimeout(step, RM ? 0 : 120);
+    };
+    step();
+  }
+  function draw(){
+    const {ctx, w, h} = fit($('#seChart')), P = POPS[pop], sig = truth(pop).sd;
+    const X0 = 48, X1 = w - 14, Y0 = h - 24, Y1 = 12, ymax = sig * 1.12;
+    const xs = n => X0 + n / 100 * (X1 - X0), ys = v => Y0 - v / ymax * (Y0 - Y1);
+    const t = ticksIn(0, ymax, 4); yGrid(ctx, X0, X1, ys, t, v => v.toFixed(sig < 5 ? 1 : 0));
+    xAxis(ctx, X0, X1, Y0, 0, 100);
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillText('sample size n', X1, Y0 - 4);
+    ctx.textAlign = 'right'; ctx.textBaseline = 'top'; ctx.fillText('SD of sample means', X1, Y1);
+    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2; ctx.beginPath();
+    for (let n = 1; n <= 100; n += .5) { const x = xs(n), y = ys(sig / Math.sqrt(n)); n === 1 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); } ctx.stroke();
+    ctx.fillStyle = C('--accent'); ctx.font = '600 11px ' + MONO; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+    [[1, 'σ'], [4, 'σ/2'], [16, 'σ/4'], [64, 'σ/8']].forEach(([n, s]) => ctx.fillText(s, xs(n) + 6, ys(sig / Math.sqrt(n)) - 4));
+    ctx.fillStyle = C('--ink-2'); res.forEach(([n, v]) => dot(ctx, xs(n), ys(v), 4.5));
+    const get = n => { const r = res.find(q => q[0] === n); return r ? r[1] : null; };
+    let s = `population: ${P.name} · σ = <b>${fmt1(sig, P)}</b>`;
+    if (res.length) s += '<br>' + [1, 4, 16, 64].filter(n => get(n) != null).map(n => `n = ${n}: measured <b>${fmt1(get(n), P)}</b>, σ/√${n} = ${fmt1(sig / Math.sqrt(n), P)}`).join('<br>');
+    else s += '<br>Press Simulate: at each sample size, draw 3,000 samples and measure how much their averages spread.';
+    $('#seRead').innerHTML = s;
+  }
+  $$('[data-sepop]').forEach(b => b.addEventListener('click', () => {
+    pop = b.dataset.sepop; clearTimeout(timer); res = [];
+    $$('[data-sepop]').forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
+    draw();
+  }));
+  $('#seGo').addEventListener('click', sim);
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 3. data vs averages ---------- */
+(function(){
+  const NS = [2, 5, 10, 25, 50, 100, 250, 500], K = 2000;
+  let pop = 'heights', ni = 3, sample = [], means = [];
+  const n = () => NS[ni];
+  function newSample(){ sample = Array.from({length: n()}, POPS[pop].draw); }
+  function newMeans(){ const D = POPS[pop].draw; means = new Float64Array(K); for (let k = 0; k < K; k++) { let m = 0; for (let j = 0; j < n(); j++) m += D(); means[k] = m / n(); } }
+  function hist(arr, lo, hi, B){ const c = new Array(B).fill(0), bw = (hi - lo) / B; arr.forEach(v => { const k = Math.floor((v - lo) / bw); if (k >= 0 && k < B) c[k]++; }); return c.map(x => x / arr.length / bw); }
+  function panel(id, dens, B, color, outline){
+    const {ctx, w, h} = fit($(id)), P = POPS[pop], X0 = 12, X1 = w - 12, Y0 = h - 22, Y1 = 8, pw = (X1 - X0) / B;
+    let ym = Math.max(...dens); if (outline) ym = Math.max(ym, Math.max(...outline.d) * 1.15); ym = ym * 1.08 || 1;
+    ctx.fillStyle = color;
+    dens.forEach((d, k) => { if (d > 0) { const hh = (Y0 - Y1) * d / ym; ctx.fillRect(X0 + k * pw + .3, Y0 - hh, Math.max(.8, pw - .6), hh); } });
+    if (outline) {
+      const ow = (X1 - X0) / outline.d.length; ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1.5; ctx.beginPath();
+      outline.d.forEach((d, k) => { const y = Y0 - (Y0 - Y1) * d / ym, x = X0 + k * ow; k ? ctx.lineTo(x, y) : ctx.moveTo(x, y); ctx.lineTo(x + ow, y); }); ctx.stroke();
+    }
+    const t = truth(pop); vline(ctx, X0 + (t.mean - P.xmin) / (P.xmax - P.xmin) * (X1 - X0), Y1, Y0, C('--ink-2'), [4, 3], 1.2);
+    xAxis(ctx, X0, X1, Y0, P.xmin, P.xmax);
+  }
+  function draw(){
+    const P = POPS[pop], t = truth(pop), B = P.binW ? Math.round((P.xmax - P.xmin) / P.binW) : 32;
+    panel('#dvData', hist(sample, P.xmin, P.xmax, B), B, C('--accent'), {d: hist(t.sorted, P.xmin, P.xmax, B)});
+    panel('#dvMeans', hist(means, P.xmin, P.xmax, 160), 160, C('--ink-3'));
+    const sdm = sdOf(Array.from(means));
+    $('#dvRead').innerHTML = `spread of the data (SD of this sample of ${n()}): <b>${fmt1(sdOf(sample), P)}</b> · population σ = ${fmt1(t.sd, P)}<br>` +
+      `spread of the averages (SD of ${comma(K)} sample means): <b>${fmt1(sdm, P)}</b> · σ/√${n()} = ${fmt1(t.sd / Math.sqrt(n()), P)}`;
+  }
+  $$('[data-dvpop]').forEach(b => b.addEventListener('click', () => {
+    pop = b.dataset.dvpop; $$('[data-dvpop]').forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
+    newSample(); newMeans(); draw();
+  }));
+  $('#dvN').addEventListener('input', e => { ni = +e.target.value; $('#dvNOut').textContent = n(); newSample(); newMeans(); draw(); });
+  $('#dvNew').addEventListener('click', () => { newSample(); draw(); });
+  $('#dvNOut').textContent = n(); newSample(); newMeans(); draw(); redraws.push(draw);
+})();
+
+/* ---------- 4. four statistics ---------- */
+(function(){
+  const NS = [3, 5, 10, 25, 50], K = 2000;
+  let pop = 'heights', ni = 2, S = null;
+  const n = () => NS[ni];
+  function sim(){
+    const D = POPS[pop].draw; S = {mean: [], median: [], max: [], sd: []};
+    for (let k = 0; k < K; k++) { const a = Array.from({length: n()}, D); for (const s in S) S[s].push(STATS[s].f(a)); }
+  }
+  function mini(id, key, tv){
+    const {ctx, w, h} = fit($(id)), P = POPS[pop], arr = Float64Array.from(S[key]).sort();
+    let lo = quantile(arr, .003), hi = quantile(arr, .997);
+    if (tv != null) { lo = Math.min(lo, tv); hi = Math.max(hi, tv); }
+    const pad = (hi - lo) * .08 || 1; lo -= pad; hi += pad;
+    const X0 = 8, X1 = w - 8, Y0 = h - 20, Y1 = 6, B = 40, bw = (hi - lo) / B, c = new Array(B).fill(0);
+    arr.forEach(v => { const k = Math.floor((v - lo) / bw); if (k >= 0 && k < B) c[k]++; });
+    const mx = Math.max(...c), pw = (X1 - X0) / B, xs = v => X0 + (v - lo) / (hi - lo) * (X1 - X0);
+    ctx.fillStyle = C('--ink-3'); c.forEach((x, k) => { if (x) { const hh = (Y0 - Y1) * x / mx; ctx.fillRect(X0 + k * pw + .4, Y0 - hh, pw - .8, hh); } });
+    if (tv != null) vline(ctx, xs(tv), Y1, Y0, C('--accent'), [4, 3], 1.8);
+    xAxis(ctx, X0, X1, Y0, lo, hi);
+    const avg = meanOf(arr);
+    $(id + 'R').innerHTML = `average <b>${fmt1(avg, P)}</b> · ` + (tv != null ? `population ${fmt1(tv, P)}` : 'population: no largest value') + ` · spread ${fmt1(sdOf(Array.from(arr)), P)}`;
+  }
+  function draw(){
+    if (!S) return; const t = truth(pop);
+    mini('#fsMean', 'mean', t.mean); mini('#fsMedian', 'median', t.median); mini('#fsMax', 'max', t.max); mini('#fsSD', 'sd', t.sd);
+  }
+  $$('[data-fspop]').forEach(b => b.addEventListener('click', () => {
+    pop = b.dataset.fspop; $$('[data-fspop]').forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
+    sim(); draw();
+  }));
+  $('#fsN').addEventListener('input', e => { ni = +e.target.value; $('#fsNOut').textContent = n(); sim(); draw(); });
+  $('#fsGo').addEventListener('click', () => { sim(); draw(); });
+  $('#fsNOut').textContent = n(); sim(); draw(); redraws.push(draw);
+})();
+
+/* ---------- 5. quiz ---------- */
+(function(){
+  const Q = [
+    {s: 'Predict: you switch from samples of 25 to samples of 100 from the same population. The spread of the sample means…',
+     o: ['stays the same', 'halves', 'shrinks to a quarter'], a: 1,
+     e: 'The standard error is σ/√n. Four times the sample size means √4 = 2 times smaller: half the spread, not a quarter.'},
+    {s: 'Two honest polls of 1,000 people report 52% and 49%. Is one of them wrong?',
+     o: ['Yes, they can’t both be right', 'Not necessarily: polls of 1,000 differ by a few points through chance alone'], a: 1,
+     e: 'Each poll has a standard error of about 1.6 points, so two good polls easily differ by 3 points. Neither number is the truth; both are draws from the same sampling distribution.'},
+    {s: 'As the sample gets bigger, the histogram of the data itself gets narrower.',
+     o: ['True', 'False'], a: 1,
+     e: 'The data keep the population’s spread: sons vary by about 2.6 inches whatever the sample size. What narrows is the spread of the average, the standard error.'},
+    {s: 'A city of 100,000 and a country of 300 million are each polled with a random sample of 1,000. Which poll is more precise?',
+     o: ['The city poll, by far', 'About the same', 'The country poll'], a: 1,
+     e: 'The standard error depends on the sample size, not the population size, as long as the sample is a small fraction of the population. Both polls have a margin of error of about 3 points.'},
+    {s: 'Waiting times are strongly skewed. What shape is the sampling distribution of the mean for samples of 50?',
+     o: ['Just as skewed as the waiting times', 'Close to a symmetric bell'], a: 1,
+     e: 'The central limit theorem: averages of reasonably large samples are close to normal whatever the population looks like. A slight skew remains, shrinking as n grows.'},
+    {s: 'On average, the largest value in a sample of 10 sons is…',
+     o: ['equal to the tallest son in the population', 'below the tallest son in the population'], a: 1,
+     e: 'A sample maximum can never exceed the population maximum, and usually falls short of it, so its sampling distribution sits below the true value. A statistic like that is called biased.'},
+    {s: 'A report shows an average with an error bar. Which reading is safe?',
+     o: ['The bar shows how much individuals vary', 'It depends: check whether the bar is an SD or an SE'], a: 1,
+     e: 'An SD bar describes individuals and doesn’t shrink with more data; an SE bar describes the precision of the average and does. With 100 per group they differ by a factor of 10.'}
+  ];
+  const box = $('#quiz'); let answered = 0, right = 0;
+  Q.forEach(q => {
+    const d = document.createElement('div'); d.className = 'qitem';
+    d.innerHTML = `<p>${q.s}</p><div class="qbtns">${q.o.map((t, i) => `<button class="btn" data-i="${i}">${t}</button>`).join('')}</div><p class="qexp" hidden></p>`;
+    const exp = d.querySelector('.qexp');
+    d.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      const ok = +b.dataset.i === q.a;
+      if (!d.dataset.done) { d.dataset.done = '1'; answered++; if (ok) right++; }
+      d.querySelectorAll('button').forEach(x => x.classList.remove('right', 'wrong'));
+      b.classList.add(ok ? 'right' : 'wrong');
+      exp.hidden = false; exp.innerHTML = `<b>${ok ? '✓ Right.' : '✗ Not quite.'}</b> ${q.e}`;
+      $('#quizScore').textContent = `${answered} of ${Q.length} answered · ${right} right on the first try`;
+    }));
+    box.appendChild(d);
+  });
+})();
+
+})();
+</script>
+</body>
+</html>

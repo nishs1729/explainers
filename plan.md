@@ -22,7 +22,7 @@ See [Statistics: how every page works](#statistics-conventions) first.
 
 ### [Learning from data](#learning-from-data)
 - [x] [1. Is that pattern real?](https://nishs1729.github.io/explainers/statistics/is-it-real.html)
-- [ ] [2. Sampling distributions](#sampling-distributions)
+- [x] [2. Sampling distributions](https://nishs1729.github.io/explainers/statistics/sampling-distributions.html)
 - [ ] [3. ⚠ Who's missing?](#selection-bias)
 - [ ] [4. What makes a good guess](#estimation)
 - [ ] [5. The bootstrap](#bootstrap)
@@ -230,6 +230,8 @@ Assumes the probability series, especially Normal (CLT, √n law) and Chi-square
 >   - Side-by-side: data histogram vs histogram of sample means, with n slider
 >
 > **Links:** builds on Normal (√n law, CLT), Chi-square (sample variance), Extreme values (sample max).
+>
+> **Built:** the hero polls a country of 20,000 voters (true support 50.6%) with polls of 1,000. The sample machine offers five populations (Galton's sons, exponential waiting times with mean 8, a two-hump "geyser" mixture, flat 0–100, and one the reader paints), four statistics, n from 1 to 100, and a drag-to-draw 95% band that must be drawn or skipped before sampling. Section 2 checks σ/√n at n = 1, 4, …, 100 by simulation and covers the margin of error and why population size doesn't matter. Section 4 shows mean, median, maximum and SD side by side. Shared helpers, styles and Galton data are copied from page 1.
 
 <a id="selection-bias"></a>
 ### **3. ⚠ Who's missing?**

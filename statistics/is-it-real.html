@@ -319,6 +319,9 @@ table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;co
   <div class="widget">
     <p class="cast-q">Tall parents tend to have tall children. How strong is the link?</p>
     <canvas id="htScat" style="height:280px" role="img" aria-label="Scatterplot of 481 sons' heights against their parents' average height"></canvas>
+    <p class="mcap" style="margin-top:12px">Correlation in each shuffle</p>
+    <canvas id="htHist" style="height:170px" role="img" aria-label="Histogram of the correlation between parents' and sons' heights after shuffling the sons among families, with the real correlation of 0.48 marked"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>correlation after shuffling sons among families</span></span><span><i class="sw line" style="border-top-color:var(--accent)"></i><span>real correlation: 0.48</span></span></div>
     <div class="controls">
       <button class="btn" id="htShuf">Shuffle sons among families</button>
       <button class="btn primary" id="htMany">1,000 shuffles</button>
@@ -326,7 +329,7 @@ table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;co
     </div>
     <div class="readout" id="htRead"></div>
   </div>
-  <p>This is Galton’s full set of sons: 481 of them, each plotted against the “mid-parent” height Galton used, the father’s height averaged with 1.08 times the mother’s (his way of putting women and men on one scale). The cloud tilts upward. Shuffle the sons among the families and the tilt vanishes; in 1,000 shuffles nothing comes close. With 481 families, the link is far beyond what chance draws. The interesting question here is not “is it real?” but “how strong, and why do children of very tall parents tend to be less tall than their parents?” That puzzle gave regression its name, and it gets its own page.</p>
+  <p>This is Galton’s full set of sons: 481 of them, each plotted against the “mid-parent” height Galton used, the father’s height averaged with 1.08 times the mother’s (his way of putting women and men on one scale). The cloud tilts upward. Shuffle the sons among the families and the tilt vanishes. Shuffled correlations pile up around 0 and rarely pass 0.15, far short of the real 0.48; in 1,000 shuffles nothing comes close. With 481 families, the link is far beyond what chance draws. The interesting question here is not “is it real?” but “how strong, and why do children of very tall parents tend to be less tall than their parents?” That puzzle gave regression its name, and it gets its own page.</p>
 </section>
 
 <!-- 4 -->
@@ -376,7 +379,7 @@ table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;co
     <div class="readout" id="quizScore" style="margin-top:10px" aria-live="polite"></div>
   </div>
 
-  <p>Every pattern in this page came with a question: how much does a number computed from data move around by chance? That wobble has a shape and a size, and it is the subject of the next page, <strong>Sampling distributions</strong> (coming soon).</p>
+  <p>Every pattern in this page came with a question: how much does a number computed from data move around by chance? That wobble has a shape and a size, and it is the subject of the next page, <a href="sampling-distributions.html">Sampling Distributions</a>.</p>
   <p class="muted small">Data: Galton’s family heights as transcribed by J. A. Hanley (<em>The American Statistician</em>, 2004), via the GaltonFamilies dataset; sleep data from Cushny &amp; Peebles (1905) as used by Student (<em>Biometrika</em>, 1908). Line-ups: Buja et al. (2009), Wickham et al. (2010).</p>
 </section>
 
@@ -843,8 +846,15 @@ function makePanels(kind, lvl){
 /* ---------- 3c. heights ---------- */
 (function(){
   const X = SONS.map(s => s.mp), Y = SONS.map(s => s.h), R = corr(X, Y);
-  let y = Y, shuf = false, maxR = null, nShuf = 0;
-  function draw(){
+  const LO = -60, HI = 60;   // correlation in bins of 0.01
+  const hist = new Array(HI - LO + 1).fill(0);
+  let y = Y, shuf = false, total = 0, beyond = 0, maxR = 0, lastR = null;
+  function add(yy){
+    const r = corr(X, yy), k = Math.round(r * 100);
+    if (k >= LO && k <= HI) hist[k - LO]++;
+    total++; if (Math.abs(r) >= R) beyond++; maxR = Math.max(maxR, Math.abs(r)); lastR = r;
+  }
+  function drawScat(){
     const {ctx, w, h} = fit($('#htScat'));
     const X0 = 44, X1 = w - 12, Y0 = h - 34, Y1 = 10, xmin = 63, xmax = 76, ymin = 59, ymax = 80;
     const xs = v => X0 + (v - xmin) / (xmax - xmin) * (X1 - X0), ys = v => Y0 - (v - ymin) / (ymax - ymin) * (Y0 - Y1);
@@ -863,16 +873,28 @@ function makePanels(kind, lvl){
     let sxy = 0, sxx = 0; for (let i = 0; i < n; i++) { sxy += (X[i] - mx) * (y[i] - my); sxx += (X[i] - mx) ** 2; }
     const b = sxy / sxx; ctx.strokeStyle = shuf ? C('--ink-2') : C('--accent'); ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(xs(64), ys(my + b * (64 - mx))); ctx.lineTo(xs(75.5), ys(my + b * (75.5 - mx))); ctx.stroke();
-    let s = shuf ? `shuffled: correlation <b>${f2(corr(X, y))}</b> (real data: ${f2(R)})` : `real data: <b>${X.length}</b> sons · correlation <b>${f2(R)}</b>`;
-    if (maxR != null) s += `<br>${comma(nShuf)} shuffles · largest correlation either way <b>${f2(maxR)}</b> · as big as ${f2(R)}: <b>none</b>`;
+  }
+  function drawHist(){
+    const {ctx, w, h} = fit($('#htHist'));
+    const ym = total ? Math.max(...hist) / total * 1.15 : .1;
+    const F = frame(ctx, w, h, {lo: LO, hi: HI, ymax: ym, step: 20, lab: k => fmtN(k / 100), yfmt: v => Math.round(v * 100) + '%'});
+    if (total) drawBars(ctx, F, LO, HI, k => hist[k - LO] / total, k => Math.abs(k / 100) >= R ? C('--accent') : C('--ink-3'), .9);
+    else emptyNote(ctx, w, h, 'no shuffles yet');
+    const px = v => F.X0 + (v * 100 - LO + .5) * F.bw;
+    vline(ctx, px(R), F.Y1, F.Y0, C('--accent'), null, 2);
+    vline(ctx, px(-R), F.Y1, F.Y0, C('--accent'), [4, 3], 1.2);
+    ctx.fillStyle = C('--accent'); ctx.font = '600 12px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+    ctx.fillText(`real ${f2(R)}`, px(R) - 5, F.Y1);
+  }
+  function readout(){
+    let s = shuf && lastR != null ? `this shuffle: correlation <b>${f2(Math.abs(lastR) < .005 ? 0 : lastR)}</b> (real data: ${f2(R)})` : `real data: <b>${X.length}</b> sons · correlation <b>${f2(R)}</b>`;
+    if (total) s += `<br>shuffles <b>${comma(total)}</b> · largest either way <b>${f2(maxR)}</b> · as big as ${f2(R)}: <b>${beyond ? comma(beyond) : 'none'}</b>`;
     $('#htRead').innerHTML = s;
   }
-  $('#htShuf').addEventListener('click', () => { y = shuffled(Y); shuf = true; draw(); });
-  $('#htMany').addEventListener('click', () => {
-    let m = 0; for (let k = 0; k < 1000; k++) { const yy = shuffled(Y); m = Math.max(m, Math.abs(corr(X, yy))); y = yy; }
-    maxR = Math.max(maxR || 0, m); nShuf += 1000; shuf = true; draw();
-  });
-  $('#htReal').addEventListener('click', () => { y = Y; shuf = false; draw(); });
+  function draw(){ drawScat(); drawHist(); readout(); }
+  $('#htShuf').addEventListener('click', () => { y = shuffled(Y); shuf = true; add(y); draw(); });
+  $('#htMany').addEventListener('click', () => { for (let k = 0; k < 1000; k++) { y = shuffled(Y); add(y); } shuf = true; draw(); });
+  $('#htReal').addEventListener('click', () => { y = Y; shuf = false; hist.fill(0); total = beyond = maxR = 0; lastR = null; draw(); });
   draw(); redraws.push(draw);
 })();
 

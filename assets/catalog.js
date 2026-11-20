@@ -162,7 +162,7 @@ window.EXPLAINERS = {
           "id": "learning-from-data",
           "title": "Learning from data",
           "blurb": "Could chance alone have done this? Starting from line-ups and coin streaks, the series builds the tools for answering that question: sampling, estimation, resampling, tests, intervals and power, ending with the 1954 polio vaccine trial.",
-          "topics": ["is-it-real"]
+          "topics": ["is-it-real", "sampling-distributions"]
         }
       ],
       "topics": [
@@ -174,6 +174,15 @@ window.EXPLAINERS = {
           "summary": "Chance draws convincing trends, streaks and gaps. Spot the real plot in a line-up, try to fake a coin, and meet the three datasets the series keeps coming back to.",
           "tags": ["line-up", "noise", "streaks", "shuffling", "Galton"],
           "preview": { "select": "#heroLU", "click": [] }
+        },
+        {
+          "id": "sampling-distributions",
+          "title": "Sampling Distributions",
+          "short": "Sampling",
+          "path": "statistics/sampling-distributions.html",
+          "summary": "Any number computed from a sample is itself random. Run polls, feed a sample machine, and watch the standard error shrink as σ/√n.",
+          "tags": ["standard error", "σ/√n", "polls", "central limit theorem", "SD vs SE"],
+          "preview": { "select": "#heroPlay", "click": ["#heroMany"] }
         }
       ]
     }
