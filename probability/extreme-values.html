@@ -204,7 +204,7 @@ table.summary td:not(:first-child),table.summary th:not(:first-child){text-align
     <li><strong>A bounded source</strong> such as the uniform can never pass its upper end. The maximum crowds up against it.</li>
     <li><strong>The normal’s</strong> tails thin out so fast that its maximum grows only like \(\sqrt{2\ln n}\): typically about 4.8 standard deviations for a million values, and about 6.1 for a billion.</li>
     <li><strong>The exponential’s</strong> maximum grows like \(\ln n\): ten times the data adds a fixed amount, about 2.3.</li>
-    <li><strong>A heavy, power-law tail</strong> is different in kind. With tail exponent 2 the maximum grows like \(\sqrt n\), without limit, and a single value can dwarf all the others put together.</li>
+    <li><strong>A heavy, <a href="power-laws.html#pareto">power-law</a> tail</strong> is different in kind. With tail exponent 2 the maximum grows like \(\sqrt n\), without limit, and a single value can dwarf all the others put together.</li>
   </ul>
 </section>
 
@@ -215,7 +215,7 @@ table.summary td:not(:first-child),table.summary th:not(:first-child){text-align
   <p>The maximum drifts, so to see its <em>shape</em> it has to be shifted and rescaled, just as the <a href="normal.html#clt">central limit theorem</a> standardizes a sum. The <em class="term">extremal types theorem</em> of Fisher and Tippett (1928), made rigorous by Gnedenko (1943), says that if the rescaled maximum settles into any shape at all, that shape is one of only three:</p>
   <ul>
     <li><strong>Gumbel</strong>, for tails that thin out exponentially or faster: normal, exponential, gamma, lognormal.</li>
-    <li><strong>Fréchet</strong>, for heavy, power-law tails, where \(P(X > x)\) falls like \(x^{-\alpha}\).</li>
+    <li><strong>Fréchet</strong>, for heavy, <a href="power-laws.html">power-law</a> tails, where \(P(X > x)\) falls like \(x^{-\alpha}\).</li>
     <li><strong>Weibull</strong> (in its reversed form), for sources with a hard upper end, such as the uniform.</li>
   </ul>
   <p>All three are one family, the <em class="term">generalized extreme value</em> (GEV) distribution, with location \(\mu\), scale \(\sigma\) and a <em class="term">shape</em> \(\xi\):</p>
@@ -387,7 +387,7 @@ table.summary td:not(:first-child),table.summary th:not(:first-child){text-align
     <div class="readout" id="quizScore" style="margin-top:10px" aria-live="polite"></div>
   </div>
 
-  <p>This is the last page of the series for now. It started with a single coin flip, built the counting and waiting distributions, the bell curve that sums lead to and its squares, a distribution for a probability itself, and ends with the laws of the largest and smallest values. The Fréchet family hinted at the next story: heavy, power-law tails, where there is no typical size at all. A page on power laws is planned. <a href="../index.html">Browse all explainers</a>.</p>
+  <p>The series started with a single coin flip, built the counting and waiting distributions, the bell curve that sums lead to and its squares, a distribution for a probability itself, and has now reached the laws of the largest and smallest values. The Fréchet family hinted at the next story: heavy, power-law tails, where there is no typical size at all. Next in the series: <a href="power-laws.html">Power Laws</a>.</p>
 </section>
 
 </main>

@@ -29,8 +29,8 @@ window.EXPLAINERS = {
         {
           "id": "distributions",
           "title": "Probability distributions",
-          "blurb": "From a single coin flip to counting events and waiting for them, in steps and in continuous time, to the bell curve and its squares, a distribution for an unknown probability, and the laws of the largest values. Each one builds on the last.",
-          "topics": ["bernoulli", "binomial", "geometric", "exponential", "poisson", "negative-binomial", "normal", "gamma", "chi-square", "beta", "extreme-values"]
+          "blurb": "From a single coin flip to counting events and waiting for them, in steps and in continuous time, to the bell curve and its squares, a distribution for an unknown probability, the laws of the largest values and the heavy tails of power laws. Each one builds on the last.",
+          "topics": ["bernoulli", "binomial", "geometric", "exponential", "poisson", "negative-binomial", "normal", "gamma", "chi-square", "beta", "extreme-values", "power-laws"]
         }
       ],
       "topics": [
@@ -132,6 +132,15 @@ window.EXPLAINERS = {
           "summary": "The largest and smallest of many values: Gumbel, Fréchet and Weibull, the weakest link, and why a 100-year flood is not once a century.",
           "tags": ["maximum", "Gumbel", "Weibull", "return period", "generalized Pareto"],
           "preview": { "select": ".hero-play", "click": ["#heroMany", "#heroMany"] }
+        },
+        {
+          "id": "power-laws",
+          "title": "Power Laws",
+          "short": "Power laws",
+          "path": "probability/power-laws.html",
+          "summary": "When size breeds size there is no typical value: Pareto and Zipf, the log–log trap, the rich get richer, and averages that never settle.",
+          "tags": ["Pareto", "Zipf", "heavy tails", "preferential attachment", "80/20 rule"],
+          "preview": { "select": ".hero-play", "click": ["#heroMany"] }
         }
       ]
     }

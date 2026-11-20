@@ -363,7 +363,7 @@ table.summary td:not(:first-child),table.summary th:not(:first-child){text-align
     <div class="legend"><span><i class="sw line" style="border-color:var(--accent)"></i><span>average of normal draws</span></span><span><i class="sw line" style="border-color:var(--zero)"></i><span>average of Cauchy draws</span></span><span><i class="sw dash" style="border-color:var(--ink-3)"></i><span>center, 0</span></span></div>
     <div class="readout" id="raRead" style="margin-top:8px"></div>
   </div>
-  <p>The normal average closes in on 0, at the \(1/\sqrt n\) pace of section 4. The Cauchy average never does. It drifts, then jumps when one enormous draw arrives, and the average of 5,000 draws is no more reliable than a single draw. In fact it has exactly the same Cauchy distribution as one draw. Distributions with heavy tails like this, where the variance is infinite, turn up in finance, in insurance losses and in the sizes of cities and earthquakes; for them the bell is the wrong picture.</p>
+  <p>The normal average closes in on 0, at the \(1/\sqrt n\) pace of section 4. The Cauchy average never does. It drifts, then jumps when one enormous draw arrives, and the average of 5,000 draws is no more reliable than a single draw. In fact it has exactly the same Cauchy distribution as one draw. Distributions with heavy tails like this, where the variance is infinite, turn up in finance, in insurance losses and in the sizes of cities and earthquakes; for them the bell is the wrong picture (see <a href="power-laws.html#averages">power laws</a>).</p>
 
   <h3>Products instead of sums</h3>
   <p>Many things grow by multiplying: an investment that gains or loses a percentage each year, a population, a cell that grows by a random factor before dividing. The logarithm turns a product into a sum, \(\ln(U_1 U_2 \cdots U_n) = \ln U_1 + \dots + \ln U_n\), so the <em>log</em> of the product is approximately normal. The product itself is then <em class="term">lognormal</em>: piled up on the left with a long tail to the right.</p>
@@ -381,6 +381,7 @@ table.summary td:not(:first-child),table.summary th:not(:first-child){text-align
   </div>
   <p>Each year the value is multiplied by a random factor between 0.5 and 1.5, which averages exactly 1. So the <em>mean</em> final value stays at 1. But the typical run loses money: the median is well below 1, because a 50% loss needs a 100% gain to undo it. A few lucky runs end far above 1 and hold up the mean. Switch to the log view and the lopsided pile becomes a bell.</p>
   <p>Dependence breaks the theorem too. If the pieces move together, as house prices in one city do, or as loans did in 2008, their sum varies far more than \(\sigma\sqrt n\), and the tails are much heavier than a normal predicts.</p>
+  <p>A lognormal with a large spread can look deceptively like a power law on a log–log plot; the <a href="power-laws.html#loglog">power laws tutorial</a> shows the trap.</p>
 </section>
 
 <!-- 7 -->

@@ -14,7 +14,7 @@
 - [x] [Chi-square](https://nishs1729.github.io/explainers/probability/chi-square.html)
 - [x] [Beta](https://nishs1729.github.io/explainers/probability/beta.html)
 - [x] [Extreme values](https://nishs1729.github.io/explainers/probability/extreme-values.html)
-- [ ] [Power laws](#power-laws)
+- [x] [Power laws](https://nishs1729.github.io/explainers/probability/power-laws.html)
 - [ ] [A Field Guide to Distributions](#field-guide)
 
 ## Statistics
@@ -59,27 +59,6 @@
 From a single coin flip to counting, waiting, the bell curve and its squares.
 The remaining pages widen the view: proportions, extremes, power laws, and a
 guide to everything else. Each page builds on the earlier ones.
-
-<a id="power-laws"></a>
-### **Power laws**
-
-> **Idea:** when size breeds size, there is no typical value: a few giants and a long tail of small ones.
->
-> **Sections:**
->   - **No typical size**: city populations, wealth, word counts; the 80/20 rule
->   - **Pareto**: the continuous version, and how the tail exponent controls everything
->   - Straight lines on log–log plots, and why a straight-ish line is not proof
->   - **Zipf**: rank vs frequency for words, cities and websites
->   - **Where they come from**: rich-get-richer (Yule–Simon, preferential attachment), multiplicative growth
->   - **When averages break**: infinite variance or mean, and what sample averages do then
->   - Properties, uses, quiz
->
-> **Widgets:**
->   - Rich-get-richer simulator: new items join existing groups in proportion to size; watch the tail form
->   - Log–log plot toggle on the same data, with a lognormal look-alike to show the trap
->   - Running average of Pareto samples for different exponents
->
-> **Links:** builds on Exponential, Normal (lognormal section). Links to [Extreme values](https://nishs1729.github.io/explainers/probability/extreme-values.html) and the [field guide](#field-guide).
 
 <a id="field-guide"></a>
 ### **A Field Guide to Distributions**
