@@ -152,6 +152,30 @@ window.EXPLAINERS = {
           "preview": { "select": "#familyMap", "click": [] }
         }
       ]
+    },
+    {
+      "id": "statistics",
+      "title": "Statistics",
+      "blurb": "From data back to the world that made it. Every idea is shown first by simulating chance in your browser, before any formula.",
+      "series": [
+        {
+          "id": "learning-from-data",
+          "title": "Learning from data",
+          "blurb": "Could chance alone have done this? Starting from line-ups and coin streaks, the series builds the tools for answering that question: sampling, estimation, resampling, tests, intervals and power, ending with the 1954 polio vaccine trial.",
+          "topics": ["is-it-real"]
+        }
+      ],
+      "topics": [
+        {
+          "id": "is-it-real",
+          "title": "Is That Pattern Real?",
+          "short": "Is it real?",
+          "path": "statistics/is-it-real.html",
+          "summary": "Chance draws convincing trends, streaks and gaps. Spot the real plot in a line-up, try to fake a coin, and meet the three datasets the series keeps coming back to.",
+          "tags": ["line-up", "noise", "streaks", "shuffling", "Galton"],
+          "preview": { "select": "#heroLU", "click": [] }
+        }
+      ]
     }
   ]
 };

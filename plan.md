@@ -21,7 +21,7 @@
 See [Statistics: how every page works](#statistics-conventions) first.
 
 ### [Learning from data](#learning-from-data)
-- [ ] [1. Is that pattern real?](#is-it-real)
+- [x] [1. Is that pattern real?](https://nishs1729.github.io/explainers/statistics/is-it-real.html)
 - [ ] [2. Sampling distributions](#sampling-distributions)
 - [ ] [3. ⚠ Who's missing?](#selection-bias)
 - [ ] [4. What makes a good guess](#estimation)
@@ -138,14 +138,19 @@ same numbers on every page that uses them.
   Drug 2: 1.9, 0.8, 1.1, 0.1, −0.1, 4.4, 5.5, 1.6, 4.6, 3.4.
   Paired differences: mean 1.58, t ≈ 4.06 (df 9). Small n makes it perfect for exact
   shuffles (2¹⁰ = 1,024 sign flips) and for t. Pages 4, 5, 6, 11, 20.
-- **Heights:** Galton's 1886 parent/child heights (928 adult children, mid-parent height).
-  Pages 26–30, 36.
+- **Heights:** Galton's family records as transcribed by Hanley (2004), the `GaltonFamilies`
+  dataset: 205 families, 934 adult children (481 sons). Mid-parent = (father + 1.08 × mother)/2.
+  Sons vs mid-parent: r = 0.48. Page 1 embeds the full data as a compact string (father, mother,
+  children in tenths of an inch; daughters negative); copy it from there. Pages 1, 26–30, 36.
 
 ### Visual language (consistent on every page)
-- One colour for **real data**, one muted colour for **chance / simulated** worlds; the
-  observed value is always a vertical line in the accent colour.
-- Null distributions are always the muted colour; tail areas beyond the observed value are
-  filled with the accent.
+- Same theme tokens as the probability pages. **Real data** = `--accent`; **chance /
+  simulated** worlds = `--ink-3` (muted grey); **the reader's own guess or data** = `--gold`;
+  right/wrong = `--one`/`--zero`. Coin heads/tails = `--one`/`--zero`.
+- The observed value is always a solid vertical line in `--accent` (its mirror for two-sided
+  comparisons dashed); null-distribution bars beyond it turn `--accent`.
+- In a line-up all panels are drawn in `--ink-2` until the reveal; then the real one turns
+  `--accent` and a wrong pick is outlined in `--zero`.
 - Individual observations are dots; collections of statistics are histograms that build up
   live as samples arrive (never appear all at once).
 
@@ -153,6 +158,7 @@ same numbers on every page that uses them.
 - Say "chance alone" before "null hypothesis", "how much it wobbles" before "standard
   error"; introduce the technical term in bold right after the plain one, once.
 - n, x̄, s, θ (true value), θ̂ (estimate), SE. Bayesian pages: prior, likelihood, posterior.
+- American spelling on the pages, as in the probability series.
 
 ### Accuracy
 - Every historical number (polio trial, Challenger, AF447, Berkeley, tank counts…) is checked
@@ -200,6 +206,8 @@ Assumes the probability series, especially Normal (CLT, √n law) and Chi-square
 > **Data:** introduces all three running datasets.
 >
 > **Links:** builds on Binomial, Poisson ("random looks clumpy"). Leads to Sampling distributions. Line-up method: Buja et al. (2009), Wickham et al. (2010).
+>
+> **Built:** the hero is the line-up on real Galton data (30 sons, 19 shuffles). The cast section gives each dataset a "show me chance" button (identical buttons, all 1,024 drug relabelings, 1,000 son shuffles), and section 4 adds the three-step recipe. The "fake a coin" widget is this page's use-my-data mode.
 
 <a id="sampling-distributions"></a>
 ### **2. Sampling distributions**
