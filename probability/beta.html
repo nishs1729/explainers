@@ -253,7 +253,7 @@ table.summary td:not(:first-child),table.summary th:not(:first-child){text-align
     <div class="legend"><span><i class="sw dot" style="background:var(--ink-3)"></i><span>other points</span></span><span><i class="sw dot" style="background:var(--gold)"></i><span>the \(k\)-th smallest</span></span><span><i class="sw" style="background:var(--accent)"></i><span>its value over many drops</span></span><span><i class="sw line" style="border-color:var(--gold)"></i><span>\(\text{Beta}(k, n - k + 1)\)</span></span></div>
     <div class="readout" id="osRead" style="margin-top:8px"></div>
   </div>
-  <p>With \(n = 1\) there is one point and it is uniform: \(\text{Beta}(1, 1)\). The smallest of \(n\) leans toward 0, the largest toward 1, and the middle one, the sample median when \(n\) is odd, is a symmetric hump around ½. On average the \(k\)-th smallest sits at \(k/(n + 1)\): the \(n\) points split the interval into \(n + 1\) gaps of equal average length.</p>
+  <p>With \(n = 1\) there is one point and it is uniform: \(\text{Beta}(1, 1)\). The smallest of \(n\) leans toward 0, the largest toward 1, and the middle one, the sample median when \(n\) is odd, is a symmetric hump around ½. On average the \(k\)-th smallest sits at \(k/(n + 1)\): the \(n\) points split the interval into \(n + 1\) gaps of equal average length. The largest, \(k = n\), is \(\text{Beta}(n, 1)\); how the largest of many values behaves for other sources is the subject of <a href="extreme-values.html">extreme value distributions</a>.</p>
   <p>The same fact explains the binomial’s <a href="binomial.html#props">link to the beta</a>: \(Y \le k\) successes in \(n\) trials happens exactly when the \((k+1)\)-th smallest of \(n\) uniforms is above \(p\).</p>
 </section>
 
@@ -385,7 +385,7 @@ table.summary td:not(:first-child),table.summary th:not(:first-child){text-align
     <div class="readout" id="quizScore" style="margin-top:10px" aria-live="polite"></div>
   </div>
 
-  <p>This is the last page of the series for now. It started with a single coin flip whose probability was simply given, built the counting and waiting distributions, the bell curve and its squares, and ends with a distribution for that probability itself. The planned series on statistical and Bayesian inference will put all of them to work. <a href="../index.html">Browse all explainers</a>.</p>
+  <p>The series started with a single coin flip whose probability was simply given, built the counting and waiting distributions and the bell curve and its squares, and has now reached a distribution for that probability itself. The planned series on statistical and Bayesian inference will put all of them to work. Next in the series: the largest of many values, which has universal laws of its own. That is <a href="extreme-values.html">Extreme Value Distributions</a>.</p>
 </section>
 
 </main>

@@ -29,8 +29,8 @@ window.EXPLAINERS = {
         {
           "id": "distributions",
           "title": "Probability distributions",
-          "blurb": "From a single coin flip to counting events and waiting for them, in steps and in continuous time, to the bell curve and its squares, and a distribution for an unknown probability itself. Each one builds on the last.",
-          "topics": ["bernoulli", "binomial", "geometric", "exponential", "poisson", "negative-binomial", "normal", "gamma", "chi-square", "beta"]
+          "blurb": "From a single coin flip to counting events and waiting for them, in steps and in continuous time, to the bell curve and its squares, a distribution for an unknown probability, and the laws of the largest values. Each one builds on the last.",
+          "topics": ["bernoulli", "binomial", "geometric", "exponential", "poisson", "negative-binomial", "normal", "gamma", "chi-square", "beta", "extreme-values"]
         }
       ],
       "topics": [
@@ -122,6 +122,15 @@ window.EXPLAINERS = {
           "path": "probability/beta.html",
           "summary": "A distribution for an unknown probability: its many shapes, the k-th smallest of n random points, ratios of gammas, and learning a coin's bias from flips.",
           "tags": ["proportion", "order statistics", "beta function", "conjugate prior", "PERT"],
+          "preview": { "select": ".hero-play", "click": ["#heroMany", "#heroMany"] }
+        },
+        {
+          "id": "extreme-values",
+          "title": "Extreme Value Distributions",
+          "short": "Extreme values",
+          "path": "probability/extreme-values.html",
+          "summary": "The largest and smallest of many values: Gumbel, Fréchet and Weibull, the weakest link, and why a 100-year flood is not once a century.",
+          "tags": ["maximum", "Gumbel", "Weibull", "return period", "generalized Pareto"],
           "preview": { "select": ".hero-play", "click": ["#heroMany", "#heroMany"] }
         }
       ]

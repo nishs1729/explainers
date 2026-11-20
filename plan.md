@@ -13,7 +13,7 @@
 - [x] [Gamma](https://nishs1729.github.io/explainers/probability/gamma.html)
 - [x] [Chi-square](https://nishs1729.github.io/explainers/probability/chi-square.html)
 - [x] [Beta](https://nishs1729.github.io/explainers/probability/beta.html)
-- [ ] [Extreme values](#extreme-values)
+- [x] [Extreme values](https://nishs1729.github.io/explainers/probability/extreme-values.html)
 - [ ] [Power laws](#power-laws)
 - [ ] [A Field Guide to Distributions](#field-guide)
 
@@ -60,26 +60,6 @@ From a single coin flip to counting, waiting, the bell curve and its squares.
 The remaining pages widen the view: proportions, extremes, power laws, and a
 guide to everything else. Each page builds on the earlier ones.
 
-<a id="extreme-values"></a>
-### **Extreme values**
-
-> **Idea:** the largest (or smallest) of many values has its own universal shapes, just as sums lead to the normal.
->
-> **Sections:**
->   - **Take the biggest**: the maximum of n values, and why it stops growing like the average
->   - **Three families**: Gumbel (light tails), Fréchet (heavy tails), Weibull (bounded); one combined form (GEV)
->   - **The weakest link**: minimums, failure times and the Weibull
->   - **Return periods**: what a "100-year flood" means, and why it is not once a century
->   - **Over the threshold**: the generalized Pareto for everything above a high level
->   - Properties, uses (floods, wind loads, insurance, material strength), quiz
->
-> **Widgets:**
->   - Max machine: choose a source (normal, exponential, uniform, heavy-tailed), choose n, see block maxima settle into Gumbel / Fréchet / Weibull
->   - Return-period calculator on simulated yearly maxima
->   - Chain of links: break a chain of n random-strength links, histogram of breaking strength
->
-> **Links:** builds on Normal, Exponential. Links to [Power laws](#power-laws) for heavy tails.
-
 <a id="power-laws"></a>
 ### **Power laws**
 
@@ -99,7 +79,7 @@ guide to everything else. Each page builds on the earlier ones.
 >   - Log–log plot toggle on the same data, with a lognormal look-alike to show the trap
 >   - Running average of Pareto samples for different exponents
 >
-> **Links:** builds on Exponential, Normal (lognormal section). Links to [Extreme values](#extreme-values) and the [field guide](#field-guide).
+> **Links:** builds on Exponential, Normal (lognormal section). Links to [Extreme values](https://nishs1729.github.io/explainers/probability/extreme-values.html) and the [field guide](#field-guide).
 
 <a id="field-guide"></a>
 ### **A Field Guide to Distributions**

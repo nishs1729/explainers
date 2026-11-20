@@ -518,7 +518,7 @@ footer{text-align:center;color:var(--ink-3);font-size:14px;padding:40px 20px 60p
     <li><strong>Its discrete twin is the <a href="geometric.html">geometric</a>.</strong> Rounding up, \(\lceil T \rceil\) is geometric with success probability \(1 - e^{-\lambda}\). The exponential is the geometric with infinitely fine slices (section 1).</li>
     <li><strong>Scaling.</strong> \(cT \sim \text{Exp}(\lambda/c)\) for \(c > 0\). Every exponential is a stretched \(\text{Exp}(1)\): \(T = E/\lambda\) with \(E \sim \text{Exp}(1)\).</li>
     <li><strong>Sums: gamma.</strong> The sum of \(k\) independent \(\text{Exp}(\lambda)\) waits is \(\text{Gamma}(k, \lambda)\), the Erlang distribution.</li>
-    <li><strong>Special case of bigger families.</strong> \(\text{Exp}(\lambda)\) is the gamma distribution with shape 1 and the Weibull distribution with shape 1. Also, \(2\lambda T \sim \chi^2_2\).</li>
+    <li><strong>Special case of bigger families.</strong> \(\text{Exp}(\lambda)\) is the gamma distribution with shape 1 and the <a href="extreme-values.html#weakest">Weibull distribution</a> with shape 1. Also, \(2\lambda T \sim \chi^2_2\).</li>
     <li><strong>Conjugate prior: gamma.</strong> If your uncertainty about \(\lambda\) is \(\text{Gamma}(\alpha, \beta)\) (shape \(\alpha\), rate \(\beta\)), then after observing \(n\) waits it becomes \(\text{Gamma}(\alpha + n,\; \beta + \sum t_i)\).</li>
   </ol>
 
