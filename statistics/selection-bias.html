@@ -162,8 +162,9 @@ table.summary.num th{font-size:11px;white-space:normal}
   <h1>Who’s Missing?</h1>
   <p class="lede">Data can only show you what made it into the data. When something filters out part of the population on its way to you, the sample misleads, and collecting more of it doesn’t help. A bigger biased sample is just more confidently wrong.</p>
   <div class="hero-play" id="heroPlay">
-    <p class="ask">Bombers come back from their missions riddled with bullet holes. You can add armor to one part of the plane. Which part?</p>
-    <canvas id="heroPlane" class="plane" style="height:330px" role="img" aria-label="Top view of a four-engine bomber divided into cockpit, engines, wings, fuselage and tail, with the bullet holes found on returning planes marked as dots"></canvas>
+    <p class="ask">Bombers come back from their missions riddled with bullet holes. Below are the holes found on the planes that made it home. You can add armor to one part of the plane. Which part?</p>
+    <canvas id="heroSky" style="height:60px" role="img" aria-label="The latest mission: 20 small planes with their hits; the ones shot down turn red and fade away"></canvas>
+    <canvas id="heroPlane" class="plane" style="height:300px" role="img" aria-label="Two diagrams of a four-engine bomber: on the left, the bullet holes found on the planes that came back; on the right, where the fatal hit landed on each plane that was lost, hidden until you reveal it"></canvas>
     <div class="controls">
       <div class="seg" role="group" aria-label="Part of the plane to armor">
         <button class="btn" data-zone="cockpit" aria-pressed="false">Cockpit</button>
@@ -173,16 +174,14 @@ table.summary.num th{font-size:11px;white-space:normal}
         <button class="btn" data-zone="tail" aria-pressed="false">Tail</button>
       </div>
     </div>
-    <div class="legend" style="justify-content:center"><span><i class="sw dot" style="background:var(--accent)"></i><span>holes on planes that came back</span></span><span><i class="sw dot" style="background:var(--zero)"></i><span>holes on planes that were lost</span></span><span><i class="sw" style="background:var(--gold-soft);border:1px solid var(--gold)"></i><span>your armor</span></span></div>
+    <div class="legend" style="justify-content:center"><span><i class="sw dot" style="background:var(--accent)"></i><span>hole on a plane that came back</span></span><span><i class="sw dot" style="background:var(--zero)"></i><span>the hit that downed a lost plane</span></span><span><i class="sw" style="background:var(--gold-soft);border:1px solid var(--gold)"></i><span>your armor</span></span></div>
     <div class="controls">
-      <button class="btn primary" id="heroFly" disabled>Send 10 planes</button>
-      <button class="btn" id="heroMany" disabled>+100 planes</button>
-      <button class="btn" id="heroLost" disabled>Show the lost planes</button>
-      <button class="btn" id="heroClear">Clear</button>
+      <button class="btn primary" id="heroLost" disabled>Show the planes that didn’t come back</button>
+      <button class="btn" id="heroFly">▶ Fly another mission</button>
+      <button class="btn" id="heroClear">Start over</button>
       <button class="linkbtn" id="heroSkip">skip the guess</button>
     </div>
-    <div class="readout" id="heroCount" style="text-align:center"></div>
-    <p class="hint" id="heroHint" aria-live="polite">First pick the part to armor: click it on the plane or use the buttons. Then send the squadron out and inspect the planes that come back.</p>
+    <p class="hint" id="heroHint" aria-live="polite"></p>
   </div>
 </header>
 
@@ -331,7 +330,7 @@ table.summary.num th{font-size:11px;white-space:normal}
     <div class="readout" id="quizScore" style="margin-top:10px" aria-live="polite"></div>
   </div>
 
-  <p>This page was about bias that comes from the data, from who made it into the sample. Bias can also come from the formula you apply to a perfectly random sample, as with the sample maximum on the previous page. How to judge an estimate by its bias and its wobble together is the next page, <strong>What makes a good guess</strong> (coming soon).</p>
+  <p>This page was about bias that comes from the data, from who made it into the sample. Bias can also come from the formula you apply to a perfectly random sample, as with the sample maximum on the previous page. How to judge an estimate by its bias and its wobble together is the next page, <a href="estimation.html"><strong>What Makes a Good Guess</strong></a>.</p>
 </section>
 
 </main>
@@ -508,85 +507,178 @@ function fillZone(ctx, z, color){
 function hit(){ for (;;) { const x = 100 * Math.random(), y = 100 * Math.random(), z = zoneAt(x, y); if (z) return [x, y, z]; } }
 function poisson(l){ const L = Math.exp(-l); let k = 0, p = Math.random(); while (p > L) { k++; p *= Math.random(); } return k; }
 
-const B = {ret: [], lost: [], sent: 0, back: 0, newRet: 0, pick: null, open: false, showLost: false};
+const B = {ret: [], lost: [], fatal: [], sent: 0, back: 0, missions: 0, newRet: 0, newFatal: 0, pick: null, open: false, showLost: false};
 const bListeners = [];
 function changed(){ bListeners.forEach(f => f()); }
-function fly(n){
-  B.newRet = B.ret.length;
-  for (let i = 0; i < n; i++) {
-    const k = poisson(HITS), hs = []; let down = false;
-    for (let j = 0; j < k; j++) { const h = hit(); hs.push(h); if (Math.random() < KILL[h[2]]) down = true; }
-    (down ? B.lost : B.ret).push(...hs); B.sent++; if (!down) B.back++;
-  }
-  B.open = true; changed();
+function genPlane(){
+  const hits = [], kills = [], k = poisson(HITS);
+  for (let j = 0; j < k; j++) { const h = hit(); hits.push(h); kills.push(Math.random() < KILL[h[2]]); }
+  const fatal = kills.indexOf(true);   // the hit that brought the plane down (-1: it came back)
+  return {hits, kills, fatal, down: fatal >= 0};
+}
+function commit(planes){
+  B.newRet = B.ret.length; B.newFatal = B.fatal.length;
+  planes.forEach(p => { (p.down ? B.lost : B.ret).push(...p.hits); if (p.down) B.fatal.push(p.hits[p.fatal]); B.sent++; if (!p.down) B.back++; });
+  changed();
+}
+let LAST = null;   // the latest mission's planes, shown in the hero's strip
+const withTimes = a => { a.forEach(p => p.times = p.hits.map(() => .16 + .46 * Math.random())); return a; };
+function fly(n){   // n planes, flown as missions of 20
+  const a = []; for (let i = 0; i < n; i++) a.push(genPlane());
+  B.missions += Math.ceil(n / 20); LAST = withTimes(a.slice(-20)); commit(a);
+}
+function drawPlane(ctx, ox, oy, s, o){
+  ctx.save(); ctx.translate(ox, oy); ctx.scale(s, s);
+  ctx.lineWidth = 1.2 / s; ctx.lineJoin = 'round'; ctx.strokeStyle = o.stroke || C('--ink-3');
+  if (o.ghost) ctx.setLineDash([3 / s, 3 / s]);
+  ctx.fillStyle = o.fill || C('--surface-2'); [PP.wing, PP.stab, PP.fus].forEach(p => { ctx.fill(p); ctx.stroke(p); });
+  ctx.fillStyle = o.fill || C('--line'); ctx.fill(PP.eng); ctx.stroke(PP.eng);
+  if (o.hover) fillZone(ctx, o.hover, C('--accent-soft'));
+  if (o.pick) fillZone(ctx, o.pick, C('--gold-soft'));
+  if (o.dividers) { ctx.setLineDash([3 / s, 3 / s]); ctx.beginPath(); ctx.moveTo(46, 18); ctx.lineTo(54, 18); ctx.moveTo(46, 76); ctx.lineTo(54, 76); ctx.stroke(); }
+  ctx.restore();
 }
 
 /* ---------- hero: where does the armor go? ---------- */
 (function(){
-  const cv = $('#heroPlane'), hint = $('#heroHint'), intro = hint.innerHTML;
-  let hover = null, geo = {s: 1, ox: 0, oy: 0};
-  const LAB = {cockpit: [57, 9], engines: [83, 30], wings: [4, 53], fuselage: [57, 62], tail: [70, 88]};
-  function draw(){
-    const {ctx, w, h} = fit(cv);
-    const s = Math.min(w, h) / 100, ox = (w - 100 * s) / 2, oy = (h - 100 * s) / 2;
-    geo = {s, ox, oy};
-    ctx.save(); ctx.translate(ox, oy); ctx.scale(s, s);
-    ctx.lineWidth = 1.2 / s; ctx.lineJoin = 'round'; ctx.strokeStyle = C('--ink-3');
-    ctx.fillStyle = C('--surface-2'); [PP.wing, PP.stab, PP.fus].forEach(p => { ctx.fill(p); ctx.stroke(p); });
-    ctx.fillStyle = C('--line'); ctx.fill(PP.eng); ctx.stroke(PP.eng);
-    if (hover && hover !== B.pick) fillZone(ctx, hover, C('--accent-soft'));
-    if (B.pick) fillZone(ctx, B.pick, C('--gold-soft'));
-    ctx.save(); ctx.setLineDash([2 / s * 1.5, 2 / s * 1.5]); ctx.beginPath(); ctx.moveTo(46, 18); ctx.lineTo(54, 18); ctx.moveTo(46, 76); ctx.lineTo(54, 76); ctx.stroke(); ctx.restore();
-    ctx.restore();
-    const nh = B.ret.length + (B.showLost ? B.lost.length : 0), thin = Math.min(1, Math.sqrt(400 / Math.max(1, nh)));
-    const r = Math.max(.9, s * .42 * Math.max(.55, thin)), al = Math.max(.3, thin), at = p => [ox + p[0] * s, oy + p[1] * s];
-    if (B.showLost) { ctx.fillStyle = C('--zero'); ctx.globalAlpha = al; B.lost.forEach(p => { const [x, y] = at(p); dot(ctx, x, y, r); }); }
-    ctx.fillStyle = C('--accent'); B.ret.forEach((p, i) => { const late = i >= B.newRet && B.ret.length - B.newRet <= 40; ctx.globalAlpha = late ? 1 : al; dot(ctx, ox + p[0] * s, oy + p[1] * s, late ? r + .9 : r); });
+  const cv = $('#heroPlane'), sky = $('#heroSky'), hint = $('#heroHint'), PER = 20;
+  const intro = () => `The strip shows only the latest mission. The diagrams add up all ${B.missions} missions so far: on the left, every bullet hole found on the ${comma(B.back)} planes that came back, drawn on one plane. Bullets hit every part of a plane about equally often. Pick the part to armor: click it on the plane, or use the buttons.`;
+  let hover = null, geo = [], anim = null;
+  const LAB = {cockpit: [44, 11, 'right'], engines: [22, 27, 'center'], wings: [13, 54, 'center'], fuselage: [44, 62, 'right'], tail: [39, 96, 'center']};
+  function holes(ctx, arr, g, color, from){
+    const thin = Math.min(1, Math.sqrt(350 / Math.max(1, arr.length)));
+    const r = Math.max(.9, g.s * .42 * Math.max(.55, thin)), al = Math.max(.3, thin), fresh = arr.length - from <= 60;
+    ctx.fillStyle = color;
+    arr.forEach((p, i) => { const late = fresh && i >= from; ctx.globalAlpha = late ? 1 : al; dot(ctx, g.ox + p[0] * g.s, g.oy + p[1] * g.s, late ? r + .9 : r); });
     ctx.globalAlpha = 1;
-    ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+  }
+  function draw(){
+    const W = cv.getBoundingClientRect().width || 600;
+    cv.style.height = Math.round(Math.max(232, Math.min(352, W / 2 + 62))) + 'px';
+    const {ctx, w, h} = fit(cv), hw = w / 2, top = 58, s = Math.min(hw - 10, h - top - 4) / 100;
+    geo = [0, 1].map(i => ({ox: i * hw + (hw - 100 * s) / 2, oy: top + (h - top - 100 * s) / 2, s}));
+    const shown = B.showLost, hv = hover !== B.pick ? hover : null;
+    drawPlane(ctx, geo[0].ox, geo[0].oy, s, {hover: hv, pick: B.pick, dividers: true});
+    drawPlane(ctx, geo[1].ox, geo[1].oy, s, {hover: hv, pick: B.pick, dividers: true, ghost: !shown});
+    ctx.font = '600 12px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillStyle = C('--ink'); ctx.fillText(`All ${B.missions} missions so far: ${comma(B.sent)} planes sent`, hw, 2);
+    ctx.font = '600 12px ' + MONO;
+    ctx.fillStyle = C('--accent'); ctx.fillText(`came back: ${comma(B.back)}`, hw / 2, 22);
+    ctx.fillStyle = C('--zero'); ctx.fillText(`didn’t come back: ${comma(B.sent - B.back)}`, hw * 1.5, 22);
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3');
+    ctx.fillText('every hole found', hw / 2, 38); ctx.fillText('the hit that downed each one', hw * 1.5, 38);
+    ctx.strokeStyle = C('--line'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(Math.round(hw) + .5, 22); ctx.lineTo(Math.round(hw) + .5, h - 4); ctx.stroke();
+    holes(ctx, B.ret, geo[0], C('--accent'), B.newRet);
+    if (shown) holes(ctx, B.fatal, geo[1], C('--zero'), B.newFatal);
+    else {
+      const cx = geo[1].ox + 50 * s, cy = geo[1].oy + 62 * s;
+      ctx.fillStyle = C('--ink-2'); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.font = '600 ' + Math.round(Math.max(26, 15 * s)) + 'px ' + getComputedStyle(document.body).getPropertyValue('--serif'); ctx.fillText('?', cx, cy - 6);
+      ctx.font = '11px ' + MONO; ctx.fillText('never inspected', cx, cy + 10 * s);
+    }
     ZONES.forEach(z => {
-      const mine = z === B.pick, [x, y] = at(LAB[z]);
-      ctx.font = (mine ? '600 ' : '') + '12px ' + MONO; ctx.fillStyle = mine ? C('--gold') : C('--ink-3');
-      ctx.fillText(mine ? z + ' ← armor' : z, x, y);
+      const mine = z === B.pick, [x, y, al] = LAB[z];
+      ctx.font = (mine ? '600 ' : '') + '11px ' + MONO; ctx.fillStyle = mine ? C('--gold') : C('--ink-3');
+      ctx.textAlign = al; ctx.textBaseline = 'middle';
+      ctx.fillText(z, geo[0].ox + x * s, geo[0].oy + y * s);
     });
   }
+  /* the latest mission, as a strip of small planes; t runs 0..1 during the animation */
+  function drawSky(t){
+    const W = sky.getBoundingClientRect().width || 600, cols = W >= 520 ? PER : PER / 2, rows = PER / cols, cell = W / cols;
+    const size = Math.min(cell * .84, 32), rowH = size + 10;
+    sky.style.height = Math.round(22 + rows * rowH) + 'px';
+    const {ctx} = fit(sky), tt = t == null ? 1 : t;
+    if (!LAST) return;
+    const lost = LAST.filter(p => p.down).length;
+    ctx.font = '12px ' + MONO; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillStyle = C('--ink-2');
+    const nar = W < 520;
+    ctx.fillText(tt < .7 ? `Latest mission (no. ${B.missions}): ${PER} planes over the target…` :
+      nar ? `Latest mission (no. ${B.missions}): ${PER - lost} back, ${lost} shot down` : `Latest mission (no. ${B.missions}): ${PER} planes out, ${PER - lost} came back, ${lost} shot down`, 2, 2);
+    const s = size / 100;
+    LAST.forEach((p, i) => {
+      const cx = (i % cols + .5) * cell, cy = 22 + Math.floor(i / cols) * rowH + rowH / 2;
+      const downAt = p.down ? Math.min(...p.times.filter((_, j) => p.kills[j])) : 2, isDown = tt >= downAt;
+      let alpha = Math.min(1, tt / .12), dy = (1 - alpha) * 8;
+      if (isDown && tt > .7) { const f = Math.min(1, (tt - .7) / .3); alpha *= 1 - .7 * f; dy += 6 * f; }
+      const ox = cx - size / 2, oy = cy - size / 2 + dy, done = tt >= .7;
+      ctx.globalAlpha = alpha;
+      drawPlane(ctx, ox, oy, s, {stroke: isDown ? C('--zero') : done ? C('--accent') : C('--ink-3'), fill: isDown ? C('--zero-soft') : null});
+      p.hits.forEach((hh, j) => {
+        if (tt < p.times[j]) return;
+        const x = ox + hh[0] * s, y = oy + hh[1] * s;
+        ctx.fillStyle = isDown ? C('--zero') : done ? C('--accent') : C('--ink'); dot(ctx, x, y, 1.4);
+        const age = tt - p.times[j];
+        if (age < .06) { ctx.strokeStyle = C('--gold'); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(x, y, 2 + age * 90, 0, TAU); ctx.stroke(); }
+      });
+      ctx.globalAlpha = 1;
+    });
+  }
+  function newMission(){
+    const a = [];
+    for (let i = 0; i < PER; i++) a.push(genPlane());
+    withTimes(a);
+    B.missions++; return a;
+  }
+  function flyMission(){
+    if (anim) return;
+    LAST = newMission();
+    if (RM) { commit(LAST); return; }
+    $('#heroFly').disabled = true;
+    const t0 = performance.now(), T = 2600;
+    const step = now => {
+      const t = Math.min(1, (now - t0) / T); drawSky(t);
+      if (t < 1) anim = requestAnimationFrame(step);
+      else { anim = null; $('#heroFly').disabled = false; commit(LAST); }
+    };
+    anim = requestAnimationFrame(step);
+  }
+  function start(){
+    Object.assign(B, {ret: [], lost: [], fatal: [], sent: 0, back: 0, missions: 0, newRet: 0, newFatal: 0, pick: null, open: false, showLost: false});
+    const all = [];
+    while (B.back + all.filter(p => !p.down).length < 200) { LAST = newMission(); all.push(...LAST); }
+    commit(all); B.newRet = B.ret.length; B.newFatal = B.fatal.length;
+  }
   function message(){
-    const P = B.pick, nm = P ? `the <b>${P}</b>` : '';
-    if (!B.open) { hint.innerHTML = intro; return; }
-    if (!B.sent) { hint.innerHTML = P ? `You’d armor ${nm}. Now send the planes out and look at the ones that come back.` : 'Send the planes out and look at the ones that come back.'; return; }
+    const P = B.pick;
     if (!B.showLost) {
-      if (B.sent < 60) hint.innerHTML = `<b>${B.back} of ${B.sent}</b> planes came back, and their holes are marked on the plane. Send more until a pattern shows.`;
-      else hint.innerHTML = `The holes on the ${comma(B.back)} planes that came back crowd the wings and fuselage, while the engines and cockpit stay almost clean. ${P ? `Still happy to armor ${nm}?` : 'Where would you put the armor?'} Then show the ${comma(B.sent - B.back)} planes that were lost.`;
+      hint.innerHTML = !P && !B.open ? intro() :
+        (P ? `You’d armor the <b>${P}</b>. ` : '') + `Now look at the planes nobody could inspect: show the ${comma(B.sent - B.back)} that didn’t come back.`;
       return;
     }
     const deadly = P === 'engines' || P === 'cockpit';
     hint.innerHTML = (P ? (deadly ? '<b>Good call.</b> ' : `<b>Armor on the ${P} would mostly be wasted.</b> `) : '') +
-      'The lost planes’ holes fill in the bare patches: bullets hit every part of the plane about equally. The engines and cockpit look clean on the returning planes because a plane hit there seldom came home. The armor goes where the survivors have no holes.';
+      'On the right is the hit that brought down each lost plane, and most of them landed on the engines or cockpit. Bullets hit every part about equally often, but a plane hit there seldom made it home, so those holes were never there to be counted. The bare patches on the survivors mark the deadly places, and that is where the armor goes.';
   }
   function sync(){
     $$('[data-zone]').forEach(b => { const on = b.dataset.zone === B.pick; b.classList.toggle('guess', on); b.setAttribute('aria-pressed', on); });
-    $('#heroFly').disabled = $('#heroMany').disabled = !B.open;
-    $('#heroSkip').hidden = B.open;
-    ['#heroLost', '#svLost'].forEach(id => { const b = $(id); b.disabled = !B.sent; b.textContent = B.showLost ? 'Hide the lost planes' : 'Show the lost planes'; });
-    $('#heroCount').innerHTML = B.sent ? `sent <b>${comma(B.sent)}</b> · came back <b>${comma(B.back)}</b> · lost <b>${comma(B.sent - B.back)}</b>` : '';
-    draw(); message();
+    const lb = $('#heroLost'); lb.disabled = !(B.pick || B.open);
+    lb.textContent = B.showLost ? 'Hide the planes that didn’t come back' : 'Show the planes that didn’t come back';
+    $('#heroSkip').hidden = !!(B.pick || B.open);
+    const sb = $('#svLost'); sb.disabled = !B.sent; sb.textContent = B.showLost ? 'Hide the lost planes' : 'Show the lost planes';
+    draw(); if (!anim) drawSky(null); message();
   }
   bListeners.push(sync);
-  function pick(z){ B.pick = z; B.open = true; changed(); }
+  function pick(z){ B.pick = z; changed(); }
   function zoneOf(e){
     const r = cv.getBoundingClientRect();
-    return zoneAt((e.clientX - r.left - geo.ox) / geo.s, (e.clientY - r.top - geo.oy) / geo.s);
+    for (const g of geo) { const z = zoneAt((e.clientX - r.left - g.ox) / g.s, (e.clientY - r.top - g.oy) / g.s); if (z) return z; }
+    return null;
   }
   cv.addEventListener('click', e => { const z = zoneOf(e); if (z) pick(z); });
   cv.addEventListener('mousemove', e => { const z = zoneOf(e); cv.style.cursor = z ? 'pointer' : 'default'; if (z !== hover) { hover = z; draw(); } });
   cv.addEventListener('mouseleave', () => { if (hover) { hover = null; draw(); } });
-  $$('[data-zone]').forEach(b => b.addEventListener('click', () => pick(b.dataset.zone)));
+  $$('[data-zone]').forEach(b => {
+    b.addEventListener('click', () => pick(b.dataset.zone));
+    b.addEventListener('mouseenter', () => { hover = b.dataset.zone; draw(); });
+    b.addEventListener('mouseleave', () => { hover = null; draw(); });
+  });
   $('#heroSkip').addEventListener('click', () => { B.open = true; changed(); });
-  $('#heroFly').addEventListener('click', () => fly(10));
-  $('#heroMany').addEventListener('click', () => fly(100));
   $('#heroLost').addEventListener('click', () => { B.showLost = !B.showLost; changed(); });
-  $('#heroClear').addEventListener('click', () => { Object.assign(B, {ret: [], lost: [], sent: 0, back: 0, newRet: 0, pick: null, open: false, showLost: false}); changed(); });
-  sync(); redraws.push(draw);
+  $('#heroFly').addEventListener('click', flyMission);
+  $('#heroClear').addEventListener('click', () => { if (anim) { cancelAnimationFrame(anim); anim = null; $('#heroFly').disabled = false; } start(); });
+  start();
+  redraws.push(() => { draw(); if (!anim) drawSky(null); });
 })();
 
 /* ---------- 1. holes per square foot ---------- */

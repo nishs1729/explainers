@@ -162,7 +162,7 @@ window.EXPLAINERS = {
           "id": "learning-from-data",
           "title": "Learning from data",
           "blurb": "Could chance alone have done this? Starting from line-ups and coin streaks, the series builds the tools for answering that question: sampling, estimation, resampling, tests, intervals and power, ending with the 1954 polio vaccine trial.",
-          "topics": ["is-it-real", "sampling-distributions", "selection-bias"]
+          "topics": ["is-it-real", "sampling-distributions", "selection-bias", "estimation"]
         }
       ],
       "topics": [
@@ -191,7 +191,15 @@ window.EXPLAINERS = {
           "path": "statistics/selection-bias.html",
           "summary": "A biased sample stays wrong however big it gets. Armor a bomber from the holes on the planes that came back, and watch 2.3 million ballots lose to 1,000 random voters.",
           "tags": ["selection bias", "survivorship bias", "nonresponse", "Literary Digest", "Abraham Wald"],
-          "preview": { "select": "#heroPlay", "click": ["#heroSkip", "#heroMany", "#heroMany"] }
+          "preview": { "select": "#heroPlay", "click": ["#heroSkip", "#heroLost"] }        },
+        {
+          "id": "estimation",
+          "title": "What Makes a Good Guess",
+          "short": "Good guesses",
+          "path": "statistics/estimation.html",
+          "summary": "Estimate how many tanks the enemy built from a few serial numbers, then race recipes in a tank factory to see bias, variance, mean squared error, robustness and consistency.",
+          "tags": ["estimator", "bias", "variance", "mean squared error", "German tank problem"],
+          "preview": { "select": "#heroPlay", "click": ["#heroSkip"] }
         }
       ]
     }

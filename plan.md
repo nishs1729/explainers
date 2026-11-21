@@ -24,7 +24,7 @@ See [Statistics: how every page works](#statistics-conventions) first.
 - [x] [1. Is that pattern real?](https://nishs1729.github.io/explainers/statistics/is-it-real.html)
 - [x] [2. Sampling distributions](https://nishs1729.github.io/explainers/statistics/sampling-distributions.html)
 - [x] [3. ⚠ Who's missing?](https://nishs1729.github.io/explainers/statistics/selection-bias.html)
-- [ ] [4. What makes a good guess](#estimation)
+- [x] [4. What makes a good guess](https://nishs1729.github.io/explainers/statistics/estimation.html)
 - [ ] [5. The bootstrap](#bootstrap)
 - [ ] [6. Shuffling to test](#permutation-tests)
 - [ ] [7. p-values](#p-values)
@@ -255,7 +255,7 @@ Assumes the probability series, especially Normal (CLT, √n law) and Chi-square
 >
 > **Links:** builds on Sampling distributions. Returns in Regression to the mean, Simpson's paradox.
 >
-> **Built:** the hero is the bomber: the reader picks a part to armor (or skips), sends planes out (hits Poisson with mean 2, landing evenly; hidden kill chance per hit: cockpit 70%, engines 75%, wings 5%, fuselage 10%, tail 20%), then reveals the lost planes. Section 1 charts holes per 100 sq ft by part, for returners and for all planes, from the same shared simulation. Section 2 replays the 1936 *Literary Digest* poll: random vs biased samples from 100 to 2,266,566 on a log axis, with a bias slider (a Landon voter 2.2× as likely to be counted, from the Digest's split vs the real two-party result of 62.5%) and the "equivalent random sample" (about 6 voters). Section 3 has three filters (political interest and survey response, diet-study dropout, fund closures) with a strength slider. Sources named on the page: Mangel & Samaniego (1984), Squire (1988), Lusinchi (2012), Lohr & Brick (2017), Pew response rates (36% in 1997, 6% in 2018), AAPOR (2017), the Coronary Drug Project (1980; 15.1% vs 28.3%).
+> **Built:** the hero is the bomber, in the order of the story: it opens with every hole found on about 200 returning planes (missions of 20; hits Poisson with mean 2, landing evenly; hidden kill chance per hit: cockpit 70%, engines 75%, wings 5%, fuselage 10%, tail 20%), and the reader picks a part to armor from that evidence (or skips). A strip above shows the latest mission, with downed planes turning red and fading; "Fly another mission" animates one. The reveal fills a second plane beside the first, "didn't come back", showing the hit that downed each lost plane, which clusters on the engines and cockpit. Section 1 charts holes per 100 sq ft by part, for returners and for all planes, from the same shared simulation. Section 2 replays the 1936 *Literary Digest* poll: random vs biased samples from 100 to 2,266,566 on a log axis, with a bias slider (a Landon voter 2.2× as likely to be counted, from the Digest's split vs the real two-party result of 62.5%) and the "equivalent random sample" (about 6 voters). Section 3 has three filters (political interest and survey response, diet-study dropout, fund closures) with a strength slider. Sources named on the page: Mangel & Samaniego (1984), Squire (1988), Lusinchi (2012), Lohr & Brick (2017), Pew response rates (36% in 1997, 6% in 2018), AAPOR (2017), the Coronary Drug Project (1980; 15.1% vs 28.3%).
 
 <a id="estimation"></a>
 ### **4. What makes a good guess**
@@ -281,6 +281,8 @@ Assumes the probability series, especially Normal (CLT, √n law) and Chi-square
 > **Data:** sleep trial (robustness).
 >
 > **Links:** builds on Sampling distributions, Chi-square (why n−1). Leads to The bootstrap; MLE is saved for Likelihood.
+>
+> **Built:** the hero shows the plates 19, 40, 42, 60, takes the reader's estimate, and pins it on a number line next to largest (60), largest + gap (74) and twice the average (79.5). The reader's guess becomes a fourth recipe, "largest × guess/60", in gold. The tank factory (N 20–500, k 2–20) fills one histogram row per recipe with latest (▼) and average (▲) markers. Section 2 is a 2D dartboard with aim and shakiness sliders whose readout splits the average squared miss into bias² + variance. Section 3 draws stacked bias²/variance bars from the factory's captures (k = 4, N = 100: typical miss largest ≈ 25, twice the average ≈ 28, largest + gap ≈ 20). Section 4 is a draggable sleep-difference dot plot with a 4.6 → 46 typo toggle (mean 1.58 → 5.72, median 1.30, 20% trimmed 1.33), plus a race of mean/median/trimmed mean on samples of 10 with 0–30% wild values. Section 5 plots typical miss against k (N = 1,000) for the three recipes plus "twice the first tank". Ruggles & Brodie (1947) table: June 1940 169/1,000/122, June 1941 244/1,550/271, August 1942 327/1,550/342.
 
 <a id="bootstrap"></a>
 ### **5. The bootstrap**

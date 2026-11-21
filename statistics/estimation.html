@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>What Makes a Good Guess — a visual introduction</title>
+<style>
+:root{
+  --bg:#faf8f4; --surface:#ffffff; --surface-2:#f2efe8; --ink:#1c1c1e; --ink-2:#4c4e55; --ink-3:#8b8d93; --line:#e3dfd5;
+  --one:#16917c; --one-soft:rgba(22,145,124,.15);
+  --zero:#d9573a; --zero-soft:rgba(217,87,58,.15);
+  --accent:#3654c9; --accent-soft:rgba(54,84,201,.11);
+  --gold:#b98317; --gold-soft:rgba(185,131,23,.22);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+    --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+    --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+    --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+    --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+  --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+  --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+  --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+  --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.68 var(--sans);-webkit-font-smoothing:antialiased}
+main{max-width:820px;margin:0 auto;padding:0 20px 80px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;letter-spacing:-.01em}
+h1{font-size:clamp(2.2rem,6vw,3.4rem);margin:.2em 0 .3em}
+h2{font-size:clamp(1.6rem,4vw,2.1rem);margin:0 0 .5em}
+h3{font-size:1.2rem;margin:1.6em 0 .4em}
+p{margin:0 0 1em}
+a{color:var(--accent)}
+strong{font-weight:650}
+em.term{font-style:normal;font-weight:650;color:var(--accent)}
+.muted{color:var(--ink-2)}
+small,.small{font-size:14px}
+
+/* hero */
+.hero{text-align:center;padding:64px 0 24px}
+.kicker{text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--ink-3);margin:0}
+.lede{font-size:1.2rem;color:var(--ink-2);max-width:620px;margin:0 auto}
+.hero-play{max-width:640px;margin:30px auto 0;text-align:left}
+.hero-play .controls{justify-content:center}
+.hint{font-size:15px;color:var(--ink-2);min-height:3.2em;margin:10px 0 0;text-align:center}
+.ask{font-family:var(--serif);font-size:1.25rem;text-align:center;margin:0 0 12px}
+
+.toc{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;margin:28px 0 8px}
+.toc ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 20px;counter-reset:t}
+.toc li{counter-increment:t;font-size:15px}
+.toc li::before{content:counter(t,decimal-leading-zero);font-family:var(--mono);color:var(--ink-3);margin-right:10px;font-size:13px}
+.toc a{color:var(--ink);text-decoration:none}
+.toc a:hover{color:var(--accent)}
+
+section{padding-top:56px}
+.secnum{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.08em;margin-bottom:4px}
+
+.widget{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin:26px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.widget-title{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);margin:0 0 12px;font-weight:600}
+.controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:12px 0}
+.ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:15px}
+.ctrl output{font-family:var(--mono);font-size:14px;min-width:5.5em;color:var(--ink)}
+input[type=range]{accent-color:var(--accent);width:170px;max-width:100%}
+.btn{font:inherit;font-size:14px;line-height:1.2;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;transition:background .15s,transform .1s}
+.btn:hover{border-color:var(--ink-3)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn.guess{background:var(--gold-soft);border-color:var(--gold);color:var(--ink)}
+.btn.right{background:var(--one-soft);border-color:var(--one);color:var(--one)}
+.btn.wrong{background:var(--zero-soft);border-color:var(--zero);color:var(--zero)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:6px}
+.readout{font-family:var(--mono);font-size:14px;color:var(--ink-2);line-height:1.6}
+.readout b{color:var(--ink);font-weight:600}
+.readout .ok{color:var(--one);font-weight:600}
+.readout .warn{color:var(--zero);font-weight:600}
+.readout .gd{color:var(--gold);font-weight:600}
+.msg{font-size:15px;color:var(--ink-2);min-height:3.4em;margin:10px 0 0}
+.msg b{color:var(--ink)}
+canvas{display:block;width:100%}
+.cap{font-size:13px;color:var(--ink-3);margin:2px 0 6px}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:20px 0}
+.callout p:last-child{margin-bottom:0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin-top:8px}
+.legend > span{display:inline-block}
+.legend .sw{vertical-align:middle;margin:0 6px 2px 0}
+.sw{display:inline-block;width:16px;height:10px;border-radius:2px}
+.sw.dot{width:8px;height:8px;border-radius:50%}
+.sw.line{height:0;border-top:2px solid var(--ink)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+@media (max-width:640px){.pair{grid-template-columns:1fr}}
+.mcap{font-size:13px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+
+/* cast */
+.cast-q{font-family:var(--serif);font-size:1.08rem;margin:0 0 10px}
+.datarow{font-family:var(--mono);font-size:14px;color:var(--ink-2);margin:0 0 6px}
+.datarow b{color:var(--ink)}
+
+/* recipe */
+.facts{counter-reset:f;list-style:none;padding:0;margin:18px 0}
+.facts li{counter-increment:f;position:relative;padding:12px 0 12px 44px;border-bottom:1px solid var(--line)}
+.facts li::before{content:counter(f);position:absolute;left:0;top:12px;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:600 13px var(--mono)}
+.facts li strong{display:block}
+.table-wrap{overflow-x:auto}
+table.summary{border-collapse:collapse;width:100%;font-size:15px;margin:14px 0}
+table.summary td,table.summary th{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3)}
+@media (max-width:480px){table.summary td,table.summary th{padding:8px 5px}}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:18px 0}
+.card{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
+.card h4{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+.card p{font-size:15px;margin:0;color:var(--ink-2)}
+
+/* quiz */
+.quiz{display:grid;gap:10px}
+.qitem{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg)}
+.qitem p{margin:0 0 8px;font-size:16px}
+.qbtns{display:flex;flex-wrap:wrap;gap:8px}
+.qexp{font-size:15px;color:var(--ink-2);margin:10px 0 0!important}
+
+@media (max-width:480px){
+  main{padding:0 16px 80px}
+  .widget{padding:14px}
+  input[type=range]{width:150px}
+}
+/* page 4 */
+table.summary.num{font-size:13px;margin:8px 0 0}
+table.summary.num td,table.summary.num th{padding:5px 8px;text-align:right;white-space:nowrap}
+table.summary.num td:first-child,table.summary.num th:first-child{text-align:left}
+table.summary.num th{font-size:11px;white-space:normal}
+.linkbtn{all:unset;cursor:pointer;font-size:14px;color:var(--accent);text-decoration:underline}
+.linkbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.linkbtn[hidden]{display:none}
+.plates{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:4px 0 6px}
+.plate{font:600 17px var(--mono);letter-spacing:.06em;padding:6px 12px;border:2px solid var(--ink-2);border-radius:6px;background:var(--surface);color:var(--ink);box-shadow:inset 0 0 0 2px var(--surface),inset 0 0 0 3px var(--line)}
+input.num{font:15px var(--mono);width:8.5em;padding:7px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+input.num:focus{outline:2px solid var(--accent);outline-offset:1px}
+.formula{font-family:var(--serif);font-size:1.15rem;text-align:center;margin:14px 0 18px}
+.minis{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+.minis.three{grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media (max-width:560px){.minis,.minis.three{grid-template-columns:1fr}}
+.mini{border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--bg)}
+.mini .readout{font-size:13px;margin-top:4px}
+canvas.drag{cursor:grab;touch-action:pan-y}
+</style>
+<script>try{var t=localStorage.getItem('xp-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/catalog.js" defer></script>
+<script src="../assets/site.js" defer></script>
+</head>
+<body>
+<main>
+<header class="hero">
+  <p class="kicker">A visual introduction</p>
+  <h1>What Makes a Good Guess</h1>
+  <p class="lede">Any recipe that turns data into a number is an estimate of something you can’t see. Some recipes aim true, some hold steady, and the best do both. The way to tell them apart is to try them where the answer is known.</p>
+  <div class="hero-play" id="heroPlay">
+    <p class="ask">Captured enemy tanks carry the serial numbers 19, 40, 42 and 60. How many tanks does the enemy have?</p>
+    <div class="plates" aria-label="Serial numbers of the four captured tanks"><span class="plate">Nº 19</span><span class="plate">Nº 40</span><span class="plate">Nº 42</span><span class="plate">Nº 60</span></div>
+    <div class="controls">
+      <label class="ctrl">your estimate <input type="number" id="heroIn" class="num" min="60" step="1" inputmode="numeric" placeholder="e.g. 100"></label>
+      <button class="btn primary" id="heroGo">Lock in</button>
+      <button class="linkbtn" id="heroSkip">skip the guess</button>
+    </div>
+    <canvas id="heroLine" style="height:150px" role="img" aria-label="A number line with the four serial numbers, your estimate, and the answers of three recipes"></canvas>
+    <p class="hint" id="heroHint" aria-live="polite">The tanks are numbered 1, 2, 3, … in the order they were built, and the four captured ones are a random handful. Type your estimate and lock it in.</p>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#recipes">Estimators are recipes</a></li>
+    <li><a href="#dartboard">Aimed and steady</a></li>
+    <li><a href="#mse">Mean squared error</a></li>
+    <li><a href="#robust">Robustness</a></li>
+    <li><a href="#consistency">Getting there as n grows</a></li>
+    <li><a href="#uses">Where you will meet it</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<section id="recipes">
+  <div class="secnum">01</div>
+  <h2>Estimators are recipes</h2>
+  <p>A recipe that turns a sample into a guess about something you can’t see directly is called an <em class="term">estimator</em>, and its answer is an <em>estimate</em>. Here are three recipes for the tank count, each with a sensible reason behind it:</p>
+  <ul>
+    <li><strong>Largest:</strong> the biggest serial number seen. There are at least that many tanks. For the hook: <strong>60</strong>.</li>
+    <li><strong>Twice the average:</strong> the captured numbers should be spread evenly between 1 and the total, so their average should land about halfway. Double it and subtract 1: 2 × 40.25 − 1 = <strong>79.5</strong>.</li>
+    <li><strong>Largest + average gap:</strong> four captured numbers leave gaps below 60 that average 60 ÷ 4 = 15 numbers wide. The stretch above the largest is probably about as wide as a typical gap, so add it: 60 + 15 − 1 = <strong>74</strong>.</li>
+  </ul>
+  <p>Your own guess is a recipe too. If you said 90 when the largest number was 60, your rule is “largest × 1.5”. One capture can’t show which recipe is best, because any recipe can get lucky once. So build a tank factory where you know the true count, capture tanks from it again and again, and watch where each recipe’s guesses land.</p>
+
+  <div class="widget">
+    <p class="widget-title">The tank factory</p>
+    <div class="controls">
+      <label class="ctrl">tanks built <input type="range" id="tfN" min="20" max="500" step="10" value="100"><output id="tfNOut"></output></label>
+      <label class="ctrl">tanks captured <input type="range" id="tfK" min="0" max="8" step="1" value="2"><output id="tfKOut"></output></label>
+    </div>
+    <p class="mcap">Latest capture</p>
+    <canvas id="tfLine" style="height:56px" role="img" aria-label="The serial numbers 1 to N, with the captured tanks marked"></canvas>
+    <p class="mcap" style="margin-top:8px">Each recipe’s guesses, one dart per capture</p>
+    <canvas id="tfLanes" style="height:250px" role="img" aria-label="One row per recipe: a histogram of its guesses over all captures, with the true number of tanks as a dashed line and the latest guess as a dart"></canvas>
+    <div class="legend"><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>true number of tanks</span></span><span><span class="muted">▼ latest guess · ▲ average guess</span></span></div>
+    <div class="controls">
+      <button class="btn primary" id="tfOne">Capture 4 tanks</button>
+      <button class="btn" id="tfRun">▶ Keep capturing</button>
+      <button class="btn" id="tfMany">+1,000 captures</button>
+      <button class="btn" id="tfClear">Clear</button>
+    </div>
+    <div class="readout" id="tfRead" aria-live="polite"></div>
+  </div>
+
+  <p>Watch the rows fill. <strong>Largest</strong> always lands below the truth, because it can only be right if the very last tank happens to be captured; its pile is narrow but sits to the left of the line. <strong>Twice the average</strong> is centered on the truth but spreads wide, because one unusually high or low number moves the average a lot. <strong>Largest + average gap</strong> is centered and narrow. Try capturing more tanks at a time, or a bigger factory.</p>
+  <div class="callout">
+    <p><strong>This happened.</strong> During the Second World War, Allied economists estimated German tank production from the serial numbers on captured and destroyed tanks and their parts, using recipes like the ones above. Their estimates of monthly production were far closer to the truth than conventional intelligence (Ruggles and Brodie 1947):</p>
+    <div class="table-wrap">
+      <table class="summary num">
+        <thead><tr><th>Month</th><th>Statistical estimate</th><th>Intelligence estimate</th><th>German records</th></tr></thead>
+        <tbody>
+          <tr><td>June 1940</td><td>169</td><td>1,000</td><td>122</td></tr>
+          <tr><td>June 1941</td><td>244</td><td>1,550</td><td>271</td></tr>
+          <tr><td>August 1942</td><td>327</td><td>1,550</td><td>342</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="dartboard">
+  <div class="secnum">02</div>
+  <h2>Aimed and steady</h2>
+  <p>Each row in the factory is the sampling distribution of one recipe, the subject of <a href="sampling-distributions.html">Sampling Distributions</a>. Two features of it decide how good the recipe is, and they are different things. Think of a dart player:</p>
+  <ul>
+    <li><strong>Where they aim.</strong> How far the center of their throws sits from the bullseye. For a recipe, it’s the gap between its average guess and the truth: the <em class="term">bias</em>.</li>
+    <li><strong>How steady the hand is.</strong> How widely the throws scatter around their own center. For a recipe, it’s how much the guesses wobble from one sample to the next: the <em class="term">variance</em>. Its square root is the standard error.</li>
+  </ul>
+
+  <div class="widget">
+    <p class="widget-title">The dartboard</p>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Player">
+        <button class="btn on" data-db="0" aria-pressed="true">Aimed, steady</button>
+        <button class="btn" data-db="1" aria-pressed="false">Aimed, shaky</button>
+        <button class="btn" data-db="2" aria-pressed="false">Off, steady</button>
+        <button class="btn" data-db="3" aria-pressed="false">Off, shaky</button>
+      </div>
+    </div>
+    <canvas id="dbBoard" style="height:300px" role="img" aria-label="A dartboard with the throws of a player, the point they aim at, and the center of their throws"></canvas>
+    <div class="legend" style="justify-content:center"><span><i class="sw dot" style="background:var(--accent)"></i><span>throws</span></span><span><span style="color:var(--ink-2);font-weight:700">+</span> <span>where the player aims</span></span><span><i class="sw dot" style="border:2px solid var(--gold);background:transparent;width:10px;height:10px"></i><span>center of the throws</span></span></div>
+    <div class="controls">
+      <label class="ctrl">aim off by <input type="range" id="dbAim" min="0" max="3" step="0.1" value="0"><output id="dbAimOut"></output></label>
+      <label class="ctrl">shakiness <input type="range" id="dbShake" min="0.2" max="2" step="0.1" value="0.5"><output id="dbShakeOut"></output></label>
+    </div>
+    <div class="controls">
+      <button class="btn primary" id="dbThrow">Throw 10 more</button>
+      <button class="btn" id="dbClear">Clear</button>
+    </div>
+    <div class="readout" id="dbRead" aria-live="polite"></div>
+  </div>
+
+  <p>A steady hand doesn’t fix bad aim, and good aim doesn’t fix a shaky hand. In the factory, <strong>Largest</strong> is a steady player aiming low, <strong>Twice the average</strong> aims at the bullseye with a shaky hand, and <strong>Largest + average gap</strong> does both well. A recipe with no bias, whose guesses are right on average, is called <em class="term">unbiased</em>. Notice that “right on average” says nothing about any single throw.</p>
+</section>
+
+<!-- 3 -->
+<section id="mse">
+  <div class="secnum">03</div>
+  <h2>Mean squared error</h2>
+  <p>To choose between a steady player who aims a little off and a shaky one who aims true, you need one number that counts both. The usual choice: square every miss, so big misses count extra, and average the squares. That is the <em class="term">mean squared error</em> (MSE). Its square root is back in the original units: the typical miss. And the MSE splits exactly into the two parts from the dartboard:</p>
+  <p class="formula">mean squared error = bias² + variance</p>
+  <p>The readout under the dartboard was already doing this sum. Here it is for the tank recipes, from every capture you have made in the factory so far:</p>
+
+  <div class="widget">
+    <p class="widget-title">Where each recipe’s error comes from</p>
+    <canvas id="mseChart" style="height:230px" role="img" aria-label="For each recipe, a bar of its mean squared error split into bias squared and variance"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--zero)"></i><span>bias²: aiming off</span></span><span><i class="sw" style="background:var(--ink-3)"></i><span>variance: shaky hand</span></span></div>
+    <div class="controls">
+      <button class="btn primary" id="mseRun">+2,000 captures</button>
+      <span class="muted small" id="mseNote"></span>
+    </div>
+  </div>
+
+  <p>With 4 tanks captured out of 100, <strong>Largest</strong> guesses about 19 too low on average, yet its typical miss, about 25 tanks, beats the unbiased <strong>Twice the average</strong>, about 28. A little bias bought a lot of steadiness. <strong>Largest + average gap</strong> beats both, with a typical miss of about 20, and for this problem no unbiased recipe can do better.</p>
+  <p>So bias isn’t automatically bad. The <a href="../probability/chi-square.html#variance">sample variance</a> divides by <em>n</em> − 1 to remove its bias; for bell-shaped data, dividing by <em>n</em> + 1 instead gives a slightly biased estimate with a smaller mean squared error. Deliberately trading a little bias for a lot of steadiness is the idea behind <em>shrinkage</em>, later in the series.</p>
+</section>
+
+<!-- 4 -->
+<section id="robust">
+  <div class="secnum">04</div>
+  <h2>Robustness</h2>
+  <p>Recipes also differ in how they react to bad data. Take the sleep trial from the <a href="is-it-real.html">first page</a>: the extra hours of sleep each of 10 patients got on drug 2 compared with drug 1. Three recipes for its center: the <strong>mean</strong>; the <strong>median</strong>, the middle value; and the <strong>trimmed mean</strong>, which drops the 2 highest and 2 lowest values and averages the rest.</p>
+
+  <div class="widget">
+    <p class="widget-title">Three recipes, one dataset</p>
+    <canvas id="rbDots" class="drag" style="height:150px" role="img" aria-label="The ten patients' extra hours of sleep as dots you can drag, with the mean, median and trimmed mean marked"></canvas>
+    <div class="legend"><span><i class="sw dot" style="background:var(--accent)"></i><span>one patient (drag me)</span></span><span><i class="sw line" style="border-top:2px solid var(--zero)"></i><span>mean</span></span><span><i class="sw line" style="border-top:2px solid var(--one)"></i><span>median</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink-2)"></i><span>trimmed mean</span></span></div>
+    <div class="controls">
+      <button class="btn" id="rbTypo" aria-pressed="false">Make a typo: 4.6 → 46</button>
+      <button class="btn" id="rbReset">Reset the data</button>
+    </div>
+    <div class="readout" id="rbRead" aria-live="polite"></div>
+  </div>
+
+  <p>Drag any patient, or make the typo. A single wild value pulls the mean as far as it likes. The median doesn’t care how far out the value is, only which side of the middle it falls on. The trimmed mean sits between the two. An estimator that a few bad values can’t push around is called <em class="term">robust</em>.</p>
+  <p>Robustness isn’t free, though. Race the three recipes on 2,000 samples of 10, drawn from a bell curve where a chosen share of the values are wild:</p>
+
+  <div class="widget">
+    <p class="widget-title">The estimator race</p>
+    <div class="controls">
+      <label class="ctrl">wild values <input type="range" id="rbC" min="0" max="30" step="5" value="0"><output id="rbCOut"></output></label>
+      <button class="btn" id="rbGo">Race again</button>
+    </div>
+    <div class="minis three">
+      <div class="mini"><p class="mcap">Mean</p><canvas id="rbM1" style="height:110px" role="img" aria-label="Spread of the mean over 2,000 samples"></canvas><div class="readout" id="rbM1R"></div></div>
+      <div class="mini"><p class="mcap">Median</p><canvas id="rbM2" style="height:110px" role="img" aria-label="Spread of the median over 2,000 samples"></canvas><div class="readout" id="rbM2R"></div></div>
+      <div class="mini"><p class="mcap">Trimmed mean</p><canvas id="rbM3" style="height:110px" role="img" aria-label="Spread of the trimmed mean over 2,000 samples"></canvas><div class="readout" id="rbM3R"></div></div>
+    </div>
+    <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>2,000 samples of 10</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>true center</span></span></div>
+  </div>
+
+  <p>With clean, bell-shaped data the mean is the steadiest of the three, and the median wobbles noticeably more. Add even 5% wild values and the order flips: the mean’s spread balloons while the median and trimmed mean hardly notice. The trimmed mean is the usual compromise: nearly as steady as the mean on clean data, nearly as safe as the median on dirty data.</p>
+</section>
+
+<!-- 5 -->
+<section id="consistency">
+  <div class="secnum">05</div>
+  <h2>Getting there as n grows</h2>
+  <p>One more question to ask of a recipe: does it get better with more data? A recipe whose guesses close in on the truth as the sample grows is called <em class="term">consistent</em>. Here are the tank recipes in a factory of 1,000 tanks, plus a fourth, lazy one: <strong>twice the first tank’s number</strong>, minus 1, ignoring every other tank captured.</p>
+
+  <div class="widget">
+    <p class="widget-title">Typical miss against the number of tanks captured</p>
+    <canvas id="csChart" style="height:260px" role="img" aria-label="Typical miss of four recipes as the number of captured tanks grows from 1 to 48, out of 1,000 tanks"></canvas>
+    <div class="controls"><button class="btn" id="csGo">Simulate again</button></div>
+  </div>
+
+  <p><strong>Largest</strong> is biased but consistent: as more tanks are captured, the largest number creeps up toward the true total and the bias melts away. <strong>Twice the first tank</strong> is unbiased, right on average, yet it never improves, because it throws away everything but one tank. Unbiased is not the same as good. And <strong>Largest + average gap</strong> improves fastest of all: its typical miss shrinks roughly in proportion to 1/<em>k</em>, faster than the 1/√<em>k</em> of averages.</p>
+</section>
+
+<!-- 6 -->
+<section id="uses">
+  <div class="secnum">06</div>
+  <h2>Where you will meet it</h2>
+  <div class="cards">
+    <div class="card"><h4>Counting from serial numbers</h4><p>Wartime tank production, and anything else numbered in sequence: the same recipe estimates how many of something exist from the numbers on the few you have seen.</p></div>
+    <div class="card"><h4>House prices</h4><p>Reports quote the median price, not the mean, because a few mansions would drag the mean up. That is robustness at work.</p></div>
+    <div class="card"><h4>Sensors and images</h4><p>Median filters clean up noisy sensor readings and speckled photos: a single wild pixel or reading can’t move a median.</p></div>
+    <div class="card"><h4>Machine learning</h4><p>The “bias–variance tradeoff”: a simple model aims off but holds steady, a flexible one aims true but wobbles with every new dataset. Overfitting, later in the series, is variance winning.</p></div>
+    <div class="card"><h4>Sports statistics</h4><p>Early-season batting averages predict the rest of the season better when pulled toward the league average (Efron and Morris 1975): a little bias, much less variance.</p></div>
+    <div class="card"><h4>Every formula with n − 1</h4><p>The sample variance divides by <em>n</em> − 1 to remove a bias. Now you know that unbiased isn’t the only goal, and why other choices are sometimes made.</p></div>
+  </div>
+
+  <h3>Check yourself</h3>
+  <div class="widget">
+    <div class="quiz" id="quiz"></div>
+    <div class="readout" id="quizScore" style="margin-top:10px" aria-live="polite"></div>
+  </div>
+
+  <p>Every recipe on this page was judged in a factory where the answer was known, by running it thousands of times. Real data comes as one sample and no factory. The next page, <strong>The Bootstrap</strong> (coming soon), builds a stand-in factory out of the one sample you have.</p>
+</section>
+
+</main>
+
+<script>
+(function(){
+'use strict';
+/* ---------- helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const root = document.documentElement;
+const C = n => getComputedStyle(root).getPropertyValue(n).trim();
+const f2 = x => x.toFixed(2);
+const fmtN = x => Math.abs(x - Math.round(x)) < 1e-9 ? String(Math.round(x)) : String(+x.toFixed(2));
+const pct = x => (100 * x).toFixed(1) + '%';
+const MONO = 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
+const TAU = Math.PI * 2;
+const comma = n => n.toLocaleString('en-US');
+
+function fit(c){
+  const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+  if (c.width !== w*dpr || c.height !== h*dpr) { c.width = w*dpr; c.height = h*dpr; }
+  const ctx = c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  return {ctx, w, h};
+}
+const redraws = [];
+function redrawAll(){ redraws.forEach(f => f()); }
+let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(redrawAll, 80); });
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+if (mq.addEventListener) mq.addEventListener('change', redrawAll);
+new MutationObserver(redrawAll).observe(root, {attributes:true, attributeFilter:['data-theme']});
+
+function niceTicks(max, count){
+  const raw = max / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const step = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag;
+  const t = []; for (let v = 0; v <= max + 1e-9; v += step) t.push(v); return t;
+}
+function stepFmt(ticks){ const st = ticks.length > 1 ? ticks[1] - ticks[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9)); return v => v.toFixed(d); }
+function yGrid(ctx, X0, X1, ys, ticks, fmt){
+  ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ticks.forEach(v => {
+    const y = Math.round(ys(v)) + .5;
+    ctx.strokeStyle = C('--line'); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X0, y); ctx.lineTo(X1, y); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.fillText(fmt(v), X0 - 6, y);
+  });
+}
+function intStep(px, minPx){
+  for (const s of [1,2,5,10,20,25,50,100]) if (s * px >= minPx) return s;
+  return 100;
+}
+function roundRect(ctx, x, y, w, h, r){
+  r = Math.max(0, Math.min(r, w/2, Math.abs(h)/2));
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+function dot(ctx, x, y, r){ ctx.beginPath(); ctx.arc(x, y, Math.max(0.5, r), 0, TAU); ctx.fill(); }
+function vline(ctx, x, y0, y1, color, dash, lw){
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw || 1.5; if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(Math.round(x) + .5, y0); ctx.lineTo(Math.round(x) + .5, y1); ctx.stroke(); ctx.restore();
+}
+/* integer-valued bar charts: bars at k = lo..hi */
+function frame(ctx, w, h, o){
+  const X0 = o.left != null ? o.left : 40, X1 = w - 10, Y0 = h - 24, Y1 = o.top != null ? o.top : 12;
+  const span = o.hi - o.lo + 1, bw = (X1 - X0) / span;
+  const xc = k => X0 + bw * (k - o.lo + .5), ys = v => Y0 - (v / o.ymax) * (Y0 - Y1);
+  const t = niceTicks(o.ymax, 3).filter(v => v <= o.ymax * 1.0001); yGrid(ctx, X0, X1, ys, t, o.yfmt || stepFmt(t));
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  const st = o.step || intStep(bw, 24);
+  for (let k = Math.ceil(o.lo / st) * st; k <= o.hi; k += st) ctx.fillText(o.lab ? o.lab(k) : k, xc(k), Y0 + 6);
+  return {X0, X1, Y0, Y1, bw, xc, ys};
+}
+function drawBars(ctx, F, lo, hi, val, color, frac){
+  const bwid = Math.max(1, F.bw * (frac == null ? .8 : frac));
+  for (let k = lo; k <= hi; k++) {
+    const v = val(k); if (!(v > 0)) continue;
+    const y = F.ys(v), hh = F.Y0 - y; if (hh < 0.2) continue;
+    const x = F.xc(k) - bwid / 2;
+    ctx.fillStyle = typeof color === 'function' ? color(k) : color;
+    if (bwid >= 6 && hh >= 3) { roundRect(ctx, x, y, bwid, hh, Math.min(3, bwid / 4)); ctx.fill(); }
+    else ctx.fillRect(x, y, bwid, hh);
+  }
+}
+function emptyNote(ctx, w, h, text){
+  ctx.fillStyle = C('--ink-3'); ctx.font = '13px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(text, w / 2, h / 2 - 8);
+}
+
+/* randomness */
+let spare = null;
+function gauss(){
+  if (spare != null) { const s = spare; spare = null; return s; }
+  let u = 0, v = 0; while (u === 0) u = Math.random(); v = Math.random();
+  const r = Math.sqrt(-2 * Math.log(u)); spare = r * Math.sin(TAU * v); return r * Math.cos(TAU * v);
+}
+function shuffled(a){ const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; }
+function corr(x, y){
+  const n = x.length; let mx = 0, my = 0; for (let i = 0; i < n; i++) { mx += x[i]; my += y[i]; } mx /= n; my /= n;
+  let sxy = 0, sxx = 0, syy = 0; for (let i = 0; i < n; i++) { const a = x[i] - mx, b = y[i] - my; sxy += a * b; sxx += a * a; syy += b * b; }
+  return sxy / Math.sqrt(sxx * syy);
+}
+function binom(n, p){ let k = 0; for (let i = 0; i < n; i++) if (Math.random() < p) k++; return k; }
+function flips(n){ const a = new Array(n); for (let i = 0; i < n; i++) a[i] = Math.random() < .5 ? 1 : 0; return a; }
+function longestRun(a){
+  let best = 1, cur = 1, start = 0, bs = 0;
+  for (let i = 1; i < a.length; i++) { if (a[i] === a[i-1]) cur++; else { cur = 1; start = i; } if (cur > best) { best = cur; bs = start; } }
+  return {len: best, start: bs};
+}
+function switches(a){ let s = 0; for (let i = 1; i < a.length; i++) if (a[i] !== a[i-1]) s++; return s; }
+const RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+function ticksIn(lo, hi, count){
+  const raw = (hi - lo) / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const st = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag, t = [];
+  for (let v = Math.ceil(lo / st - 1e-9) * st; v <= hi + 1e-9; v += st) t.push(+v.toFixed(10));
+  return t;
+}
+function xAxis(ctx, X0, X1, Y0, lo, hi, fmt){
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  const t = ticksIn(lo, hi, Math.max(2, Math.floor((X1 - X0) / 60)));
+  const st = t.length > 1 ? t[1] - t[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9));
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  t.forEach(v => ctx.fillText(fmt ? fmt(v) : v.toFixed(d), X0 + (v - lo) / (hi - lo) * (X1 - X0), Y0 + 5));
+}
+function label(ctx, x, y, text, color, X0, X1){
+  ctx.font = '600 11px ' + MONO; ctx.fillStyle = color; ctx.textBaseline = 'top';
+  const right = x > (X0 + X1) / 2; ctx.textAlign = right ? 'right' : 'left';
+  ctx.fillText(text, x + (right ? -5 : 5), y);
+}
+
+function bar(ctx, x, w, y, Y0, color){
+  const hh = Y0 - y; if (!(hh > .2)) return;
+  ctx.fillStyle = color;
+  if (w >= 6 && hh >= 3) { roundRect(ctx, x, y, w, hh, Math.min(3, w / 4)); ctx.fill(); } else ctx.fillRect(x, y, w, hh);
+}
+
+
+/* ---------- tank recipes ---------- */
+const HOOK = [19, 40, 42, 60];
+const maxOf = a => { let m = -Infinity; for (const v of a) if (v > m) m = v; return m; };
+const meanOf = a => { let s = 0; for (const v of a) s += v; return s / a.length; };
+const YOU = {guess: null, c: null};
+const RECIPES = [
+  {id: 'max', name: 'Largest', color: '--accent', f: a => maxOf(a)},
+  {id: 'twice', name: 'Twice the average', color: '--ink-2', f: a => 2 * meanOf(a) - 1},
+  {id: 'gap', name: 'Largest + average gap', color: '--one', f: a => { const m = maxOf(a); return m + m / a.length - 1; }},
+  {id: 'you', name: 'Your rule', color: '--gold', f: a => maxOf(a) * YOU.c}
+];
+const active = () => RECIPES.filter(r => r.id !== 'you' || YOU.c);
+const youName = () => `Your rule: largest × ${YOU.c.toFixed(2)}`;
+function capture(N, k){   // k different serial numbers from 1..N, in the order they were captured
+  const s = new Set(), a = [];
+  while (a.length < k) { const v = 1 + Math.floor(Math.random() * N); if (!s.has(v)) { s.add(v); a.push(v); } }
+  return a;
+}
+const f1 = v => (Math.round(v * 10) / 10).toString();
+const listeners = [];
+function changed(){ listeners.forEach(f => f()); }
+
+/* ---------- hero: guess the tank count ---------- */
+(function(){
+  const inp = $('#heroIn'), hint = $('#heroHint');
+  let shown = false;
+  function draw(){
+    const {ctx, w, h} = fit($('#heroLine'));
+    const g = YOU.guess, X0 = 16, X1 = w - 16, Y0 = h - 26;
+    const hi = Math.min(300, Math.max(110, shown && g ? g * 1.3 : 0)), xs = v => X0 + Math.min(v, hi) / hi * (X1 - X0);
+    xAxis(ctx, X0, X1, Y0, 0, hi);
+    HOOK.forEach(v => { ctx.fillStyle = C('--accent'); roundRect(ctx, xs(v) - 2, Y0 - 12, 4, 12, 1.5); ctx.fill(); });
+    if (!shown) { ctx.fillStyle = C('--ink-3'); ctx.font = '600 20px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillText('?', xs(hi * .8), Y0 - 30); return; }
+    const SHORT = {max: 'largest', twice: 'twice the average', gap: 'largest + gap'};
+    const pins = RECIPES.filter(r => r.id !== 'you').map(r => ({v: r.f(HOOK), name: SHORT[r.id], color: C(r.color)}));
+    if (g) pins.push({v: g, name: 'you', color: C('--gold'), you: true});
+    pins.sort((a, b) => a.v - b.v);
+    const rowH = Math.min(22, (Y0 - 20) / pins.length);
+    pins.forEach((p, i) => {   // smallest on top: a later line never crosses an earlier label
+      const x = Math.round(xs(p.v)) + .5, y = 4 + i * rowH;
+      ctx.strokeStyle = p.color; ctx.lineWidth = p.you ? 2.5 : 1.5; ctx.beginPath(); ctx.moveTo(x, y + 2); ctx.lineTo(x, Y0); ctx.stroke();
+      ctx.font = '600 12px ' + MONO; ctx.fillStyle = p.color; ctx.textBaseline = 'top';
+      const t = `${p.name} ${f1(p.v)}${p.v > hi ? ' →' : ''}`, tw = ctx.measureText(t).width, fits = x + 5 + tw <= w - 2;
+      ctx.textAlign = fits ? 'left' : 'right'; ctx.fillText(t, fits ? x + 5 : x - 5, y);
+    });
+  }
+  function reveal(){
+    shown = true; $('#heroSkip').hidden = true; draw(); changed();
+    const g = YOU.guess;
+    hint.innerHTML = (g ? `You said <b>${comma(g)}</b>, which as a rule is “largest × ${YOU.c.toFixed(2)}”. ` : '') +
+      'Three sensible recipes give <b>60</b>, <b>74</b> and <b>79.5</b>. Which is best? One capture can’t tell you: nobody knows the true answer here, and any recipe can get lucky once. To judge a recipe, run it many times where the answer is known. That is the tank factory below.';
+  }
+  function lock(){
+    const v = Math.round(+inp.value);
+    if (!inp.value || !isFinite(v)) { hint.innerHTML = 'Type a whole number first.'; return; }
+    if (v < 60) { hint.innerHTML = 'You’ve already seen tank number 60, so there are at least 60 tanks. Try again.'; return; }
+    YOU.guess = v; YOU.c = v / 60; $('#heroGo').classList.add('guess'); reveal();
+  }
+  $('#heroGo').addEventListener('click', lock);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') lock(); });
+  $('#heroSkip').addEventListener('click', reveal);
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 1. the tank factory ---------- */
+const KS = [2, 3, 4, 5, 6, 8, 10, 15, 20];
+const TF = {N: 100, k: 4, caps: 0, maxes: [], est: {max: [], twice: [], gap: []}, last: null};
+function tfAdd(n){
+  for (let i = 0; i < n; i++) {
+    const a = capture(TF.N, TF.k);
+    TF.maxes.push(maxOf(a)); ['max', 'twice', 'gap'].forEach(id => TF.est[id].push(RECIPES.find(r => r.id === id).f(a)));
+    TF.last = a; TF.caps++;
+  }
+}
+function tfEst(id){ return id === 'you' ? TF.maxes.map(m => m * YOU.c) : TF.est[id]; }
+function stats(a, N){
+  const n = a.length; if (!n) return null;
+  let s = 0, s2 = 0; for (const v of a) { s += v; s2 += v * v; }
+  const m = s / n, v = Math.max(0, s2 / n - m * m);
+  return {n, mean: m, bias: m - N, sd: Math.sqrt(v), mse: v + (m - N) ** 2};
+}
+function tfClear(){ TF.caps = 0; TF.maxes = []; TF.est = {max: [], twice: [], gap: []}; TF.last = null; }
+(function(){
+  const nIn = $('#tfN'), kIn = $('#tfK');
+  let timer = null;
+  function drawLine(){
+    const {ctx, w, h} = fit($('#tfLine'));
+    const X0 = 12, X1 = w - 12, Y = h - 22, xs = v => X0 + (v - .5) / TF.N * (X1 - X0);
+    ctx.fillStyle = C('--surface-2'); ctx.fillRect(X0, Y - 14, X1 - X0, 14);
+    ctx.strokeStyle = C('--line'); ctx.strokeRect(X0 + .5, Y - 13.5, X1 - X0 - 1, 13);
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textBaseline = 'top';
+    ctx.textAlign = 'left'; ctx.fillText('1', X0, Y + 4); ctx.textAlign = 'right'; ctx.fillText(`${TF.N} built`, X1, Y + 4);
+    if (!TF.last) return;
+    const many = TF.last.length > 8;
+    TF.last.forEach(v => {
+      const x = xs(v);
+      ctx.fillStyle = C('--accent'); ctx.fillRect(Math.round(x) - 1, Y - 18, 3, 18);
+      if (!many) { ctx.textAlign = 'center'; ctx.fillStyle = C('--accent'); ctx.fillText(v, x, Y + 4); }
+    });
+  }
+  function drawLanes(){
+    const R = active(), laneH = 62, axisH = 24, H = R.length * laneH + axisH + 14;
+    $('#tfLanes').style.height = H + 'px';
+    const {ctx, w, h} = fit($('#tfLanes'));
+    const X0 = 12, X1 = w - 12, xmax = 2.2 * TF.N, xs = v => X0 + Math.max(0, Math.min(v, xmax)) / xmax * (X1 - X0);
+    const B = 66, bw = xmax / B, hists = R.map(r => { const c = new Array(B).fill(0); tfEst(r.id).forEach(v => c[Math.max(0, Math.min(B - 1, Math.floor(v / bw)))]++); return c; });
+    let top = 1; hists.forEach(c => c.forEach(v => top = Math.max(top, v)));
+    R.forEach((r, i) => {
+      const y0 = 14 + i * laneH, base = y0 + laneH - 10, col = C(r.color), st = stats(tfEst(r.id), TF.N);
+      ctx.font = '600 12px ' + MONO; ctx.fillStyle = col; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+      ctx.fillText(r.id === 'you' ? youName() : r.name, X0, y0);
+      if (st && st.n >= 20 && w > 470) { ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-2'); ctx.textAlign = 'right'; ctx.fillText(`average ${f1(st.mean)} · typical miss ${f1(Math.sqrt(st.mse))}`, X1, y0); }
+      ctx.strokeStyle = C('--line'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, base + .5); ctx.lineTo(X1, base + .5); ctx.stroke();
+      const pw = (X1 - X0) / B;
+      ctx.globalAlpha = .8;
+      hists[i].forEach((c, b) => { if (c) bar(ctx, X0 + b * pw + .5, Math.max(1, pw - 1), base - c / top * (laneH - 30), base, col); });
+      ctx.globalAlpha = 1;
+      if (st) {   // average (▲) and latest (▼)
+        const xa = xs(st.mean); ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(xa, base + 1); ctx.lineTo(xa - 5, base + 9); ctx.lineTo(xa + 5, base + 9); ctx.closePath(); ctx.fill();
+        const a = tfEst(r.id), xl = xs(a[a.length - 1]), yl = base - (laneH - 28);
+        ctx.strokeStyle = C('--surface'); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(xl, yl + 9); ctx.lineTo(xl - 6, yl); ctx.lineTo(xl + 6, yl); ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+    });
+    const xn = xs(TF.N);
+    vline(ctx, xn, 12, h - axisH, C('--ink'), [5, 4], 1.5);
+    ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--ink'); ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(`truth: ${TF.N}`, xn, 0);
+    xAxis(ctx, X0, X1, h - axisH, 0, xmax);
+    if (!TF.caps) emptyNote(ctx, w, h - 10, 'capture some tanks');
+  }
+  function read(){
+    const out = $('#tfRead');
+    if (!TF.last) { out.innerHTML = ''; return; }
+    const a = TF.last, sorted = a.slice().sort((x, y) => x - y);
+    out.innerHTML = `capture ${comma(TF.caps)}: ${sorted.length <= 10 ? 'serials ' + sorted.join(', ') : sorted.length + ' tanks, largest ' + maxOf(a)} → ` +
+      active().map(r => `<span style="color:var(${r.color})">${r.id === 'you' ? 'yours' : r.name.toLowerCase()} <b>${f1(r.f(a))}</b></span>`).join(' · ');
+  }
+  function draw(){ drawLine(); drawLanes(); read(); }
+  function outs(){ $('#tfNOut').textContent = nIn.value; $('#tfKOut').textContent = KS[+kIn.value]; $('#tfOne').textContent = `Capture ${KS[+kIn.value]} tanks`; }
+  function stop(){ clearInterval(timer); timer = null; $('#tfRun').textContent = '▶ Keep capturing'; }
+  function reset(){ stop(); TF.N = +nIn.value; TF.k = KS[+kIn.value]; tfClear(); outs(); changed(); }
+  nIn.addEventListener('input', reset); kIn.addEventListener('input', reset);
+  $('#tfOne').addEventListener('click', () => { tfAdd(1); changed(); });
+  $('#tfMany').addEventListener('click', () => { tfAdd(1000); changed(); });
+  $('#tfClear').addEventListener('click', () => { stop(); tfClear(); changed(); });
+  $('#tfRun').addEventListener('click', () => {
+    if (timer) return stop();
+    $('#tfRun').textContent = '❚❚ Pause';
+    timer = setInterval(() => { tfAdd(RM ? 20 : 1); changed(); if (TF.caps >= 5000) stop(); }, RM ? 400 : 110);
+  });
+  outs(); listeners.push(draw); draw(); redraws.push(draw);
+})();
+
+/* ---------- 2. the dartboard ---------- */
+(function(){
+  const PRESETS = [[0, .5], [0, 1.6], [2.2, .5], [2.2, 1.6]];
+  const aIn = $('#dbAim'), sIn = $('#dbShake'), ANG = -Math.PI / 4;
+  let throws = [], fresh = 0;
+  function throwN(n){
+    fresh = throws.length;
+    const a = +aIn.value, s = +sIn.value;
+    for (let i = 0; i < n; i++) throws.push([a * Math.cos(ANG) + s * gauss(), a * Math.sin(ANG) + s * gauss()]);
+  }
+  function draw(){
+    const {ctx, w, h} = fit($('#dbBoard'));
+    const R = Math.max(10, Math.min(w, h) / 2 - 8), cx = w / 2, cy = h / 2, u = R / 5;   // board radius = 5 units
+    const rings = [5, 4, 3, 2, 1];
+    rings.forEach((r, i) => { ctx.fillStyle = i % 2 ? C('--surface') : C('--surface-2'); ctx.beginPath(); ctx.arc(cx, cy, r * u, 0, TAU); ctx.fill(); ctx.strokeStyle = C('--line'); ctx.lineWidth = 1; ctx.stroke(); });
+    ctx.fillStyle = C('--zero-soft'); ctx.beginPath(); ctx.arc(cx, cy, .45 * u, 0, TAU); ctx.fill(); ctx.strokeStyle = C('--zero'); ctx.stroke();
+    const a = +aIn.value, ax = cx + a * Math.cos(ANG) * u, ay = cy + a * Math.sin(ANG) * u;
+    ctx.strokeStyle = C('--ink-2'); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(ax - 7, ay); ctx.lineTo(ax + 7, ay); ctx.moveTo(ax, ay - 7); ctx.lineTo(ax, ay + 7); ctx.stroke();
+    throws.forEach((t, i) => {
+      const x = cx + t[0] * u, y = cy + t[1] * u; if (Math.hypot(x - cx, y - cy) > R + 6) return;
+      ctx.fillStyle = C('--accent'); ctx.globalAlpha = i >= fresh ? 1 : .55; dot(ctx, x, y, i >= fresh ? 4 : 3.2);
+    });
+    ctx.globalAlpha = 1;
+    if (throws.length >= 3) {
+      const mx = meanOf(throws.map(t => t[0])), my = meanOf(throws.map(t => t[1]));
+      ctx.strokeStyle = C('--gold'); ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(cx + mx * u, cy + my * u, 7, 0, TAU); ctx.stroke();
+    }
+    const n = throws.length, out = $('#dbRead');
+    if (!n) { out.innerHTML = ''; return; }
+    const mx = meanOf(throws.map(t => t[0])), my = meanOf(throws.map(t => t[1]));
+    const b2 = mx * mx + my * my, v = meanOf(throws.map(t => (t[0] - mx) ** 2 + (t[1] - my) ** 2)), mse = b2 + v;
+    out.innerHTML = `${n} throws · average squared miss <b>${mse.toFixed(2)}</b> = bias² <b style="color:var(--zero)">${b2.toFixed(2)}</b> + variance <b>${v.toFixed(2)}</b> · typical miss ${Math.sqrt(mse).toFixed(2)} rings`;
+  }
+  function outs(){ $('#dbAimOut').textContent = (+aIn.value).toFixed(1) + ' rings'; $('#dbShakeOut').textContent = (+sIn.value).toFixed(1); }
+  function restart(){ throws = []; throwN(20); outs(); draw(); }
+  $$('[data-db]').forEach(b => b.addEventListener('click', () => {
+    const p = PRESETS[+b.dataset.db]; aIn.value = p[0]; sIn.value = p[1];
+    $$('[data-db]').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); });
+    restart();
+  }));
+  const unpreset = () => $$('[data-db]').forEach(x => { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); });
+  aIn.addEventListener('input', () => { unpreset(); restart(); });
+  sIn.addEventListener('input', () => { unpreset(); restart(); });
+  $('#dbThrow').addEventListener('click', () => { throwN(10); draw(); });
+  $('#dbClear').addEventListener('click', () => { throws = []; draw(); });
+  restart(); redraws.push(draw);
+})();
+
+/* ---------- 3. mean squared error, from the factory ---------- */
+(function(){
+  function draw(){
+    const R = active(), rowH = 46, H = R.length * rowH + 30;
+    $('#mseChart').style.height = H + 'px';
+    const {ctx, w, h} = fit($('#mseChart'));
+    $('#mseNote').textContent = TF.caps ? `${comma(TF.caps)} captures of ${TF.k} tanks from ${TF.N}` : '';
+    if (TF.caps < 20) { emptyNote(ctx, w, h, 'capture some tanks in the factory first'); return; }
+    const S = R.map(r => stats(tfEst(r.id), TF.N));
+    const base = S.filter((s, i) => R[i].id !== 'you').map(s => s.mse), cap = Math.max(...base) * 1.6;
+    const top = Math.max(...S.map(s => Math.min(s.mse, cap))) * 1.08;
+    const X0 = 12, X1 = w - 12, xs = v => X0 + Math.min(v, top) / top * (X1 - X0);
+    R.forEach((r, i) => {
+      const s = S[i], y = 6 + i * rowH, by = y + 18, bh = 16;
+      ctx.font = '600 12px ' + MONO; ctx.fillStyle = C(r.color); ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+      ctx.fillText(r.id === 'you' ? youName() : r.name, X0, y);
+      ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-2'); ctx.textAlign = 'right';
+      const txt = `typical miss ${f1(Math.sqrt(s.mse))} · bias ${s.bias < 0 ? '−' : '+'}${f1(Math.abs(s.bias))} · spread ${f1(s.sd)}`;
+      if (w > 520) ctx.fillText(txt, X1, y); else { ctx.textAlign = 'left'; ctx.fillText(`miss ${f1(Math.sqrt(s.mse))} = √(${comma(Math.round(s.bias ** 2))} + ${comma(Math.round(s.sd ** 2))})`, X0 + 2, by + bh + 2); }
+      const b2 = s.bias ** 2, xb = xs(b2), xe = xs(s.mse);
+      ctx.fillStyle = C('--zero'); ctx.fillRect(X0, by, xb - X0, bh);
+      ctx.fillStyle = C('--ink-3'); ctx.fillRect(xb, by, Math.max(0, xe - xb), bh);
+      if (s.mse > top) { ctx.fillStyle = C('--ink-2'); ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.font = '600 12px ' + MONO; ctx.fillText('→', X1, by + bh / 2); }
+    });
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+    ctx.fillText('bar length = mean squared error (tanks²)', X0, h - 2);
+  }
+  $('#mseRun').addEventListener('click', () => { tfAdd(2000); changed(); });
+  listeners.push(draw); draw(); redraws.push(draw);
+})();
+
+/* ---------- 4. robustness: the sleep trial ---------- */
+const SLEEP = [1.2, 2.4, 1.3, 1.3, 0.0, 1.0, 1.8, 0.8, 4.6, 1.4];   // drug 2 minus drug 1, Cushny & Peebles via Student (1908)
+const median = a => { const b = a.slice().sort((x, y) => x - y), m = b.length >> 1; return b.length % 2 ? b[m] : (b[m - 1] + b[m]) / 2; };
+const trimmed = (a, t) => { const b = a.slice().sort((x, y) => x - y).slice(t, a.length - t); return meanOf(b); };
+(function(){
+  const cv = $('#rbDots'), tb = $('#rbTypo');
+  let D = SLEEP.slice(), typo = false, drag = -1, range = [-1, 7];
+  const geo = () => { const w = cv.getBoundingClientRect().width; return {X0: 16, X1: w - 16}; };
+  function pos(){   // stack equal values
+    const seen = {}; return D.map(v => { const k = Math.round(v * 20); seen[k] = (seen[k] || 0) + 1; return seen[k] - 1; });
+  }
+  function draw(){
+    const {ctx, w, h} = fit(cv), {X0, X1} = geo(), Y0 = h - 24, xs = v => X0 + (v - range[0]) / (range[1] - range[0]) * (X1 - X0);
+    xAxis(ctx, X0, X1, Y0, range[0], range[1], v => v + ' h');
+    const m = meanOf(D), md = median(D), tm = trimmed(D, 2);
+    [[m, C('--zero'), null, 'mean'], [md, C('--one'), null, 'median'], [tm, C('--ink-2'), [5, 4], 'trimmed']].forEach(([v, col, dash, nm], i) => {
+      vline(ctx, xs(v), 8 + i * 15, Y0, col, dash, 2);
+    });
+    [[m, C('--zero'), 'mean'], [md, C('--one'), 'median'], [tm, C('--ink-2'), 'trimmed']].forEach(([v, col, nm], i) => {
+      const t = `${nm} ${v.toFixed(2)}`, x = xs(v), y = 2 + i * 15;
+      ctx.font = '600 11px ' + MONO; const tw = ctx.measureText(t).width, right = x + 6 + tw > X1, tx = right ? x - 6 - tw : x + 6;
+      ctx.fillStyle = C('--surface'); ctx.fillRect(tx - 3, y - 1, tw + 6, 14);
+      ctx.fillStyle = col; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(t, tx, y);
+    });
+    const st = pos();
+    D.forEach((v, i) => { ctx.fillStyle = C('--accent'); ctx.globalAlpha = i === drag ? 1 : .85; dot(ctx, xs(v), Y0 - 8 - st[i] * 13, i === drag ? 7 : 6); });
+    ctx.globalAlpha = 1;
+    $('#rbRead').innerHTML = `mean <b style="color:var(--zero)">${m.toFixed(2)}</b> · median <b style="color:var(--one)">${md.toFixed(2)}</b> · trimmed mean <b>${tm.toFixed(2)}</b> hours`;
+  }
+  function setRange(){ const hi = Math.max(...D); range = hi > 7 ? [-2, 50] : [-1, 7]; }
+  function at(e){ const r = cv.getBoundingClientRect(), {X0, X1} = geo(); return range[0] + (e.clientX - r.left - X0) / (X1 - X0) * (range[1] - range[0]); }
+  cv.addEventListener('pointerdown', e => {
+    const r = cv.getBoundingClientRect(), {X0, X1} = geo(), st = pos(), h = r.height, Y0 = h - 24;
+    let best = -1, bd = 14;
+    D.forEach((v, i) => { const x = X0 + (v - range[0]) / (range[1] - range[0]) * (X1 - X0), y = Y0 - 8 - st[i] * 13, d = Math.hypot(e.clientX - r.left - x, e.clientY - r.top - y); if (d < bd) { bd = d; best = i; } });
+    if (best < 0) return;
+    drag = best; try { cv.setPointerCapture(e.pointerId); } catch (err) {} e.preventDefault(); draw();
+  });
+  cv.addEventListener('pointermove', e => {
+    if (drag < 0) { return; }
+    D[drag] = Math.round(Math.max(range[0], Math.min(range[1], at(e))) * 10) / 10; draw();
+  });
+  const end = () => { if (drag >= 0) { drag = -1; draw(); } };
+  cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+  tb.addEventListener('click', () => {
+    typo = !typo; D[8] = typo ? 46 : 4.6; setRange();
+    tb.classList.toggle('on', typo); tb.setAttribute('aria-pressed', typo); tb.textContent = typo ? 'Fix the typo: 46 → 4.6' : 'Make a typo: 4.6 → 46';
+    draw();
+  });
+  $('#rbReset').addEventListener('click', () => { D = SLEEP.slice(); typo = false; setRange(); tb.classList.remove('on'); tb.setAttribute('aria-pressed', 'false'); tb.textContent = 'Make a typo: 4.6 → 46'; draw(); });
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 4b. the estimator race ---------- */
+(function(){
+  const cIn = $('#rbC'), REPS = 2000, n = 10, ids = ['#rbM1', '#rbM2', '#rbM3'], fs = [meanOf, median, a => trimmed(a, 2)];
+  let res = null;
+  function run(){
+    const c = +cIn.value / 100; res = fs.map(() => new Float64Array(REPS));
+    const a = new Array(n);
+    for (let r = 0; r < REPS; r++) {
+      for (let i = 0; i < n; i++) a[i] = Math.random() < c ? 10 * gauss() : gauss();
+      fs.forEach((f, j) => res[j][r] = f(a));
+    }
+  }
+  function draw(){
+    const sds = res.map(x => { const m = meanOf(x); return Math.sqrt(meanOf(Array.from(x, v => (v - m) ** 2))); });
+    const best = sds.indexOf(Math.min(...sds)), lo = -2, hi = 2, B = 40, bw = (hi - lo) / B;
+    const hs = res.map(x => { const c = new Array(B).fill(0); x.forEach(v => { const b = Math.floor((v - lo) / bw); if (b >= 0 && b < B) c[b]++; }); return c; });
+    let top = 1; hs.forEach(c => c.forEach(v => top = Math.max(top, v)));
+    ids.forEach((id, j) => {
+      const {ctx, w, h} = fit($(id)), X0 = 14, X1 = w - 14, Y0 = h - 20, pw = (X1 - X0) / B;
+      hs[j].forEach((c, b) => { if (c) bar(ctx, X0 + b * pw + .5, Math.max(1, pw - 1), Y0 - c / top * (Y0 - 6), Y0, j === best ? C('--accent') : C('--ink-3')); });
+      xAxis(ctx, X0, X1, Y0, lo, hi);
+      vline(ctx, X0 + (0 - lo) / (hi - lo) * (X1 - X0), 2, Y0, C('--ink'), [4, 3], 1.5);
+      $(id + 'R').innerHTML = `spread ${sds[j].toFixed(2)}${j === best ? ' · <b class="ok">steadiest</b>' : ''}`;
+    });
+  }
+  const go = () => { $('#rbCOut').textContent = cIn.value + '%'; run(); draw(); };
+  cIn.addEventListener('input', go); $('#rbGo').addEventListener('click', go);
+  go(); redraws.push(draw);
+})();
+
+/* ---------- 5. consistency ---------- */
+(function(){
+  const N = 1000, KK = [1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48], REPS = 1500;
+  const LINES = [
+    {name: 'Largest', color: '--accent', f: a => maxOf(a)},
+    {name: 'Twice the average', color: '--ink-2', f: a => 2 * meanOf(a) - 1},
+    {name: 'Largest + average gap', color: '--one', f: a => { const m = maxOf(a); return m + m / a.length - 1; }},
+    {name: 'Twice the first tank', color: '--zero', f: a => 2 * a[0] - 1, dash: [5, 4]}
+  ];
+  let R = null;
+  function run(){
+    R = LINES.map(() => []);
+    KK.forEach(k => {
+      const acc = LINES.map(() => 0);
+      for (let t = 0; t < REPS; t++) { const a = capture(N, k); LINES.forEach((L, j) => acc[j] += (L.f(a) - N) ** 2); }
+      acc.forEach((s, j) => R[j].push(Math.sqrt(s / REPS)));
+    });
+  }
+  function draw(){
+    const {ctx, w, h} = fit($('#csChart'));
+    const X0 = 46, X1 = w - (w > 520 ? 150 : 14), Y0 = h - 40, Y1 = 10, lx = Math.log(KK[KK.length - 1]);
+    const xs = k => X0 + Math.log(k) / lx * (X1 - X0), ymax = 700, ys = v => Y0 - Math.min(v, ymax) / ymax * (Y0 - Y1);
+    yGrid(ctx, X0, X1, ys, [0, 100, 200, 300, 400, 500, 600, 700], v => String(v));
+    ctx.strokeStyle = C('--ink-3'); ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    [1, 2, 4, 8, 16, 32].forEach(k => ctx.fillText(k, xs(k), Y0 + 6));
+    ctx.fillText('tanks captured (out of 1,000)', (X0 + X1) / 2, Y0 + 22);
+    ctx.save(); ctx.translate(12, (Y0 + Y1) / 2); ctx.rotate(-Math.PI / 2); ctx.fillText('typical miss', 0, -6); ctx.restore();
+    LINES.forEach((L, j) => {
+      ctx.strokeStyle = C(L.color); ctx.lineWidth = 2; ctx.setLineDash(L.dash || []);
+      ctx.beginPath(); KK.forEach((k, i) => { const x = xs(k), y = ys(R[j][i]); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C(L.color); KK.forEach((k, i) => dot(ctx, xs(k), ys(R[j][i]), 2.5));
+    });
+    // labels: at the right end on wide screens, as a legend row on narrow ones
+    ctx.font = '600 11px ' + MONO; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+    if (w > 520) {
+      const ys0 = LINES.map((L, j) => ys(R[j][KK.length - 1])), order = ys0.map((y, j) => j).sort((a, b) => ys0[a] - ys0[b]);
+      let last = -99; order.forEach(j => { const y = Math.max(ys0[j], last + 14); last = y; ctx.fillStyle = C(LINES[j].color); ctx.fillText(LINES[j].name, X1 + 8, y); });
+    } else {
+      let x = X0, y = Y1 + 4; LINES.forEach(L => { const t = L.name, tw = ctx.measureText(t).width; if (x + tw > w - 8) { x = X0; y += 14; } ctx.fillStyle = C(L.color); ctx.fillText(t, x, y); x += tw + 14; });
+    }
+  }
+  $('#csGo').addEventListener('click', () => { run(); draw(); });
+  run(); draw(); redraws.push(draw);
+})();
+
+/* ---------- 6. quiz ---------- */
+(function(){
+  const Q = [
+    {s: 'Predict: you capture 10 tanks at a time instead of 4 (out of 100). The spread of the “largest + average gap” guesses…',
+     o: ['stays about the same', 'shrinks by about a third', 'shrinks to less than half'], a: 2,
+     e: 'It falls from about 20 tanks to about 9. This recipe sharpens roughly in proportion to 1/k, faster than the 1/√k you’d expect from an average.'},
+    {s: 'Serial numbers 19, 40, 42 and 60. What does “largest + average gap” estimate?',
+     o: ['60', '74', '80'], a: 1,
+     e: 'The average gap is 60 ÷ 4 = 15, so 60 + 15 − 1 = 74.'},
+    {s: 'Recipe A is unbiased but its guesses scatter widely. Recipe B is a little off on average but very steady. Which is better?',
+     o: ['A, because unbiased always wins', 'B, because steady always wins', 'It depends: compare their mean squared errors'], a: 2,
+     e: 'Mean squared error = bias² + variance. A small bias can be worth paying for a big drop in variance, as “Largest” showed against “Twice the average”, but not always.'},
+    {s: 'An estimator is unbiased. Which reading is <em>wrong</em>?',
+     o: ['Averaged over many samples, it hits the truth', 'Its answer from your one sample is close to the truth', 'It can still miss by a lot'], a: 1,
+     e: 'Unbiased describes the average over many samples, not any single sample. “Twice the first tank” is unbiased and routinely misses by hundreds.'},
+    {s: 'A typo turns the sleep value 4.6 into 46. Which estimate barely moves?',
+     o: ['The mean', 'The median'], a: 1,
+     e: 'The mean jumps from 1.58 to 5.72 hours. The median stays at 1.30, because the wild value is still just “one value above the middle”.'},
+    {s: 'The data are clean and bell-shaped, with no wild values. Which wobbles least from sample to sample?',
+     o: ['The mean', 'The median'], a: 0,
+     e: 'For clean bell-shaped data the mean is the steadiest; the median’s spread is about 25% larger in big samples. Robustness has a price when nothing goes wrong.'},
+    {s: '“Twice the first tank’s number, minus 1” is unbiased. What is wrong with it?',
+     o: ['It aims too low', 'It ignores the other tanks, so it never improves with more data'], a: 1,
+     e: 'Its typical miss is the same whether you capture 2 tanks or 48. A good recipe should be consistent: its error should shrink as the sample grows.'}
+  ];
+  const box = $('#quiz'); let answered = 0, right = 0;
+  Q.forEach(q => {
+    const d = document.createElement('div'); d.className = 'qitem';
+    d.innerHTML = `<p>${q.s}</p><div class="qbtns">${q.o.map((t, i) => `<button class="btn" data-i="${i}">${t}</button>`).join('')}</div><p class="qexp" hidden></p>`;
+    const exp = d.querySelector('.qexp');
+    d.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      const ok = +b.dataset.i === q.a;
+      if (!d.dataset.done) { d.dataset.done = '1'; answered++; if (ok) right++; }
+      d.querySelectorAll('button').forEach(x => x.classList.remove('right', 'wrong'));
+      b.classList.add(ok ? 'right' : 'wrong');
+      exp.hidden = false; exp.innerHTML = `<b>${ok ? '✓ Right.' : '✗ Not quite.'}</b> ${q.e}`;
+      $('#quizScore').textContent = `${answered} of ${Q.length} answered · ${right} right on the first try`;
+    }));
+    box.appendChild(d);
+  });
+})();
+
+})();
+</script>
+</body>
+</html>
