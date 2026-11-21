@@ -162,7 +162,7 @@ window.EXPLAINERS = {
           "id": "learning-from-data",
           "title": "Learning from data",
           "blurb": "Could chance alone have done this? Starting from line-ups and coin streaks, the series builds the tools for answering that question: sampling, estimation, resampling, tests, intervals and power, ending with the 1954 polio vaccine trial.",
-          "topics": ["is-it-real", "sampling-distributions", "selection-bias", "estimation"]
+          "topics": ["is-it-real", "sampling-distributions", "selection-bias", "estimation", "bootstrap"]
         }
       ],
       "topics": [
@@ -200,6 +200,15 @@ window.EXPLAINERS = {
           "summary": "Estimate how many tanks the enemy built from a few serial numbers, then race recipes in a tank factory to see bias, variance, mean squared error, robustness and consistency.",
           "tags": ["estimator", "bias", "variance", "mean squared error", "German tank problem"],
           "preview": { "select": "#heroPlay", "click": ["#heroSkip"] }
+        },
+        {
+          "id": "bootstrap",
+          "title": "The Bootstrap",
+          "short": "Bootstrap",
+          "path": "statistics/bootstrap.html",
+          "summary": "One sample, no formula for the median: resample your own data with replacement to see how much an estimate wobbles, check it against s/√n, and watch where it fails.",
+          "tags": ["bootstrap", "resampling", "standard error", "percentile interval", "Efron"],
+          "preview": { "select": "#heroPlay", "click": ["#heroSkip", "#heroGo"] }
         }
       ]
     }

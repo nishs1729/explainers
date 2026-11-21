@@ -25,7 +25,7 @@ See [Statistics: how every page works](#statistics-conventions) first.
 - [x] [2. Sampling distributions](https://nishs1729.github.io/explainers/statistics/sampling-distributions.html)
 - [x] [3. ⚠ Who's missing?](https://nishs1729.github.io/explainers/statistics/selection-bias.html)
 - [x] [4. What makes a good guess](https://nishs1729.github.io/explainers/statistics/estimation.html)
-- [ ] [5. The bootstrap](#bootstrap)
+- [x] [5. The bootstrap](https://nishs1729.github.io/explainers/statistics/bootstrap.html)
 - [ ] [6. Shuffling to test](#permutation-tests)
 - [ ] [7. p-values](#p-values)
 - [ ] [8. Confidence intervals](#confidence-intervals)
@@ -308,6 +308,8 @@ Assumes the probability series, especially Normal (CLT, √n law) and Chi-square
 > **Data:** sleep trial (differences).
 >
 > **Links:** builds on Sampling distributions, What makes a good guess, Power laws (heavy-tail failure). Efron (1979).
+>
+> **Built:** the hero shows the 10 sleep differences on a line. The reader drags a gold range for the true median (or skips), then "Check with 2,000 resamples" draws the bootstrap medians and their middle 95% (about 1.0–1.9) and compares the widths. Section 1 is a two-row diagram, real world vs bootstrap world. The resampler uses tokens with ×k badges and faded left-out patients, a chip row of the draws and a dot plot of the resample, median or mean, at speeds 1–10,000 per second plus a +10,000 button; its readout gives the bootstrap SE (median ≈ 0.23, mean ≈ 0.37) and the patients left out (3.5 on average). Section 3 compares the reader's range in a dynamic callout. Section 4 overlays 10,000 bootstrap means on the s/√n bell (0.369 vs 0.389, a ratio of √(9/10)). Section 5 is a truth-vs-bootstrap comparison with presets: works (bell mean, n = 20, ratio usually within ~20%), tiny sample (median, n = 3), largest value (flat, n = 20, ~64% spike), heavy tails (Pareto α = 1.5 mean, bootstrap ≈ 1/5 of the true spread).
 
 <a id="permutation-tests"></a>
 ### **6. Shuffling to test**

@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Bootstrap — a visual introduction</title>
+<style>
+:root{
+  --bg:#faf8f4; --surface:#ffffff; --surface-2:#f2efe8; --ink:#1c1c1e; --ink-2:#4c4e55; --ink-3:#8b8d93; --line:#e3dfd5;
+  --one:#16917c; --one-soft:rgba(22,145,124,.15);
+  --zero:#d9573a; --zero-soft:rgba(217,87,58,.15);
+  --accent:#3654c9; --accent-soft:rgba(54,84,201,.11);
+  --gold:#b98317; --gold-soft:rgba(185,131,23,.22);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+    --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+    --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+    --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+    --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+  --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+  --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+  --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+  --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.68 var(--sans);-webkit-font-smoothing:antialiased}
+main{max-width:820px;margin:0 auto;padding:0 20px 80px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;letter-spacing:-.01em}
+h1{font-size:clamp(2.2rem,6vw,3.4rem);margin:.2em 0 .3em}
+h2{font-size:clamp(1.6rem,4vw,2.1rem);margin:0 0 .5em}
+h3{font-size:1.2rem;margin:1.6em 0 .4em}
+p{margin:0 0 1em}
+a{color:var(--accent)}
+strong{font-weight:650}
+em.term{font-style:normal;font-weight:650;color:var(--accent)}
+.muted{color:var(--ink-2)}
+small,.small{font-size:14px}
+
+/* hero */
+.hero{text-align:center;padding:64px 0 24px}
+.kicker{text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--ink-3);margin:0}
+.lede{font-size:1.2rem;color:var(--ink-2);max-width:620px;margin:0 auto}
+.hero-play{max-width:640px;margin:30px auto 0;text-align:left}
+.hero-play .controls{justify-content:center}
+.hint{font-size:15px;color:var(--ink-2);min-height:3.2em;margin:10px 0 0;text-align:center}
+.ask{font-family:var(--serif);font-size:1.25rem;text-align:center;margin:0 0 12px}
+
+.toc{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;margin:28px 0 8px}
+.toc ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 20px;counter-reset:t}
+.toc li{counter-increment:t;font-size:15px}
+.toc li::before{content:counter(t,decimal-leading-zero);font-family:var(--mono);color:var(--ink-3);margin-right:10px;font-size:13px}
+.toc a{color:var(--ink);text-decoration:none}
+.toc a:hover{color:var(--accent)}
+
+section{padding-top:56px}
+.secnum{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.08em;margin-bottom:4px}
+
+.widget{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin:26px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.widget-title{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);margin:0 0 12px;font-weight:600}
+.controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:12px 0}
+.ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:15px}
+.ctrl output{font-family:var(--mono);font-size:14px;min-width:5.5em;color:var(--ink)}
+input[type=range]{accent-color:var(--accent);width:170px;max-width:100%}
+.btn{font:inherit;font-size:14px;line-height:1.2;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;transition:background .15s,transform .1s}
+.btn:hover{border-color:var(--ink-3)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn.guess{background:var(--gold-soft);border-color:var(--gold);color:var(--ink)}
+.btn.right{background:var(--one-soft);border-color:var(--one);color:var(--one)}
+.btn.wrong{background:var(--zero-soft);border-color:var(--zero);color:var(--zero)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:6px}
+.readout{font-family:var(--mono);font-size:14px;color:var(--ink-2);line-height:1.6}
+.readout b{color:var(--ink);font-weight:600}
+.readout .ok{color:var(--one);font-weight:600}
+.readout .warn{color:var(--zero);font-weight:600}
+.readout .gd{color:var(--gold);font-weight:600}
+.msg{font-size:15px;color:var(--ink-2);min-height:3.4em;margin:10px 0 0}
+.msg b{color:var(--ink)}
+canvas{display:block;width:100%}
+.cap{font-size:13px;color:var(--ink-3);margin:2px 0 6px}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:20px 0}
+.callout p:last-child{margin-bottom:0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin-top:8px}
+.legend > span{display:inline-block}
+.legend .sw{vertical-align:middle;margin:0 6px 2px 0}
+.sw{display:inline-block;width:16px;height:10px;border-radius:2px}
+.sw.dot{width:8px;height:8px;border-radius:50%}
+.sw.line{height:0;border-top:2px solid var(--ink)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+@media (max-width:640px){.pair{grid-template-columns:1fr}}
+.mcap{font-size:13px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+
+/* cast */
+.cast-q{font-family:var(--serif);font-size:1.08rem;margin:0 0 10px}
+.datarow{font-family:var(--mono);font-size:14px;color:var(--ink-2);margin:0 0 6px}
+.datarow b{color:var(--ink)}
+
+/* recipe */
+.facts{counter-reset:f;list-style:none;padding:0;margin:18px 0}
+.facts li{counter-increment:f;position:relative;padding:12px 0 12px 44px;border-bottom:1px solid var(--line)}
+.facts li::before{content:counter(f);position:absolute;left:0;top:12px;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:600 13px var(--mono)}
+.facts li strong{display:block}
+.table-wrap{overflow-x:auto}
+table.summary{border-collapse:collapse;width:100%;font-size:15px;margin:14px 0}
+table.summary td,table.summary th{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3)}
+@media (max-width:480px){table.summary td,table.summary th{padding:8px 5px}}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:18px 0}
+.card{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
+.card h4{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+.card p{font-size:15px;margin:0;color:var(--ink-2)}
+
+/* quiz */
+.quiz{display:grid;gap:10px}
+.qitem{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg)}
+.qitem p{margin:0 0 8px;font-size:16px}
+.qbtns{display:flex;flex-wrap:wrap;gap:8px}
+.qexp{font-size:15px;color:var(--ink-2);margin:10px 0 0!important}
+
+@media (max-width:480px){
+  main{padding:0 16px 80px}
+  .widget{padding:14px}
+  input[type=range]{width:150px}
+}
+/* page 5 */
+table.summary.num{font-size:13px;margin:8px 0 0}
+table.summary.num td,table.summary.num th{padding:5px 8px;text-align:right;white-space:nowrap}
+table.summary.num td:first-child,table.summary.num th:first-child{text-align:left}
+.linkbtn{all:unset;cursor:pointer;font-size:14px;color:var(--accent);text-decoration:underline}
+.linkbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.linkbtn[hidden]{display:none}
+canvas.band{cursor:ew-resize;touch-action:pan-y}
+.legend > span[hidden]{display:none}
+.tokens{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin:6px 0 2px}
+@media (max-width:520px){.tokens{grid-template-columns:repeat(5,1fr)}}
+.token{position:relative;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);padding:8px 0 6px;text-align:center;transition:border-color .12s,opacity .2s,background .12s}
+.token .tv{font:600 15px var(--mono);color:var(--ink)}
+.token .tb{position:absolute;top:-8px;right:-6px;font:600 11px var(--mono);color:#fff;background:var(--accent);border-radius:999px;padding:1px 6px}
+.token .tb:empty{display:none}
+.token.picked{border-color:var(--accent);background:var(--accent-soft)}
+.token.out{opacity:.35}
+.draws{display:flex;flex-wrap:wrap;gap:5px;min-height:30px;margin:4px 0 2px}
+.chip{font:600 13px var(--mono);padding:4px 8px;border-radius:7px;background:var(--accent-soft);color:var(--accent);min-width:3.2em;text-align:center}
+.chip.ghost{background:transparent;border:1px dashed var(--line)}
+.worlds{display:grid;gap:14px;margin:22px 0}
+.world .flow{display:flex;align-items:stretch;gap:8px}
+.world .box{flex:1;border:1px solid var(--accent);background:var(--accent-soft);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.world .box b{font-size:15px}
+.world .box span{font-size:13px;color:var(--ink-2)}
+.world .box.ghost{border-style:dashed;border-color:var(--ink-3);background:transparent}
+.world .arrow{align-self:center;color:var(--ink-3);font-size:20px}
+@media (max-width:560px){.world .flow{flex-direction:column}.world .arrow{transform:rotate(90deg)}}
+.callout-lite{border:1px dashed var(--gold);background:var(--gold-soft);border-radius:10px;padding:10px 14px}
+</style>
+<script>try{var t=localStorage.getItem('xp-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/catalog.js" defer></script>
+<script src="../assets/site.js" defer></script>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <p class="kicker">A visual introduction</p>
+  <h1>The Bootstrap</h1>
+  <p class="lede">You have one sample and want to know how much a number computed from it would wobble, but there are no other samples to compare it with. So make some: draw new samples from your own data, and watch the number wobble.</p>
+  <div class="hero-play" id="heroPlay">
+    <p class="ask">Ten patients slept this much longer on one drug than on another. The median is 1.3 hours. With no formula for the median, how sure can you be?</p>
+    <canvas id="heroLine" class="band" style="height:200px" role="img" aria-label="The ten patients' extra hours of sleep as dots on a line, with their median; drag across the line to mark where you think the true median plausibly lies"></canvas>
+    <div class="legend" style="justify-content:center"><span><i class="sw dot" style="background:var(--accent)"></i><span>one patient</span></span><span><i class="sw" style="background:var(--gold-soft);border:1px solid var(--gold)"></i><span>your range</span></span><span><i class="sw" style="background:var(--ink-3)"></i><span>medians of 2,000 resamples</span></span></div>
+    <div class="controls">
+      <button class="btn primary" id="heroGo" disabled>Check with 2,000 resamples</button>
+      <button class="btn" id="heroClear">Clear</button>
+      <button class="linkbtn" id="heroSkip">skip the guess</button>
+    </div>
+    <p class="hint" id="heroHint" aria-live="polite">Drag across the line to mark the range where you think the true median could plausibly be, if you could test every patient there is. Make it wide enough that you’d be 95% sure.</p>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#pretend">Pretend your sample is the population</a></li>
+    <li><a href="#resample">Resample with replacement</a></li>
+    <li><a href="#distribution">The bootstrap distribution</a></li>
+    <li><a href="#formula">It matches the formula</a></li>
+    <li><a href="#fails">When it fails</a></li>
+    <li><a href="#uses">Where you will meet it</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<section id="pretend">
+  <div class="secnum">01</div>
+  <h2>Pretend your sample is the population</h2>
+  <p>On <a href="sampling-distributions.html">Sampling Distributions</a> the answer to “how much does this number wobble?” was easy: draw thousands of samples from the population, compute the number for each, and look at the spread. In real life that is impossible. You have one sample, and the population is exactly what you don’t know.</p>
+  <p>The bootstrap’s trick is to use the best picture of the population you have, which is the sample itself. Imagine your 10 patients copied a million times over into a stand-in population, then draw new samples of 10 from that. Each new sample is called a <em class="term">resample</em>.</p>
+
+  <div class="worlds" role="img" aria-label="Two parallel diagrams. Real world: population, then many samples, then the sampling distribution. Bootstrap world: your sample, then many resamples, then the bootstrap distribution.">
+    <div class="world">
+      <p class="mcap">The real world (impossible)</p>
+      <div class="flow">
+        <div class="box ghost"><b>Population</b><span>unknown</span></div>
+        <div class="arrow">→</div>
+        <div class="box ghost"><b>Many samples</b><span>can’t afford them</span></div>
+        <div class="arrow">→</div>
+        <div class="box ghost"><b>Sampling distribution</b><span>how the median wobbles</span></div>
+      </div>
+    </div>
+    <div class="world">
+      <p class="mcap" style="color:var(--accent)">The bootstrap world (easy)</p>
+      <div class="flow">
+        <div class="box"><b>Your sample</b><span>standing in for the population</span></div>
+        <div class="arrow">→</div>
+        <div class="box"><b>Many resamples</b><span>drawn from your sample</span></div>
+        <div class="arrow">→</div>
+        <div class="box"><b>Bootstrap distribution</b><span>an estimate of that wobble</span></div>
+      </div>
+    </div>
+  </div>
+
+  <p>The idea comes from Bradley Efron (1979), who named it after the impossible feat of pulling yourself up by your own bootstraps. It seems too good to be true, and it does have limits, but in a wide range of problems the wobble in the bootstrap world closely matches the wobble in the real one.</p>
+</section>
+
+<!-- 2 -->
+<section id="resample">
+  <div class="secnum">02</div>
+  <h2>Resample with replacement</h2>
+  <p>Drawing from a population copied a million times is the same as drawing from your sample <em>with replacement</em>: pick a patient at random, note their value, put them back, and pick again, 10 times. Some patients get picked twice or more, and some not at all. That is the point: each resample is a slightly different mix of your data, the way a fresh sample would be a different mix of the population. (Without replacement, every resample would be the same 10 patients in a new order, with the same median.)</p>
+
+  <div class="widget">
+    <p class="widget-title">The resampler</p>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Statistic">
+        <button class="btn on" data-bs="median" aria-pressed="true">Median</button>
+        <button class="btn" data-bs="mean" aria-pressed="false">Mean</button>
+      </div>
+      <label class="ctrl">speed <input type="range" id="rsSpeed" min="0" max="5" step="1" value="1"><output id="rsSpeedOut"></output></label>
+    </div>
+    <p class="mcap">Your sample: 10 patients</p>
+    <div class="tokens" id="rsTokens"></div>
+    <p class="mcap" style="margin-top:10px">Latest resample</p>
+    <div class="draws" id="rsDraws" aria-live="polite"></div>
+    <canvas id="rsSamp" style="height:62px" role="img" aria-label="The values in the latest resample as dots, with its statistic marked"></canvas>
+    <p class="mcap" style="margin-top:8px" id="rsHistCap">Median of every resample</p>
+    <canvas id="rsHist" style="height:200px" role="img" aria-label="Histogram of the statistic over all resamples so far, with your sample's value, the middle 95%, and your guessed range"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>resamples so far</span></span><span><i class="sw line" style="border-top:2px solid var(--accent)"></i><span>your sample’s value</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>middle 95%</span></span><span id="rsBandKey" hidden><i class="sw" style="background:var(--gold-soft);border:1px solid var(--gold)"></i><span>your range</span></span></div>
+    <div class="controls">
+      <button class="btn primary" id="rsOne">Resample once</button>
+      <button class="btn" id="rsRun">▶ Run</button>
+      <button class="btn" id="rsMany">+10,000</button>
+      <button class="btn" id="rsClear">Clear</button>
+    </div>
+    <div class="readout" id="rsRead" aria-live="polite"></div>
+  </div>
+
+  <p>Watch a few resamples at the slow speed. On average a resample leaves out about 3 or 4 of the 10 patients, because each one has a 0.9<sup>10</sup> ≈ 35% chance of never being picked. Then speed up and let the medians pile up.</p>
+</section>
+
+<!-- 3 -->
+<section id="distribution">
+  <div class="secnum">03</div>
+  <h2>The bootstrap distribution</h2>
+  <p>The pile of resample medians is the <em class="term">bootstrap distribution</em>. It stands in for the sampling distribution you can’t see, and you read it the same way:</p>
+  <ul>
+    <li>Its spread estimates how much the median would wobble from sample to sample: the <strong>bootstrap standard error</strong>. For the sleep data it is about <strong>0.23 hours</strong>.</li>
+    <li>Its middle 95% gives a range of plausible values for the true median: the <strong>percentile interval</strong>. For the sleep data it runs from about <strong>1.0 to 1.9 hours</strong>, 0.9 hours wide.</li>
+  </ul>
+  <p class="callout-lite" id="cmpBand">Draw a range in the opening chart, or skip the guess, and this paragraph will compare it with the bootstrap’s answer.</p>
+  <p>The histogram of medians is spiky, not a smooth bell. A median of 10 values is the average of the 5th and 6th values, and only a handful of such averages are possible, so the resample medians pile onto the same few numbers. Nearly a third of them land exactly on 1.30. The bootstrap is honest about that lumpiness; a formula assuming a smooth bell would hide it.</p>
+  <div class="callout">
+    <p><strong>What the bootstrap can’t do.</strong> It doesn’t make your estimate more accurate, and it doesn’t create information. The resample medians center on <em>your sample’s</em> median, not on the truth. All the bootstrap tells you is how far off your estimate is likely to be. If the sample is biased, as on <a href="selection-bias.html">Who’s Missing?</a>, the bootstrap will measure the wobble around the wrong answer, confidently.</p>
+  </div>
+  <p>The percentile interval is the simplest of several bootstrap intervals; better-behaved versions exist, and intervals in general get their own page, <em>Confidence intervals</em>, later in the series.</p>
+</section>
+
+<!-- 4 -->
+<section id="formula">
+  <div class="secnum">04</div>
+  <h2>It matches the formula</h2>
+  <p>For the median there is no simple formula, which is why the bootstrap is so useful. For the mean there is one: the standard error is <em>s</em>/√<em>n</em>. For the sleep data, <em>s</em> = 1.23 hours and <em>n</em> = 10, so the formula says 0.39 hours. Does the bootstrap agree?</p>
+
+  <div class="widget">
+    <p class="widget-title">Bootstrap means against the formula</p>
+    <canvas id="fmChart" style="height:220px" role="img" aria-label="Histogram of 10,000 bootstrap means of the sleep data, with the bell curve the formula predicts drawn over it"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>10,000 bootstrap means</span></span><span><i class="sw line" style="border-top:2px solid var(--accent)"></i><span>bell curve from the formula: mean 1.58, SE 0.39</span></span></div>
+    <div class="controls"><button class="btn primary" id="fmGo">Resample 10,000 times</button></div>
+    <div class="readout" id="fmRead" aria-live="polite"></div>
+  </div>
+
+  <p>The two agree closely. The bootstrap comes out a touch smaller, about 0.37, for a known reason: treating the sample as the whole population means dividing by <em>n</em> instead of <em>n</em> − 1 when measuring its spread, which shrinks the answer by a factor of √(9/10). With larger samples the difference vanishes. The histogram is also slightly lopsided, leaning right because of the patient who slept 4.6 hours longer; the formula’s bell can’t show that.</p>
+  <p>That is the general pattern: where a formula exists, the bootstrap reproduces it, and where none exists (medians, ratios, correlations, percentiles, anything computed by a long procedure), the bootstrap carries on regardless.</p>
+</section>
+
+<!-- 5 -->
+<section id="fails">
+  <div class="secnum">05</div>
+  <h2>When it fails</h2>
+  <p>You can only check the bootstrap where the truth is known, so go back to a population you control. Below, one sample is drawn from a known population. The top chart is the real sampling distribution, from 2,000 fresh samples; the bottom one is the bootstrap distribution, from 2,000 resamples of the one sample. If the bootstrap works, the two spreads match, even though the bottom one is centered on the sample’s value instead of the truth.</p>
+
+  <div class="widget">
+    <p class="widget-title">Bootstrap against the truth</p>
+    <div class="controls">
+      <span class="muted small">Try:</span>
+      <div class="seg" role="group" aria-label="Examples">
+        <button class="btn on" data-cpre="0" aria-pressed="true">It works</button>
+        <button class="btn" data-cpre="1" aria-pressed="false">Tiny sample</button>
+        <button class="btn" data-cpre="2" aria-pressed="false">The largest value</button>
+        <button class="btn" data-cpre="3" aria-pressed="false">Heavy tails</button>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Population">
+        <button class="btn" data-cpop="bell">Bell</button>
+        <button class="btn" data-cpop="skewed">Skewed</button>
+        <button class="btn" data-cpop="flat">Flat 0–100</button>
+        <button class="btn" data-cpop="heavy">Heavy tails</button>
+      </div>
+      <div class="seg" role="group" aria-label="Statistic">
+        <button class="btn" data-cstat="mean">Mean</button>
+        <button class="btn" data-cstat="median">Median</button>
+        <button class="btn" data-cstat="max">Largest</button>
+      </div>
+      <label class="ctrl">sample size <input type="range" id="cpN" min="0" max="4" step="1" value="3"><output id="cpNOut"></output></label>
+    </div>
+    <p class="mcap" id="cpTrueCap">The truth: 2,000 fresh samples from the population</p>
+    <canvas id="cpTrue" style="height:120px" role="img" aria-label="The real sampling distribution of the statistic"></canvas>
+    <p class="mcap" style="margin-top:6px">Your one sample</p>
+    <canvas id="cpSamp" style="height:40px" role="img" aria-label="The values in your one sample"></canvas>
+    <p class="mcap" style="margin-top:6px">The bootstrap: 2,000 resamples of your one sample</p>
+    <canvas id="cpBoot" style="height:120px" role="img" aria-label="The bootstrap distribution of the statistic"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>fresh samples</span></span><span><i class="sw" style="background:var(--accent)"></i><span>resamples</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>population value</span></span><span><i class="sw line" style="border-top:2px solid var(--ink)"></i><span>your sample’s value</span></span></div>
+    <div class="controls"><button class="btn primary" id="cpNew">Draw a new sample</button></div>
+    <div class="readout" id="cpRead" aria-live="polite"></div>
+  </div>
+
+  <ul>
+    <li><strong>It works</strong> for the mean of 20 values from a bell curve. Draw several samples: the bootstrap’s spread usually lands within about 20% of the true one, sometimes above and sometimes below, because it can only be as good as the spread of the sample it starts from. Medians and skewed populations behave similarly once samples are moderately large.</li>
+    <li><strong>Tiny samples:</strong> with 3 values there are only 10 different resamples, so the bootstrap distribution is a handful of spikes. Its answer swings wildly from one sample to the next, anywhere from a third of the true spread to nearly double. Three values are a poor picture of any population, and the bootstrap can’t know what it hasn’t seen.</li>
+    <li><strong>The largest value:</strong> a resample can never exceed your sample’s largest value, and with 20 values about 64% of resamples contain it, so the bootstrap distribution is one tall spike. The real sampling distribution looks nothing like it. Extremes are the bootstrap’s classic failure.</li>
+    <li><strong>Heavy tails:</strong> when rare, enormous values drive the mean, as with the <a href="../probability/power-laws.html#averages">power laws</a>, most samples don’t contain one. The bootstrap only reshuffles what the sample has, so it misses the wild values that make the real mean so unstable. For this population it typically reports less than a fifth of the true spread.</li>
+  </ul>
+</section>
+
+<!-- 6 -->
+<section id="uses">
+  <div class="secnum">06</div>
+  <h2>Where you will meet it</h2>
+  <div class="cards">
+    <div class="card"><h4>Medicine and economics</h4><p>Intervals for medians, ratios and cost-effectiveness figures, where no tidy formula exists, are routinely bootstrapped.</p></div>
+    <div class="card"><h4>A/B testing</h4><p>Product metrics such as median session length or the 95th-percentile page load time have no simple standard error; companies bootstrap them.</p></div>
+    <div class="card"><h4>Machine learning</h4><p>“Bagging” trains many models on bootstrap resamples and averages them; random forests are built this way. Resampling the test set also gives an error bar for a model’s accuracy.</p></div>
+    <div class="card"><h4>Evolutionary trees</h4><p>The support numbers on branches of a family tree of species are bootstrap percentages: how often the branch reappears when the genetic data are resampled (Felsenstein 1985).</p></div>
+    <div class="card"><h4>Time series</h4><p>Days in a row aren’t independent, so resampling single days would break the pattern. The <em>block bootstrap</em> resamples whole stretches of days instead.</p></div>
+    <div class="card"><h4>Complicated pipelines</h4><p>When an estimate comes out of a long chain of steps, rerunning the whole chain on resamples is often the only practical way to get an error bar.</p></div>
+  </div>
+
+  <h3>Check yourself</h3>
+  <div class="widget">
+    <div class="quiz" id="quiz"></div>
+    <div class="readout" id="quizScore" style="margin-top:10px" aria-live="polite"></div>
+  </div>
+
+  <p>The bootstrap resamples one group to see how much a number wobbles. Shuffling labels between two groups answers a different question: could the difference between them be chance alone? That is the next page, <strong>Shuffling to Test</strong> (coming soon).</p>
+</section>
+
+</main>
+
+<script>
+(function(){
+'use strict';
+/* ---------- helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const root = document.documentElement;
+const C = n => getComputedStyle(root).getPropertyValue(n).trim();
+const f2 = x => x.toFixed(2);
+const fmtN = x => Math.abs(x - Math.round(x)) < 1e-9 ? String(Math.round(x)) : String(+x.toFixed(2));
+const pct = x => (100 * x).toFixed(1) + '%';
+const MONO = 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
+const TAU = Math.PI * 2;
+const comma = n => n.toLocaleString('en-US');
+
+function fit(c){
+  const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+  if (c.width !== w*dpr || c.height !== h*dpr) { c.width = w*dpr; c.height = h*dpr; }
+  const ctx = c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  return {ctx, w, h};
+}
+const redraws = [];
+function redrawAll(){ redraws.forEach(f => f()); }
+let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(redrawAll, 80); });
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+if (mq.addEventListener) mq.addEventListener('change', redrawAll);
+new MutationObserver(redrawAll).observe(root, {attributes:true, attributeFilter:['data-theme']});
+
+function niceTicks(max, count){
+  const raw = max / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const step = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag;
+  const t = []; for (let v = 0; v <= max + 1e-9; v += step) t.push(v); return t;
+}
+function stepFmt(ticks){ const st = ticks.length > 1 ? ticks[1] - ticks[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9)); return v => v.toFixed(d); }
+function yGrid(ctx, X0, X1, ys, ticks, fmt){
+  ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ticks.forEach(v => {
+    const y = Math.round(ys(v)) + .5;
+    ctx.strokeStyle = C('--line'); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X0, y); ctx.lineTo(X1, y); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.fillText(fmt(v), X0 - 6, y);
+  });
+}
+function intStep(px, minPx){
+  for (const s of [1,2,5,10,20,25,50,100]) if (s * px >= minPx) return s;
+  return 100;
+}
+function roundRect(ctx, x, y, w, h, r){
+  r = Math.max(0, Math.min(r, w/2, Math.abs(h)/2));
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+function dot(ctx, x, y, r){ ctx.beginPath(); ctx.arc(x, y, Math.max(0.5, r), 0, TAU); ctx.fill(); }
+function vline(ctx, x, y0, y1, color, dash, lw){
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw || 1.5; if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(Math.round(x) + .5, y0); ctx.lineTo(Math.round(x) + .5, y1); ctx.stroke(); ctx.restore();
+}
+/* integer-valued bar charts: bars at k = lo..hi */
+function frame(ctx, w, h, o){
+  const X0 = o.left != null ? o.left : 40, X1 = w - 10, Y0 = h - 24, Y1 = o.top != null ? o.top : 12;
+  const span = o.hi - o.lo + 1, bw = (X1 - X0) / span;
+  const xc = k => X0 + bw * (k - o.lo + .5), ys = v => Y0 - (v / o.ymax) * (Y0 - Y1);
+  const t = niceTicks(o.ymax, 3).filter(v => v <= o.ymax * 1.0001); yGrid(ctx, X0, X1, ys, t, o.yfmt || stepFmt(t));
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  const st = o.step || intStep(bw, 24);
+  for (let k = Math.ceil(o.lo / st) * st; k <= o.hi; k += st) ctx.fillText(o.lab ? o.lab(k) : k, xc(k), Y0 + 6);
+  return {X0, X1, Y0, Y1, bw, xc, ys};
+}
+function drawBars(ctx, F, lo, hi, val, color, frac){
+  const bwid = Math.max(1, F.bw * (frac == null ? .8 : frac));
+  for (let k = lo; k <= hi; k++) {
+    const v = val(k); if (!(v > 0)) continue;
+    const y = F.ys(v), hh = F.Y0 - y; if (hh < 0.2) continue;
+    const x = F.xc(k) - bwid / 2;
+    ctx.fillStyle = typeof color === 'function' ? color(k) : color;
+    if (bwid >= 6 && hh >= 3) { roundRect(ctx, x, y, bwid, hh, Math.min(3, bwid / 4)); ctx.fill(); }
+    else ctx.fillRect(x, y, bwid, hh);
+  }
+}
+function emptyNote(ctx, w, h, text){
+  ctx.fillStyle = C('--ink-3'); ctx.font = '13px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(text, w / 2, h / 2 - 8);
+}
+
+/* randomness */
+let spare = null;
+function gauss(){
+  if (spare != null) { const s = spare; spare = null; return s; }
+  let u = 0, v = 0; while (u === 0) u = Math.random(); v = Math.random();
+  const r = Math.sqrt(-2 * Math.log(u)); spare = r * Math.sin(TAU * v); return r * Math.cos(TAU * v);
+}
+function shuffled(a){ const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; }
+function corr(x, y){
+  const n = x.length; let mx = 0, my = 0; for (let i = 0; i < n; i++) { mx += x[i]; my += y[i]; } mx /= n; my /= n;
+  let sxy = 0, sxx = 0, syy = 0; for (let i = 0; i < n; i++) { const a = x[i] - mx, b = y[i] - my; sxy += a * b; sxx += a * a; syy += b * b; }
+  return sxy / Math.sqrt(sxx * syy);
+}
+function binom(n, p){ let k = 0; for (let i = 0; i < n; i++) if (Math.random() < p) k++; return k; }
+function flips(n){ const a = new Array(n); for (let i = 0; i < n; i++) a[i] = Math.random() < .5 ? 1 : 0; return a; }
+function longestRun(a){
+  let best = 1, cur = 1, start = 0, bs = 0;
+  for (let i = 1; i < a.length; i++) { if (a[i] === a[i-1]) cur++; else { cur = 1; start = i; } if (cur > best) { best = cur; bs = start; } }
+  return {len: best, start: bs};
+}
+function switches(a){ let s = 0; for (let i = 1; i < a.length; i++) if (a[i] !== a[i-1]) s++; return s; }
+const RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+function ticksIn(lo, hi, count){
+  const raw = (hi - lo) / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const st = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag, t = [];
+  for (let v = Math.ceil(lo / st - 1e-9) * st; v <= hi + 1e-9; v += st) t.push(+v.toFixed(10));
+  return t;
+}
+function xAxis(ctx, X0, X1, Y0, lo, hi, fmt){
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  const t = ticksIn(lo, hi, Math.max(2, Math.floor((X1 - X0) / 60)));
+  const st = t.length > 1 ? t[1] - t[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9));
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  t.forEach(v => ctx.fillText(fmt ? fmt(v) : v.toFixed(d), X0 + (v - lo) / (hi - lo) * (X1 - X0), Y0 + 5));
+}
+function label(ctx, x, y, text, color, X0, X1){
+  ctx.font = '600 11px ' + MONO; ctx.fillStyle = color; ctx.textBaseline = 'top';
+  const right = x > (X0 + X1) / 2; ctx.textAlign = right ? 'right' : 'left';
+  ctx.fillText(text, x + (right ? -5 : 5), y);
+}
+
+function bar(ctx, x, w, y, Y0, color){
+  const hh = Y0 - y; if (!(hh > .2)) return;
+  ctx.fillStyle = color;
+  if (w >= 6 && hh >= 3) { roundRect(ctx, x, y, w, hh, Math.min(3, w / 4)); ctx.fill(); } else ctx.fillRect(x, y, w, hh);
+}
+
+
+/* ---------- shared ---------- */
+const SLEEP = [1.2, 2.4, 1.3, 1.3, 0.0, 1.0, 1.8, 0.8, 4.6, 1.4];   // drug 2 minus drug 1, Cushny & Peebles via Student (1908)
+const meanOf = a => { let s = 0; for (const v of a) s += v; return s / a.length; };
+const median = a => { const b = Array.from(a).sort((x, y) => x - y), m = b.length >> 1; return b.length % 2 ? b[m] : (b[m - 1] + b[m]) / 2; };
+const maxOf = a => { let m = -Infinity; for (const v of a) if (v > m) m = v; return m; };
+const sdOf = a => { const m = meanOf(a); let s = 0; for (const v of a) s += (v - m) ** 2; return Math.sqrt(s / a.length); };
+const STAT = {median, mean: meanOf, max: maxOf};
+function boot(data, f, R){
+  const n = data.length, a = new Array(n), out = new Float64Array(R);
+  for (let r = 0; r < R; r++) { for (let i = 0; i < n; i++) a[i] = data[Math.floor(Math.random() * n)]; out[r] = f(a); }
+  return out;
+}
+const sortedCopy = a => Float64Array.from(a).sort();
+const q = (s, p) => s[Math.min(s.length - 1, Math.max(0, Math.floor(p * s.length)))];
+const h2 = v => (Math.round(v * 100) / 100).toFixed(2);
+function hist(ctx, vals, lo, hi, B, X0, X1, Y0, Y1, color, scaleTo){
+  const c = new Array(B).fill(0), bw = (hi - lo) / B;
+  for (const v of vals) { const b = Math.floor((v - lo) / bw + 1e-9); if (b >= 0 && b < B) c[b]++; }
+  const top = scaleTo || Math.max(1, ...c), pw = (X1 - X0) / B;
+  c.forEach((k, b) => { if (k) bar(ctx, X0 + b * pw + .5, Math.max(1, pw - 1), Y0 - k / top * (Y0 - Y1), Y0, color); });
+  return c;
+}
+const BAND = {v: null, skipped: false};
+const bandListeners = [];
+const bandChanged = () => bandListeners.forEach(f => f());
+
+/* ---------- hero: how sure can you be about the median? ---------- */
+(function(){
+  const cv = $('#heroLine'), hint = $('#heroHint'), intro = hint.innerHTML, LO = -.5, HI = 5;
+  let drag = null, meds = null;
+  const geo = () => { const w = cv.getBoundingClientRect().width; return {X0: 16, X1: w - 16}; };
+  const toVal = e => { const r = cv.getBoundingClientRect(), {X0, X1} = geo(); return Math.max(LO, Math.min(HI, LO + (e.clientX - r.left - X0) / (X1 - X0) * (HI - LO))); };
+  function draw(){
+    const {ctx, w, h} = fit(cv), {X0, X1} = geo(), Y0 = h - 22, xs = v => X0 + (v - LO) / (HI - LO) * (X1 - X0);
+    if (BAND.v) { const a = xs(BAND.v[0]), b = xs(BAND.v[1]); ctx.fillStyle = C('--gold-soft'); ctx.fillRect(a, 4, b - a, Y0 - 4); ctx.strokeStyle = C('--gold'); ctx.lineWidth = 1.5; ctx.strokeRect(a + .5, 4.5, b - a - 1, Y0 - 5); }
+    xAxis(ctx, X0, X1, Y0, LO, HI, v => v + ' h');
+    if (meds) {
+      hist(ctx, meds, LO, HI, 110, X0, X1, Y0 - 50, 26, C('--ink-3'));
+      const s = sortedCopy(meds), a = q(s, .025), b = q(s, .975);
+      [a, b].forEach(v => vline(ctx, xs(v), 16, Y0, C('--ink'), [5, 4], 1.5));
+      ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--ink'); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.fillText(`middle 95%: ${a.toFixed(2)} – ${b.toFixed(2)}`, (xs(a) + xs(b)) / 2, 2);
+    }
+    const seen = {};
+    SLEEP.forEach(v => { const k = Math.round(v * 10); seen[k] = (seen[k] || 0) + 1; ctx.fillStyle = C('--accent'); dot(ctx, xs(v), Y0 - 8 - (seen[k] - 1) * 12, 5.5); });
+    vline(ctx, xs(1.3), Y0 - 46, Y0, C('--accent'), null, 2);
+    ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--accent'); ctx.textAlign = 'left'; ctx.textBaseline = 'bottom'; ctx.fillText('median 1.3', xs(1.3) + 6, Y0 - 34);
+    if (!BAND.v && !meds && !BAND.skipped) { ctx.fillStyle = C('--ink-3'); ctx.font = '13px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('drag across here to mark your range', (X0 + X1) / 2, (Y0 - 40) / 2 + 8, X1 - X0 - 10); }
+  }
+  function message(){
+    if (!meds) { hint.innerHTML = BAND.v ? `Your range: <b>${BAND.v[0].toFixed(1)} to ${BAND.v[1].toFixed(1)} hours</b>, ${(BAND.v[1] - BAND.v[0]).toFixed(1)} wide. Now let 2,000 resamples of the same 10 patients have their say.` : BAND.skipped ? 'Now let 2,000 resamples of the 10 patients have their say.' : intro; return; }
+    const s = sortedCopy(meds), a = q(s, .025), b = q(s, .975), bw = b - a;
+    let t = `The middle 95% of the resample medians runs from <b>${a.toFixed(2)}</b> to <b>${b.toFixed(2)}</b> hours, ${bw.toFixed(2)} wide. `;
+    if (BAND.v) {
+      const yw = BAND.v[1] - BAND.v[0], r = yw / bw;
+      t += `Your range was ${yw.toFixed(1)} wide: ${r > 1.5 ? 'much wider than' : r > 1.15 ? 'a little wider than' : r < .67 ? 'much narrower than' : r < .87 ? 'a little narrower than' : 'about as wide as'} the bootstrap’s. `;
+    }
+    hint.innerHTML = t + 'How 2,000 resamples of just 10 numbers can tell you this is what the rest of the page is about.';
+  }
+  function sync(){ $('#heroGo').disabled = !(BAND.v || BAND.skipped); $('#heroSkip').hidden = !!(BAND.v || BAND.skipped); draw(); message(); }
+  cv.addEventListener('pointerdown', e => { drag = toVal(e); BAND.v = [drag, drag]; meds = null; try { cv.setPointerCapture(e.pointerId); } catch (_) {} draw(); });
+  cv.addEventListener('pointermove', e => { if (drag == null) return; const v = toVal(e); BAND.v = [Math.min(drag, v), Math.max(drag, v)]; draw(); });
+  const end = () => { if (drag == null) return; drag = null; if (BAND.v[1] - BAND.v[0] < .05) BAND.v = null; bandChanged(); };
+  cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+  $('#heroSkip').addEventListener('click', () => { BAND.skipped = true; bandChanged(); });
+  $('#heroGo').addEventListener('click', () => { meds = boot(SLEEP, median, 2000); sync(); });
+  $('#heroClear').addEventListener('click', () => { BAND.v = null; BAND.skipped = false; meds = null; bandChanged(); });
+  bandListeners.push(sync); sync(); redraws.push(draw);
+})();
+
+/* ---------- 2. the resampler ---------- */
+(function(){
+  const SPEEDS = [1, 3, 10, 100, 1000, 10000], LO = -.25, HI = 3.5, n = SLEEP.length;
+  const sp = $('#rsSpeed'), tokBox = $('#rsTokens'), drawBox = $('#rsDraws');
+  let stat = 'median', vals = [], last = null, shown = 0, running = false, cur = null, raf = 0, lastT = 0, acc = 0;
+  SLEEP.forEach((v, i) => { const t = document.createElement('div'); t.className = 'token'; t.innerHTML = `<span class="tv">${v.toFixed(1)}</span><span class="tb"></span>`; tokBox.appendChild(t); });
+  const toks = $$('.token', tokBox);
+  const newIdx = () => { const a = new Array(n); for (let i = 0; i < n; i++) a[i] = Math.floor(Math.random() * n); return a; };
+  function showPicks(idx, k){
+    const cnt = new Array(n).fill(0); idx.slice(0, k).forEach(i => cnt[i]++);
+    toks.forEach((t, i) => { t.classList.toggle('picked', cnt[i] > 0); t.classList.toggle('out', k === n && cnt[i] === 0); t.querySelector('.tb').textContent = cnt[i] > 1 ? '×' + cnt[i] : cnt[i] ? '×1' : ''; });
+    drawBox.innerHTML = idx.slice(0, k).map(i => `<span class="chip">${SLEEP[i].toFixed(1)}</span>`).join('') + '<span class="chip ghost"></span>'.repeat(n - k);
+  }
+  function commit(idx){ vals.push(STAT[stat](idx.map(i => SLEEP[i]))); last = idx; }
+  function drawSamp(){
+    const {ctx, w, h} = fit($('#rsSamp')), X0 = 16, X1 = w - 16, Y0 = h - 20, xs = v => X0 + (v + .5) / 5.5 * (X1 - X0);
+    xAxis(ctx, X0, X1, Y0, -.5, 5, v => v + ' h');
+    if (!last) return;
+    const k = cur ? shown : n, idx = (cur ? cur.idx : last).slice(0, k), seen = {};
+    idx.forEach(i => { const v = SLEEP[i], key = Math.round(v * 10); seen[key] = (seen[key] || 0) + 1; ctx.fillStyle = C('--accent'); dot(ctx, xs(v), Y0 - 7 - (seen[key] - 1) * 10, 4.5); });
+    if (k === n) { const v = STAT[stat](idx.map(i => SLEEP[i])); vline(ctx, xs(v), 2, Y0, C('--accent'), null, 2); label(ctx, xs(v), 2, `${stat} ${h2(v)}`, C('--accent'), X0, X1); }
+  }
+  function drawHist(){
+    const {ctx, w, h} = fit($('#rsHist')), X0 = 16, X1 = w - 16, Y0 = h - 22, Y1 = 30, xs = v => X0 + (v - LO) / (HI - LO) * (X1 - X0);
+    const showBand = stat === 'median' && BAND.v;
+    if (showBand) { const a = xs(Math.max(LO, BAND.v[0])), b = xs(Math.min(HI, BAND.v[1])); ctx.fillStyle = C('--gold-soft'); ctx.fillRect(a, Y1 - 6, b - a, Y0 - Y1 + 6); }
+    $('#rsBandKey').hidden = !showBand;
+    xAxis(ctx, X0, X1, Y0, LO, HI, v => v + ' h');
+    const v0 = STAT[stat](SLEEP);
+    if (!vals.length) { emptyNote(ctx, w, h, 'resample to start'); }
+    else hist(ctx, vals, LO, HI, 75, X0, X1, Y0, Y1, C('--ink-3'));
+    vline(ctx, xs(v0), 14, Y0, C('--accent'), null, 2);
+    label(ctx, xs(v0), 14, `your sample ${h2(v0)}`, C('--accent'), X0, X1);
+    if (vals.length >= 100) {
+      const s = sortedCopy(vals), a = q(s, .025), b = q(s, .975);
+      [a, b].forEach(v => vline(ctx, xs(v), 2, Y0, C('--ink'), [5, 4], 1.5));
+      ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--ink'); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.fillText(`middle 95%: ${h2(a)} – ${h2(b)}`, Math.min(X1 - 70, Math.max(X0 + 70, (xs(a) + xs(b)) / 2)), 0);
+    }
+  }
+  function read(){
+    const out = $('#rsRead'); if (!vals.length) { out.innerHTML = ''; return; }
+    const s = sortedCopy(vals), se = sdOf(vals), d = new Set(last).size;
+    let t = `latest resample: <b>${d}</b> different patients, <b>${n - d}</b> left out<br><b>${comma(vals.length)}</b> resamples · bootstrap SE <b>${h2(se)}</b>`;
+    if (vals.length >= 100) t += ` · middle 95% <b>${h2(q(s, .025))} to ${h2(q(s, .975))}</b>`;
+    if (stat === 'mean') t += ` · formula s/√n = <b>0.39</b>`;
+    out.innerHTML = t;
+  }
+  function drawAll(){ drawSamp(); drawHist(); read(); }
+  function frame(now){
+    const dt = Math.min(250, now - (lastT || now)); lastT = now;
+    if (cur) {
+      shown = Math.min(n, Math.floor((now - cur.t0) / cur.dur * n) + 1); showPicks(cur.idx, shown);
+      if (now - cur.t0 >= cur.dur) { const idx = cur.idx; cur = null; commit(idx); showPicks(idx, n); }
+      drawAll();
+    } else if (running) {
+      const s = SPEEDS[+sp.value];
+      if (s <= 3 && !RM) { cur = {idx: newIdx(), t0: now, dur: 900 / s}; shown = 0; }
+      else { acc += dt / 1000 * s; const k = Math.min(Math.floor(acc), 4000); acc -= k; for (let i = 0; i < k; i++) commit(newIdx()); if (k) { showPicks(last, n); drawAll(); } }
+    }
+    if (running || cur) raf = requestAnimationFrame(frame); else raf = 0;
+  }
+  const kick = () => { if (!raf) { lastT = 0; raf = requestAnimationFrame(frame); } };
+  function stop(){ running = false; $('#rsRun').textContent = '▶ Run'; }
+  $('#rsOne').addEventListener('click', () => {
+    if (cur) return;
+    if (RM) { const idx = newIdx(); commit(idx); showPicks(idx, n); drawAll(); return; }
+    cur = {idx: newIdx(), t0: performance.now(), dur: 1000}; shown = 0; kick();
+  });
+  $('#rsRun').addEventListener('click', () => { running = !running; $('#rsRun').textContent = running ? '❚❚ Pause' : '▶ Run'; acc = 0; kick(); });
+  $('#rsMany').addEventListener('click', () => { for (let i = 0; i < 10000; i++) commit(newIdx()); showPicks(last, n); drawAll(); });
+  $('#rsClear').addEventListener('click', () => { stop(); cur = null; vals = []; last = null; toks.forEach(t => { t.classList.remove('picked', 'out'); t.querySelector('.tb').textContent = ''; }); drawBox.innerHTML = '<span class="chip ghost"></span>'.repeat(n); drawAll(); });
+  $$('[data-bs]').forEach(b => b.addEventListener('click', () => {
+    stat = b.dataset.bs; $$('[data-bs]').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); });
+    $('#rsHistCap').textContent = stat === 'median' ? 'Median of every resample' : 'Mean of every resample';
+    stop(); cur = null; vals = []; last = null; drawBox.innerHTML = '<span class="chip ghost"></span>'.repeat(n); toks.forEach(t => { t.classList.remove('picked', 'out'); t.querySelector('.tb').textContent = ''; }); drawAll();
+  }));
+  const spOut = () => { const s = SPEEDS[+sp.value]; $('#rsSpeedOut').textContent = s >= 10000 ? '10,000 / s' : comma(s) + ' / s'; };
+  sp.addEventListener('input', spOut); spOut();
+  drawBox.innerHTML = '<span class="chip ghost"></span>'.repeat(n);
+  bandListeners.push(drawHist);
+  drawAll(); redraws.push(drawAll);
+})();
+
+/* ---------- 3. compare the reader's range with the bootstrap ---------- */
+(function(){
+  const el = $('#cmpBand');
+  function upd(){
+    if (BAND.v) {
+      const w = BAND.v[1] - BAND.v[0];
+      el.innerHTML = `<b>Your opening guess</b> was ${BAND.v[0].toFixed(1)} to ${BAND.v[1].toFixed(1)} hours, ${w.toFixed(1)} wide. The bootstrap’s answer, about 1.0 to 1.9, is 0.9 wide. ${w > 1.35 ? 'You were more cautious than the data require.' : w < .6 ? 'You were more confident than the data allow: ten patients can’t pin the median down that tightly.' : 'That is close to what the data support.'}`;
+    } else if (BAND.skipped) el.innerHTML = 'You skipped the opening guess. The bootstrap’s answer is about 1.0 to 1.9 hours, a range 0.9 hours wide, from just ten patients.';
+    else el.innerHTML = 'Draw a range in the opening chart, or skip the guess, and this paragraph will compare it with the bootstrap’s answer.';
+  }
+  bandListeners.push(upd); upd();
+})();
+
+/* ---------- 4. bootstrap means against s/√n ---------- */
+(function(){
+  const M = meanOf(SLEEP), S = Math.sqrt(SLEEP.reduce((s, v) => s + (v - M) ** 2, 0) / 9), SE = S / Math.sqrt(10), LO = 0, HI = 3.4, B = 68;
+  let vals = null;
+  function draw(){
+    const {ctx, w, h} = fit($('#fmChart')), X0 = 16, X1 = w - 16, Y0 = h - 22, Y1 = 12, xs = v => X0 + (v - LO) / (HI - LO) * (X1 - X0);
+    xAxis(ctx, X0, X1, Y0, LO, HI, v => v + ' h');
+    const bw = (HI - LO) / B, peak = 1 / (SE * Math.sqrt(TAU));   // density of the formula's bell at its center
+    let top = peak;
+    if (vals) {
+      const c = new Array(B).fill(0); vals.forEach(v => { const b = Math.floor((v - LO) / bw); if (b >= 0 && b < B) c[b]++; });
+      const dens = c.map(k => k / vals.length / bw); top = Math.max(top, ...dens);
+      const ys = d => Y0 - d / top * .92 * (Y0 - Y1), pw = (X1 - X0) / B;
+      dens.forEach((d, b) => { if (d) bar(ctx, X0 + b * pw + .5, Math.max(1, pw - 1), ys(d), Y0, C('--ink-3')); });
+    }
+    const ys = d => Y0 - d / top * .92 * (Y0 - Y1);
+    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2.5; ctx.beginPath();
+    for (let i = 0; i <= 200; i++) { const v = LO + (HI - LO) * i / 200, d = peak * Math.exp(-.5 * ((v - M) / SE) ** 2); i ? ctx.lineTo(xs(v), ys(d)) : ctx.moveTo(xs(v), ys(d)); }
+    ctx.stroke();
+    if (!vals) emptyNote(ctx, w, h - 60, 'press the button to resample');
+    $('#fmRead').innerHTML = vals ? `bootstrap SE <b>${sdOf(vals).toFixed(3)}</b> · formula s/√n <b>${SE.toFixed(3)}</b> · ratio ${(sdOf(vals) / SE).toFixed(3)} (√(9/10) = 0.949)` : `formula: s = ${S.toFixed(2)}, s/√n = <b>${SE.toFixed(3)}</b>`;
+  }
+  $('#fmGo').addEventListener('click', () => { vals = boot(SLEEP, meanOf, 10000); draw(); });
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 5. bootstrap against the truth ---------- */
+(function(){
+  const NS = [3, 5, 10, 20, 50], R = 2000;
+  const POP = {
+    bell: {draw: () => 50 + 10 * gauss(), val: {mean: 50, median: 50, max: null}},
+    skewed: {draw: () => -8 * Math.log(1 - Math.random()), val: {mean: 8, median: 8 * Math.LN2, max: null}},
+    flat: {draw: () => 100 * Math.random(), val: {mean: 50, median: 50, max: 100}},
+    heavy: {draw: () => Math.pow(1 - Math.random(), -1 / 1.5), val: {mean: 3, median: Math.pow(2, 1 / 1.5), max: null}}
+  };
+  const PRE = [{pop: 'bell', stat: 'mean', ni: 3}, {pop: 'bell', stat: 'median', ni: 0}, {pop: 'flat', stat: 'max', ni: 3}, {pop: 'heavy', stat: 'mean', ni: 3}];
+  const nIn = $('#cpN');
+  let pop = 'bell', stat = 'mean', tru = null, sample = null, bs = null;
+  const draws = k => { const a = new Array(k); for (let i = 0; i < k; i++) a[i] = POP[pop].draw(); return a; };
+  function truth(){ const n = NS[+nIn.value]; tru = new Float64Array(R); for (let r = 0; r < R; r++) tru[r] = STAT[stat](draws(n)); }
+  function fresh(){ sample = draws(NS[+nIn.value]); bs = boot(sample, STAT[stat], R); }
+  function draw(){
+    const st = sortedCopy(tru), sb = sortedCopy(bs), pv = POP[pop].val[stat], sv = STAT[stat](sample);
+    let lo = Math.min(q(st, .005), q(sb, .005), sv), hi = Math.max(q(st, .995), q(sb, .995), sv);
+    if (pv != null) { lo = Math.min(lo, pv); hi = Math.max(hi, pv); }
+    const pad = (hi - lo) * .06; lo -= pad; hi += pad;
+    [['#cpTrue', tru, C('--ink-3'), pv, C('--ink'), [5, 4]], ['#cpBoot', bs, C('--accent'), sv, C('--ink'), null]].forEach(([id, data, col, line, lc, dash]) => {
+      const {ctx, w, h} = fit($(id)), X0 = 14, X1 = w - 14, Y0 = h - 20, xs = v => X0 + (v - lo) / (hi - lo) * (X1 - X0);
+      hist(ctx, data, lo, hi, 60, X0, X1, Y0, 6, col);
+      xAxis(ctx, X0, X1, Y0, lo, hi);
+      if (line != null) vline(ctx, xs(line), 2, Y0, lc, dash, 2);
+    });
+    const {ctx, w, h} = fit($('#cpSamp')), X0 = 14, X1 = w - 14, smin = Math.min(...sample), smax = Math.max(...sample), sp = (smax - smin) || 1;
+    const xs = v => X0 + (v - smin + sp * .05) / (sp * 1.1) * (X1 - X0);
+    ctx.strokeStyle = C('--line'); ctx.beginPath(); ctx.moveTo(X0, h / 2 + .5); ctx.lineTo(X1, h / 2 + .5); ctx.stroke();
+    ctx.fillStyle = C('--accent'); ctx.globalAlpha = .75; sample.forEach(v => dot(ctx, xs(v), h / 2, 4)); ctx.globalAlpha = 1;
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textBaseline = 'top';
+    ctx.textAlign = 'left'; ctx.fillText(smin.toFixed(1), X0, h / 2 + 7); ctx.textAlign = 'right'; ctx.fillText(smax.toFixed(1), X1, h / 2 + 7);
+    const T = sdOf(tru), Bs = sdOf(bs), r = Bs / T, judge = stat !== 'max' && NS[+nIn.value] > 3, cls = !judge ? '' : r > .75 && r < 1.33 ? 'ok' : 'warn';
+    let t = `true spread (SE) <b>${T.toFixed(2)}</b> · bootstrap <b>${Bs.toFixed(2)}</b> · ratio <b class="${cls}">${r.toFixed(2)}</b>`;
+    if (stat === 'max') t += ` · <b>${Math.round(100 * bs.filter(v => v === smax).length / R)}%</b> of resamples equal your sample’s largest value`;
+    const distinct = new Set(bs).size; if (distinct < 40) t += ` · only <b>${distinct}</b> different resample values`;
+    if (pop === 'heavy' && stat === 'mean') t += ' · in theory the true spread is infinite';
+    $('#cpRead').innerHTML = t;
+  }
+  function sync(){
+    $$('[data-cpop]').forEach(b => { const on = b.dataset.cpop === pop; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+    $$('[data-cstat]').forEach(b => { const on = b.dataset.cstat === stat; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+    $('#cpNOut').textContent = NS[+nIn.value];
+  }
+  function setPre(i){ $$('[data-cpre]').forEach(b => { const on = +b.dataset.cpre === i; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }); }
+  function all(){ sync(); truth(); fresh(); draw(); }
+  $$('[data-cpre]').forEach(b => b.addEventListener('click', () => { const p = PRE[+b.dataset.cpre]; pop = p.pop; stat = p.stat; nIn.value = p.ni; setPre(+b.dataset.cpre); all(); }));
+  $$('[data-cpop]').forEach(b => b.addEventListener('click', () => { pop = b.dataset.cpop; setPre(-1); all(); }));
+  $$('[data-cstat]').forEach(b => b.addEventListener('click', () => { stat = b.dataset.cstat; setPre(-1); all(); }));
+  nIn.addEventListener('input', () => { setPre(-1); all(); });
+  $('#cpNew').addEventListener('click', () => { fresh(); draw(); });
+  all(); redraws.push(draw);
+})();
+
+/* ---------- 6. quiz ---------- */
+(function(){
+  const Q = [
+    {s: 'Predict: a resample draws 10 patients from your 10, with replacement. On average, how many of the original patients are left out?',
+     o: ['None', 'About 1', 'About 3 or 4'], a: 2,
+     e: 'Each patient has a 0.9 chance of being missed on each of the 10 draws, so 0.9¹⁰ ≈ 35% of being left out entirely: about 3.5 patients per resample.'},
+    {s: 'Why resample <em>with</em> replacement?',
+     o: ['To make the resamples bigger than the sample', 'Without it, every resample is the same 10 values reshuffled, with the same median'], a: 1,
+     e: 'Drawing 10 from 10 without replacement just reorders the sample. Replacement makes each resample a different mix, the way a new sample from the population would be.'},
+    {s: 'You bootstrap the median of the sleep data. Which reading is <em>wrong</em>?',
+     o: ['Its spread estimates how much the median wobbles', 'It improves the median by creating new data', 'Its middle 95% gives a rough range for the true median'], a: 1,
+     e: 'The bootstrap creates no information. The resample medians center on your own sample’s median; they only show how far off it is likely to be.'},
+    {s: 'For the mean of the sleep data, how does the bootstrap standard error compare with s/√n?',
+     o: ['Nearly the same (0.37 against 0.39)', 'Wildly different'], a: 0,
+     e: 'Where a formula exists the bootstrap reproduces it. The small gap is the factor √((n − 1)/n), from treating the sample as the population.'},
+    {s: 'Predict: you collect 40 patients instead of 10. The bootstrap standard error of the mean will be about…',
+     o: ['the same', 'half as big', 'a quarter as big'], a: 1,
+     e: 'The bootstrap tracks the real wobble, which shrinks like 1/√n. Four times the data, half the standard error.'},
+    {s: 'You bootstrap the largest value in a sample of 20. What goes wrong?',
+     o: ['Nothing, it works as usual', 'No resample can exceed the sample’s largest value, and most resamples contain it'], a: 1,
+     e: 'About 64% of resamples include the largest value, so the bootstrap distribution is one tall spike that never reaches past it. The real sampling distribution looks nothing like that.'},
+    {s: 'Your sample is biased, like the Literary Digest’s ballots. Will the bootstrap fix it?',
+     o: ['Yes, resampling removes bias', 'No: it measures the wobble around the biased estimate'], a: 1,
+     e: 'The bootstrap treats the sample as the population. If the sample is skewed toward one kind of voter, so is every resample.'}
+  ];
+  const box = $('#quiz'); let answered = 0, right = 0;
+  Q.forEach(qq => {
+    const d = document.createElement('div'); d.className = 'qitem';
+    d.innerHTML = `<p>${qq.s}</p><div class="qbtns">${qq.o.map((t, i) => `<button class="btn" data-i="${i}">${t}</button>`).join('')}</div><p class="qexp" hidden></p>`;
+    const exp = d.querySelector('.qexp');
+    d.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      const ok = +b.dataset.i === qq.a;
+      if (!d.dataset.done) { d.dataset.done = '1'; answered++; if (ok) right++; }
+      d.querySelectorAll('button').forEach(x => x.classList.remove('right', 'wrong'));
+      b.classList.add(ok ? 'right' : 'wrong');
+      exp.hidden = false; exp.innerHTML = `<b>${ok ? '✓ Right.' : '✗ Not quite.'}</b> ${qq.e}`;
+      $('#quizScore').textContent = `${answered} of ${Q.length} answered · ${right} right on the first try`;
+    }));
+    box.appendChild(d);
+  });
+})();
+
+})();
+</script>
+</body>
+</html>
