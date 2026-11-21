@@ -162,7 +162,7 @@ window.EXPLAINERS = {
           "id": "learning-from-data",
           "title": "Learning from data",
           "blurb": "Could chance alone have done this? Starting from line-ups and coin streaks, the series builds the tools for answering that question: sampling, estimation, resampling, tests, intervals and power, ending with the 1954 polio vaccine trial.",
-          "topics": ["is-it-real", "sampling-distributions"]
+          "topics": ["is-it-real", "sampling-distributions", "selection-bias"]
         }
       ],
       "topics": [
@@ -183,6 +183,15 @@ window.EXPLAINERS = {
           "summary": "Any number computed from a sample is itself random. Run polls, feed a sample machine, and watch the standard error shrink as σ/√n.",
           "tags": ["standard error", "σ/√n", "polls", "central limit theorem", "SD vs SE"],
           "preview": { "select": "#heroPlay", "click": ["#heroMany"] }
+        },
+        {
+          "id": "selection-bias",
+          "title": "Who’s Missing?",
+          "short": "Who’s missing?",
+          "path": "statistics/selection-bias.html",
+          "summary": "A biased sample stays wrong however big it gets. Armor a bomber from the holes on the planes that came back, and watch 2.3 million ballots lose to 1,000 random voters.",
+          "tags": ["selection bias", "survivorship bias", "nonresponse", "Literary Digest", "Abraham Wald"],
+          "preview": { "select": "#heroPlay", "click": ["#heroSkip", "#heroMany", "#heroMany"] }
         }
       ]
     }

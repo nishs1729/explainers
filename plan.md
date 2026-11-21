@@ -23,7 +23,7 @@ See [Statistics: how every page works](#statistics-conventions) first.
 ### [Learning from data](#learning-from-data)
 - [x] [1. Is that pattern real?](https://nishs1729.github.io/explainers/statistics/is-it-real.html)
 - [x] [2. Sampling distributions](https://nishs1729.github.io/explainers/statistics/sampling-distributions.html)
-- [ ] [3. ⚠ Who's missing?](#selection-bias)
+- [x] [3. ⚠ Who's missing?](https://nishs1729.github.io/explainers/statistics/selection-bias.html)
 - [ ] [4. What makes a good guess](#estimation)
 - [ ] [5. The bootstrap](#bootstrap)
 - [ ] [6. Shuffling to test](#permutation-tests)
@@ -254,6 +254,8 @@ Assumes the probability series, especially Normal (CLT, √n law) and Chi-square
 >   - Bias vs n: a filtered population sampled at growing n; the interval tightens around the wrong value
 >
 > **Links:** builds on Sampling distributions. Returns in Regression to the mean, Simpson's paradox.
+>
+> **Built:** the hero is the bomber: the reader picks a part to armor (or skips), sends planes out (hits Poisson with mean 2, landing evenly; hidden kill chance per hit: cockpit 70%, engines 75%, wings 5%, fuselage 10%, tail 20%), then reveals the lost planes. Section 1 charts holes per 100 sq ft by part, for returners and for all planes, from the same shared simulation. Section 2 replays the 1936 *Literary Digest* poll: random vs biased samples from 100 to 2,266,566 on a log axis, with a bias slider (a Landon voter 2.2× as likely to be counted, from the Digest's split vs the real two-party result of 62.5%) and the "equivalent random sample" (about 6 voters). Section 3 has three filters (political interest and survey response, diet-study dropout, fund closures) with a strength slider. Sources named on the page: Mangel & Samaniego (1984), Squire (1988), Lusinchi (2012), Lohr & Brick (2017), Pew response rates (36% in 1997, 6% in 2018), AAPOR (2017), the Coronary Drug Project (1980; 15.1% vs 28.3%).
 
 <a id="estimation"></a>
 ### **4. What makes a good guess**

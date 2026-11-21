@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Who’s Missing? — a visual introduction</title>
+<style>
+:root{
+  --bg:#faf8f4; --surface:#ffffff; --surface-2:#f2efe8; --ink:#1c1c1e; --ink-2:#4c4e55; --ink-3:#8b8d93; --line:#e3dfd5;
+  --one:#16917c; --one-soft:rgba(22,145,124,.15);
+  --zero:#d9573a; --zero-soft:rgba(217,87,58,.15);
+  --accent:#3654c9; --accent-soft:rgba(54,84,201,.11);
+  --gold:#b98317; --gold-soft:rgba(185,131,23,.22);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+    --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+    --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+    --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+    --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+  --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+  --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+  --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+  --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.68 var(--sans);-webkit-font-smoothing:antialiased}
+main{max-width:820px;margin:0 auto;padding:0 20px 80px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;letter-spacing:-.01em}
+h1{font-size:clamp(2.2rem,6vw,3.4rem);margin:.2em 0 .3em}
+h2{font-size:clamp(1.6rem,4vw,2.1rem);margin:0 0 .5em}
+h3{font-size:1.2rem;margin:1.6em 0 .4em}
+p{margin:0 0 1em}
+a{color:var(--accent)}
+strong{font-weight:650}
+em.term{font-style:normal;font-weight:650;color:var(--accent)}
+.muted{color:var(--ink-2)}
+small,.small{font-size:14px}
+
+/* hero */
+.hero{text-align:center;padding:64px 0 24px}
+.kicker{text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--ink-3);margin:0}
+.lede{font-size:1.2rem;color:var(--ink-2);max-width:620px;margin:0 auto}
+.hero-play{max-width:640px;margin:30px auto 0;text-align:left}
+.hero-play .controls{justify-content:center}
+.hint{font-size:15px;color:var(--ink-2);min-height:3.2em;margin:10px 0 0;text-align:center}
+.ask{font-family:var(--serif);font-size:1.25rem;text-align:center;margin:0 0 12px}
+
+.toc{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;margin:28px 0 8px}
+.toc ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 20px;counter-reset:t}
+.toc li{counter-increment:t;font-size:15px}
+.toc li::before{content:counter(t,decimal-leading-zero);font-family:var(--mono);color:var(--ink-3);margin-right:10px;font-size:13px}
+.toc a{color:var(--ink);text-decoration:none}
+.toc a:hover{color:var(--accent)}
+
+section{padding-top:56px}
+.secnum{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.08em;margin-bottom:4px}
+
+.widget{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin:26px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.widget-title{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);margin:0 0 12px;font-weight:600}
+.controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:12px 0}
+.ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:15px}
+.ctrl output{font-family:var(--mono);font-size:14px;min-width:5.5em;color:var(--ink)}
+input[type=range]{accent-color:var(--accent);width:170px;max-width:100%}
+.btn{font:inherit;font-size:14px;line-height:1.2;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;transition:background .15s,transform .1s}
+.btn:hover{border-color:var(--ink-3)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn.guess{background:var(--gold-soft);border-color:var(--gold);color:var(--ink)}
+.btn.right{background:var(--one-soft);border-color:var(--one);color:var(--one)}
+.btn.wrong{background:var(--zero-soft);border-color:var(--zero);color:var(--zero)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:6px}
+.readout{font-family:var(--mono);font-size:14px;color:var(--ink-2);line-height:1.6}
+.readout b{color:var(--ink);font-weight:600}
+.readout .ok{color:var(--one);font-weight:600}
+.readout .warn{color:var(--zero);font-weight:600}
+.readout .gd{color:var(--gold);font-weight:600}
+.msg{font-size:15px;color:var(--ink-2);min-height:3.4em;margin:10px 0 0}
+.msg b{color:var(--ink)}
+canvas{display:block;width:100%}
+.cap{font-size:13px;color:var(--ink-3);margin:2px 0 6px}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:20px 0}
+.callout p:last-child{margin-bottom:0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin-top:8px}
+.legend > span{display:inline-block}
+.legend .sw{vertical-align:middle;margin:0 6px 2px 0}
+.sw{display:inline-block;width:16px;height:10px;border-radius:2px}
+.sw.dot{width:8px;height:8px;border-radius:50%}
+.sw.line{height:0;border-top:2px solid var(--ink)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+@media (max-width:640px){.pair{grid-template-columns:1fr}}
+.mcap{font-size:13px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+
+/* cast */
+.cast-q{font-family:var(--serif);font-size:1.08rem;margin:0 0 10px}
+.datarow{font-family:var(--mono);font-size:14px;color:var(--ink-2);margin:0 0 6px}
+.datarow b{color:var(--ink)}
+
+/* recipe */
+.facts{counter-reset:f;list-style:none;padding:0;margin:18px 0}
+.facts li{counter-increment:f;position:relative;padding:12px 0 12px 44px;border-bottom:1px solid var(--line)}
+.facts li::before{content:counter(f);position:absolute;left:0;top:12px;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:600 13px var(--mono)}
+.facts li strong{display:block}
+.table-wrap{overflow-x:auto}
+table.summary{border-collapse:collapse;width:100%;font-size:15px;margin:14px 0}
+table.summary td,table.summary th{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3)}
+@media (max-width:480px){table.summary td,table.summary th{padding:8px 5px}}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:18px 0}
+.card{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
+.card h4{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+.card p{font-size:15px;margin:0;color:var(--ink-2)}
+
+/* quiz */
+.quiz{display:grid;gap:10px}
+.qitem{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg)}
+.qitem p{margin:0 0 8px;font-size:16px}
+.qbtns{display:flex;flex-wrap:wrap;gap:8px}
+.qexp{font-size:15px;color:var(--ink-2);margin:10px 0 0!important}
+
+@media (max-width:480px){
+  main{padding:0 16px 80px}
+  .widget{padding:14px}
+  input[type=range]{width:150px}
+}
+/* page 3 */
+canvas.plane{touch-action:manipulation}
+table.summary.num{font-size:13px;margin:8px 0 0}
+table.summary.num td,table.summary.num th{padding:5px 8px;text-align:right;white-space:nowrap}
+table.summary.num td:first-child,table.summary.num th:first-child{text-align:left}
+table.summary.num th{font-size:11px;white-space:normal}
+.linkbtn{all:unset;cursor:pointer;font-size:14px;color:var(--accent);text-decoration:underline}
+.linkbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.linkbtn[hidden]{display:none}
+</style>
+<script>try{var t=localStorage.getItem('xp-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/catalog.js" defer></script>
+<script src="../assets/site.js" defer></script>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <p class="kicker">A visual introduction</p>
+  <h1>Who’s Missing?</h1>
+  <p class="lede">Data can only show you what made it into the data. When something filters out part of the population on its way to you, the sample misleads, and collecting more of it doesn’t help. A bigger biased sample is just more confidently wrong.</p>
+  <div class="hero-play" id="heroPlay">
+    <p class="ask">Bombers come back from their missions riddled with bullet holes. You can add armor to one part of the plane. Which part?</p>
+    <canvas id="heroPlane" class="plane" style="height:330px" role="img" aria-label="Top view of a four-engine bomber divided into cockpit, engines, wings, fuselage and tail, with the bullet holes found on returning planes marked as dots"></canvas>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Part of the plane to armor">
+        <button class="btn" data-zone="cockpit" aria-pressed="false">Cockpit</button>
+        <button class="btn" data-zone="engines" aria-pressed="false">Engines</button>
+        <button class="btn" data-zone="wings" aria-pressed="false">Wings</button>
+        <button class="btn" data-zone="fuselage" aria-pressed="false">Fuselage</button>
+        <button class="btn" data-zone="tail" aria-pressed="false">Tail</button>
+      </div>
+    </div>
+    <div class="legend" style="justify-content:center"><span><i class="sw dot" style="background:var(--accent)"></i><span>holes on planes that came back</span></span><span><i class="sw dot" style="background:var(--zero)"></i><span>holes on planes that were lost</span></span><span><i class="sw" style="background:var(--gold-soft);border:1px solid var(--gold)"></i><span>your armor</span></span></div>
+    <div class="controls">
+      <button class="btn primary" id="heroFly" disabled>Send 10 planes</button>
+      <button class="btn" id="heroMany" disabled>+100 planes</button>
+      <button class="btn" id="heroLost" disabled>Show the lost planes</button>
+      <button class="btn" id="heroClear">Clear</button>
+      <button class="linkbtn" id="heroSkip">skip the guess</button>
+    </div>
+    <div class="readout" id="heroCount" style="text-align:center"></div>
+    <p class="hint" id="heroHint" aria-live="polite">First pick the part to armor: click it on the plane or use the buttons. Then send the squadron out and inspect the planes that come back.</p>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#survivors">The planes that didn’t come back</a></li>
+    <li><a href="#bigger">Bigger doesn’t help</a></li>
+    <li><a href="#kinds">Kinds of missing</a></li>
+    <li><a href="#cure">Random sampling is the cure</a></li>
+    <li><a href="#uses">Where you will meet it</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<section id="survivors">
+  <div class="secnum">01</div>
+  <h2>The planes that didn’t come back</h2>
+  <p>The holes you can count are on the planes that came back. That makes them a sample of all the hits, but not a random one: every hole on a returning plane is a hit that the plane survived. A part of the plane can look clean for only two reasons. Either it is rarely hit, or a hit there brings the plane down, so the planes hit there aren’t around to be inspected.</p>
+  <p>In this toy squadron the bullets land evenly all over the plane, which rules out the first reason. How deadly a hit is in each part is set in advance and kept hidden. To compare parts of different sizes fairly, count holes per square foot:</p>
+
+  <div class="widget">
+    <p class="widget-title">Holes per 100 square feet, by part of the plane</p>
+    <p class="cap">“Hits home” is the share of hits in that part that were on a plane that made it back.</p>
+    <canvas id="svBars" style="height:220px" role="img" aria-label="Bar chart of holes per 100 square feet in each part of the plane, for the planes that came back and, once revealed, for every plane sent"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i><span>planes that came back</span></span><span><i class="sw" style="background:var(--ink-3)"></i><span>every plane sent, including the lost ones</span></span></div>
+    <div class="controls">
+      <button class="btn primary" id="svMany">Send 1,000 planes</button>
+      <button class="btn" id="svLost" disabled>Show the lost planes</button>
+    </div>
+    <div class="readout" id="svRead" aria-live="polite"></div>
+  </div>
+
+  <p>On the returning planes, the engines and cockpit carry only a fraction of the holes per square foot that the wings carry. Add the lost planes and the shortfall fills in: every part of the plane was hit about equally often, and the missing holes were on the missing planes. So the parts with the fewest holes on the survivors are the parts where a hit is deadliest, and that is where the armor belongs. (Even the wings don’t bring all their hits home, because a plane with a harmless wing hit can still be brought down by a second hit elsewhere.)</p>
+  <p>The trap has a name: <em class="term">survivorship bias</em>. It happens when you study only what got through a filter, and whether something got through depends on the very thing you are measuring.</p>
+  <div class="callout">
+    <p><strong>What really happened.</strong> The story is told about Abraham Wald, a mathematician in the Statistical Research Group at Columbia University during the Second World War. The popular version, with an officer pointing at a diagram covered in red dots, is a later simplification, and the famous diagram is a modern illustration. Wald’s real contribution was a series of eight technical memos showing how to estimate the chance that a hit on each part would down a plane, using only the damage on the planes that returned. Mangel and Samaniego (1984) explain his method. The heart of it is the idea above: if hits would have landed evenly, the shortfall of holes on a part measures how deadly a hit there is.</p>
+  </div>
+  <p>The question to ask of any dataset is the same one: <em>what had to happen for this observation to reach me?</em></p>
+</section>
+
+<!-- 2 -->
+<section id="bigger">
+  <div class="secnum">02</div>
+  <h2>Bigger doesn’t help</h2>
+  <p>On the <a href="sampling-distributions.html">previous page</a> a bigger sample always helped. The wobble of an average shrinks like σ/√<em>n</em>, so with enough data the estimate homes in on the truth. That promise came with a condition: the sample has to be random. A sample that passes through a filter also homes in as it grows, but on the wrong value.</p>
+  <p>The most famous demonstration is the US presidential election of 1936. The <em>Literary Digest</em>, a popular magazine that had called the winner of every election since 1916, mailed mock ballots to 10 million people. The addresses came mainly from telephone directories, car registrations and its own subscriber lists. Nearly 2.4 million ballots came back, and the final count was 1,293,669 for the Republican, Alf Landon, against 972,897 for President Franklin Roosevelt: 57% for Landon.</p>
+  <p>In November Roosevelt won 60.8% of the vote and every state except Maine and Vermont. Of the votes for the two men, he took 62.5%; the <em>Digest</em>’s ballots gave him 42.9%. George Gallup, with about 50,000 interviews, correctly called Roosevelt’s win.</p>
+
+  <div class="widget">
+    <p class="widget-title">A biased sample against a random one, as both grow</p>
+    <p class="cast-q">Which would you trust more to forecast the election?</p>
+    <div class="controls" id="dgPred">
+      <button class="btn" data-g="big">2.3 million mailed-back ballots</button>
+      <button class="btn" data-g="small">1,000 voters picked at random</button>
+      <button class="btn" data-g="same">They’re about as good</button>
+    </div>
+    <canvas id="dgChart" style="height:260px" role="img" aria-label="Estimated Roosevelt share against sample size on a log scale, for random samples and for samples that over-count Landon voters, each with its 95% margin of error, next to the true share and the Literary Digest's result"></canvas>
+    <div class="legend"><span><i class="sw dot" style="background:var(--one)"></i><span>random sample</span></span><span><i class="sw dot" style="background:var(--zero)"></i><span><em>Digest</em>-style sample</span></span><span><i class="sw" style="border:2px solid var(--accent);width:9px;height:9px;transform:rotate(45deg)"></i><span>the <em>Digest</em>’s real result</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>Roosevelt’s true share</span></span></div>
+    <div class="controls">
+      <label class="ctrl">a Landon voter is <input type="range" id="dgK" min="1" max="4" step="0.1" value="2.2"><output id="dgKOut" style="min-width:0"></output> as likely to be counted</label>
+    </div>
+    <div class="controls">
+      <button class="btn primary" id="dgGo" disabled>▶ Grow the samples</button>
+      <button class="linkbtn" id="dgSkip">skip the guess</button>
+    </div>
+    <div class="readout" id="dgRead" aria-live="polite"></div>
+    <p class="msg" id="dgMsg" aria-live="polite"></p>
+  </div>
+
+  <p>Both kinds of sample settle down as they grow, and their error bars shrink in the same way. The random sample settles on the truth. The biased one settles on 43%, with an error bar so narrow it hides behind the dot. Its margin of error is honest about chance and blind to bias, because the formula assumes the sample is random.</p>
+  <div class="callout">
+    <p><strong>Error = bias + wobble.</strong> More data shrinks only the wobble. The bias, how far the sample’s target sits from the truth, stays exactly where it is, however large the sample. Slide the bias to 1 and the two samples behave identically.</p>
+  </div>
+  <p>Why the over-count? In the middle of the Great Depression, people with telephones and cars were better off than average and leaned Republican. On top of that, the people who bothered to mail a ballot back leaned toward Landon. Studies of the poll disagree about how to split the blame between the mailing list and the response (Squire 1988; Lusinchi 2012; Lohr and Brick 2017), but agree that both played a part. Comparing the <em>Digest</em>’s split with the real one, a Landon voter was about <strong>2.2 times</strong> as likely as a Roosevelt voter to end up in the count. That is the default on the slider.</p>
+</section>
+
+<!-- 3 -->
+<section id="kinds">
+  <div class="secnum">03</div>
+  <h2>Kinds of missing</h2>
+  <p>Bombers and ballots are two cases of one problem: whether a value reaches you depends on the value itself. It turns up anywhere people or things can drop out before they are counted. Pick an example below and change how strongly the value decides who is seen.</p>
+
+  <div class="widget">
+    <p class="widget-title">Who gets seen</p>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Example">
+        <button class="btn on" data-km="survey" aria-pressed="true">Who answers</button>
+        <button class="btn" data-km="study" aria-pressed="false">Who finishes</button>
+        <button class="btn" data-km="funds" aria-pressed="false">Which funds survive</button>
+      </div>
+    </div>
+    <p class="cap" id="kmCap"></p>
+    <canvas id="kmChart" style="height:220px" role="img" aria-label="Histogram of the whole population, split into the part that is seen and the part that is missing, with the averages of everyone and of those seen"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i><span>seen</span></span><span><i class="sw" style="background:var(--zero-soft);border:1px solid var(--zero)"></i><span>missing</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>average of everyone</span></span><span><i class="sw line" style="border-top:2px solid var(--accent)"></i><span>average of those seen</span></span></div>
+    <div class="controls">
+      <label class="ctrl">how much the value decides who is seen <input type="range" id="kmS" min="0" max="1" step="0.05" value="0.7"><output id="kmSOut"></output></label>
+    </div>
+    <div class="readout" id="kmRead" aria-live="polite"></div>
+  </div>
+
+  <ul>
+    <li><strong>Who answers</strong> is <em class="term">nonresponse bias</em>. People who answer surveys differ from people who don’t: they tend to be more interested in the topic, more trusting and more helpful. Surveys overstate how much people volunteer, for instance, because the people who give up their time for a survey also tend to give it to good causes (Abraham, Helms and Presser 2009).</li>
+    <li><strong>Who finishes</strong> is <em class="term">attrition</em>, or dropout. In a study that follows people over time, the ones it isn’t working for are the most likely to stop showing up, so the final measurements describe the successes.</li>
+    <li><strong>Which funds survive</strong> is survivorship bias again. Funds that do badly are closed or merged into others, and often vanish from the databases. Averaging the funds that still exist makes the whole industry look better than it was.</li>
+  </ul>
+  <p>A fourth kind needs no filter at all, just volunteers: <strong>self-selection</strong>. Online polls, product reviews and phone-in shows hear from the people who chose to speak, and those people usually feel strongly. However many of them there are, they speak only for themselves.</p>
+</section>
+
+<!-- 4 -->
+<section id="cure">
+  <div class="secnum">04</div>
+  <h2>Random sampling is the cure</h2>
+  <p>There is one reliable way to stop the values from deciding who gets into the sample: let chance decide. In a <em class="term">random sample</em> everyone has the same chance of being picked, whatever their vote, height or bank balance. The sample can still be unlucky, but only by chance, and chance is exactly what the previous page learned to measure: its size is the standard error, and it shrinks as the sample grows. Random sampling turns an error you can’t measure (bias) into one you can (wobble).</p>
+  <p>That is why 1,000 people picked at random beat 2.3 million who came through a filter.</p>
+  <p>The catch is that you can choose people at random, but you can’t make them answer. Pew Research Center’s telephone surveys had a response rate of 36% in 1997 and 6% in 2018. Every modern poll is a random sample passed through a second, non-random filter, and pollsters fight back as best they can:</p>
+  <div class="table-wrap">
+    <table class="summary">
+      <thead><tr><th>Problem</th><th>What people do</th><th>The catch</th></tr></thead>
+      <tbody>
+        <tr><td>Some groups answer less often</td><td><strong>Weighting:</strong> if young people answer half as often, count each young respondent twice</td><td>It only fixes what you measured. The young people who answer must be like the young people who don’t. After the 2016 US election, the industry’s review (AAPOR 2017) found that many state polls hadn’t adjusted for education, when college graduates were both likelier to answer and likelier to vote for Clinton.</td></tr>
+        <tr><td>People drop out of a trial</td><td><strong>Intention to treat:</strong> analyze everyone as they were assigned, and chase up the dropouts</td><td>It measures the effect of being offered the treatment, a slightly different question.</td></tr>
+        <tr><td>Failures disappear</td><td><strong>Collect the failures too:</strong> records of lost aircraft, databases that keep closed funds</td><td>Someone has to keep the records.</td></tr>
+        <tr><td>Random sampling is impossible</td><td><strong>Model the filter,</strong> as Wald did</td><td>The answer is only as good as the model of who’s missing.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>The same cure works for comparisons. When a coin decides which visitors see the orange button, or which patients get the new drug, nothing about the people can sneak into the comparison. That is <em>random assignment</em>, and the 1954 polio vaccine trial at the end of this part of the series shows what it buys.</p>
+</section>
+
+<!-- 5 -->
+<section id="uses">
+  <div class="secnum">05</div>
+  <h2>Where you will meet it</h2>
+  <div class="cards">
+    <div class="card"><h4>Medicine</h4><p>In the Coronary Drug Project (1980), patients who took most of their <em>placebo</em> pills had a five-year death rate of 15.1%, against 28.3% for those who didn’t. The sugar pills did nothing; people who stick with treatment differ from those who don’t.</p></div>
+    <div class="card"><h4>Opinion polls</h4><p>A poll’s “± 3 points” covers chance only. Who refused to answer is a separate error, handled by weighting, and it doesn’t shrink with a bigger sample.</p></div>
+    <div class="card"><h4>Investing</h4><p>Fund performance studies use “survivorship-bias-free” databases that keep every fund that ever existed, because the funds still around are the ones that did well.</p></div>
+    <div class="card"><h4>Lending and AI</h4><p>A bank only learns whether a loan was repaid if it approved the loan. A model trained on past loans never sees the applicants who were turned down.</p></div>
+    <div class="card"><h4>Astronomy</h4><p>Far away, only bright stars and galaxies are visible, so a catalog makes distant objects look brighter on average than nearby ones. Astronomers call it Malmquist bias.</p></div>
+    <div class="card"><h4>Everyday life</h4><p>“They don’t build them like they used to.” The old buildings, cars and fridges still around are the ones that lasted; the flimsy ones were thrown away long ago.</p></div>
+  </div>
+
+  <h3>Check yourself</h3>
+  <div class="widget">
+    <div class="quiz" id="quiz"></div>
+    <div class="readout" id="quizScore" style="margin-top:10px" aria-live="polite"></div>
+  </div>
+
+  <p>This page was about bias that comes from the data, from who made it into the sample. Bias can also come from the formula you apply to a perfectly random sample, as with the sample maximum on the previous page. How to judge an estimate by its bias and its wobble together is the next page, <strong>What makes a good guess</strong> (coming soon).</p>
+</section>
+
+</main>
+
+<script>
+(function(){
+'use strict';
+/* ---------- helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const root = document.documentElement;
+const C = n => getComputedStyle(root).getPropertyValue(n).trim();
+const f2 = x => x.toFixed(2);
+const fmtN = x => Math.abs(x - Math.round(x)) < 1e-9 ? String(Math.round(x)) : String(+x.toFixed(2));
+const pct = x => (100 * x).toFixed(1) + '%';
+const MONO = 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
+const TAU = Math.PI * 2;
+const comma = n => n.toLocaleString('en-US');
+
+function fit(c){
+  const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+  if (c.width !== w*dpr || c.height !== h*dpr) { c.width = w*dpr; c.height = h*dpr; }
+  const ctx = c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  return {ctx, w, h};
+}
+const redraws = [];
+function redrawAll(){ redraws.forEach(f => f()); }
+let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(redrawAll, 80); });
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+if (mq.addEventListener) mq.addEventListener('change', redrawAll);
+new MutationObserver(redrawAll).observe(root, {attributes:true, attributeFilter:['data-theme']});
+
+function niceTicks(max, count){
+  const raw = max / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const step = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag;
+  const t = []; for (let v = 0; v <= max + 1e-9; v += step) t.push(v); return t;
+}
+function stepFmt(ticks){ const st = ticks.length > 1 ? ticks[1] - ticks[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9)); return v => v.toFixed(d); }
+function yGrid(ctx, X0, X1, ys, ticks, fmt){
+  ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ticks.forEach(v => {
+    const y = Math.round(ys(v)) + .5;
+    ctx.strokeStyle = C('--line'); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X0, y); ctx.lineTo(X1, y); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.fillText(fmt(v), X0 - 6, y);
+  });
+}
+function intStep(px, minPx){
+  for (const s of [1,2,5,10,20,25,50,100]) if (s * px >= minPx) return s;
+  return 100;
+}
+function roundRect(ctx, x, y, w, h, r){
+  r = Math.max(0, Math.min(r, w/2, Math.abs(h)/2));
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+function dot(ctx, x, y, r){ ctx.beginPath(); ctx.arc(x, y, Math.max(0.5, r), 0, TAU); ctx.fill(); }
+function vline(ctx, x, y0, y1, color, dash, lw){
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw || 1.5; if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(Math.round(x) + .5, y0); ctx.lineTo(Math.round(x) + .5, y1); ctx.stroke(); ctx.restore();
+}
+/* integer-valued bar charts: bars at k = lo..hi */
+function frame(ctx, w, h, o){
+  const X0 = o.left != null ? o.left : 40, X1 = w - 10, Y0 = h - 24, Y1 = o.top != null ? o.top : 12;
+  const span = o.hi - o.lo + 1, bw = (X1 - X0) / span;
+  const xc = k => X0 + bw * (k - o.lo + .5), ys = v => Y0 - (v / o.ymax) * (Y0 - Y1);
+  const t = niceTicks(o.ymax, 3).filter(v => v <= o.ymax * 1.0001); yGrid(ctx, X0, X1, ys, t, o.yfmt || stepFmt(t));
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  const st = o.step || intStep(bw, 24);
+  for (let k = Math.ceil(o.lo / st) * st; k <= o.hi; k += st) ctx.fillText(o.lab ? o.lab(k) : k, xc(k), Y0 + 6);
+  return {X0, X1, Y0, Y1, bw, xc, ys};
+}
+function drawBars(ctx, F, lo, hi, val, color, frac){
+  const bwid = Math.max(1, F.bw * (frac == null ? .8 : frac));
+  for (let k = lo; k <= hi; k++) {
+    const v = val(k); if (!(v > 0)) continue;
+    const y = F.ys(v), hh = F.Y0 - y; if (hh < 0.2) continue;
+    const x = F.xc(k) - bwid / 2;
+    ctx.fillStyle = typeof color === 'function' ? color(k) : color;
+    if (bwid >= 6 && hh >= 3) { roundRect(ctx, x, y, bwid, hh, Math.min(3, bwid / 4)); ctx.fill(); }
+    else ctx.fillRect(x, y, bwid, hh);
+  }
+}
+function emptyNote(ctx, w, h, text){
+  ctx.fillStyle = C('--ink-3'); ctx.font = '13px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(text, w / 2, h / 2 - 8);
+}
+
+/* randomness */
+let spare = null;
+function gauss(){
+  if (spare != null) { const s = spare; spare = null; return s; }
+  let u = 0, v = 0; while (u === 0) u = Math.random(); v = Math.random();
+  const r = Math.sqrt(-2 * Math.log(u)); spare = r * Math.sin(TAU * v); return r * Math.cos(TAU * v);
+}
+function shuffled(a){ const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; }
+function corr(x, y){
+  const n = x.length; let mx = 0, my = 0; for (let i = 0; i < n; i++) { mx += x[i]; my += y[i]; } mx /= n; my /= n;
+  let sxy = 0, sxx = 0, syy = 0; for (let i = 0; i < n; i++) { const a = x[i] - mx, b = y[i] - my; sxy += a * b; sxx += a * a; syy += b * b; }
+  return sxy / Math.sqrt(sxx * syy);
+}
+function binom(n, p){ let k = 0; for (let i = 0; i < n; i++) if (Math.random() < p) k++; return k; }
+function flips(n){ const a = new Array(n); for (let i = 0; i < n; i++) a[i] = Math.random() < .5 ? 1 : 0; return a; }
+function longestRun(a){
+  let best = 1, cur = 1, start = 0, bs = 0;
+  for (let i = 1; i < a.length; i++) { if (a[i] === a[i-1]) cur++; else { cur = 1; start = i; } if (cur > best) { best = cur; bs = start; } }
+  return {len: best, start: bs};
+}
+function switches(a){ let s = 0; for (let i = 1; i < a.length; i++) if (a[i] !== a[i-1]) s++; return s; }
+const RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+function ticksIn(lo, hi, count){
+  const raw = (hi - lo) / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const st = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag, t = [];
+  for (let v = Math.ceil(lo / st - 1e-9) * st; v <= hi + 1e-9; v += st) t.push(+v.toFixed(10));
+  return t;
+}
+function xAxis(ctx, X0, X1, Y0, lo, hi, fmt){
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  const t = ticksIn(lo, hi, Math.max(2, Math.floor((X1 - X0) / 60)));
+  const st = t.length > 1 ? t[1] - t[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9));
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  t.forEach(v => ctx.fillText(fmt ? fmt(v) : v.toFixed(d), X0 + (v - lo) / (hi - lo) * (X1 - X0), Y0 + 5));
+}
+function label(ctx, x, y, text, color, X0, X1){
+  ctx.font = '600 11px ' + MONO; ctx.fillStyle = color; ctx.textBaseline = 'top';
+  const right = x > (X0 + X1) / 2; ctx.textAlign = right ? 'right' : 'left';
+  ctx.fillText(text, x + (right ? -5 : 5), y);
+}
+
+function bar(ctx, x, w, y, Y0, color){
+  const hh = Y0 - y; if (!(hh > .2)) return;
+  ctx.fillStyle = color;
+  if (w >= 6 && hh >= 3) { roundRect(ctx, x, y, w, hh, Math.min(3, w / 4)); ctx.fill(); } else ctx.fillRect(x, y, w, hh);
+}
+
+/* ---------- the toy bomber (top view, drawn in a 100 x 100 box; 1 unit = 1.1 ft) ---------- */
+const ZONES = ['cockpit', 'engines', 'wings', 'fuselage', 'tail'];
+const KILL = {cockpit: .7, engines: .75, wings: .05, fuselage: .1, tail: .2};   // chance that one hit there downs the plane
+const HITS = 2, FT2 = 1.21, ENG = [22, 35, 65, 78];
+function zoneAt(x, y){
+  for (const cx of ENG) if (((x - cx) / 3) ** 2 + ((y - 38) / 7) ** 2 <= 1) return 'engines';
+  const ax = Math.abs(x - 50);
+  if ((ax <= 4 && y >= 8 && y <= 88) || Math.hypot(ax, y - 8) <= 4 || Math.hypot(ax, y - 88) <= 4) return y < 18 ? 'cockpit' : y > 76 ? 'tail' : 'fuselage';
+  if (ax >= 4 && ax <= 18 && y >= 80 + (ax - 4) / 14 * 6 && y <= 91 - (ax - 4) / 14) return 'tail';
+  if (ax >= 4 && ax <= 46 && y >= 34 + (ax - 4) / 42 * 8 && y <= 50 - (ax - 4) / 42 * 2) return 'wings';
+  return null;
+}
+const AREA = (() => {   // square feet
+  const a = {}; ZONES.forEach(z => a[z] = 0); const st = .2;
+  for (let x = st / 2; x < 100; x += st) for (let y = st / 2; y < 100; y += st) { const z = zoneAt(x, y); if (z) a[z] += st * st * FT2; }
+  return a;
+})();
+const PP = (() => {
+  const wing = new Path2D(), stab = new Path2D(), fus = new Path2D(), eng = new Path2D();
+  [[46, 4], [54, 96]].forEach(([r, t]) => { wing.moveTo(r, 34); wing.lineTo(t, 42); wing.lineTo(t, 48); wing.lineTo(r, 50); wing.closePath(); });
+  [[46, 32], [54, 68]].forEach(([r, t]) => { stab.moveTo(r, 80); stab.lineTo(t, 86); stab.lineTo(t, 90); stab.lineTo(r, 91); stab.closePath(); });
+  fus.moveTo(46, 8); fus.arc(50, 8, 4, Math.PI, 0); fus.lineTo(54, 88); fus.arc(50, 88, 4, 0, Math.PI); fus.closePath();
+  ENG.forEach(cx => { eng.moveTo(cx + 3, 38); eng.ellipse(cx, 38, 3, 7, 0, 0, TAU); });
+  return {wing, stab, fus, eng};
+})();
+function fillZone(ctx, z, color){
+  ctx.save(); ctx.fillStyle = color;
+  if (z === 'wings') ctx.fill(PP.wing);
+  else if (z === 'engines') ctx.fill(PP.eng);
+  else {
+    if (z === 'tail') ctx.fill(PP.stab);
+    const r = z === 'cockpit' ? [0, 0, 100, 18] : z === 'fuselage' ? [0, 18, 100, 58] : [0, 76, 100, 24];
+    ctx.beginPath(); ctx.rect(r[0], r[1], r[2], r[3]); ctx.clip(); ctx.fill(PP.fus);
+  }
+  ctx.restore();
+}
+function hit(){ for (;;) { const x = 100 * Math.random(), y = 100 * Math.random(), z = zoneAt(x, y); if (z) return [x, y, z]; } }
+function poisson(l){ const L = Math.exp(-l); let k = 0, p = Math.random(); while (p > L) { k++; p *= Math.random(); } return k; }
+
+const B = {ret: [], lost: [], sent: 0, back: 0, newRet: 0, pick: null, open: false, showLost: false};
+const bListeners = [];
+function changed(){ bListeners.forEach(f => f()); }
+function fly(n){
+  B.newRet = B.ret.length;
+  for (let i = 0; i < n; i++) {
+    const k = poisson(HITS), hs = []; let down = false;
+    for (let j = 0; j < k; j++) { const h = hit(); hs.push(h); if (Math.random() < KILL[h[2]]) down = true; }
+    (down ? B.lost : B.ret).push(...hs); B.sent++; if (!down) B.back++;
+  }
+  B.open = true; changed();
+}
+
+/* ---------- hero: where does the armor go? ---------- */
+(function(){
+  const cv = $('#heroPlane'), hint = $('#heroHint'), intro = hint.innerHTML;
+  let hover = null, geo = {s: 1, ox: 0, oy: 0};
+  const LAB = {cockpit: [57, 9], engines: [83, 30], wings: [4, 53], fuselage: [57, 62], tail: [70, 88]};
+  function draw(){
+    const {ctx, w, h} = fit(cv);
+    const s = Math.min(w, h) / 100, ox = (w - 100 * s) / 2, oy = (h - 100 * s) / 2;
+    geo = {s, ox, oy};
+    ctx.save(); ctx.translate(ox, oy); ctx.scale(s, s);
+    ctx.lineWidth = 1.2 / s; ctx.lineJoin = 'round'; ctx.strokeStyle = C('--ink-3');
+    ctx.fillStyle = C('--surface-2'); [PP.wing, PP.stab, PP.fus].forEach(p => { ctx.fill(p); ctx.stroke(p); });
+    ctx.fillStyle = C('--line'); ctx.fill(PP.eng); ctx.stroke(PP.eng);
+    if (hover && hover !== B.pick) fillZone(ctx, hover, C('--accent-soft'));
+    if (B.pick) fillZone(ctx, B.pick, C('--gold-soft'));
+    ctx.save(); ctx.setLineDash([2 / s * 1.5, 2 / s * 1.5]); ctx.beginPath(); ctx.moveTo(46, 18); ctx.lineTo(54, 18); ctx.moveTo(46, 76); ctx.lineTo(54, 76); ctx.stroke(); ctx.restore();
+    ctx.restore();
+    const nh = B.ret.length + (B.showLost ? B.lost.length : 0), thin = Math.min(1, Math.sqrt(400 / Math.max(1, nh)));
+    const r = Math.max(.9, s * .42 * Math.max(.55, thin)), al = Math.max(.3, thin), at = p => [ox + p[0] * s, oy + p[1] * s];
+    if (B.showLost) { ctx.fillStyle = C('--zero'); ctx.globalAlpha = al; B.lost.forEach(p => { const [x, y] = at(p); dot(ctx, x, y, r); }); }
+    ctx.fillStyle = C('--accent'); B.ret.forEach((p, i) => { const late = i >= B.newRet && B.ret.length - B.newRet <= 40; ctx.globalAlpha = late ? 1 : al; dot(ctx, ox + p[0] * s, oy + p[1] * s, late ? r + .9 : r); });
+    ctx.globalAlpha = 1;
+    ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+    ZONES.forEach(z => {
+      const mine = z === B.pick, [x, y] = at(LAB[z]);
+      ctx.font = (mine ? '600 ' : '') + '12px ' + MONO; ctx.fillStyle = mine ? C('--gold') : C('--ink-3');
+      ctx.fillText(mine ? z + ' ← armor' : z, x, y);
+    });
+  }
+  function message(){
+    const P = B.pick, nm = P ? `the <b>${P}</b>` : '';
+    if (!B.open) { hint.innerHTML = intro; return; }
+    if (!B.sent) { hint.innerHTML = P ? `You’d armor ${nm}. Now send the planes out and look at the ones that come back.` : 'Send the planes out and look at the ones that come back.'; return; }
+    if (!B.showLost) {
+      if (B.sent < 60) hint.innerHTML = `<b>${B.back} of ${B.sent}</b> planes came back, and their holes are marked on the plane. Send more until a pattern shows.`;
+      else hint.innerHTML = `The holes on the ${comma(B.back)} planes that came back crowd the wings and fuselage, while the engines and cockpit stay almost clean. ${P ? `Still happy to armor ${nm}?` : 'Where would you put the armor?'} Then show the ${comma(B.sent - B.back)} planes that were lost.`;
+      return;
+    }
+    const deadly = P === 'engines' || P === 'cockpit';
+    hint.innerHTML = (P ? (deadly ? '<b>Good call.</b> ' : `<b>Armor on the ${P} would mostly be wasted.</b> `) : '') +
+      'The lost planes’ holes fill in the bare patches: bullets hit every part of the plane about equally. The engines and cockpit look clean on the returning planes because a plane hit there seldom came home. The armor goes where the survivors have no holes.';
+  }
+  function sync(){
+    $$('[data-zone]').forEach(b => { const on = b.dataset.zone === B.pick; b.classList.toggle('guess', on); b.setAttribute('aria-pressed', on); });
+    $('#heroFly').disabled = $('#heroMany').disabled = !B.open;
+    $('#heroSkip').hidden = B.open;
+    ['#heroLost', '#svLost'].forEach(id => { const b = $(id); b.disabled = !B.sent; b.textContent = B.showLost ? 'Hide the lost planes' : 'Show the lost planes'; });
+    $('#heroCount').innerHTML = B.sent ? `sent <b>${comma(B.sent)}</b> · came back <b>${comma(B.back)}</b> · lost <b>${comma(B.sent - B.back)}</b>` : '';
+    draw(); message();
+  }
+  bListeners.push(sync);
+  function pick(z){ B.pick = z; B.open = true; changed(); }
+  function zoneOf(e){
+    const r = cv.getBoundingClientRect();
+    return zoneAt((e.clientX - r.left - geo.ox) / geo.s, (e.clientY - r.top - geo.oy) / geo.s);
+  }
+  cv.addEventListener('click', e => { const z = zoneOf(e); if (z) pick(z); });
+  cv.addEventListener('mousemove', e => { const z = zoneOf(e); cv.style.cursor = z ? 'pointer' : 'default'; if (z !== hover) { hover = z; draw(); } });
+  cv.addEventListener('mouseleave', () => { if (hover) { hover = null; draw(); } });
+  $$('[data-zone]').forEach(b => b.addEventListener('click', () => pick(b.dataset.zone)));
+  $('#heroSkip').addEventListener('click', () => { B.open = true; changed(); });
+  $('#heroFly').addEventListener('click', () => fly(10));
+  $('#heroMany').addEventListener('click', () => fly(100));
+  $('#heroLost').addEventListener('click', () => { B.showLost = !B.showLost; changed(); });
+  $('#heroClear').addEventListener('click', () => { Object.assign(B, {ret: [], lost: [], sent: 0, back: 0, newRet: 0, pick: null, open: false, showLost: false}); changed(); });
+  sync(); redraws.push(draw);
+})();
+
+/* ---------- 1. holes per square foot ---------- */
+(function(){
+  function draw(){
+    const {ctx, w, h} = fit($('#svBars')), out = $('#svRead');
+    if (!B.sent) { emptyNote(ctx, w, h, 'send some planes first'); out.innerHTML = ''; return; }
+    const ret = {}, all = {}; ZONES.forEach(z => { ret[z] = 0; all[z] = 0; });
+    B.ret.forEach(p => { ret[p[2]]++; all[p[2]]++; }); B.lost.forEach(p => all[p[2]]++);
+    const dR = z => 100 * ret[z] / AREA[z], dA = z => 100 * all[z] / AREA[z];
+    let ymax = 0; ZONES.forEach(z => ymax = Math.max(ymax, dR(z), B.showLost ? dA(z) : 0)); ymax = ymax * 1.15 || 1;
+    const F = frame(ctx, w, h, {lo: 0, hi: 4, ymax, left: 44, step: 1, lab: k => ZONES[k]});
+    const bw = Math.min(46, F.bw * .32);
+    ZONES.forEach((z, k) => {
+      const xc = F.xc(k);
+      bar(ctx, xc - bw - 2, bw, F.ys(dR(z)), F.Y0, C('--accent'));
+      if (B.showLost) bar(ctx, xc + 2, bw, F.ys(dA(z)), F.Y0, C('--ink-3'));
+      else { ctx.fillStyle = C('--ink-3'); ctx.font = '600 14px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillText('?', xc + 2 + bw / 2, F.Y0 - 4); }
+    });
+    const f = v => v.toFixed(v < 10 ? 2 : 1), q = '<span class="muted">?</span>';
+    out.innerHTML = `<div class="table-wrap"><table class="summary num"><thead><tr><th>part</th><th>came back</th><th>all planes</th><th>hits home</th><th>one hit downs</th></tr></thead><tbody>` +
+      ZONES.map(z => `<tr><td>${z}</td><td>${f(dR(z))}</td><td>${B.showLost ? f(dA(z)) : q}</td><td>${B.showLost ? `<b>${all[z] ? Math.round(100 * ret[z] / all[z]) : 0}%</b>` : q}</td><td>${B.showLost ? Math.round(100 * KILL[z]) + '%' : q}</td></tr>`).join('') + '</tbody></table></div>';
+  }
+  $('#svMany').addEventListener('click', () => fly(1000));
+  $('#svLost').addEventListener('click', () => { B.showLost = !B.showLost; changed(); });
+  bListeners.push(draw); draw(); redraws.push(draw);
+})();
+
+/* ---------- 2. bias against sample size: the 1936 Literary Digest poll ---------- */
+(function(){
+  const R = 27752648 / (27752648 + 16681862), NDIG = 972897 + 1293669, DIG = 972897 / NDIG;   // Roosevelt's two-party share; the Digest's
+  const SIZES = [100, 300, 1000, 3000, 10000, 30000, 100000, 300000, 1000000, NDIG];
+  let pts = [], timer = null, guess = null, open = false, done = false;
+  const kIn = $('#dgK'), msg = $('#dgMsg');
+  const pB = () => { const k = +kIn.value; return R / (R + k * (1 - R)); };
+  const sample = (n, p) => n <= 3000 ? binom(n, p) / n : Math.min(1, Math.max(0, p + Math.sqrt(p * (1 - p) / n) * gauss()));
+  const moe = (p, n) => 1.96 * Math.sqrt(p * (1 - p) / n);
+  const big = n => n >= 1e6 ? +(n / 1e6).toFixed(1) + 'M' : n >= 1000 ? n / 1000 + 'k' : String(n);
+  function draw(){
+    const {ctx, w, h} = fit($('#dgChart'));
+    const X0 = 44, X1 = w - 14, Y0 = h - 24, Y1 = 10, l0 = Math.log10(60), l1 = Math.log10(4.5e6), lo = .2, hi = .9;
+    const xs = n => X0 + (Math.log10(n) - l0) / (l1 - l0) * (X1 - X0), ys = v => Y0 - (v - lo) / (hi - lo) * (Y0 - Y1);
+    yGrid(ctx, X0, X1, ys, [.2, .3, .4, .5, .6, .7, .8, .9], v => Math.round(v * 100) + '%');
+    ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    [100, 1000, 1e4, 1e5, 1e6].forEach(n => ctx.fillText(n === 100 ? '100' : n === 1000 ? '1,000' : big(n), xs(n), Y0 + 6));
+    if (w >= 420) { ctx.textAlign = 'right'; ctx.fillText('sample size →', X1, Y0 + 6); }
+    ctx.save(); ctx.strokeStyle = C('--ink'); ctx.lineWidth = 1.5; ctx.setLineDash([5, 4]);
+    ctx.beginPath(); ctx.moveTo(X0, Math.round(ys(R)) + .5); ctx.lineTo(X1, Math.round(ys(R)) + .5); ctx.stroke(); ctx.restore();
+    ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--ink'); ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+    ctx.fillText('Roosevelt’s true share 62.5%', X1, ys(R) + 6);
+    pts.forEach(p => {
+      [[p.r, -5, C('--one')], [p.b, 5, C('--zero')]].forEach(([v, dx, col]) => {
+        const x = Math.round(xs(p.n) + dx) + .5, m = moe(v, p.n), a = ys(Math.min(hi, v + m)), b = ys(Math.max(lo, v - m));
+        ctx.strokeStyle = col; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(x, a); ctx.lineTo(x, b); ctx.moveTo(x - 3, a); ctx.lineTo(x + 3, a); ctx.moveTo(x - 3, b); ctx.lineTo(x + 3, b); ctx.stroke();
+        ctx.fillStyle = col; dot(ctx, x, ys(v), 3.5);
+      });
+    });
+    const dx = xs(NDIG) + 5, dy = ys(DIG);
+    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(dx, dy - 8); ctx.lineTo(dx + 8, dy); ctx.lineTo(dx, dy + 8); ctx.lineTo(dx - 8, dy); ctx.closePath(); ctx.stroke();
+    ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--accent'); ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+    ctx.fillText('Literary Digest, 1936: 42.9%', dx - 12, dy + 10);
+  }
+  function read(){
+    const out = $('#dgRead'); if (!pts.length) { out.innerHTML = ''; return; }
+    const p = pts[pts.length - 1], d = p.n >= 1e5 ? 2 : 1, m = v => (100 * moe(v, p.n)).toFixed(d);
+    let s = `sample of <b>${comma(p.n)}</b>: random <b>${(100 * p.r).toFixed(1)}%</b> ± ${m(p.r)} · <em>Digest</em>-style <b>${(100 * p.b).toFixed(1)}%</b> ± ${m(p.b)}`;
+    if (done) {
+      const bias = pB() - R;
+      if (Math.abs(bias) < .002) s += '<br>No bias: both kinds of sample home in on the truth.';
+      else {
+        const neq = R * (1 - R) / (bias * bias), nf = neq < 1.5 ? '1' : neq < 20 ? String(Math.round(neq)) : comma(+neq.toPrecision(2));
+        s += `<br>bias <b>${bias < 0 ? '−' : '+'}${Math.abs(100 * bias).toFixed(1)} points</b>. A random sample of just <b>${nf}</b> voter${nf === '1' ? '' : 's'} would typically miss by as much as these ${comma(NDIG)} biased ballots.`;
+      }
+    }
+    out.innerHTML = s;
+  }
+  function verdict(){
+    $$('#dgPred .btn').forEach(b => { b.classList.remove('right', 'wrong'); if (b.dataset.g === guess) b.classList.add(guess === 'small' ? 'right' : 'wrong'); });
+    const r1 = pts.find(p => p.n === 1000), last = pts[pts.length - 1], k = +kIn.value;
+    if (k < 1.05) { msg.innerHTML = 'With the bias set to 1, the big sample really is better: both kinds home in on the truth, and more data means a narrower margin. Slide the bias back up.'; return; }
+    const lead = guess === 'small' ? '<b>Right.</b> ' : guess ? '<b>The small random sample wins.</b> ' : '';
+    msg.innerHTML = lead + `The 1,000 random voters gave ${(100 * r1.r).toFixed(1)}%, within a few points of the truth. The ${comma(NDIG)} biased ballots gave ${(100 * last.b).toFixed(1)}%, ${Math.abs(100 * (last.b - R)).toFixed(0)} points off, with a margin of error under a tenth of a point. Size shrinks the wobble, not the bias.`;
+  }
+  function run(animate){
+    clearTimeout(timer); pts = []; done = false; let i = 0;
+    const step = () => {
+      pts.push({n: SIZES[i], r: sample(SIZES[i], R), b: sample(SIZES[i], pB())}); i++;
+      if (i < SIZES.length && animate) { draw(); read(); timer = setTimeout(step, 260); return; }
+      if (i < SIZES.length) return step();
+      done = true; draw(); read(); verdict(); $('#dgGo').textContent = 'Run again';
+    };
+    step();
+  }
+  function setOpen(){ open = true; $('#dgGo').disabled = false; $('#dgSkip').hidden = true; }
+  $$('#dgPred .btn').forEach(b => b.addEventListener('click', () => {
+    guess = b.dataset.g; $$('#dgPred .btn').forEach(x => x.classList.toggle('guess', x === b)); setOpen();
+    if (done) verdict(); else msg.innerHTML = 'Now grow both samples, from 100 people to 2.3 million.';
+  }));
+  $('#dgSkip').addEventListener('click', setOpen);
+  $('#dgGo').addEventListener('click', () => run(!RM));
+  kIn.addEventListener('input', () => { $('#dgKOut').textContent = (+kIn.value).toFixed(1) + '×'; if (done) run(false); });
+  $('#dgKOut').textContent = (+kIn.value).toFixed(1) + '×';
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 3. who gets seen ---------- */
+(function(){
+  const logistic = z => 1 / (1 + Math.exp(-z));
+  const S = {
+    survey: {cap: 'A political survey asks “How interested are you in politics, from 0 to 10?” People who care about politics are more willing to spend fifteen minutes answering questions about it.',
+      lo: -.5, hi: 10.5, bw: 1, fmt: v => v.toFixed(1), draw: () => binom(10, .2 + .55 * Math.random()), keep: (v, s) => Math.min(1, .25 * Math.exp(.4 * s * (v - 5))), unit: 'interest in politics'},
+    study: {cap: 'A six-month diet program weighs everyone at the end. The people who aren’t losing weight are the most likely to stop coming, so they miss the final weigh-in. (Negative means weight lost.)',
+      lo: -16, hi: 12, bw: 1, fmt: v => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(1) + ' kg', draw: () => -2 + 4 * gauss(), keep: (v, s) => logistic(Math.log(7 / 3) - .6 * s * (v + 2)), unit: 'change in weight (kg)'},
+    funds: {cap: 'Average yearly return of investment funds over ten years. Funds that do badly are closed or merged away; a database of the funds open today only averages the ones still standing.',
+      lo: -6, hi: 18, bw: 1, fmt: v => v.toFixed(1) + '%', draw: () => 6 + 3 * gauss(), keep: (v, s) => logistic(Math.log(1.5) + 1.2 * s * (v - 6)), unit: 'yearly return (%)'}
+  };
+  const N = 20000, cache = {};
+  function values(key){
+    if (cache[key]) return cache[key];
+    const P = S[key], a = new Float64Array(N);
+    for (let i = 0; i < N; i++) { let v; do v = P.draw(); while (v < P.lo || v >= P.hi); a[i] = v; }
+    return (cache[key] = a);
+  }
+  let cur = 'survey';
+  const sIn = $('#kmS');
+  const word = s => s === 0 ? 'not at all' : s < .35 ? 'a little' : s < .7 ? 'moderately' : 'strongly';
+  function draw(){
+    const P = S[cur], a = values(cur), s = +sIn.value, nb = Math.round((P.hi - P.lo) / P.bw);
+    const pop = new Float64Array(nb), seen = new Float64Array(nb);
+    let mA = 0, mS = 0, wS = 0;
+    for (let i = 0; i < N; i++) {
+      const v = a[i], k = Math.min(nb - 1, Math.floor((v - P.lo) / P.bw)), q = P.keep(v, s);
+      pop[k] += 1 / N; seen[k] += q / N; mA += v; mS += v * q; wS += q;
+    }
+    mA /= N; mS /= wS;
+    const {ctx, w, h} = fit($('#kmChart'));
+    const X0 = 14, X1 = w - 14, Y0 = h - 24, Y1 = 34, xs = v => X0 + (v - P.lo) / (P.hi - P.lo) * (X1 - X0);
+    let ymax = 0; pop.forEach(v => ymax = Math.max(ymax, v)); ymax *= 1.05;
+    const ys = v => Y0 - v / ymax * (Y0 - Y1), bpx = (X1 - X0) / nb, bwid = Math.max(1, bpx * .82);
+    for (let k = 0; k < nb; k++) {
+      const x = X0 + k * bpx + (bpx - bwid) / 2, yS = ys(seen[k]), yP = ys(pop[k]);
+      if (pop[k] - seen[k] > 1e-6) { ctx.fillStyle = C('--zero-soft'); ctx.fillRect(x, yP, bwid, yS - yP); ctx.strokeStyle = C('--zero'); ctx.lineWidth = 1; ctx.strokeRect(x + .5, yP + .5, bwid - 1, Math.max(0, yS - yP - 1)); }
+      bar(ctx, x, bwid, yS, Y0, C('--accent'));
+    }
+    xAxis(ctx, X0, X1, Y0, P.lo, P.hi, v => cur === 'survey' ? (v >= 0 ? String(v) : '') : String(v));
+    vline(ctx, xs(mA), 4, Y0, C('--ink'), [5, 4], 1.5);
+    vline(ctx, xs(mS), 18, Y0, C('--accent'), null, 2);
+    label(ctx, xs(mA), 4, 'everyone ' + P.fmt(mA), C('--ink'), X0, X1);
+    label(ctx, xs(mS), 18, 'seen ' + P.fmt(mS), C('--accent'), X0, X1);
+    $('#kmRead').innerHTML = `${P.unit} · everyone: <b>${P.fmt(mA)}</b> · those seen: <b>${P.fmt(mS)}</b> · <b>${Math.round(100 * wS / N)}%</b> of the population is seen`;
+    $('#kmSOut').textContent = word(s);
+  }
+  $$('[data-km]').forEach(b => b.addEventListener('click', () => {
+    cur = b.dataset.km; $$('[data-km]').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); });
+    $('#kmCap').textContent = S[cur].cap; draw();
+  }));
+  sIn.addEventListener('input', draw);
+  $('#kmCap').textContent = S[cur].cap;
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 5. quiz ---------- */
+(function(){
+  const Q = [
+    {s: 'Predict: a website poll has 200,000 answers. If it kept running until it had 2 million answers from the same kind of visitors, its error would…',
+     o: ['shrink a lot', 'stay about the same'], a: 1,
+     e: 'The error of a self-selected poll comes from who chooses to answer, not from chance. Ten times more of the same people gives the same answer with a narrower margin: confidently wrong.'},
+    {s: 'Returning bombers have the most holes per square foot on the wings and the fewest on the engines. Where should the armor go?',
+     o: ['On the wings', 'On the engines', 'Spread evenly'], a: 1,
+     e: 'The engines look clean because planes hit there seldom came back. The holes on survivors show where a plane can take a hit.'},
+    {s: 'A weight-loss program reports that people who completed it lost 8 kg on average; 40% dropped out. Which reading is <em>wrong</em>?',
+     o: ['Completers lost 8 kg on average', 'The program makes the average participant lose 8 kg', 'The completers may be the people it worked for'], a: 1,
+     e: 'The 8 kg describes the people who stayed. If the people it wasn’t working for were the ones who left, the average participant lost much less.'},
+    {s: 'The Literary Digest’s 2.3 million ballots for the two candidates missed Roosevelt’s share by about 20 points. A random sample of how many voters would typically miss by that much?',
+     o: ['About 6', 'About 1,000', 'About 100,000'], a: 0,
+     e: 'A random sample of n voters typically misses by about √(p(1 − p)/n). For a 20-point miss, n ≈ 0.625 × 0.375 / 0.2² ≈ 6. Over two million biased ballots were worth about as much as six random ones.'},
+    {s: 'Why does random sampling remove bias?',
+     o: ['Because random samples are bigger', 'Because the chance of being picked doesn’t depend on anything about the person', 'Because errors cancel out in large samples'], a: 1,
+     e: 'Size has nothing to do with it; a random sample of 50 is unbiased too. What matters is that nothing about the people decides who gets in, so the only error left is chance, which the standard error measures.'},
+    {s: 'A fund company advertises that the funds it offers today have beaten the market on average for ten years. For all the funds it launched in that time, the average was probably…',
+     o: ['the same', 'worse', 'better'], a: 1,
+     e: 'Funds that did badly were closed or merged, so they aren’t among the funds it offers today. Counting them would pull the average down.'},
+    {s: 'A phone poll dials numbers at random, but only 6% of the people it tries to reach take part. Is it a random sample of the population?',
+     o: ['Yes, because the numbers were random', 'No: who answers is a second filter, which weighting can only partly fix'], a: 1,
+     e: 'Random dialing removes the bias of choosing whom to call. It does nothing about who picks up and agrees to talk. Weighting fixes the imbalance in things the pollster measures, like age and education, but not in anything else.'}
+  ];
+  const box = $('#quiz'); let answered = 0, right = 0;
+  Q.forEach(q => {
+    const d = document.createElement('div'); d.className = 'qitem';
+    d.innerHTML = `<p>${q.s}</p><div class="qbtns">${q.o.map((t, i) => `<button class="btn" data-i="${i}">${t}</button>`).join('')}</div><p class="qexp" hidden></p>`;
+    const exp = d.querySelector('.qexp');
+    d.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      const ok = +b.dataset.i === q.a;
+      if (!d.dataset.done) { d.dataset.done = '1'; answered++; if (ok) right++; }
+      d.querySelectorAll('button').forEach(x => x.classList.remove('right', 'wrong'));
+      b.classList.add(ok ? 'right' : 'wrong');
+      exp.hidden = false; exp.innerHTML = `<b>${ok ? '✓ Right.' : '✗ Not quite.'}</b> ${q.e}`;
+      $('#quizScore').textContent = `${answered} of ${Q.length} answered · ${right} right on the first try`;
+    }));
+    box.appendChild(d);
+  });
+})();
+
+})();
+</script>
+</body>
+</html>
