@@ -27,7 +27,7 @@ See [Statistics: how every page works](#statistics-conventions) first.
 - [x] [4. What makes a good guess](https://nishs1729.github.io/explainers/statistics/estimation.html)
 - [x] [5. The bootstrap](https://nishs1729.github.io/explainers/statistics/bootstrap.html)
 - [x] [6. Shuffling to test](https://nishs1729.github.io/explainers/statistics/permutation-tests.html)
-- [ ] [7. p-values](#p-values)
+- [x] [7. p-values](https://nishs1729.github.io/explainers/statistics/p-values.html)
 - [ ] [8. Confidence intervals](#confidence-intervals)
 - [ ] [9. Errors and decisions](#errors)
 - [ ] [10. Power and sample size](#power)
@@ -361,6 +361,8 @@ Assumes the probability series, especially Normal (CLT, √n law) and Chi-square
 > **Data:** button test (p ≈ 0.18).
 >
 > **Links:** builds on Shuffling to test. Wasserstein & Lazar, ASA statement (2016).
+>
+> **Built:** the hero poses the p = 0.03 question, then a predict-the-shape step (4 mini histograms), then rains 1,000 null trials into a 20-bin histogram (flat; counts below 0.05 and at or below 0.03). Section 1 shows the exact permutation null of the button gap with a draggable observed line and an either-direction or orange-only toggle (0.210 / 0.105; the text notes the two-proportion formula gives 0.18). Section 2's misreading checker has six p = 0.03 sentences, 2 right and 4 wrong (probability of the null, 97% works, size, replication ≈ 58%); the follow-up gives a 36% false-discovery example (1 in 10 drugs work, 80% power) and the ASA 2016 principles. The p-value rain uses a two-group z-test with a true-effect dial of 0–1 SD and n = 10–500 per group; section 4 quotes power for d = 0.2 (n = 50: 17%, n = 500: 89%). Section 5 plots the typical p for a 0.1-point gap (5.0% vs 5.1%) against visitors per button from 1k to 100M (p ≈ 0.001 at 1M, 10⁻²⁴ at 10M).
 
 <a id="confidence-intervals"></a>
 ### **8. Confidence intervals**

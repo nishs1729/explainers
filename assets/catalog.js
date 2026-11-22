@@ -162,7 +162,7 @@ window.EXPLAINERS = {
           "id": "learning-from-data",
           "title": "Learning from data",
           "blurb": "Could chance alone have done this? Starting from line-ups and coin streaks, the series builds the tools for answering that question: sampling, estimation, resampling, tests, intervals and power, ending with the 1954 polio vaccine trial.",
-          "topics": ["is-it-real", "sampling-distributions", "selection-bias", "estimation", "bootstrap", "permutation-tests"]
+          "topics": ["is-it-real", "sampling-distributions", "selection-bias", "estimation", "bootstrap", "permutation-tests", "p-values"]
         }
       ],
       "topics": [
@@ -218,6 +218,15 @@ window.EXPLAINERS = {
           "summary": "If the groups don't matter, shuffling the labels changes nothing. Taste tea like Fisher's lady, shuffle the button test, and flip all 1,024 signs of the sleep trial.",
           "tags": ["permutation test", "randomization", "lady tasting tea", "sign flip", "Fisher"],
           "preview": { "select": "#heroPlay", "click": ["#heroAll4"] }
+        },
+        {
+          "id": "p-values",
+          "title": "p-values",
+          "short": "p-values",
+          "path": "statistics/p-values.html",
+          "summary": "How surprising the data would be if chance alone were at work, and not the chance that it is. Watch p-values rain down flat under no effect, pile up near 0 with one, and catch the classic misreadings.",
+          "tags": ["p-value", "significance", "misreadings", "power", "ASA statement"],
+          "preview": { "select": "#heroPlay", "click": ["#heroSkip", "#heroGo"] }
         }
       ]
     }

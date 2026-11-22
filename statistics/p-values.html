@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>p-values — a visual introduction</title>
+<style>
+:root{
+  --bg:#faf8f4; --surface:#ffffff; --surface-2:#f2efe8; --ink:#1c1c1e; --ink-2:#4c4e55; --ink-3:#8b8d93; --line:#e3dfd5;
+  --one:#16917c; --one-soft:rgba(22,145,124,.15);
+  --zero:#d9573a; --zero-soft:rgba(217,87,58,.15);
+  --accent:#3654c9; --accent-soft:rgba(54,84,201,.11);
+  --gold:#b98317; --gold-soft:rgba(185,131,23,.22);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+    --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+    --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+    --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+    --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+  --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+  --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+  --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+  --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.68 var(--sans);-webkit-font-smoothing:antialiased}
+main{max-width:820px;margin:0 auto;padding:0 20px 80px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;letter-spacing:-.01em}
+h1{font-size:clamp(2.2rem,6vw,3.4rem);margin:.2em 0 .3em}
+h2{font-size:clamp(1.6rem,4vw,2.1rem);margin:0 0 .5em}
+h3{font-size:1.2rem;margin:1.6em 0 .4em}
+p{margin:0 0 1em}
+a{color:var(--accent)}
+strong{font-weight:650}
+em.term{font-style:normal;font-weight:650;color:var(--accent)}
+.muted{color:var(--ink-2)}
+small,.small{font-size:14px}
+
+/* hero */
+.hero{text-align:center;padding:64px 0 24px}
+.kicker{text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--ink-3);margin:0}
+.lede{font-size:1.2rem;color:var(--ink-2);max-width:620px;margin:0 auto}
+.hero-play{max-width:640px;margin:30px auto 0;text-align:left}
+.hero-play .controls{justify-content:center}
+.hint{font-size:15px;color:var(--ink-2);min-height:3.2em;margin:10px 0 0;text-align:center}
+.ask{font-family:var(--serif);font-size:1.25rem;text-align:center;margin:0 0 12px}
+
+.toc{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;margin:28px 0 8px}
+.toc ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 20px;counter-reset:t}
+.toc li{counter-increment:t;font-size:15px}
+.toc li::before{content:counter(t,decimal-leading-zero);font-family:var(--mono);color:var(--ink-3);margin-right:10px;font-size:13px}
+.toc a{color:var(--ink);text-decoration:none}
+.toc a:hover{color:var(--accent)}
+
+section{padding-top:56px}
+.secnum{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.08em;margin-bottom:4px}
+
+.widget{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin:26px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.widget-title{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);margin:0 0 12px;font-weight:600}
+.controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:12px 0}
+.ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:15px}
+.ctrl output{font-family:var(--mono);font-size:14px;min-width:5.5em;color:var(--ink)}
+input[type=range]{accent-color:var(--accent);width:170px;max-width:100%}
+.btn{font:inherit;font-size:14px;line-height:1.2;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;transition:background .15s,transform .1s}
+.btn:hover{border-color:var(--ink-3)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn.guess{background:var(--gold-soft);border-color:var(--gold);color:var(--ink)}
+.btn.right{background:var(--one-soft);border-color:var(--one);color:var(--one)}
+.btn.wrong{background:var(--zero-soft);border-color:var(--zero);color:var(--zero)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:6px}
+.readout{font-family:var(--mono);font-size:14px;color:var(--ink-2);line-height:1.6}
+.readout b{color:var(--ink);font-weight:600}
+.readout .ok{color:var(--one);font-weight:600}
+.readout .warn{color:var(--zero);font-weight:600}
+.readout .gd{color:var(--gold);font-weight:600}
+.msg{font-size:15px;color:var(--ink-2);min-height:3.4em;margin:10px 0 0}
+.msg b{color:var(--ink)}
+canvas{display:block;width:100%}
+.cap{font-size:13px;color:var(--ink-3);margin:2px 0 6px}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:20px 0}
+.callout p:last-child{margin-bottom:0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin-top:8px}
+.legend > span{display:inline-block}
+.legend .sw{vertical-align:middle;margin:0 6px 2px 0}
+.sw{display:inline-block;width:16px;height:10px;border-radius:2px}
+.sw.dot{width:8px;height:8px;border-radius:50%}
+.sw.line{height:0;border-top:2px solid var(--ink)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+@media (max-width:640px){.pair{grid-template-columns:1fr}}
+.mcap{font-size:13px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+
+/* cast */
+.cast-q{font-family:var(--serif);font-size:1.08rem;margin:0 0 10px}
+.datarow{font-family:var(--mono);font-size:14px;color:var(--ink-2);margin:0 0 6px}
+.datarow b{color:var(--ink)}
+
+/* recipe */
+.facts{counter-reset:f;list-style:none;padding:0;margin:18px 0}
+.facts li{counter-increment:f;position:relative;padding:12px 0 12px 44px;border-bottom:1px solid var(--line)}
+.facts li::before{content:counter(f);position:absolute;left:0;top:12px;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:600 13px var(--mono)}
+.facts li strong{display:block}
+.table-wrap{overflow-x:auto}
+table.summary{border-collapse:collapse;width:100%;font-size:15px;margin:14px 0}
+table.summary td,table.summary th{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3)}
+@media (max-width:480px){table.summary td,table.summary th{padding:8px 5px}}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:18px 0}
+.card{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
+.card h4{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+.card p{font-size:15px;margin:0;color:var(--ink-2)}
+
+/* quiz */
+.quiz{display:grid;gap:10px}
+.qitem{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg)}
+.qitem p{margin:0 0 8px;font-size:16px}
+.qbtns{display:flex;flex-wrap:wrap;gap:8px}
+.qexp{font-size:15px;color:var(--ink-2);margin:10px 0 0!important}
+
+@media (max-width:480px){
+  main{padding:0 16px 80px}
+  .widget{padding:14px}
+  input[type=range]{width:150px}
+}
+/* page 7 */
+.linkbtn{all:unset;cursor:pointer;font-size:14px;color:var(--accent);text-decoration:underline}
+.linkbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.linkbtn[hidden]{display:none}
+canvas.band{cursor:ew-resize;touch-action:pan-y}
+.shapes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media (max-width:520px){.shapes{grid-template-columns:repeat(2,1fr)}}
+.shape{font:inherit;cursor:pointer;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);padding:8px 8px 6px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.shape canvas{height:46px}
+.shape span{font-size:13px;color:var(--ink-2)}
+.shape:hover{border-color:var(--ink-3)}
+.shape:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.shape.guess{border-color:var(--gold);background:var(--gold-soft)}
+.shape.right{border-color:var(--one);background:var(--one-soft)}
+.shape.wrong{border-color:var(--zero);background:var(--zero-soft)}
+.claims{display:grid;gap:8px}
+.claim{font:inherit;text-align:left;cursor:pointer;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);padding:10px 12px;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:start}
+.claim:hover{border-color:var(--ink-3)}
+.claim:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.claim .mark{font:600 12px var(--mono);color:var(--ink-3);min-width:7.5em;padding-top:2px}
+.claim .ct{font-size:15px}
+.claim .ce{grid-column:2;font-size:14px;color:var(--ink-2)}
+.claim.flag{border-color:var(--zero)}
+.claim.flag .mark{color:var(--zero)}
+.claim.good{background:var(--one-soft);border-color:var(--one)}
+.claim.bad{background:var(--zero-soft);border-color:var(--zero)}
+@media (max-width:480px){.claim{grid-template-columns:1fr}.claim .ce{grid-column:1}}
+</style>
+<script>try{var t=localStorage.getItem('xp-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/catalog.js" defer></script>
+<script src="../assets/site.js" defer></script>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <p class="kicker">A visual introduction</p>
+  <h1>p-values</h1>
+  <p class="lede">A p-value says how surprising your data would be if chance alone were at work. It is not the probability that chance is at work, and that one-word swap is behind a century of misreadings.</p>
+  <div class="hero-play" id="heroPlay">
+    <p class="ask">A drug trial reports p = 0.03. Is there a 97% chance the drug works?</p>
+    <p class="hint" style="min-height:0;margin:0 0 10px">Warm up first. Suppose a drug does nothing at all, and 1,000 separate trials test it. Each trial gets its own p-value. What does the histogram of those 1,000 p-values look like?</p>
+    <div class="shapes" id="heroPred" role="group" aria-label="Possible shapes for the histogram">
+      <button class="shape" data-s="0"><canvas data-shape="0"></canvas><span>piled up near 0</span></button>
+      <button class="shape" data-s="1"><canvas data-shape="1"></canvas><span>a bell around 0.5</span></button>
+      <button class="shape" data-s="2"><canvas data-shape="2"></canvas><span>flat</span></button>
+      <button class="shape" data-s="3"><canvas data-shape="3"></canvas><span>piled up near 1</span></button>
+    </div>
+    <canvas id="heroRain" style="height:200px;margin-top:12px" role="img" aria-label="Histogram of the p-values from 1,000 trials of a drug that does nothing, filling in as the trials finish"></canvas>
+    <div class="controls">
+      <button class="btn primary" id="heroGo" disabled>Run 1,000 trials</button>
+      <button class="linkbtn" id="heroSkip">skip the guess</button>
+    </div>
+    <p class="hint" id="heroHint" aria-live="polite">Pick a shape, then run the trials.</p>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#beyond">The fraction beyond the line</a></li>
+    <li><a href="#not">What it is not</a></li>
+    <li><a href="#flat">Under chance alone, p is flat</a></li>
+    <li><a href="#pile">With a real effect, p piles up near 0</a></li>
+    <li><a href="#tiny">Small p, tiny effect</a></li>
+    <li><a href="#uses">Where you will meet it</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<section id="beyond">
+  <div class="secnum">01</div>
+  <h2>The fraction beyond the line</h2>
+  <p>On <a href="permutation-tests.html">Shuffling to Test</a>, every test ended the same way: build the world where nothing is going on, and count how much of it is at least as extreme as the real data. That fraction is the <em class="term">p-value</em>.</p>
+  <p>Here is the button test once more. The bars show every gap that shuffling the 2,000 visitors can produce, worked out exactly instead of by sampling. The real gap, +1.4 points, is the line. Drag it to see how the p-value depends on where the data lands.</p>
+
+  <div class="widget">
+    <p class="widget-title">Reading a p-value off the chance histogram</p>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Which direction counts">
+        <button class="btn on" data-side="2" aria-pressed="true">Either direction</button>
+        <button class="btn" data-side="1" aria-pressed="false">Orange better only</button>
+      </div>
+      <button class="btn" id="pmReset">Back to the real gap</button>
+    </div>
+    <canvas id="pmChart" class="band" style="height:220px" role="img" aria-label="The chance distribution of the gap between the buttons, with a draggable line for the observed gap and the area beyond it shaded"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>gaps chance can produce</span></span><span><i class="sw" style="background:var(--accent)"></i><span>at least as extreme as the line: the p-value</span></span></div>
+    <div class="readout" id="pmRead" aria-live="polite"></div>
+  </div>
+
+  <p>The real gap gives p = 0.21: chance alone produces a gap this big, in one direction or the other, about 21% of the time. Drag the line out to 3 points and the shaded area all but vanishes. A small p-value means the data sit far out in a tail of the chance world; a large one means they sit in its crowded middle. (A common formula for comparing two percentages gives 0.18 for the button test. It approximates the shuffle, and the two tell the same story.)</p>
+  <p>Whether to count both tails is decided before seeing the data. If any difference would have been interesting, count both; that is the usual choice, and it doubles a one-sided p-value.</p>
+  <p>By a convention going back to Ronald Fisher in the 1920s, p below 0.05 is called <em class="term">statistically significant</em>. Fisher meant it as a rough signal that a result was worth a closer look, not as a verdict.</p>
+</section>
+
+<!-- 2 -->
+<section id="not">
+  <div class="secnum">02</div>
+  <h2>What it is not</h2>
+  <p>A p-value answers one narrow question: <em>if chance alone were at work, how often would data look at least this extreme?</em> It is very easy to read it as the answer to a different, more interesting question. Here are six sentences about a trial that reported p = 0.03. Tap the ones you think are wrong, then check.</p>
+
+  <div class="widget">
+    <p class="widget-title">The misreading checker</p>
+    <div class="claims" id="mcList"></div>
+    <div class="controls">
+      <button class="btn primary" id="mcCheck">Check my answers</button>
+      <button class="btn" id="mcReset">Start again</button>
+    </div>
+    <div class="readout" id="mcRead" aria-live="polite"></div>
+  </div>
+
+  <p>The central mistake flips the question around. The p-value is the chance of data like this <em>given</em> that chance alone is at work. The probability that chance alone is at work, <em>given</em> data like this, is a different number. It depends on something the p-value knows nothing about: how plausible the drug was before the trial. For example, if only 1 in 10 drugs tested actually works, and trials catch 80% of the ones that do, then about 36% of drugs that reach p &lt; 0.05 are duds. Working that out properly is the job of <em>Bayes’ theorem</em>, later in the series.</p>
+  <div class="callout">
+    <p><strong>The statisticians’ own warning.</strong> In 2016 the American Statistical Association published a statement on p-values (Wasserstein and Lazar 2016), its first on a specific statistical practice. Among its principles: p-values do not measure the probability that the studied hypothesis is true, or the probability that the data were produced by random chance alone; a p-value does not measure the size of an effect or the importance of a result; and decisions should not be based only on whether a p-value passes a specific threshold.</p>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="flat">
+  <div class="secnum">03</div>
+  <h2>Under chance alone, p is flat</h2>
+  <p>The opening experiment is the key to everything else on this page, so here it is with dials. Each experiment compares two groups of patients; the dial sets how much the treatment truly helps, measured in standard deviations of the outcome. Every experiment’s p-value drops into the histogram.</p>
+
+  <div class="widget">
+    <p class="widget-title">The p-value rain</p>
+    <div class="controls">
+      <label class="ctrl">true effect <input type="range" id="rnD" min="0" max="20" step="1" value="0"><output id="rnDOut"></output></label>
+      <label class="ctrl">patients per group <input type="range" id="rnN" min="0" max="5" step="1" value="2"><output id="rnNOut"></output></label>
+    </div>
+    <canvas id="rnChart" style="height:240px" role="img" aria-label="Histogram of the p-values of many simulated experiments, with p-values falling in as each experiment finishes and the bar below 0.05 highlighted"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>experiments</span></span><span><i class="sw" style="background:var(--accent)"></i><span>p &lt; 0.05, “significant”</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink-2)"></i><span>level if p-values were flat</span></span></div>
+    <div class="controls">
+      <button class="btn primary" id="rnRun">▶ Run</button>
+      <button class="btn" id="rnMany">+1,000 experiments</button>
+      <button class="btn" id="rnClear">Clear</button>
+    </div>
+    <div class="readout" id="rnRead" aria-live="polite"></div>
+  </div>
+
+  <p>With the effect at zero, the histogram is flat. Any p-value between 0 and 1 is as likely as any other, so 5% of experiments land below 0.05, 10% below 0.10, and so on. That isn’t a coincidence; it is what a p-value means. “p = 0.03” says the data are as extreme as the most extreme 3% of chance worlds, and when chance is all there is, 3% of experiments are exactly that extreme.</p>
+  <p>So when a drug does nothing, 1 trial in 20 still comes out “significant”. Run 20 useless trials, or test 20 useless drugs, or look at 20 outcomes in one trial, and you should expect one success that means nothing. That is the engine behind the <em>garden of forking paths</em>, later in the series.</p>
+</section>
+
+<!-- 4 -->
+<section id="pile">
+  <div class="secnum">04</div>
+  <h2>With a real effect, p piles up near 0</h2>
+  <p>Now turn the effect up in the rain above. As soon as the treatment truly helps, small p-values become more common than large ones, and the histogram tilts toward 0. The bigger the effect, the steeper the pile. More patients per group do the same thing for a given effect: a bigger sample makes a real effect harder for chance to hide.</p>
+  <p>The share of experiments that land below 0.05 when there <em>is</em> an effect is called the <em class="term">power</em> of the experiment. With a modest effect of 0.2 standard deviations, 50 patients per group catch it only about 17% of the time; 500 per group catch it about 89% of the time. Most of the time, a small study of a small effect comes back “not significant”, not because the effect isn’t there but because the study couldn’t see it. Planning for that is the subject of <em>Power and sample size</em>.</p>
+  <p>Notice what never happens: even with a large effect, some experiments still land well above 0.05. One non-significant result is not evidence that nothing is going on. The button test’s p = 0.21 doesn’t show that orange is no better. It shows that 1,000 visitors per button couldn’t tell.</p>
+</section>
+
+<!-- 5 -->
+<section id="tiny">
+  <div class="secnum">05</div>
+  <h2>Small p, tiny effect</h2>
+  <p>The flip side: with enough data, a difference too small to matter becomes “highly significant”. Suppose the orange button really is better, by 0.1 percentage points: 5.1% against 5.0%. Slide the number of visitors.</p>
+
+  <div class="widget">
+    <p class="widget-title">One tiny effect, many sample sizes</p>
+    <div class="controls">
+      <label class="ctrl">visitors per button <input type="range" id="tyN" min="0" max="20" step="1" value="8"><output id="tyNOut"></output></label>
+    </div>
+    <canvas id="tyChart" style="height:220px" role="img" aria-label="The typical p-value for a 0.1-point difference, falling steeply as the number of visitors grows, with the 0.05 line marked"></canvas>
+    <div class="readout" id="tyRead" aria-live="polite"></div>
+  </div>
+
+  <p>The difference never changes; it is 0.1 points all the way along. Only the sample size grows. At a few thousand visitors per button the gap is invisible; at a million it is “significant” at p ≈ 0.001; at ten million it is around 10<sup>−24</sup>, a decimal point followed by 23 zeros. The p-value measures how sure you can be that the difference isn’t zero, which depends as much on the sample size as on the difference. Whether 0.1 points is worth anything is a separate question the p-value can’t answer.</p>
+  <p>That is why a careful report gives the size of the effect with an interval around it, not just a p-value. The next page, <em>Confidence intervals</em>, is about exactly that.</p>
+</section>
+
+<!-- 6 -->
+<section id="uses">
+  <div class="secnum">06</div>
+  <h2>Where you will meet it</h2>
+  <div class="cards">
+    <div class="card"><h4>Medical research</h4><p>Almost every trial reports p-values, usually against 0.05. Regulators look at the size of the benefit and its uncertainty too, not the p-value alone.</p></div>
+    <div class="card"><h4>Particle physics</h4><p>Physicists demand “5 sigma”, a one-sided p-value of about 3 in 10 million, before claiming a discovery. The Higgs boson was announced in 2012 at that level.</p></div>
+    <div class="card"><h4>Genetics</h4><p>Studies that scan a million genetic variants use a threshold of 5 × 10⁻⁸, because at p &lt; 0.05 a million tests would turn up 50,000 flukes.</p></div>
+    <div class="card"><h4>A/B testing</h4><p>Dashboards show p-values that update as data arrives. Stopping the moment p dips below 0.05 inflates the false-alarm rate far above 5%.</p></div>
+    <div class="card"><h4>The replication crisis</h4><p>When 100 published psychology studies were repeated (Open Science Collaboration 2015), 97% of the originals had p &lt; 0.05 but only about 36% of the repeats did.</p></div>
+    <div class="card"><h4>News headlines</h4><p>“Scientists find link between X and Y” often rests on one p-value just under 0.05. Now you know what it does and doesn’t say.</p></div>
+  </div>
+
+  <h3>Check yourself</h3>
+  <div class="widget">
+    <div class="quiz" id="quiz"></div>
+    <div class="readout" id="quizScore" style="margin-top:10px" aria-live="polite"></div>
+  </div>
+
+  <p>A p-value squeezes an experiment into one number about one question. A confidence interval keeps much more: how big the effect might be, and how sure you can be. That is the next page, <strong>Confidence intervals</strong> (coming soon).</p>
+</section>
+
+</main>
+
+<script>
+(function(){
+'use strict';
+/* ---------- helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const root = document.documentElement;
+const C = n => getComputedStyle(root).getPropertyValue(n).trim();
+const f2 = x => x.toFixed(2);
+const fmtN = x => Math.abs(x - Math.round(x)) < 1e-9 ? String(Math.round(x)) : String(+x.toFixed(2));
+const pct = x => (100 * x).toFixed(1) + '%';
+const MONO = 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
+const TAU = Math.PI * 2;
+const comma = n => n.toLocaleString('en-US');
+
+function fit(c){
+  const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+  if (c.width !== w*dpr || c.height !== h*dpr) { c.width = w*dpr; c.height = h*dpr; }
+  const ctx = c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  return {ctx, w, h};
+}
+const redraws = [];
+function redrawAll(){ redraws.forEach(f => f()); }
+let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(redrawAll, 80); });
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+if (mq.addEventListener) mq.addEventListener('change', redrawAll);
+new MutationObserver(redrawAll).observe(root, {attributes:true, attributeFilter:['data-theme']});
+
+function niceTicks(max, count){
+  const raw = max / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const step = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag;
+  const t = []; for (let v = 0; v <= max + 1e-9; v += step) t.push(v); return t;
+}
+function stepFmt(ticks){ const st = ticks.length > 1 ? ticks[1] - ticks[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9)); return v => v.toFixed(d); }
+function yGrid(ctx, X0, X1, ys, ticks, fmt){
+  ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ticks.forEach(v => {
+    const y = Math.round(ys(v)) + .5;
+    ctx.strokeStyle = C('--line'); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X0, y); ctx.lineTo(X1, y); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.fillText(fmt(v), X0 - 6, y);
+  });
+}
+function intStep(px, minPx){
+  for (const s of [1,2,5,10,20,25,50,100]) if (s * px >= minPx) return s;
+  return 100;
+}
+function roundRect(ctx, x, y, w, h, r){
+  r = Math.max(0, Math.min(r, w/2, Math.abs(h)/2));
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+function dot(ctx, x, y, r){ ctx.beginPath(); ctx.arc(x, y, Math.max(0.5, r), 0, TAU); ctx.fill(); }
+function vline(ctx, x, y0, y1, color, dash, lw){
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw || 1.5; if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(Math.round(x) + .5, y0); ctx.lineTo(Math.round(x) + .5, y1); ctx.stroke(); ctx.restore();
+}
+/* integer-valued bar charts: bars at k = lo..hi */
+function frame(ctx, w, h, o){
+  const X0 = o.left != null ? o.left : 40, X1 = w - 10, Y0 = h - 24, Y1 = o.top != null ? o.top : 12;
+  const span = o.hi - o.lo + 1, bw = (X1 - X0) / span;
+  const xc = k => X0 + bw * (k - o.lo + .5), ys = v => Y0 - (v / o.ymax) * (Y0 - Y1);
+  const t = niceTicks(o.ymax, 3).filter(v => v <= o.ymax * 1.0001); yGrid(ctx, X0, X1, ys, t, o.yfmt || stepFmt(t));
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  const st = o.step || intStep(bw, 24);
+  for (let k = Math.ceil(o.lo / st) * st; k <= o.hi; k += st) ctx.fillText(o.lab ? o.lab(k) : k, xc(k), Y0 + 6);
+  return {X0, X1, Y0, Y1, bw, xc, ys};
+}
+function drawBars(ctx, F, lo, hi, val, color, frac){
+  const bwid = Math.max(1, F.bw * (frac == null ? .8 : frac));
+  for (let k = lo; k <= hi; k++) {
+    const v = val(k); if (!(v > 0)) continue;
+    const y = F.ys(v), hh = F.Y0 - y; if (hh < 0.2) continue;
+    const x = F.xc(k) - bwid / 2;
+    ctx.fillStyle = typeof color === 'function' ? color(k) : color;
+    if (bwid >= 6 && hh >= 3) { roundRect(ctx, x, y, bwid, hh, Math.min(3, bwid / 4)); ctx.fill(); }
+    else ctx.fillRect(x, y, bwid, hh);
+  }
+}
+function emptyNote(ctx, w, h, text){
+  ctx.fillStyle = C('--ink-3'); ctx.font = '13px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(text, w / 2, h / 2 - 8);
+}
+
+/* randomness */
+let spare = null;
+function gauss(){
+  if (spare != null) { const s = spare; spare = null; return s; }
+  let u = 0, v = 0; while (u === 0) u = Math.random(); v = Math.random();
+  const r = Math.sqrt(-2 * Math.log(u)); spare = r * Math.sin(TAU * v); return r * Math.cos(TAU * v);
+}
+function shuffled(a){ const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; }
+function corr(x, y){
+  const n = x.length; let mx = 0, my = 0; for (let i = 0; i < n; i++) { mx += x[i]; my += y[i]; } mx /= n; my /= n;
+  let sxy = 0, sxx = 0, syy = 0; for (let i = 0; i < n; i++) { const a = x[i] - mx, b = y[i] - my; sxy += a * b; sxx += a * a; syy += b * b; }
+  return sxy / Math.sqrt(sxx * syy);
+}
+function binom(n, p){ let k = 0; for (let i = 0; i < n; i++) if (Math.random() < p) k++; return k; }
+function flips(n){ const a = new Array(n); for (let i = 0; i < n; i++) a[i] = Math.random() < .5 ? 1 : 0; return a; }
+function longestRun(a){
+  let best = 1, cur = 1, start = 0, bs = 0;
+  for (let i = 1; i < a.length; i++) { if (a[i] === a[i-1]) cur++; else { cur = 1; start = i; } if (cur > best) { best = cur; bs = start; } }
+  return {len: best, start: bs};
+}
+function switches(a){ let s = 0; for (let i = 1; i < a.length; i++) if (a[i] !== a[i-1]) s++; return s; }
+const RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+function ticksIn(lo, hi, count){
+  const raw = (hi - lo) / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const st = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag, t = [];
+  for (let v = Math.ceil(lo / st - 1e-9) * st; v <= hi + 1e-9; v += st) t.push(+v.toFixed(10));
+  return t;
+}
+function xAxis(ctx, X0, X1, Y0, lo, hi, fmt){
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  const t = ticksIn(lo, hi, Math.max(2, Math.floor((X1 - X0) / 60)));
+  const st = t.length > 1 ? t[1] - t[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9));
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  t.forEach(v => ctx.fillText(fmt ? fmt(v) : v.toFixed(d), X0 + (v - lo) / (hi - lo) * (X1 - X0), Y0 + 5));
+}
+function label(ctx, x, y, text, color, X0, X1){
+  ctx.font = '600 11px ' + MONO; ctx.fillStyle = color; ctx.textBaseline = 'top';
+  const right = x > (X0 + X1) / 2; ctx.textAlign = right ? 'right' : 'left';
+  ctx.fillText(text, x + (right ? -5 : 5), y);
+}
+
+function bar(ctx, x, w, y, Y0, color){
+  const hh = Y0 - y; if (!(hh > .2)) return;
+  ctx.fillStyle = color;
+  if (w >= 6 && hh >= 3) { roundRect(ctx, x, y, w, hh, Math.min(3, w / 4)); ctx.fill(); } else ctx.fillRect(x, y, w, hh);
+}
+
+
+/* ---------- shared ---------- */
+function erfc(x){   // Numerical Recipes erfc, relative error < 1.2e-7
+  const z = Math.abs(x), t = 1 / (1 + .5 * z);
+  const r = t * Math.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (.37409196 + t * (.09678418 + t * (-.18628806 + t * (.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-.82215223 + t * .17087277)))))))));
+  return x >= 0 ? r : 2 - r;
+}
+const pTwo = z => Math.min(1, erfc(Math.abs(z) / Math.SQRT2));
+const signed = (v, d) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(d);
+function fmtP(p){
+  if (p >= .001) return p.toFixed(3);
+  const e = Math.floor(Math.log10(p)), m = p / Math.pow(10, e);
+  return `${m.toFixed(1)} × 10<sup>−${-e}</sup>`;
+}
+
+/* the p-value rain: experiments with two groups of n, true effect d (in SDs); p from the two-sided z-test */
+function makeRain(cv, getD, getN, onUpdate){
+  const B = 20, R = {cnt: new Array(B).fill(0), total: 0, sig: 0, le03: 0, drops: [], running: false, rate: 30, fall: 650};
+  let raf = 0, lastT = 0, acc = 0, queue = 0, frames = 0;
+  const experiment = () => { const se = Math.sqrt(2 / getN()); return pTwo((getD() + se * gauss()) / se); };
+  function land(p){ const b = Math.min(B - 1, Math.floor(p * B)); R.cnt[b]++; R.total++; if (p < .05) R.sig++; if (p <= .03) R.le03++; }
+  function draw(){
+    const {ctx, w, h} = fit(cv), X0 = 40, X1 = w - 12, Y0 = h - 24, Y1 = 30, pw = (X1 - X0) / B;
+    const flat = R.total / B, top = Math.max(10, ...R.cnt, flat * 1.6) * 1.08, ys = v => Y0 - v / top * (Y0 - Y1);
+    const t = niceTicks(top, 3); yGrid(ctx, X0, X1, ys, t.filter(v => v <= top), v => comma(v));
+    R.cnt.forEach((c, b) => { if (c) bar(ctx, X0 + b * pw + 1, pw - 2, ys(c), Y0, b === 0 ? C('--accent') : C('--ink-3')); });
+    if (R.total >= 40) { ctx.save(); ctx.strokeStyle = C('--ink-2'); ctx.setLineDash([5, 4]); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(X0, ys(flat)); ctx.lineTo(X1, ys(flat)); ctx.stroke(); ctx.restore(); }
+    ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    [0, .25, .5, .75, 1].forEach(v => ctx.fillText(v === 0 ? '0' : v === 1 ? '1' : String(v), X0 + v * (X1 - X0), Y0 + 6));
+    ctx.fillStyle = C('--accent'); ctx.font = '600 11px ' + MONO; ctx.fillText('0.05', X0 + pw, Y0 + 6);
+    const now = performance.now();
+    R.drops.forEach(d => {
+      const f = Math.min(1, (now - d.t0) / R.fall), b = Math.min(B - 1, Math.floor(d.p * B));
+      const x = X0 + (b + .5) * pw + d.j * pw * .3, y = Y1 - 20 + f * f * (ys(R.cnt[b]) - Y1 + 16);
+      ctx.fillStyle = d.p < .05 ? C('--accent') : C('--ink-2'); dot(ctx, x, y, 2.6);
+    });
+    if (!R.total && !R.drops.length) emptyNote(ctx, w, h - 20, 'no experiments yet');
+  }
+  function frame(now){
+    frames++;
+    const dt = Math.min(200, now - (lastT || now)); lastT = now;
+    if (R.running) acc += dt / 1000 * R.rate;
+    if (queue > 0) { const k = Math.min(queue, Math.ceil(dt / 1000 * R.rate) || 1); queue -= k; acc += k; }
+    while (acc >= 1) { acc--; R.drops.push({p: experiment(), t0: now, j: Math.random() - .5}); }
+    R.drops = R.drops.filter(d => { if (now - d.t0 >= R.fall) { land(d.p); return false; } return true; });
+    draw(); onUpdate && onUpdate(R);
+    if (R.running || queue > 0 || R.drops.length) raf = requestAnimationFrame(frame); else raf = 0;
+  }
+  const kick = () => { if (!raf) { lastT = 0; raf = requestAnimationFrame(frame); } };
+  return {
+    R, draw,
+    run(on){ R.running = on; kick(); },
+    rain(k, rate){
+      if (RM) return this.instant(k);
+      R.rate = rate; queue += k; kick();
+      let seen = -1;
+      const watch = () => {   // animation frames stalled (hidden tab, headless): land everything at once
+        if (queue <= 0) return;
+        if (frames === seen) { const k2 = queue; queue = 0; R.drops.forEach(d => land(d.p)); R.drops = []; this.instant(k2); return; }
+        seen = frames; setTimeout(watch, 400);
+      };
+      setTimeout(watch, 400);
+    },
+    instant(k){ for (let i = 0; i < k; i++) land(experiment()); draw(); onUpdate && onUpdate(R); },
+    clear(){ R.cnt.fill(0); R.total = R.sig = R.le03 = 0; R.drops = []; queue = 0; acc = 0; draw(); onUpdate && onUpdate(R); }
+  };
+}
+
+/* ---------- hero: what do p-values look like when the drug does nothing? ---------- */
+(function(){
+  const hint = $('#heroHint');
+  let guess = null, done = false;
+  const SH = [i => Math.exp(-i / 2.2), i => Math.exp(-(((i - 4.5) / 2) ** 2)), () => .55, i => Math.exp(-(9 - i) / 2.2)];
+  function drawShapes(){
+    $$('[data-shape]').forEach(c => {
+      const {ctx, w, h} = fit(c), f = SH[+c.dataset.shape], pw = (w - 8) / 10;
+      for (let i = 0; i < 10; i++) { const v = f(i); ctx.fillStyle = C('--ink-3'); ctx.fillRect(4 + i * pw + 1, h - 4 - v * (h - 10), pw - 2, v * (h - 10)); }
+    });
+  }
+  const rain = makeRain($('#heroRain'), () => 0, () => 50, R => {
+    if (!done && R.total >= 1000) { done = true; message(R); }
+  });
+  function message(R){
+    const low = R.cnt[0], le03 = R.le03;
+    const ok = guess === 2;
+    $$('#heroPred .shape').forEach(b => { b.classList.remove('right', 'wrong'); if (+b.dataset.s === guess) b.classList.add(ok ? 'right' : 'wrong'); });
+    hint.innerHTML = (guess == null ? '' : ok ? '<b>Right: flat.</b> ' : '<b>It comes out flat.</b> ') +
+      `When the drug does nothing, every p-value from 0 to 1 is equally likely: ${low} of these 1,000 trials landed below 0.05, about 5%, and ${le03} came in at 0.03 or below. So p = 0.03 is something about 3% of trials of a useless drug produce. Whether <em>this</em> drug works also depends on how many of the drugs being tested work at all, which the p-value can’t know. So no: p = 0.03 does not mean a 97% chance.`;
+  }
+  function open(){ $('#heroGo').disabled = false; $('#heroSkip').hidden = true; }
+  $$('#heroPred .shape').forEach(b => b.addEventListener('click', () => { guess = +b.dataset.s; $$('#heroPred .shape').forEach(x => x.classList.toggle('guess', x === b)); open(); if (done) message(rain.R); }));
+  $('#heroSkip').addEventListener('click', open);
+  $('#heroGo').addEventListener('click', () => { rain.clear(); done = false; rain.rain(1000, 420); $('#heroGo').textContent = 'Run 1,000 more'; });
+  drawShapes(); rain.draw(); redraws.push(() => { drawShapes(); rain.draw(); });
+})();
+
+/* ---------- 1. reading a p-value off the chance histogram ---------- */
+(function(){
+  const N = 1000, K = 114, LO = -40, HI = 40, REAL = 14;
+  const lf = [0]; for (let i = 1; i <= 2 * N; i++) lf[i] = lf[i - 1] + Math.log(i);
+  const lC = (n, k) => lf[n] - lf[k] - lf[n - k];
+  const P = {};   // exact chance distribution of the gap (B clicks − A clicks) when the 2,000 visitors are dealt at random
+  for (let x = 0; x <= K; x++) P[2 * x - K] = Math.exp(lC(K, x) + lC(2 * N - K, N - x) - lC(2 * N, N));
+  const cv = $('#pmChart');
+  let obs = REAL, side = 2, drag = false, geo = null;
+  const counted = g => side === 2 ? Math.abs(g) >= Math.abs(obs) : g >= obs;
+  const pval = () => Object.keys(P).reduce((s, g) => s + (counted(+g) ? P[g] : 0), 0);
+  function draw(){
+    const {ctx, w, h} = fit(cv);
+    const F = frame(ctx, w, h, {lo: LO, hi: HI, ymax: Math.max(...Object.values(P)) * 1.1, step: 10, left: 46, top: 26, lab: k => signed(k / 10, 0), yfmt: v => (v * 100).toFixed(0) + '%'});
+    geo = F;
+    drawBars(ctx, F, LO, HI, k => P[k] || 0, k => counted(k) ? C('--accent') : C('--ink-3'), 1.7);
+    vline(ctx, F.xc(obs), F.Y1 - 14, F.Y0, C('--accent'), null, 2.5);
+    if (side === 2 && obs) vline(ctx, F.xc(-obs), F.Y1 - 14, F.Y0, C('--accent'), [4, 3], 1.5);
+    ctx.font = '600 12px ' + MONO; ctx.fillStyle = C('--accent'); ctx.textBaseline = 'top';
+    const right = F.xc(obs) > (F.X0 + F.X1) / 2; ctx.textAlign = right ? 'right' : 'left';
+    ctx.fillText(`${obs === REAL ? 'real gap' : 'gap'} ${signed(obs / 10, 1)} · drag me`, F.xc(obs) + (right ? -6 : 6), 0);
+    const p = pval();
+    $('#pmRead').innerHTML = `gap <b>${signed(obs / 10, 1)} points</b> → p = <b>${p < .001 ? '&lt; 0.001' : p.toFixed(3)}</b> · ${side === 2 ? 'chance gives a gap this big, either way,' : 'chance gives orange a lead this big'} in ${p < .001 ? 'fewer than 1 in 1,000' : (100 * p).toFixed(1) + '%'} of shuffles${p < .05 ? ' · <span class="ok">below 0.05</span>' : ''}`;
+  }
+  const toGap = e => { const r = cv.getBoundingClientRect(), x = e.clientX - r.left, k = LO + (x - geo.X0) / geo.bw - .5; return Math.max(LO, Math.min(HI, 2 * Math.round(k / 2))); };
+  cv.addEventListener('pointerdown', e => { drag = true; obs = toGap(e); try { cv.setPointerCapture(e.pointerId); } catch (_) {} draw(); });
+  cv.addEventListener('pointermove', e => { if (!drag) return; obs = toGap(e); draw(); });
+  const end = () => { drag = false; };
+  cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+  $$('[data-side]').forEach(b => b.addEventListener('click', () => { side = +b.dataset.side; $$('[data-side]').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); }); draw(); }));
+  $('#pmReset').addEventListener('click', () => { obs = REAL; draw(); });
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 2. the misreading checker ---------- */
+(function(){
+  const CL = [
+    {t: 'If the drug did nothing, results at least this extreme would turn up about 3% of the time.', ok: true,
+     e: 'Right. This is exactly what a p-value says.'},
+    {t: 'There is a 3% chance that the drug does nothing.', ok: false,
+     e: 'Wrong. The 3% was computed <em>assuming</em> the drug does nothing, so it can’t also be the probability of that assumption.'},
+    {t: 'There is a 97% chance that the drug works.', ok: false,
+     e: 'Wrong, the same mistake from the other side. The chance the drug works depends on how plausible it was before the trial, which the p-value ignores.'},
+    {t: 'The drug has a large effect.', ok: false,
+     e: 'Wrong. The p-value says nothing about size: a huge trial can give p = 0.03 for a trivial effect, and a tiny trial can miss a big one.'},
+    {t: 'If the trial were repeated, it would come out significant again 97% of the time.', ok: false,
+     e: 'Wrong. Even if the true effect were exactly what this trial measured, a repeat would reach p &lt; 0.05 only about 58% of the time.'},
+    {t: 'Chance alone is an unlikely explanation for a difference this big, though not an impossible one.', ok: true,
+     e: 'Right. About 1 trial in 33 of a useless drug does at least this well: unusual, not unheard of.'}
+  ];
+  const box = $('#mcList'), flags = new Array(CL.length).fill(false);
+  let checked = false;
+  CL.forEach((c, i) => {
+    const b = document.createElement('button'); b.className = 'claim'; b.setAttribute('aria-pressed', 'false');
+    b.innerHTML = `<span class="mark" aria-hidden="true"></span><span class="ct">“${c.t}”</span><span class="ce" hidden></span>`;
+    b.addEventListener('click', () => { if (checked) return; flags[i] = !flags[i]; sync(); });
+    box.appendChild(b);
+  });
+  function sync(){
+    const items = $$('.claim', box); let right = 0;
+    items.forEach((b, i) => {
+      const correct = flags[i] === !CL[i].ok; if (correct) right++;
+      b.classList.toggle('flag', flags[i]); b.setAttribute('aria-pressed', flags[i]);
+      b.querySelector('.mark').textContent = checked ? `you: ${flags[i] ? 'wrong' : 'right'}` : flags[i] ? '✗ wrong' : 'tap if wrong';
+      b.classList.toggle('good', checked && correct); b.classList.toggle('bad', checked && !correct);
+      const ce = b.querySelector('.ce'); ce.hidden = !checked; ce.innerHTML = CL[i].e;
+    });
+    $('#mcRead').innerHTML = checked ? `You judged <b>${right} of ${CL.length}</b> sentences correctly. Only the first and last are right.` : `${flags.filter(Boolean).length} marked as wrong`;
+    $('#mcCheck').disabled = checked;
+  }
+  $('#mcCheck').addEventListener('click', () => { checked = true; sync(); });
+  $('#mcReset').addEventListener('click', () => { checked = false; flags.fill(false); sync(); });
+  sync();
+})();
+
+/* ---------- 3–4. the p-value rain with dials ---------- */
+(function(){
+  const NS = [10, 20, 50, 100, 200, 500], dIn = $('#rnD'), nIn = $('#rnN');
+  const d = () => +dIn.value / 20, n = () => NS[+nIn.value];
+  const size = v => v === 0 ? 'none' : v < .2 ? 'tiny' : v < .4 ? 'small' : v < .7 ? 'medium' : 'large';
+  const rain = makeRain($('#rnChart'), d, n, R => {
+    $('#rnRead').innerHTML = R.total ? `<b>${comma(R.total)}</b> experiments · p &lt; 0.05 in <b>${comma(R.sig)}</b> = <b>${(100 * R.sig / R.total).toFixed(1)}%</b>${d() === 0 ? ' · with no effect, this hovers around 5%' : ''}` : '';
+  });
+  function outs(){ $('#rnDOut').textContent = `${d().toFixed(2)} SD (${size(d())})`; $('#rnNOut').textContent = n(); }
+  const reset = () => { outs(); rain.clear(); };
+  dIn.addEventListener('input', reset); nIn.addEventListener('input', reset);
+  $('#rnRun').addEventListener('click', () => { const on = !rain.R.running; rain.run(on); $('#rnRun').textContent = on ? '❚❚ Pause' : '▶ Run'; });
+  $('#rnMany').addEventListener('click', () => rain.instant(1000));
+  $('#rnClear').addEventListener('click', () => rain.clear());
+  outs(); rain.draw(); redraws.push(rain.draw);
+})();
+
+/* ---------- 5. small p, tiny effect ---------- */
+(function(){
+  const PA = .05, PB = .051, nIn = $('#tyN');
+  const nOf = i => Math.round(Math.pow(10, 3 + i * .25));
+  const zOf = n => (PB - PA) / Math.sqrt((PA * (1 - PA) + PB * (1 - PB)) / n);
+  const lp = n => { const p = pTwo(zOf(n)); return p > 0 ? Math.log10(p) : -300; };
+  function draw(){
+    const {ctx, w, h} = fit($('#tyChart')), X0 = 54, X1 = w - 16, Y0 = h - 30, Y1 = 12, LMIN = -12;
+    const xs = l => X0 + (l - 3) / 5 * (X1 - X0), ys = l => Y1 + Math.min(-l, -LMIN) / -LMIN * (Y0 - Y1);
+    yGrid(ctx, X0, X1, ys, [0, -3, -6, -9, -12], v => ({0: '1', '-3': '0.001', '-6': '10⁻⁶', '-9': '10⁻⁹', '-12': '10⁻¹²'})[v]);
+    ctx.strokeStyle = C('--ink-3'); ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ['1k', '10k', '100k', '1M', '10M', '100M'].forEach((t, i) => ctx.fillText(t, xs(3 + i), Y0 + 6));
+    ctx.fillText('visitors per button', (X0 + X1) / 2, Y0 + 18);
+    const y05 = ys(Math.log10(.05));
+    ctx.save(); ctx.strokeStyle = C('--accent'); ctx.setLineDash([5, 4]); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(X0, y05); ctx.lineTo(X1, y05); ctx.stroke(); ctx.restore();
+    ctx.fillStyle = C('--accent'); ctx.font = '600 11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillText('p = 0.05', X1, y05 - 3);
+    ctx.strokeStyle = C('--ink-2'); ctx.lineWidth = 2; ctx.beginPath();
+    for (let i = 0; i <= 200; i++) { const l = 3 + 5 * i / 200, y = ys(lp(Math.pow(10, l))); i ? ctx.lineTo(xs(l), y) : ctx.moveTo(xs(l), y); }
+    ctx.stroke();
+    const n = nOf(+nIn.value), l = Math.log10(n), p = pTwo(zOf(n));
+    ctx.fillStyle = p < .05 ? C('--accent') : C('--ink'); dot(ctx, xs(l), ys(lp(n)), 6);
+    $('#tyNOut').textContent = comma(n);
+    $('#tyRead').innerHTML = `true gap <b>0.1 points</b> (5.0% against 5.1%) · ${comma(n)} visitors per button · typical p ≈ <b>${p < 1e-300 ? '0.000…' : fmtP(p)}</b> · ${p < .05 ? '<span class="ok">“statistically significant”</span>' : 'not significant'}`;
+  }
+  nIn.addEventListener('input', draw);
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 6. quiz ---------- */
+(function(){
+  const Q = [
+    {s: 'Predict: a drug does nothing, and 1,000 trials test it. About how many come out with p &lt; 0.05?',
+     o: ['About 0', 'About 50', 'About 500'], a: 1,
+     e: 'When nothing is going on, p-values are flat between 0 and 1, so 5% of them, about 50 trials, land below 0.05. Each of those is a false alarm.'},
+    {s: 'A trial reports p = 0.03. Which sentence is right?',
+     o: ['If the drug did nothing, results this extreme would appear about 3% of the time', 'There is a 3% chance the drug does nothing'], a: 0,
+     e: 'The p-value is computed assuming the drug does nothing. It can’t also be the probability of that assumption.'},
+    {s: 'The button test gives p ≈ 0.2. Which reading is <em>wrong</em>?',
+     o: ['Orange is no better than grey', 'This data can’t tell whether orange is better', 'Chance alone makes gaps like this about 1 time in 5'], a: 0,
+     e: 'A large p-value means the data are compatible with no difference, not that there is none. Absence of evidence isn’t evidence of absence.'},
+    {s: 'A study of 2 million people finds p = 0.0001 for a difference of 0.1 points. The effect is…',
+     o: ['large, since p is tiny', 'not necessarily important: p doesn’t measure size'], a: 1,
+     e: 'With enough data, any nonzero difference gets a tiny p-value. Whether 0.1 points matters is a separate question.'},
+    {s: 'What happens to the p-value histogram as the true effect grows?',
+     o: ['It stays flat', 'It piles up near 0', 'It piles up near 1'], a: 1,
+     e: 'A real effect makes extreme data more common than chance alone would, so small p-values become more frequent. More patients per group steepen the pile too.'},
+    {s: 'Two similar studies report p = 0.04 and p = 0.06. Do they contradict each other?',
+     o: ['Yes: one is significant and the other isn’t', 'No: that is almost exactly the same evidence'], a: 1,
+     e: 'The 0.05 line is a convention, not a cliff. p-values of 0.04 and 0.06 describe nearly identical results.'},
+    {s: 'A trial found p = 0.03. If the true effect is exactly what it measured, how often would a repeat trial reach p &lt; 0.05?',
+     o: ['About 97% of the time', 'About 58% of the time', 'About 3% of the time'], a: 1,
+     e: 'The repeat’s result wobbles around the same effect, and only a little over half of that wobble lands beyond the 0.05 line. A single p = 0.03 is weaker evidence than it sounds.'}
+  ];
+  const box = $('#quiz'); let answered = 0, right = 0;
+  Q.forEach(qq => {
+    const d = document.createElement('div'); d.className = 'qitem';
+    d.innerHTML = `<p>${qq.s}</p><div class="qbtns">${qq.o.map((t, i) => `<button class="btn" data-i="${i}">${t}</button>`).join('')}</div><p class="qexp" hidden></p>`;
+    const exp = d.querySelector('.qexp');
+    d.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      const ok = +b.dataset.i === qq.a;
+      if (!d.dataset.done) { d.dataset.done = '1'; answered++; if (ok) right++; }
+      d.querySelectorAll('button').forEach(x => x.classList.remove('right', 'wrong'));
+      b.classList.add(ok ? 'right' : 'wrong');
+      exp.hidden = false; exp.innerHTML = `<b>${ok ? '✓ Right.' : '✗ Not quite.'}</b> ${qq.e}`;
+      $('#quizScore').textContent = `${answered} of ${Q.length} answered · ${right} right on the first try`;
+    }));
+    box.appendChild(d);
+  });
+})();
+
+})();
+</script>
+</body>
+</html>
