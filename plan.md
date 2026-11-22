@@ -29,7 +29,7 @@ See [Statistics: how every page works](#statistics-conventions) first.
 - [x] [6. Shuffling to test](https://nishs1729.github.io/explainers/statistics/permutation-tests.html)
 - [x] [7. p-values](https://nishs1729.github.io/explainers/statistics/p-values.html)
 - [x] [8. Confidence intervals](https://nishs1729.github.io/explainers/statistics/confidence-intervals.html)
-- [ ] [9. Errors and decisions](#errors)
+- [x] [9. Errors and decisions](https://nishs1729.github.io/explainers/statistics/errors.html)
 - [ ] [10. Power and sample size](#power)
 - [ ] [11. Student's t](#student-t)
 - [ ] [12. Chi-square tests](#chi-square-tests)
@@ -412,6 +412,8 @@ Assumes the probability series, especially Normal (CLT, √n law) and Chi-square
 >   - Two-curves threshold: null and alternative distributions with a draggable cutoff, shaded α and β
 >
 > **Links:** builds on p-values. Leads to Power.
+>
+> **Built:** the hero is the inspector game: a filling machine puts 100 g in a bag when good and 97 g when drifted (bags ± 3 g); each of 50 batches (30 good, 20 drifted, shuffled) shows 4 bag weights and their average, the reader presses Pass or Reject (keys P/R), and a 50-square scoreboard fills green/red. At the end the canvas turns into the trade-off curve (false alarm rate across, miss rate up, 4 bags: SE 1.5 g, d′ = 2) with the reader's dot; "skip" plays the rest with the rule "reject below 98.5 g". Section 1 lays out the 50 batch averages in two rows (good/drifted, filled = rejected, green/red = right/wrong) with a draggable rule, the hindsight-best cutoff and whether the reader's decisions match any single cutoff. Section 2 is the 2×2 table with the game's counts, α, β and the share of rejections that were good, plus an inspector ↔ test mapping table and the boy-who-cried-wolf aid. Section 3 has the two humps with a draggable cutoff (shaded α and β), bags per batch 1–16, and the trade-off curve with fainter curves for the other n (98.5 g: 15.9%/15.9%; α = 5%: β = 36%; 16 bags: β < 1%). Section 4 plots expected cost against cutoff for a miss-cost ratio (1/10–50) and drift share (1–60%), marking the cheapest cutoff (defaults 1 and 40%: 98.2 g, α 11.5%, β 21.2%), then a table of smoke alarm, trial (Blackstone 1769), screening, spam, and Fisher's 1925 "1 in 20" vs 5 sigma.
 
 <a id="power"></a>
 ### **10. Power and sample size**

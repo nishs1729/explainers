@@ -162,7 +162,7 @@ window.EXPLAINERS = {
           "id": "learning-from-data",
           "title": "Learning from data",
           "blurb": "Could chance alone have done this? Starting from line-ups and coin streaks, the series builds the tools for answering that question: sampling, estimation, resampling, tests, intervals and power, ending with the 1954 polio vaccine trial.",
-          "topics": ["is-it-real", "sampling-distributions", "selection-bias", "estimation", "bootstrap", "permutation-tests", "p-values", "confidence-intervals"]
+          "topics": ["is-it-real", "sampling-distributions", "selection-bias", "estimation", "bootstrap", "permutation-tests", "p-values", "confidence-intervals", "errors"]
         }
       ],
       "topics": [
@@ -236,6 +236,15 @@ window.EXPLAINERS = {
           "summary": "What the ± in a poll promises: watch 100 intervals rain down and about 5 miss, see why widths shrink like 1/√n, how intervals and tests agree, and where the simple interval breaks.",
           "tags": ["confidence interval", "margin of error", "coverage", "Wilson interval", "1.96"],
           "preview": { "select": "#heroPlay", "click": ["#heroSkip", "#heroGo"] }
+        },
+        {
+          "id": "errors",
+          "title": "Errors and Decisions",
+          "short": "Errors",
+          "path": "statistics/errors.html",
+          "summary": "Play quality inspector for 50 batches, then see your false alarms and misses on the trade-off curve: moving the cutoff swaps one mistake for the other, and the costs decide where it belongs.",
+          "tags": ["type I error", "type II error", "false alarm", "alpha", "decision threshold"],
+          "preview": { "select": "#heroPlay", "click": ["#heroSkip"] }
         }
       ]
     }

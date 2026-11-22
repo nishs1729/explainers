@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Errors and Decisions — a visual introduction</title>
+<style>
+:root{
+  --bg:#faf8f4; --surface:#ffffff; --surface-2:#f2efe8; --ink:#1c1c1e; --ink-2:#4c4e55; --ink-3:#8b8d93; --line:#e3dfd5;
+  --one:#16917c; --one-soft:rgba(22,145,124,.15);
+  --zero:#d9573a; --zero-soft:rgba(217,87,58,.15);
+  --accent:#3654c9; --accent-soft:rgba(54,84,201,.11);
+  --gold:#b98317; --gold-soft:rgba(185,131,23,.22);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+    --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+    --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+    --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+    --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+  --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+  --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+  --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+  --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.68 var(--sans);-webkit-font-smoothing:antialiased}
+main{max-width:820px;margin:0 auto;padding:0 20px 80px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;letter-spacing:-.01em}
+h1{font-size:clamp(2.2rem,6vw,3.4rem);margin:.2em 0 .3em}
+h2{font-size:clamp(1.6rem,4vw,2.1rem);margin:0 0 .5em}
+h3{font-size:1.2rem;margin:1.6em 0 .4em}
+p{margin:0 0 1em}
+a{color:var(--accent)}
+strong{font-weight:650}
+em.term{font-style:normal;font-weight:650;color:var(--accent)}
+.muted{color:var(--ink-2)}
+small,.small{font-size:14px}
+
+/* hero */
+.hero{text-align:center;padding:64px 0 24px}
+.kicker{text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--ink-3);margin:0}
+.lede{font-size:1.2rem;color:var(--ink-2);max-width:620px;margin:0 auto}
+.hero-play{max-width:640px;margin:30px auto 0;text-align:left}
+.hero-play .controls{justify-content:center}
+.hint{font-size:15px;color:var(--ink-2);min-height:3.2em;margin:10px 0 0;text-align:center}
+.ask{font-family:var(--serif);font-size:1.25rem;text-align:center;margin:0 0 12px}
+
+.toc{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;margin:28px 0 8px}
+.toc ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 20px;counter-reset:t}
+.toc li{counter-increment:t;font-size:15px}
+.toc li::before{content:counter(t,decimal-leading-zero);font-family:var(--mono);color:var(--ink-3);margin-right:10px;font-size:13px}
+.toc a{color:var(--ink);text-decoration:none}
+.toc a:hover{color:var(--accent)}
+
+section{padding-top:56px}
+.secnum{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.08em;margin-bottom:4px}
+
+.widget{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin:26px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.widget-title{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);margin:0 0 12px;font-weight:600}
+.controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:12px 0}
+.ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:15px}
+.ctrl output{font-family:var(--mono);font-size:14px;min-width:5.5em;color:var(--ink)}
+input[type=range]{accent-color:var(--accent);width:170px;max-width:100%}
+.btn{font:inherit;font-size:14px;line-height:1.2;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;transition:background .15s,transform .1s}
+.btn:hover{border-color:var(--ink-3)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn.guess{background:var(--gold-soft);border-color:var(--gold);color:var(--ink)}
+.btn.right{background:var(--one-soft);border-color:var(--one);color:var(--one)}
+.btn.wrong{background:var(--zero-soft);border-color:var(--zero);color:var(--zero)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:6px}
+.readout{font-family:var(--mono);font-size:14px;color:var(--ink-2);line-height:1.6}
+.readout b{color:var(--ink);font-weight:600}
+.readout .ok{color:var(--one);font-weight:600}
+.readout .warn{color:var(--zero);font-weight:600}
+.readout .gd{color:var(--gold);font-weight:600}
+.msg{font-size:15px;color:var(--ink-2);min-height:3.4em;margin:10px 0 0}
+.msg b{color:var(--ink)}
+canvas{display:block;width:100%}
+.cap{font-size:13px;color:var(--ink-3);margin:2px 0 6px}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:20px 0}
+.callout p:last-child{margin-bottom:0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin-top:8px}
+.legend > span{display:inline-block}
+.legend .sw{vertical-align:middle;margin:0 6px 2px 0}
+.sw{display:inline-block;width:16px;height:10px;border-radius:2px}
+.sw.dot{width:8px;height:8px;border-radius:50%}
+.sw.line{height:0;border-top:2px solid var(--ink)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+@media (max-width:640px){.pair{grid-template-columns:1fr}}
+.mcap{font-size:13px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+
+/* cast */
+.cast-q{font-family:var(--serif);font-size:1.08rem;margin:0 0 10px}
+.datarow{font-family:var(--mono);font-size:14px;color:var(--ink-2);margin:0 0 6px}
+.datarow b{color:var(--ink)}
+
+/* recipe */
+.facts{counter-reset:f;list-style:none;padding:0;margin:18px 0}
+.facts li{counter-increment:f;position:relative;padding:12px 0 12px 44px;border-bottom:1px solid var(--line)}
+.facts li::before{content:counter(f);position:absolute;left:0;top:12px;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:600 13px var(--mono)}
+.facts li strong{display:block}
+.table-wrap{overflow-x:auto}
+table.summary{border-collapse:collapse;width:100%;font-size:15px;margin:14px 0}
+table.summary td,table.summary th{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3)}
+@media (max-width:480px){table.summary td,table.summary th{padding:8px 5px}}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:18px 0}
+.card{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
+.card h4{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+.card p{font-size:15px;margin:0;color:var(--ink-2)}
+
+/* quiz */
+.quiz{display:grid;gap:10px}
+.qitem{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg)}
+.qitem p{margin:0 0 8px;font-size:16px}
+.qbtns{display:flex;flex-wrap:wrap;gap:8px}
+.qexp{font-size:15px;color:var(--ink-2);margin:10px 0 0!important}
+
+@media (max-width:480px){
+  main{padding:0 16px 80px}
+  .widget{padding:14px}
+  input[type=range]{width:150px}
+}
+/* page 9 */
+.linkbtn{all:unset;cursor:pointer;font-size:14px;color:var(--accent);text-decoration:underline}
+.linkbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.linkbtn[hidden],.btn[hidden],.controls[hidden]{display:none}
+canvas.band{cursor:ew-resize;touch-action:pan-y}
+.ok{color:var(--one);font-weight:600}
+.warn{color:var(--zero);font-weight:600}
+.btn.big{font-size:16px;padding:10px 22px;min-width:130px}
+.strip{display:flex;flex-wrap:wrap;gap:3px;justify-content:center;margin:6px auto 0;max-width:372px}
+.strip span{width:12px;height:12px;border-radius:3px;background:var(--line)}
+.strip span.r{background:var(--one)}
+.strip span.w{background:var(--zero)}
+.strip span.c{background:transparent;box-shadow:inset 0 0 0 2px var(--accent)}
+table.cm{border-collapse:separate;border-spacing:6px;width:100%;font-size:15px;margin:0}
+table.cm th{font-size:13px;color:var(--ink-3);font-weight:600;text-align:left;padding:4px 6px;text-transform:uppercase;letter-spacing:.06em;vertical-align:middle}
+table.cm td{border-radius:10px;padding:10px 12px;vertical-align:top;border:1px solid var(--line);width:40%}
+table.cm td.okc{background:var(--one-soft)}
+table.cm td.badc{background:var(--zero-soft)}
+table.cm b.n{font:600 22px var(--mono);display:block;line-height:1.2}
+table.cm small{display:block;color:var(--ink-2);font-size:13px;line-height:1.4}
+@media (max-width:480px){table.cm td{padding:8px}table.cm th{font-size:11px;padding:2px}}
+</style>
+<script>try{var t=localStorage.getItem('xp-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/catalog.js" defer></script>
+<script src="../assets/site.js" defer></script>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <p class="kicker">A visual introduction</p>
+  <h1>Errors and Decisions</h1>
+  <p class="lede">Every decision made from noisy data can go wrong in two ways: raising a false alarm, or missing something real. You can trade one mistake for the other, but no rule avoids both.</p>
+  <div class="hero-play" id="heroPlay">
+    <p class="ask">You’re the quality inspector. 50 batches of coffee, some of them faulty. Pass or reject each one.</p>
+    <p class="hint" style="min-height:0;margin:0 0 10px">A filling machine in good order puts 100 g of coffee in a bag on average; one that has drifted puts in only 97 g. Single bags vary by a few grams either way, so from each batch you weigh 4 bags. About 2 batches in 5 have drifted.</p>
+    <canvas id="heroGame" style="height:240px" role="img" aria-label="The current batch: four bag weights on a scale from 86 to 112 grams, their average, and dashed marks at 97 grams (drifted machine) and 100 grams (good machine)"></canvas>
+    <div class="legend" id="heroLegend" style="justify-content:center"></div>
+    <div class="controls" id="heroBtns">
+      <button class="btn big" id="heroPass">Pass ✓</button>
+      <button class="btn big" id="heroReject">Reject ✗</button>
+      <span class="readout" id="heroCount"></span>
+    </div>
+    <div class="strip" id="heroStrip" aria-hidden="true"></div>
+    <div class="controls">
+      <button class="linkbtn" id="heroSkip">skip: play it for me</button>
+      <button class="btn primary" id="heroAgain" hidden>Play 50 new batches</button>
+    </div>
+    <p class="hint" id="heroHint" aria-live="polite"></p>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#noise">Decisions under noise</a></li>
+    <li><a href="#two">Two kinds of mistake</a></li>
+    <li><a href="#threshold">Moving the threshold</a></li>
+    <li><a href="#costs">The costs decide</a></li>
+    <li><a href="#uses">Where you will meet it</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<section id="noise">
+  <div class="secnum">01</div>
+  <h2>Decisions under noise</h2>
+  <p>Here are all 50 batches from the game, each placed at the average of its 4 bags: the good batches on the top row, the drifted ones on the bottom. A filled dot is a batch that was rejected, an empty one a batch that was passed; green decisions were right, red ones wrong.</p>
+
+  <div class="widget">
+    <p class="widget-title">The 50 batches, laid out</p>
+    <p class="cap" id="yoWho"></p>
+    <canvas id="yoChart" class="band" style="height:190px" role="img" aria-label="The 50 batch averages on a weight scale, good batches in one row and drifted batches in another, colored by whether the decision on each was right, with a draggable cutoff"></canvas>
+    <div class="legend"><span><i class="sw dot" style="background:var(--one)"></i><span>right</span></span><span><i class="sw dot" style="background:var(--zero)"></i><span>wrong</span></span><span><i class="sw dot" style="background:var(--ink-3)"></i><span>filled: rejected</span></span><span><i class="sw dot" style="border:1.5px solid var(--ink-3)"></i><span>empty: passed</span></span><span><i class="sw line" style="border-top:2px solid var(--gold)"></i><span>a fixed rule (drag it)</span></span></div>
+    <div class="controls"><button class="btn" id="yoBest">Try the best cutoff, with hindsight</button></div>
+    <div class="readout" id="yoRead" aria-live="polite"></div>
+  </div>
+
+  <p>The two rows overlap. Some good batches happened to get four light bags, and some drifted ones four heavy bags. An inspector who sees only the bags can’t sort every batch correctly: even the best single rule, chosen after the fact with every answer known, gets some wrong. The mistakes aren’t carelessness. They come with the noise, and they will come with any decision made from a sample.</p>
+</section>
+
+<!-- 2 -->
+<section id="two">
+  <div class="secnum">02</div>
+  <h2>Two kinds of mistake</h2>
+  <p>The red dots come in two kinds, and they are different mistakes with different costs.</p>
+
+  <div class="widget">
+    <p class="widget-title">Every decision, sorted</p>
+    <div class="table-wrap" id="cmBox"></div>
+    <div class="readout" id="cmRead" aria-live="polite"></div>
+  </div>
+
+  <p>A <em class="term">false alarm</em> is rejecting a good batch: acting when nothing is wrong. A <em class="term">miss</em> is passing a drifted batch: failing to act when something is. Statisticians call them <em class="term">type I</em> and <em class="term">type II errors</em>, after Jerzy Neyman and Egon Pearson, who around 1930 named them errors “of the first kind” and “of the second kind”. The share of good batches that get rejected is written <strong>α</strong> (alpha), and the share of drifted batches that get passed is <strong>β</strong> (beta).</p>
+  <p>Every test on the earlier pages is an inspector of this kind:</p>
+  <div class="table-wrap">
+    <table class="summary">
+      <thead><tr><th>The inspector</th><th>A test</th></tr></thead>
+      <tbody>
+        <tr><td>The batch is good</td><td>Nothing is going on: chance alone, the <strong>null hypothesis</strong>, is true</td></tr>
+        <tr><td>The batch has drifted</td><td>Something real is going on</td></tr>
+        <tr><td>Reject the batch</td><td>Reject chance alone: a “significant” result</td></tr>
+        <tr><td>Pass the batch</td><td>Not significant: chance alone can’t be ruled out</td></tr>
+        <tr><td>False alarm rate α</td><td>The <strong>significance level</strong>. As the rain on <a href="p-values.html">p-values</a> showed, when chance alone is at work p lands below 0.05 one time in 20, so the rule “p &lt; 0.05” has α = 5% by construction.</td></tr>
+        <tr><td>Miss rate β</td><td>Set by how big the real effect is and how much data there is. 1 − β is the test’s <strong>power</strong>: the next page.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Both rates count mistakes among the batches that really were good or really had drifted, not among your decisions. “α = 5%” does <em>not</em> mean that 5% of rejected batches were good: the last line of the readout above shows the difference with the game’s own numbers. That second share depends on how many drifted batches there were to find, which is why a “significant” result can still be a false alarm more often than 1 time in 20.</p>
+  <div class="callout"><p><strong>A memory aid.</strong> In the fable of the boy who cried wolf, the villagers make both mistakes in order. First they run to a wolf that isn’t there: a false alarm, type I. Later they ignore a wolf that is: a miss, type II.</p></div>
+</section>
+
+<!-- 3 -->
+<section id="threshold">
+  <div class="secnum">03</div>
+  <h2>Moving the threshold</h2>
+  <p>A rule of the form “reject if the average is below some weight” fixes both rates in advance. The humps below show where the averages of <em>all</em> good and all drifted batches land, not just these 50. Drag the cutoff and watch the two shaded areas, and the point on the right.</p>
+
+  <div class="widget">
+    <p class="widget-title">One cutoff, two mistakes</p>
+    <div class="controls">
+      <span class="ctrl">bags weighed per batch</span>
+      <div class="seg" role="group" aria-label="Bags weighed per batch">
+        <button class="btn" data-n="1" aria-pressed="false">1</button>
+        <button class="btn" data-n="2" aria-pressed="false">2</button>
+        <button class="btn on" data-n="4" aria-pressed="true">4</button>
+        <button class="btn" data-n="8" aria-pressed="false">8</button>
+        <button class="btn" data-n="16" aria-pressed="false">16</button>
+      </div>
+    </div>
+    <div class="pair">
+      <div><div class="mcap">Where batch averages land</div><canvas id="thCurves" class="band" style="height:250px" role="img" aria-label="Two bell curves for the averages of good and drifted batches, a draggable cutoff, the false alarm area under the good curve shaded red and the miss area under the drifted curve shaded blue"></canvas></div>
+      <div><div class="mcap">The trade-off</div><canvas id="thTrade" style="height:250px" role="img" aria-label="False alarm rate against miss rate for every cutoff, with the current cutoff marked; fainter curves for other numbers of bags"></canvas></div>
+    </div>
+    <div class="legend"><span><i class="sw" style="background:var(--zero);opacity:.45"></i><span>false alarms α: good batches below the cutoff</span></span><span><i class="sw" style="background:var(--accent);opacity:.4"></i><span>misses β: drifted batches above it</span></span><span><i class="sw dot" style="background:var(--gold)"></i><span>the game’s result (4 bags)</span></span></div>
+    <div class="controls">
+      <button class="btn" id="thA5">Set α = 5%</button>
+      <button class="btn" id="thEq">Make the two equal</button>
+    </div>
+    <div class="readout" id="thRead" aria-live="polite"></div>
+  </div>
+
+  <p>Slide the cutoff left and you reject less: false alarms shrink, misses grow. Slide it right and the reverse happens. The point on the trade-off chart runs along its curve but can’t leave it. With 4 bags per batch, holding false alarms to 5% lets about 36% of drifted batches through. The game’s dot sits near the 4-bag curve; with only 50 batches it can land a little off it on either side, just by luck.</p>
+  <p>To shrink both mistakes at once, the humps must overlap less. That takes clearer evidence: more bags per batch, or a bigger drift to catch. Try 16 bags: the same 5% false alarm rate now misses fewer than 1 drifted batch in 100. How much data is enough is the subject of the next page.</p>
+</section>
+
+<!-- 4 -->
+<section id="costs">
+  <div class="secnum">04</div>
+  <h2>The costs decide</h2>
+  <p>Statistics can tell you how many false alarms and misses each cutoff will produce. It can’t tell you which mistake is worse; that comes from outside the data. Say scrapping a good batch costs one unit. Set what a drifted batch costs once it reaches customers, and how common drift is:</p>
+
+  <div class="widget">
+    <p class="widget-title">The cheapest cutoff</p>
+    <div class="controls">
+      <label class="ctrl">a drifted batch shipped costs <input type="range" id="coR" min="0" max="8" step="1" value="3"><output id="coROut"></output></label>
+      <label class="ctrl">batches that drift <input type="range" id="coF" min="0" max="5" step="1" value="4"><output id="coFOut"></output></label>
+    </div>
+    <canvas id="coChart" style="height:240px" role="img" aria-label="Expected cost per 100 batches for every cutoff, split into the cost of false alarms and of misses, with the cheapest cutoff marked"></canvas>
+    <div class="legend"><span><i class="sw line" style="border-top:2px solid var(--zero)"></i><span>cost of false alarms</span></span><span><i class="sw line" style="border-top:2px solid var(--accent)"></i><span>cost of misses</span></span><span><i class="sw line" style="border-top:2.5px solid var(--ink)"></i><span>total</span></span><span><i class="sw dot" style="background:var(--gold)"></i><span>cheapest cutoff</span></span></div>
+    <div class="readout" id="coRead" aria-live="polite"></div>
+  </div>
+
+  <p>When misses are expensive, the cheapest cutoff moves right and accepts plenty of false alarms. When false alarms are expensive it moves left. Rare drift pushes it left as well: if almost every batch is good, most rejections would be false alarms. Every real decision rule makes this trade, whether or not anyone wrote the costs down:</p>
+  <div class="table-wrap">
+    <table class="summary">
+      <thead><tr><th>Decision</th><th>False alarm</th><th>Miss</th><th>So the rule…</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Smoke alarm</strong></td><td>It beeps at burnt toast</td><td>It stays silent in a fire</td><td>is set to be very sensitive. A miss can kill; a false alarm costs a wave of a towel.</td></tr>
+        <tr><td><strong>Criminal trial</strong></td><td>An innocent person is convicted</td><td>A guilty person goes free</td><td>demands proof “beyond reasonable doubt” and accepts many misses. William Blackstone (1769): “better that ten guilty persons escape, than that one innocent suffer.”</td></tr>
+        <tr><td><strong>Medical screening</strong></td><td>A healthy person is sent for more tests</td><td>A disease goes unnoticed</td><td>casts a wide net first, then sorts out the false alarms with a second, more exact test.</td></tr>
+        <tr><td><strong>Spam filter</strong></td><td>A real email lands in the spam folder</td><td>Spam reaches the inbox</td><td>lets some spam through, because losing a real email is worse.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Science usually works the other way round: it fixes the false alarm rate first and lets the miss rate fall where it may. The 5% goes back to Ronald Fisher, who in 1925 called a 1-in-20 chance a “convenient” limit. It is a convention, not a law of nature. Fields where a false discovery is very costly ask for more: particle physicists announce a discovery only at “5 sigma”, a false alarm rate of about 1 in 3.5 million.</p>
+</section>
+
+<!-- 5 -->
+<section id="uses">
+  <div class="secnum">05</div>
+  <h2>Where you will meet it</h2>
+  <div class="cards">
+    <div class="card"><h4>Medical tests</h4><p><strong>Sensitivity</strong> is 1 − the miss rate; <strong>specificity</strong> is 1 − the false alarm rate. A test report quotes both because no test maximizes both.</p></div>
+    <div class="card"><h4>Machine learning</h4><p>A classifier’s <strong>ROC curve</strong> is the trade-off chart from section 3 flipped upside down: it plots hits (1 − β) against false alarms (α) for every threshold.</p></div>
+    <div class="card"><h4>A/B testing</h4><p>Shipping a button that doesn’t help is a false alarm; dropping one that would have helped is a miss. Teams pick α and plan the sample size to keep the miss rate down.</p></div>
+    <div class="card"><h4>Factory quality control</h4><p>Walter Shewhart’s control charts, from Bell Labs in the 1920s, are this page’s game: sample a few items, and stop the line only when the average strays past a limit.</p></div>
+    <div class="card"><h4>Security and fraud</h4><p>Airport scanners and card-fraud systems flag far more innocent bags and purchases than guilty ones, by design: a miss is the costly mistake.</p></div>
+    <div class="card"><h4>Science</h4><p>α = 5% is the usual false alarm rate; the miss rate often goes unreported. The next page shows why that matters.</p></div>
+  </div>
+
+  <h3>Check yourself</h3>
+  <div class="widget">
+    <div class="quiz" id="quiz"></div>
+    <div class="readout" id="quizScore" style="margin-top:10px" aria-live="polite"></div>
+  </div>
+
+  <p>Moving the cutoff only trades one mistake for the other; more data per decision is the only way to cut both. How much data is enough, and what happens when a study is too small to see what it’s looking for, is the next page, <strong>Power and sample size</strong> (coming soon).</p>
+</section>
+
+</main>
+
+<script>
+(function(){
+'use strict';
+/* ---------- helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const root = document.documentElement;
+const C = n => getComputedStyle(root).getPropertyValue(n).trim();
+const f2 = x => x.toFixed(2);
+const fmtN = x => Math.abs(x - Math.round(x)) < 1e-9 ? String(Math.round(x)) : String(+x.toFixed(2));
+const pct = x => (100 * x).toFixed(1) + '%';
+const MONO = 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
+const TAU = Math.PI * 2;
+const comma = n => n.toLocaleString('en-US');
+
+function fit(c){
+  const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+  if (c.width !== w*dpr || c.height !== h*dpr) { c.width = w*dpr; c.height = h*dpr; }
+  const ctx = c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  return {ctx, w, h};
+}
+const redraws = [];
+function redrawAll(){ redraws.forEach(f => f()); }
+let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(redrawAll, 80); });
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+if (mq.addEventListener) mq.addEventListener('change', redrawAll);
+new MutationObserver(redrawAll).observe(root, {attributes:true, attributeFilter:['data-theme']});
+
+function niceTicks(max, count){
+  const raw = max / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const step = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag;
+  const t = []; for (let v = 0; v <= max + 1e-9; v += step) t.push(v); return t;
+}
+function stepFmt(ticks){ const st = ticks.length > 1 ? ticks[1] - ticks[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9)); return v => v.toFixed(d); }
+function yGrid(ctx, X0, X1, ys, ticks, fmt){
+  ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ticks.forEach(v => {
+    const y = Math.round(ys(v)) + .5;
+    ctx.strokeStyle = C('--line'); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X0, y); ctx.lineTo(X1, y); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.fillText(fmt(v), X0 - 6, y);
+  });
+}
+function intStep(px, minPx){
+  for (const s of [1,2,5,10,20,25,50,100]) if (s * px >= minPx) return s;
+  return 100;
+}
+function roundRect(ctx, x, y, w, h, r){
+  r = Math.max(0, Math.min(r, w/2, Math.abs(h)/2));
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+function dot(ctx, x, y, r){ ctx.beginPath(); ctx.arc(x, y, Math.max(0.5, r), 0, TAU); ctx.fill(); }
+function vline(ctx, x, y0, y1, color, dash, lw){
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw || 1.5; if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(Math.round(x) + .5, y0); ctx.lineTo(Math.round(x) + .5, y1); ctx.stroke(); ctx.restore();
+}
+/* integer-valued bar charts: bars at k = lo..hi */
+function frame(ctx, w, h, o){
+  const X0 = o.left != null ? o.left : 40, X1 = w - 10, Y0 = h - 24, Y1 = o.top != null ? o.top : 12;
+  const span = o.hi - o.lo + 1, bw = (X1 - X0) / span;
+  const xc = k => X0 + bw * (k - o.lo + .5), ys = v => Y0 - (v / o.ymax) * (Y0 - Y1);
+  const t = niceTicks(o.ymax, 3).filter(v => v <= o.ymax * 1.0001); yGrid(ctx, X0, X1, ys, t, o.yfmt || stepFmt(t));
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  const st = o.step || intStep(bw, 24);
+  for (let k = Math.ceil(o.lo / st) * st; k <= o.hi; k += st) ctx.fillText(o.lab ? o.lab(k) : k, xc(k), Y0 + 6);
+  return {X0, X1, Y0, Y1, bw, xc, ys};
+}
+function drawBars(ctx, F, lo, hi, val, color, frac){
+  const bwid = Math.max(1, F.bw * (frac == null ? .8 : frac));
+  for (let k = lo; k <= hi; k++) {
+    const v = val(k); if (!(v > 0)) continue;
+    const y = F.ys(v), hh = F.Y0 - y; if (hh < 0.2) continue;
+    const x = F.xc(k) - bwid / 2;
+    ctx.fillStyle = typeof color === 'function' ? color(k) : color;
+    if (bwid >= 6 && hh >= 3) { roundRect(ctx, x, y, bwid, hh, Math.min(3, bwid / 4)); ctx.fill(); }
+    else ctx.fillRect(x, y, bwid, hh);
+  }
+}
+function emptyNote(ctx, w, h, text){
+  ctx.fillStyle = C('--ink-3'); ctx.font = '13px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(text, w / 2, h / 2 - 8);
+}
+
+/* randomness */
+let spare = null;
+function gauss(){
+  if (spare != null) { const s = spare; spare = null; return s; }
+  let u = 0, v = 0; while (u === 0) u = Math.random(); v = Math.random();
+  const r = Math.sqrt(-2 * Math.log(u)); spare = r * Math.sin(TAU * v); return r * Math.cos(TAU * v);
+}
+function shuffled(a){ const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; }
+function corr(x, y){
+  const n = x.length; let mx = 0, my = 0; for (let i = 0; i < n; i++) { mx += x[i]; my += y[i]; } mx /= n; my /= n;
+  let sxy = 0, sxx = 0, syy = 0; for (let i = 0; i < n; i++) { const a = x[i] - mx, b = y[i] - my; sxy += a * b; sxx += a * a; syy += b * b; }
+  return sxy / Math.sqrt(sxx * syy);
+}
+function binom(n, p){ let k = 0; for (let i = 0; i < n; i++) if (Math.random() < p) k++; return k; }
+function flips(n){ const a = new Array(n); for (let i = 0; i < n; i++) a[i] = Math.random() < .5 ? 1 : 0; return a; }
+function longestRun(a){
+  let best = 1, cur = 1, start = 0, bs = 0;
+  for (let i = 1; i < a.length; i++) { if (a[i] === a[i-1]) cur++; else { cur = 1; start = i; } if (cur > best) { best = cur; bs = start; } }
+  return {len: best, start: bs};
+}
+function switches(a){ let s = 0; for (let i = 1; i < a.length; i++) if (a[i] !== a[i-1]) s++; return s; }
+const RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+function ticksIn(lo, hi, count){
+  const raw = (hi - lo) / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const st = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag, t = [];
+  for (let v = Math.ceil(lo / st - 1e-9) * st; v <= hi + 1e-9; v += st) t.push(+v.toFixed(10));
+  return t;
+}
+function xAxis(ctx, X0, X1, Y0, lo, hi, fmt){
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  const t = ticksIn(lo, hi, Math.max(2, Math.floor((X1 - X0) / 60)));
+  const st = t.length > 1 ? t[1] - t[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9));
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  t.forEach(v => ctx.fillText(fmt ? fmt(v) : v.toFixed(d), X0 + (v - lo) / (hi - lo) * (X1 - X0), Y0 + 5));
+}
+function label(ctx, x, y, text, color, X0, X1){
+  ctx.font = '600 11px ' + MONO; ctx.fillStyle = color; ctx.textBaseline = 'top';
+  const right = x > (X0 + X1) / 2; ctx.textAlign = right ? 'right' : 'left';
+  ctx.fillText(text, x + (right ? -5 : 5), y);
+}
+
+function bar(ctx, x, w, y, Y0, color){
+  const hh = Y0 - y; if (!(hh > .2)) return;
+  ctx.fillStyle = color;
+  if (w >= 6 && hh >= 3) { roundRect(ctx, x, y, w, hh, Math.min(3, w / 4)); ctx.fill(); } else ctx.fillRect(x, y, w, hh);
+}
+
+
+/* ---------- shared ---------- */
+const MG = 100, MB = 97, SD = 3, NBAG = 4, SE4 = SD / Math.sqrt(NBAG), ROBOT = 98.5, NGOOD = 30, NBAD = 20;
+function erfc(x){
+  const z = Math.abs(x), t = 1 / (1 + .5 * z);
+  const r = t * Math.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (.37409196 + t * (.09678418 + t * (-.18628806 + t * (.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-.82215223 + t * .17087277)))))))));
+  return x >= 0 ? r : 2 - r;
+}
+const Phi = z => .5 * erfc(-z / Math.SQRT2);
+const alphaAt = (c, se) => Phi((c - MG) / se);
+const betaAt = (c, se) => 1 - Phi((c - MB) / se);
+const pc = (x, d) => (100 * x).toFixed(d == null ? 0 : d) + '%';
+const g1 = x => x.toFixed(1) + ' g';
+
+function makeGame(){
+  const flags = shuffled(Array.from({length: NGOOD + NBAD}, (_, i) => i < NBAD));
+  return flags.map(bad => {
+    const w = []; for (let i = 0; i < NBAG; i++) w.push(Math.round(10 * ((bad ? MB : MG) + SD * gauss())) / 10);
+    return {bad, w, avg: w.reduce((a, b) => a + b, 0) / NBAG};
+  });
+}
+function tally(b, dec){
+  let fa = 0, mi = 0, nG = 0, nB = 0, rej = 0;
+  b.forEach((x, i) => { if (dec[i]) rej++; if (x.bad) { nB++; if (!dec[i]) mi++; } else { nG++; if (dec[i]) fa++; } });
+  return {fa, mi, nG, nB, rej, right: b.length - fa - mi};
+}
+const ruleDec = (b, c) => b.map(x => x.avg < c);
+let GAME = null; const listeners = [];
+function setGame(g){ GAME = g; g.t = tally(g.b, g.dec); listeners.forEach(f => f()); }
+const whoName = () => GAME.who === 'you' ? 'you' : GAME.who === 'mixed' ? 'you + rule' : 'sample';
+
+/* false alarm rate (across) against miss rate (up): every cutoff traces a curve */
+function drawTrade(cv, o){
+  const {ctx, w, h} = fit(cv), SH = h - 58, SW = Math.min(w - 74, SH * 1.5), X0 = Math.max(56, (w - SW) / 2 + 18), X1 = X0 + SW, Y1 = 10, Y0 = Y1 + SH;
+  const xs = a => X0 + a * (X1 - X0), ys = b => Y0 - b * (Y0 - Y1);
+  yGrid(ctx, X0, X1, ys, [0, .25, .5, .75, 1], v => Math.round(v * 100) + '%');
+  xAxis(ctx, X0, X1, Y0, 0, 100, v => v + '%');
+  ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-2'); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  ctx.fillText('good batches rejected (false alarms) →', (X0 + X1) / 2, Y0 + 21);
+  ctx.save(); ctx.translate(X0 - 40, (Y0 + Y1) / 2); ctx.rotate(-Math.PI / 2); ctx.textBaseline = 'bottom'; ctx.fillText('drifted passed (misses) →', 0, 0); ctx.restore();
+  const curve = (se, col, lw, ga) => {
+    ctx.save(); ctx.globalAlpha = ga; ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.beginPath();
+    for (let i = 0; i <= 600; i++) { const c = 80 + i * .067, x = xs(alphaAt(c, se)), y = ys(betaAt(c, se)); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.stroke(); ctx.restore();
+  };
+  (o.others || []).forEach(se => curve(se, C('--ink-3'), 1.2, .5));
+  curve(o.se, C('--ink-2'), 2.2, 1);
+  ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textBaseline = 'bottom'; ctx.textAlign = 'left';
+  if (o.ends) { ctx.textAlign = 'right'; ctx.fillText('no rule reaches 0% and 0%', xs(1) - 2, ys(0) - 7); }
+  ctx.fillStyle = C('--zero'); dot(ctx, xs(0), ys(0), 4);
+  if (o.ends) { ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText('pass everything', xs(0) + 8, ys(1) + 2); }
+  if (o.cur != null) {
+    const x = xs(alphaAt(o.cur, o.se)), y = ys(betaAt(o.cur, o.se));
+    ctx.fillStyle = C('--surface'); dot(ctx, x, y, 7); ctx.fillStyle = C('--ink'); dot(ctx, x, y, 5);
+  }
+  if (o.game) {
+    const x = xs(o.game.a), y = ys(o.game.b);
+    ctx.fillStyle = C('--surface'); dot(ctx, x, y, 8); ctx.fillStyle = C('--gold'); dot(ctx, x, y, 6);
+    label(ctx, x, y - 20, o.game.name, C('--gold'), X0, X1);
+  }
+}
+
+/* ---------- hero: the inspector game ---------- */
+(function(){
+  const cv = $('#heroGame'), hint = $('#heroHint'), strip = $('#heroStrip'), LO = 86, HI = 112;
+  let b = [], dec = [], i = 0, mode = 'play', who = 'you', nYou = 0;
+  const LEG_PLAY = '<span><i class="sw dot" style="background:var(--accent)"></i><span>one bag</span></span><span><i class="sw line" style="border-top:2.5px solid var(--accent)"></i><span>average of the 4 bags</span></span>';
+  const LEG_DONE = '<span><i class="sw dot" style="background:var(--gold)"></i><span>your result</span></span><span><i class="sw line" style="border-top:2px solid var(--ink-2)"></i><span>every rule “reject below some weight”</span></span>';
+  function paintStrip(){ $$('span', strip).forEach((s, k) => { s.className = k < dec.length ? (dec[k] === b[k].bad ? 'r' : 'w') : (k === i && mode === 'play') ? 'c' : ''; }); }
+  function newGame(){
+    b = makeGame(); dec = []; i = 0; mode = 'play'; who = 'you'; nYou = 0;
+    strip.innerHTML = b.map(() => '<span></span>').join('');
+    $('#heroBtns').hidden = false; $('#heroSkip').hidden = false; $('#heroAgain').hidden = true;
+    $('#heroLegend').innerHTML = LEG_PLAY;
+    hint.innerHTML = 'Look at the 4 bags and their average, then pass or reject the batch. (Keys P and R work too.)';
+    paintStrip(); draw();
+  }
+  function drawPlay(){
+    const {ctx, w, h} = fit(cv), X0 = 16, X1 = w - 16, Y0 = h - 24, xs = v => X0 + (Math.max(LO, Math.min(HI, v)) - LO) / (HI - LO) * (X1 - X0);
+    xAxis(ctx, X0, X1, Y0, LO, HI, v => v + ' g');
+    vline(ctx, xs(MB), 20, Y0, C('--ink-3'), [4, 4], 1.2); vline(ctx, xs(MG), 20, Y0, C('--ink-3'), [4, 4], 1.2);
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-2'); ctx.textBaseline = 'top';
+    ctx.textAlign = 'right'; ctx.fillText('drifted: 97 g', xs(MB) - 5, 4);
+    ctx.textAlign = 'left'; ctx.fillText('good: 100 g', xs(MG) + 5, 4);
+    const cur = b[i]; if (!cur) return;
+    const xa = xs(cur.avg), bw = Math.max(30, Math.min(42, w / 14)), bh = bw * 1.15, gap = 6;
+    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(Math.round(xa) + .5, 44); ctx.lineTo(Math.round(xa) + .5, Y0); ctx.stroke();
+    const placed = [];
+    cur.w.forEach(v => {
+      const x = xs(v); let row = 0;
+      while (placed.some(p => p.row === row && Math.abs(p.x - x) < bw + 3)) row++;
+      placed.push({x, row});
+      const y = Y0 - 8 - (row + 1) * (bh + gap);
+      ctx.strokeStyle = C('--accent'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, y + bh); ctx.lineTo(x, Y0); ctx.stroke();
+      ctx.fillStyle = C('--accent'); roundRect(ctx, x - bw / 2, y + bh * .16, bw, bh * .84, 4); ctx.fill();
+      ctx.fillRect(x - bw * .42, y, bw * .84, bh * .12);
+      ctx.fillStyle = '#fff'; ctx.font = '600 ' + Math.round(bw / 3.6) + 'px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(v.toFixed(1), x, y + bh * .58);
+      ctx.fillStyle = C('--accent'); dot(ctx, x, Y0, 3);
+    });
+    ctx.font = '600 12px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const lab = 'average ' + g1(cur.avg), lw = ctx.measureText(lab).width / 2 + 6, lx = Math.max(X0 + lw, Math.min(X1 - lw, xa));
+    ctx.fillStyle = C('--surface'); roundRect(ctx, lx - lw, 26, 2 * lw, 18, 9); ctx.fill();
+    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.fillStyle = C('--accent'); ctx.fillText(lab, lx, 35.5);
+    $('#heroCount').textContent = `batch ${i + 1} of ${b.length}`;
+  }
+  function draw(){
+    if (mode === 'play') return drawPlay();
+    const t = tally(b, dec);
+    drawTrade(cv, {se: SE4, ends: true, game: {a: t.fa / t.nG, b: t.mi / t.nB, name: who === 'robot' ? 'the rule' : 'you'}});
+  }
+  function decide(rej){
+    if (mode !== 'play') return;
+    const cur = b[i]; dec.push(rej); nYou++; i++;
+    const ok = rej === cur.bad;
+    hint.innerHTML = `Batch ${i} ${cur.bad ? '<b>had drifted</b>' : '<b>was good</b>'} (its bags averaged ${g1(cur.avg)}); you ${rej ? 'rejected' : 'passed'} it: ${ok ? '<span class="ok">right</span>' : `<span class="warn">wrong, a ${rej ? 'false alarm' : 'miss'}</span>`}.`;
+    if (i >= b.length) return finish();
+    paintStrip(); draw();
+  }
+  function finish(){
+    mode = 'done'; paintStrip();
+    const t = tally(b, dec);
+    $('#heroBtns').hidden = true; $('#heroSkip').hidden = true; $('#heroAgain').hidden = false;
+    $('#heroLegend').innerHTML = LEG_DONE;
+    const lead = who === 'robot' ? 'Played for you with the rule “reject if the average is below 98.5 g”. It'
+      : who === 'mixed' ? `You judged ${nYou} batches and the rule “reject below 98.5 g” did the rest. Together you` : 'You';
+    hint.innerHTML = `${lead} rejected <b>${t.fa} of the ${t.nG} good batches</b> (${pc(t.fa / t.nG)}) and passed <b>${t.mi} of the ${t.nB} drifted ones</b> (${pc(t.mi / t.nB)}): <b>${t.right} of 50 right</b>. ` +
+      'The curve shows every rule of the form “reject if the average is below some weight”. Moving along it swaps one kind of mistake for the other, and no rule reaches the corner where nothing goes wrong.';
+    draw();
+    setGame({b, dec: dec.slice(), who, nYou});
+  }
+  $('#heroPass').addEventListener('click', () => decide(false));
+  $('#heroReject').addEventListener('click', () => decide(true));
+  $('#heroPlay').addEventListener('keydown', e => {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    const k = e.key.toLowerCase(); if (k === 'p') decide(false); else if (k === 'r') decide(true);
+  });
+  $('#heroSkip').addEventListener('click', () => {
+    while (i < b.length) { dec.push(b[i].avg < ROBOT); i++; }
+    who = nYou ? 'mixed' : 'robot'; finish();
+  });
+  $('#heroAgain').addEventListener('click', newGame);
+  newGame(); redraws.push(draw);
+})();
+
+/* ---------- 1. the 50 batches laid out ---------- */
+(function(){
+  const cv = $('#yoChart'), LO = 91, HI = 106;
+  let cut = ROBOT, drag = false;
+  const geo = () => { const w = cv.getBoundingClientRect().width; return {X0: 16, X1: w - 16}; };
+  function best(){
+    const b = GAME.b, cs = b.map(x => x.avg).sort((a, c) => a - c);
+    const cand = [cs[0] - .05]; for (let k = 1; k < cs.length; k++) cand.push((cs[k - 1] + cs[k]) / 2); cand.push(cs[cs.length - 1] + .05);
+    let bc = ROBOT, br = -1;
+    cand.forEach(c => { const r = tally(b, ruleDec(b, c)).right; if (r > br || (r === br && Math.abs(c - ROBOT) < Math.abs(bc - ROBOT))) { br = r; bc = c; } });
+    return {c: bc, right: br};
+  }
+  function consistency(){
+    const b = GAME.b, cs = b.map(x => x.avg).sort((a, c) => a - c); let m = 0;
+    [cs[0] - .05, ...cs.map((v, k) => k ? (cs[k - 1] + v) / 2 : null).filter(v => v != null), cs[cs.length - 1] + .05]
+      .forEach(c => { const d = ruleDec(b, c); let a = 0; d.forEach((x, k) => { if (x === GAME.dec[k]) a++; }); m = Math.max(m, a); });
+    return b.length - m;
+  }
+  function draw(){
+    if (!GAME) return;
+    const {ctx, w, h} = fit(cv), {X0, X1} = geo(), Y0 = h - 24, xs = v => X0 + (Math.max(LO, Math.min(HI, v)) - LO) / (HI - LO) * (X1 - X0);
+    const rows = [{bad: false, y: 52, name: `good batches (${GAME.t.nG})`}, {bad: true, y: 122, name: `drifted batches (${GAME.t.nB})`}];
+    ctx.fillStyle = C('--gold-soft'); ctx.globalAlpha = .55; ctx.fillRect(X0, 18, xs(cut) - X0, Y0 - 18); ctx.globalAlpha = 1;
+    xAxis(ctx, X0, X1, Y0, LO, HI, v => v + ' g');
+    ctx.font = '11px ' + MONO; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+    rows.forEach(r => { ctx.fillStyle = r.bad ? C('--accent') : C('--ink-2'); ctx.fillText(r.name, X0 + 2, r.y - 22); });
+    GAME.b.forEach((x, k) => {
+      const r = rows[x.bad ? 1 : 0], y = r.y + (((k * 37) % 11) - 5) * 2.6, px = xs(x.avg), rej = GAME.dec[k], ok = rej === x.bad, col = ok ? C('--one') : C('--zero');
+      if (rej) { ctx.fillStyle = col; dot(ctx, px, y, 5); }
+      else { ctx.fillStyle = C('--surface'); dot(ctx, px, y, 5); ctx.strokeStyle = col; ctx.lineWidth = 1.8; ctx.beginPath(); ctx.arc(px, y, 4.2, 0, TAU); ctx.stroke(); }
+    });
+    vline(ctx, xs(cut), 18, Y0, C('--gold'), null, 2.5);
+    ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--gold'); ctx.textBaseline = 'top';
+    const right = xs(cut) > (X0 + X1) * .6; ctx.textAlign = right ? 'right' : 'left';
+    ctx.fillText('rule: reject below ' + g1(cut), xs(cut) + (right ? -6 : 6), 2);
+    const rt = tally(GAME.b, ruleDec(GAME.b, cut)), t = GAME.t, bb = best(), inc = consistency();
+    const whoLine = GAME.who === 'you' ? 'your decisions' : GAME.who === 'mixed' ? 'your decisions + the rule' : 'the sample game (rule 98.5 g)';
+    $('#yoRead').innerHTML =
+      `rule “reject below ${g1(cut)}” on these 50: false alarms <b>${rt.fa}</b> of ${rt.nG} · misses <b>${rt.mi}</b> of ${rt.nB} · <b>${rt.right}</b> right` +
+      `<br>${whoLine}: false alarms <b>${t.fa}</b> · misses <b>${t.mi}</b> · <b>${t.right}</b> right` +
+      `<br>best single cutoff, chosen with hindsight: <b>${bb.right}</b> right (reject below ${g1(bb.c)})${bb.right === 50 ? ', a rare lucky set where the rows don’t overlap' : ', still not 50'}` +
+      (GAME.who === 'you' ? `<br>${inc === 0 ? '<span class="ok">Your decisions match a single cutoff exactly</span>: you were using a rule, whether you knew it or not.' : `No single cutoff matches all your decisions: ${inc} of them disagree with the closest rule.`}` : '');
+  }
+  const toV = e => { const r = cv.getBoundingClientRect(), {X0, X1} = geo(); return Math.round(10 * Math.max(LO + .5, Math.min(HI - .5, LO + (e.clientX - r.left - X0) / (X1 - X0) * (HI - LO)))) / 10; };
+  cv.addEventListener('pointerdown', e => { drag = true; cut = toV(e); try { cv.setPointerCapture(e.pointerId); } catch (_) {} draw(); });
+  cv.addEventListener('pointermove', e => { if (drag) { cut = toV(e); draw(); } });
+  cv.addEventListener('pointerup', () => drag = false); cv.addEventListener('pointercancel', () => drag = false);
+  $('#yoBest').addEventListener('click', () => { cut = Math.round(100 * best().c) / 100; draw(); });
+  listeners.push(() => {
+    cut = ROBOT;
+    $('#yoWho').textContent = GAME.who === 'you' ? 'Your 50 decisions from the game above.' : GAME.who === 'mixed' ? 'Your decisions, with the rule finishing the game.'
+      : 'A sample game, played with the rule “reject below 98.5 g”. Play the game above to see your own decisions here.';
+    draw();
+  });
+  redraws.push(draw);
+})();
+
+/* ---------- 2. the four outcomes ---------- */
+listeners.push(() => {
+  const t = GAME.t, you = GAME.who === 'robot' || GAME.who === 'sample' ? 'The rule' : 'You';
+  $('#cmBox').innerHTML = `<table class="cm">
+    <thead><tr><th></th><th>Batch was good (${t.nG})</th><th>Batch had drifted (${t.nB})</th></tr></thead>
+    <tbody>
+      <tr><th>${you} passed it</th><td class="okc"><b class="n">${t.nG - t.fa}</b>right</td><td class="badc"><b class="n">${t.mi}</b><strong>miss</strong><small>a drifted batch let through · type II error</small></td></tr>
+      <tr><th>${you} rejected it</th><td class="badc"><b class="n">${t.fa}</b><strong>false alarm</strong><small>a good batch scrapped · type I error</small></td><td class="okc"><b class="n">${t.nB - t.mi}</b>right</td></tr>
+    </tbody></table>`;
+  $('#cmRead').innerHTML = `false alarm rate α: ${t.fa} of ${t.nG} good batches = <b>${pc(t.fa / t.nG)}</b> · miss rate β: ${t.mi} of ${t.nB} drifted = <b>${pc(t.mi / t.nB)}</b>` +
+    `<br>a different share: of the ${t.rej} batches rejected, ${t.fa} were good = <b>${t.rej ? pc(t.fa / t.rej) : '–'}</b>`;
+});
+
+/* ---------- 3. two curves and a cutoff ---------- */
+(function(){
+  const cv = $('#thCurves'), LO = 86, HI = 111, NS = [1, 2, 4, 8, 16];
+  let n = 4, cut = ROBOT, drag = false;
+  const se = () => SD / Math.sqrt(n);
+  const geo = () => { const w = cv.getBoundingClientRect().width; return {X0: 12, X1: w - 12}; };
+  function draw(){
+    const {ctx, w, h} = fit(cv), {X0, X1} = geo(), Y0 = h - 22, Y1 = 34, s = se();
+    const xs = v => X0 + (v - LO) / (HI - LO) * (X1 - X0), ys = d => Y0 - d * (Y0 - Y1), pdf = (v, m) => Math.exp(-.5 * ((v - m) / s) ** 2);
+    const area = (m, a, b2, col, ga) => {
+      ctx.save(); ctx.globalAlpha = ga; ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(xs(a), Y0);
+      for (let i = 0; i <= 160; i++) { const v = a + (b2 - a) * i / 160; ctx.lineTo(xs(v), ys(pdf(v, m))); }
+      ctx.lineTo(xs(b2), Y0); ctx.closePath(); ctx.fill(); ctx.restore();
+    };
+    area(MG, LO, cut, C('--zero'), .42); area(MB, cut, HI, C('--accent'), .34);
+    [[MG, C('--ink-3')], [MB, C('--accent')]].forEach(([m, col]) => {
+      ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.beginPath();
+      for (let i = 0; i <= 300; i++) { const v = LO + (HI - LO) * i / 300; i ? ctx.lineTo(xs(v), ys(pdf(v, m))) : ctx.moveTo(xs(v), ys(pdf(v, m))); }
+      ctx.stroke();
+    });
+    xAxis(ctx, X0, X1, Y0, LO, HI, v => v + ' g');
+    ctx.font = '11px ' + MONO; ctx.textBaseline = 'bottom';
+    ctx.fillStyle = C('--ink-2'); ctx.textAlign = 'left'; ctx.fillText('good', xs(MG) + 4, Y1 - 3);
+    ctx.fillStyle = C('--accent'); ctx.textAlign = 'right'; ctx.fillText('drifted', xs(MB) - 4, Y1 - 3);
+    vline(ctx, xs(cut), 16, Y0, C('--gold'), null, 2.5);
+    ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--gold'); ctx.textBaseline = 'top'; ctx.textAlign = 'center';
+    const lab = 'cutoff ' + g1(cut), lw = ctx.measureText(lab).width / 2 + 2;
+    ctx.fillText(lab, Math.max(X0 + lw, Math.min(X1 - lw, xs(cut))), 1);
+    ctx.font = '11px ' + MONO; ctx.textBaseline = 'bottom';
+    ctx.fillStyle = C('--ink'); ctx.textAlign = 'right'; ctx.fillText('← reject', xs(cut) - 6, Y0 - 3);
+    ctx.textAlign = 'left'; ctx.fillText('pass →', xs(cut) + 6, Y0 - 3);
+    const showGame = n === 4 && GAME;
+    drawTrade($('#thTrade'), {se: s, cur: cut, others: NS.filter(m => m !== n).map(m => SD / Math.sqrt(m)),
+      game: showGame ? {a: GAME.t.fa / GAME.t.nG, b: GAME.t.mi / GAME.t.nB, name: whoName()} : null});
+    $('#thRead').innerHTML = `${n} bag${n > 1 ? 's' : ''} per batch · cutoff <b>${g1(cut)}</b> · false alarm rate <b style="color:var(--zero)">α = ${pc(alphaAt(cut, s), 1)}</b> · miss rate <b style="color:var(--accent)">β = ${pc(betaAt(cut, s), 1)}</b>`;
+  }
+  const toV = e => { const r = cv.getBoundingClientRect(), {X0, X1} = geo(); return Math.round(10 * Math.max(LO + 1, Math.min(HI - 1, LO + (e.clientX - r.left - X0) / (X1 - X0) * (HI - LO)))) / 10; };
+  cv.addEventListener('pointerdown', e => { drag = true; cut = toV(e); try { cv.setPointerCapture(e.pointerId); } catch (_) {} draw(); });
+  cv.addEventListener('pointermove', e => { if (drag) { cut = toV(e); draw(); } });
+  cv.addEventListener('pointerup', () => drag = false); cv.addEventListener('pointercancel', () => drag = false);
+  $$('[data-n]').forEach(bt => bt.addEventListener('click', () => { n = +bt.dataset.n; $$('[data-n]').forEach(x => { x.classList.toggle('on', x === bt); x.setAttribute('aria-pressed', x === bt); }); draw(); }));
+  $('#thA5').addEventListener('click', () => { cut = MG - 1.6449 * se(); draw(); });
+  $('#thEq').addEventListener('click', () => { cut = (MG + MB) / 2; draw(); });
+  listeners.push(draw); redraws.push(draw);
+})();
+
+/* ---------- 4. costs ---------- */
+(function(){
+  const RS = [.1, .2, .5, 1, 2, 5, 10, 20, 50], FS = [.01, .05, .1, .2, .4, .6], rIn = $('#coR'), fIn = $('#coF'), LO = 91, HI = 105;
+  function draw(){
+    const r = RS[+rIn.value], f = FS[+fIn.value];
+    const fa = c => 100 * (1 - f) * alphaAt(c, SE4), mi = c => 100 * f * r * betaAt(c, SE4), tot = c => fa(c) + mi(c);
+    let bc = LO, bv = Infinity; for (let c = LO; c <= HI; c += .01) { const v = tot(c); if (v < bv) { bv = v; bc = c; } }
+    let top = 0; for (let c = LO; c <= HI; c += .1) top = Math.max(top, tot(c));
+    const ymax = Math.min(top, Math.max(4 * bv, 6));
+    const {ctx, w, h} = fit($('#coChart')), X0 = 44, X1 = w - 14, Y0 = h - 24, Y1 = 22;
+    const xs = c => X0 + (c - LO) / (HI - LO) * (X1 - X0), ys = v => Y0 - v / ymax * (Y0 - Y1);
+    const tk = niceTicks(ymax, 3); yGrid(ctx, X0, X1, ys, tk, stepFmt(tk));
+    xAxis(ctx, X0, X1, Y0, LO, HI, v => v + ' g');
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText('cost per 100 batches', X0 + 4, 2);
+    ctx.save(); ctx.beginPath(); ctx.rect(X0, Y1 - 8, X1 - X0, Y0 - Y1 + 8); ctx.clip();
+    [[fa, C('--zero'), 1.8], [mi, C('--accent'), 1.8], [tot, C('--ink'), 2.6]].forEach(([fn, col, lw]) => {
+      ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.beginPath();
+      for (let i = 0; i <= 280; i++) { const c = LO + (HI - LO) * i / 280, x = xs(c), y = ys(fn(c)); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+      ctx.stroke();
+    });
+    ctx.restore();
+    vline(ctx, xs(bc), Y1 - 6, Y0, C('--gold'), [4, 3], 1.5);
+    ctx.fillStyle = C('--surface'); dot(ctx, xs(bc), ys(bv), 8); ctx.fillStyle = C('--gold'); dot(ctx, xs(bc), ys(bv), 6);
+    label(ctx, xs(bc), Y1 - 6, 'cheapest: reject below ' + g1(bc), C('--gold'), X0, X1);
+    $('#coROut').textContent = (r < 1 ? '1/' + fmtN(1 / r) : fmtN(r)) + ' unit' + (r === 1 ? '' : 's');
+    $('#coFOut').textContent = pc(f);
+    $('#coRead').innerHTML = `cheapest rule: <b>reject below ${g1(bc)}</b> · false alarm rate <b style="color:var(--zero)">${pc(alphaAt(bc, SE4), 1)}</b> · miss rate <b style="color:var(--accent)">${pc(betaAt(bc, SE4), 1)}</b> · cost about <b>${bv.toFixed(1)}</b> units per 100 batches`;
+  }
+  rIn.addEventListener('input', draw); fIn.addEventListener('input', draw);
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 5. quiz ---------- */
+(function(){
+  const Q = [
+    {s: 'Predict: you move the cutoff so that more batches get rejected. What happens to false alarms?',
+     o: ['They go up', 'They go down', 'They stay the same'], a: 0,
+     e: 'Rejecting more catches more drifted batches (fewer misses) but also scraps more good ones (more false alarms). That is the trade.'},
+    {s: 'Predict: which change can cut false alarms and misses at the same time?',
+     o: ['Moving the cutoff', 'Weighing more bags per batch', 'Deciding faster'], a: 1,
+     e: 'The cutoff only slides you along the trade-off curve. More bags make the two humps overlap less, which moves the whole curve toward the corner.'},
+    {s: 'A test uses α = 5%. Which reading is <em>wrong</em>?',
+     o: ['When nothing is going on, it raises a false alarm 5% of the time', '5% of its “significant” results are false alarms', 'α says nothing about how often it misses a real effect'], a: 1,
+     e: 'α counts false alarms among the cases where nothing is going on. The share of alarms that are false depends on how often there is something real to find, and on the miss rate.'},
+    {s: 'A smoke alarm’s designers should mostly avoid…',
+     o: ['false alarms', 'misses'], a: 1,
+     e: 'A miss can kill; a false alarm costs a moment’s annoyance. So alarms are made sensitive and go off at burnt toast.'},
+    {s: 'In a criminal trial, “innocent until proven guilty” makes innocence the starting assumption. Convicting an innocent person is then…',
+     o: ['a false alarm (type I error)', 'a miss (type II error)'], a: 0,
+     e: 'Rejecting the starting assumption when it is true is a false alarm. “Beyond reasonable doubt” keeps that rate low, at the price of more misses.'},
+    {s: 'A small study of a new drug finds p = 0.3. What follows?',
+     o: ['The drug doesn’t work', 'The drug might work, and the study missed it'], a: 1,
+     e: 'Failing to reject chance alone is not proof of no effect. A small study can easily miss a real one: its β may be large. That is the next page.'},
+    {s: 'In the fable, the villagers ignore the boy’s last cry, and this time the wolf is real. That mistake is…',
+     o: ['a false alarm', 'a miss'], a: 1,
+     e: 'Something real was going on and they didn’t act: a miss, or type II error. Their earlier run to a wolf that wasn’t there was the false alarm.'}
+  ];
+  const box = $('#quiz'); let answered = 0, right = 0;
+  Q.forEach(qq => {
+    const d = document.createElement('div'); d.className = 'qitem';
+    d.innerHTML = `<p>${qq.s}</p><div class="qbtns">${qq.o.map((t, i) => `<button class="btn" data-i="${i}">${t}</button>`).join('')}</div><p class="qexp" hidden></p>`;
+    const exp = d.querySelector('.qexp');
+    d.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      const ok = +b.dataset.i === qq.a;
+      if (!d.dataset.done) { d.dataset.done = '1'; answered++; if (ok) right++; }
+      d.querySelectorAll('button').forEach(x => x.classList.remove('right', 'wrong'));
+      b.classList.add(ok ? 'right' : 'wrong');
+      exp.hidden = false; exp.innerHTML = `<b>${ok ? '✓ Right.' : '✗ Not quite.'}</b> ${qq.e}`;
+      $('#quizScore').textContent = `${answered} of ${Q.length} answered · ${right} right on the first try`;
+    }));
+    box.appendChild(d);
+  });
+})();
+
+/* a sample game so sections 1–3 have something to show before the reader plays */
+(function(){ const b = makeGame(); setGame({b, dec: ruleDec(b, ROBOT), who: 'sample', nYou: 0}); })();
+
+})();
+</script>
+</body>
+</html>
