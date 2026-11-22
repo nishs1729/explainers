@@ -28,7 +28,7 @@ See [Statistics: how every page works](#statistics-conventions) first.
 - [x] [5. The bootstrap](https://nishs1729.github.io/explainers/statistics/bootstrap.html)
 - [x] [6. Shuffling to test](https://nishs1729.github.io/explainers/statistics/permutation-tests.html)
 - [x] [7. p-values](https://nishs1729.github.io/explainers/statistics/p-values.html)
-- [ ] [8. Confidence intervals](#confidence-intervals)
+- [x] [8. Confidence intervals](https://nishs1729.github.io/explainers/statistics/confidence-intervals.html)
 - [ ] [9. Errors and decisions](#errors)
 - [ ] [10. Power and sample size](#power)
 - [ ] [11. Student's t](#student-t)
@@ -388,6 +388,8 @@ Assumes the probability series, especially Normal (CLT, √n law) and Chi-square
 > **Data:** button test (interval for the difference includes 0).
 >
 > **Links:** builds on Binomial (its CI section), Normal, The bootstrap, p-values.
+>
+> **Built:** the hero asks how many of 100 poll intervals miss (None / about 5 / about 25 / about half), then adds 100 polls of 1,000 from 50.6% as stacked bars every 25 ms (via setInterval, so it works in background tabs), with misses in red. Section 1 shows the sampling bell with its middle 95% shaded and a draggable poll whose ±3.1 interval turns green or red. The interval rain offers 80/90/95/99% and n = 25–6,400 (default 400), keeps the last 60 rows and a coverage counter; the text notes that the simple interval covers only ~93% at n = 25. Section 3 has a width table (95%: ±9.8/4.9/3.1/1.5/1.0; 99%: ±12.9/6.4/4.1/2.0/1.3). Section 4 has a slider for orange's clicks with the CI for the gap (unpooled SE) beside the matching z-test p: at 64, −0.6 to +3.4 and p = 0.177; 0 drops out at 72, p = 0.040. Section 5 plots exact coverage of the simple and Wilson intervals against p for n = 10–1,000 (n = 20, p = 5%: 64% vs 92%; 0 of 20 → Wilson 0–16.1%). Section 6 is a static misreadings table (including that a repeat poll lands inside the first interval ~83% of the time).
 
 <a id="errors"></a>
 ### **9. Errors and decisions**

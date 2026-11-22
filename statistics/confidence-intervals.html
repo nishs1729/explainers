@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Confidence Intervals — a visual introduction</title>
+<style>
+:root{
+  --bg:#faf8f4; --surface:#ffffff; --surface-2:#f2efe8; --ink:#1c1c1e; --ink-2:#4c4e55; --ink-3:#8b8d93; --line:#e3dfd5;
+  --one:#16917c; --one-soft:rgba(22,145,124,.15);
+  --zero:#d9573a; --zero-soft:rgba(217,87,58,.15);
+  --accent:#3654c9; --accent-soft:rgba(54,84,201,.11);
+  --gold:#b98317; --gold-soft:rgba(185,131,23,.22);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+    --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+    --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+    --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+    --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+  --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+  --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+  --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+  --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.68 var(--sans);-webkit-font-smoothing:antialiased}
+main{max-width:820px;margin:0 auto;padding:0 20px 80px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;letter-spacing:-.01em}
+h1{font-size:clamp(2.2rem,6vw,3.4rem);margin:.2em 0 .3em}
+h2{font-size:clamp(1.6rem,4vw,2.1rem);margin:0 0 .5em}
+h3{font-size:1.2rem;margin:1.6em 0 .4em}
+p{margin:0 0 1em}
+a{color:var(--accent)}
+strong{font-weight:650}
+em.term{font-style:normal;font-weight:650;color:var(--accent)}
+.muted{color:var(--ink-2)}
+small,.small{font-size:14px}
+
+/* hero */
+.hero{text-align:center;padding:64px 0 24px}
+.kicker{text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--ink-3);margin:0}
+.lede{font-size:1.2rem;color:var(--ink-2);max-width:620px;margin:0 auto}
+.hero-play{max-width:640px;margin:30px auto 0;text-align:left}
+.hero-play .controls{justify-content:center}
+.hint{font-size:15px;color:var(--ink-2);min-height:3.2em;margin:10px 0 0;text-align:center}
+.ask{font-family:var(--serif);font-size:1.25rem;text-align:center;margin:0 0 12px}
+
+.toc{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;margin:28px 0 8px}
+.toc ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 20px;counter-reset:t}
+.toc li{counter-increment:t;font-size:15px}
+.toc li::before{content:counter(t,decimal-leading-zero);font-family:var(--mono);color:var(--ink-3);margin-right:10px;font-size:13px}
+.toc a{color:var(--ink);text-decoration:none}
+.toc a:hover{color:var(--accent)}
+
+section{padding-top:56px}
+.secnum{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.08em;margin-bottom:4px}
+
+.widget{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin:26px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.widget-title{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);margin:0 0 12px;font-weight:600}
+.controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:12px 0}
+.ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:15px}
+.ctrl output{font-family:var(--mono);font-size:14px;min-width:5.5em;color:var(--ink)}
+input[type=range]{accent-color:var(--accent);width:170px;max-width:100%}
+.btn{font:inherit;font-size:14px;line-height:1.2;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;transition:background .15s,transform .1s}
+.btn:hover{border-color:var(--ink-3)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn.guess{background:var(--gold-soft);border-color:var(--gold);color:var(--ink)}
+.btn.right{background:var(--one-soft);border-color:var(--one);color:var(--one)}
+.btn.wrong{background:var(--zero-soft);border-color:var(--zero);color:var(--zero)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:6px}
+.readout{font-family:var(--mono);font-size:14px;color:var(--ink-2);line-height:1.6}
+.readout b{color:var(--ink);font-weight:600}
+.readout .ok{color:var(--one);font-weight:600}
+.readout .warn{color:var(--zero);font-weight:600}
+.readout .gd{color:var(--gold);font-weight:600}
+.msg{font-size:15px;color:var(--ink-2);min-height:3.4em;margin:10px 0 0}
+.msg b{color:var(--ink)}
+canvas{display:block;width:100%}
+.cap{font-size:13px;color:var(--ink-3);margin:2px 0 6px}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:20px 0}
+.callout p:last-child{margin-bottom:0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin-top:8px}
+.legend > span{display:inline-block}
+.legend .sw{vertical-align:middle;margin:0 6px 2px 0}
+.sw{display:inline-block;width:16px;height:10px;border-radius:2px}
+.sw.dot{width:8px;height:8px;border-radius:50%}
+.sw.line{height:0;border-top:2px solid var(--ink)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+@media (max-width:640px){.pair{grid-template-columns:1fr}}
+.mcap{font-size:13px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+
+/* cast */
+.cast-q{font-family:var(--serif);font-size:1.08rem;margin:0 0 10px}
+.datarow{font-family:var(--mono);font-size:14px;color:var(--ink-2);margin:0 0 6px}
+.datarow b{color:var(--ink)}
+
+/* recipe */
+.facts{counter-reset:f;list-style:none;padding:0;margin:18px 0}
+.facts li{counter-increment:f;position:relative;padding:12px 0 12px 44px;border-bottom:1px solid var(--line)}
+.facts li::before{content:counter(f);position:absolute;left:0;top:12px;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:600 13px var(--mono)}
+.facts li strong{display:block}
+.table-wrap{overflow-x:auto}
+table.summary{border-collapse:collapse;width:100%;font-size:15px;margin:14px 0}
+table.summary td,table.summary th{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3)}
+@media (max-width:480px){table.summary td,table.summary th{padding:8px 5px}}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:18px 0}
+.card{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
+.card h4{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+.card p{font-size:15px;margin:0;color:var(--ink-2)}
+
+/* quiz */
+.quiz{display:grid;gap:10px}
+.qitem{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg)}
+.qitem p{margin:0 0 8px;font-size:16px}
+.qbtns{display:flex;flex-wrap:wrap;gap:8px}
+.qexp{font-size:15px;color:var(--ink-2);margin:10px 0 0!important}
+
+@media (max-width:480px){
+  main{padding:0 16px 80px}
+  .widget{padding:14px}
+  input[type=range]{width:150px}
+}
+/* page 8 */
+.linkbtn{all:unset;cursor:pointer;font-size:14px;color:var(--accent);text-decoration:underline}
+.linkbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.linkbtn[hidden]{display:none}
+canvas.band{cursor:ew-resize;touch-action:pan-y}
+table.summary.num{font-size:14px}
+table.summary.num td,table.summary.num th{text-align:right;white-space:nowrap}
+table.summary.num td:first-child,table.summary.num th:first-child{text-align:left;white-space:normal}
+.ok{color:var(--one);font-weight:600}
+.warn{color:var(--zero);font-weight:600}
+</style>
+<script>try{var t=localStorage.getItem('xp-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/catalog.js" defer></script>
+<script src="../assets/site.js" defer></script>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <p class="kicker">A visual introduction</p>
+  <h1>Confidence Intervals</h1>
+  <p class="lede">An estimate with a range around it: how big the effect might be, and how sure you can be. “95% confident” is a promise about the method that made the range: used again and again, it catches the truth 95% of the time.</p>
+  <div class="hero-play" id="heroPlay">
+    <p class="ask">A poll of 1,000 voters says 52% ± 3%. What exactly does the ± promise?</p>
+    <p class="hint" style="min-height:0;margin:0 0 10px">Suppose 100 pollsters each poll 1,000 voters from the same country and each reports their result ± 3%. Of those 100 ranges, how many miss the true level of support?</p>
+    <div class="controls" id="heroPred">
+      <button class="btn" data-g="0">None of them</button>
+      <button class="btn" data-g="5">About 5</button>
+      <button class="btn" data-g="25">About 25</button>
+      <button class="btn" data-g="50">About half</button>
+    </div>
+    <canvas id="heroRain" style="height:300px" role="img" aria-label="100 poll results, each drawn as a horizontal range around its estimate, against a vertical line at the true support; ranges that miss the line are highlighted"></canvas>
+    <div class="legend" style="justify-content:center"><span><i class="sw" style="background:var(--ink-3)"></i><span>range catches the truth</span></span><span><i class="sw" style="background:var(--zero)"></i><span>range misses</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>true support 50.6%</span></span></div>
+    <div class="controls">
+      <button class="btn primary" id="heroGo" disabled>Run 100 polls</button>
+      <button class="linkbtn" id="heroSkip">skip the guess</button>
+    </div>
+    <p class="hint" id="heroHint" aria-live="polite">Make your guess, then run the polls.</p>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#wobble">Estimate ± wobble</a></li>
+    <li><a href="#coverage">Coverage</a></li>
+    <li><a href="#width">Width</a></li>
+    <li><a href="#tests">Intervals and tests</a></li>
+    <li><a href="#fails">When the simple interval fails</a></li>
+    <li><a href="#misread">Misreadings</a></li>
+    <li><a href="#uses">Where you will meet it</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<section id="wobble">
+  <div class="secnum">01</div>
+  <h2>Estimate ± wobble</h2>
+  <p>On <a href="sampling-distributions.html">Sampling Distributions</a>, honest polls of 1,000 people scattered around the true support with a standard error of about 1.6 points. Like any bell, 95% of that scatter lies within 1.96 standard errors of the center; that is where the 1.96 comes from (see <a href="../probability/normal.html#z">the Normal page</a>). So 95% of polls land within about 3.1 points of the truth.</p>
+  <p>Now flip it around. If the poll is within 3.1 points of the truth, then the truth is within 3.1 points of the poll. So “estimate ± 3.1” reaches back to the truth exactly when the poll landed in the middle 95%, which happens in 95% of polls. Drag the poll result below to see the flip.</p>
+
+  <div class="widget">
+    <p class="widget-title">The flip: from wobble to interval</p>
+    <canvas id="flChart" class="band" style="height:220px" role="img" aria-label="The bell-shaped spread of poll results around the true support with its middle 95% shaded, a draggable poll result, and the interval of plus or minus 3.1 points drawn around it"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent-soft);border:1px solid var(--accent)"></i><span>middle 95% of polls</span></span><span><i class="sw dot" style="background:var(--gold)"></i><span>your poll (drag it)</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>true support</span></span></div>
+    <div class="readout" id="flRead" aria-live="polite"></div>
+  </div>
+
+  <p>That is the whole recipe for a <em class="term">confidence interval</em>: estimate ± 1.96 standard errors. In practice the standard error itself is estimated from the sample, as √(p̂(1 − p̂)/n) for a percentage, or <em>s</em>/√<em>n</em> for an average, and for statistics with no formula the <a href="bootstrap.html">bootstrap</a> provides it.</p>
+</section>
+
+<!-- 2 -->
+<section id="coverage">
+  <div class="secnum">02</div>
+  <h2>Coverage</h2>
+  <p>The 95% is a property of the recipe, so the way to see it is to use the recipe many times. Each bar below is one poll’s interval; the newest appears at the top. The truth never moves; the intervals do.</p>
+
+  <div class="widget">
+    <p class="widget-title">The interval rain</p>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Confidence level">
+        <button class="btn" data-lvl="0" aria-pressed="false">80%</button>
+        <button class="btn" data-lvl="1" aria-pressed="false">90%</button>
+        <button class="btn on" data-lvl="2" aria-pressed="true">95%</button>
+        <button class="btn" data-lvl="3" aria-pressed="false">99%</button>
+      </div>
+      <label class="ctrl">people per poll <input type="range" id="irN" min="0" max="4" step="1" value="2"><output id="irNOut"></output></label>
+    </div>
+    <canvas id="irChart" style="height:320px" role="img" aria-label="Many poll intervals as horizontal bars stacked top to bottom against the true support; misses highlighted"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>catches the truth</span></span><span><i class="sw" style="background:var(--zero)"></i><span>misses</span></span><span><i class="sw" style="background:var(--accent)"></i><span>newest</span></span></div>
+    <div class="controls">
+      <button class="btn primary" id="irOne">One poll</button>
+      <button class="btn" id="irRun">▶ Run</button>
+      <button class="btn" id="irMany">+1,000 polls</button>
+      <button class="btn" id="irClear">Clear</button>
+    </div>
+    <div class="readout" id="irRead" aria-live="polite"></div>
+  </div>
+
+  <p>Over many polls, the share of intervals that catch the truth, the <em class="term">coverage</em>, settles at the advertised level: about 95 in 100 for a 95% interval. Any single interval either contains the truth or it doesn’t, and in real life you never find out which. The 95% is your confidence in the method, not a probability attached to one particular range.</p>
+  <p>With very small polls the simple recipe falls a little short of its promise: at 25 people per poll, its 95% intervals catch the truth about 93% of the time. Section 5 shows why, and what to do about it.</p>
+</section>
+
+<!-- 3 -->
+<section id="width">
+  <div class="secnum">03</div>
+  <h2>Width</h2>
+  <p>Two dials set how wide the interval is. Try both in the rain above.</p>
+  <ul>
+    <li><strong>Confidence level.</strong> To catch the truth more often, cast a wider net: 99% intervals use 2.58 standard errors instead of 1.96. To be right 100% of the time you would need an interval from 0% to 100%, which tells you nothing. There is always a trade between confidence and precision.</li>
+    <li><strong>Sample size.</strong> The standard error shrinks like 1/√<em>n</em>, so to halve the width you need four times the people. That square-root law is why national polls rarely go much beyond a few thousand people: each extra point of precision costs more than the last.</li>
+  </ul>
+  <div class="table-wrap">
+    <table class="summary num">
+      <thead><tr><th>People in the poll</th><th>100</th><th>400</th><th>1,000</th><th>4,000</th><th>10,000</th></tr></thead>
+      <tbody>
+        <tr><td>95% margin of error (near 50%)</td><td>± 9.8</td><td>± 4.9</td><td>± 3.1</td><td>± 1.5</td><td>± 1.0</td></tr>
+        <tr><td>99% margin of error</td><td>± 12.9</td><td>± 6.4</td><td>± 4.1</td><td>± 2.0</td><td>± 1.3</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>As on Sampling Distributions, the size of the population doesn’t appear anywhere: 1,000 people give ± 3.1 points whether the country has a million voters or a hundred million.</p>
+</section>
+
+<!-- 4 -->
+<section id="tests">
+  <div class="secnum">04</div>
+  <h2>Intervals and tests are the same thing</h2>
+  <p>Back to the button test: 50 clicks from 1,000 visitors on grey, 64 from 1,000 on orange. The gap is 1.4 points, and its 95% confidence interval runs from about −0.6 to +3.4 points. The interval contains 0, so “no difference” is among the plausible values, and that is exactly the same conclusion as the p-value of about 0.18 on the <a href="p-values.html">previous page</a>. Move orange’s click count and watch the two agree:</p>
+
+  <div class="widget">
+    <p class="widget-title">One result, two readings</p>
+    <div class="controls">
+      <label class="ctrl">orange’s clicks (of 1,000) <input type="range" id="dlB" min="40" max="100" step="1" value="64"><output id="dlBOut"></output></label>
+    </div>
+    <canvas id="dlChart" style="height:120px" role="img" aria-label="The gap between orange and grey with its 95% confidence interval, against a line at zero"></canvas>
+    <div class="readout" id="dlRead" aria-live="polite"></div>
+  </div>
+
+  <p>Every value inside a 95% interval is one a test at the 0.05 level would not reject; every value outside it is one the test would. When 0 drops out of the interval, p drops below 0.05 at the same moment. (Both here use the same standard error; other formulas can disagree in the third decimal place.)</p>
+  <p>The interval says more than the test, though. “p = 0.18” says only that the data can’t rule out no difference. “−0.6 to +3.4 points” says that too, and adds that orange could plausibly be better by as much as 3.4 points: worth testing again with more visitors. That is why careful reports give intervals, not just p-values.</p>
+</section>
+
+<!-- 5 -->
+<section id="fails">
+  <div class="secnum">05</div>
+  <h2>When the simple interval fails</h2>
+  <p>“Estimate ± 1.96 standard errors” leans on the bell shape, and for percentages near 0% or 100% in small samples the bell is a poor fit. The <a href="../probability/binomial.html#infer">Binomial page</a> met the problem from the other side. Here is the coverage, worked out exactly, of the simple interval and of a better one, the <em class="term">Wilson interval</em>, for every true percentage:</p>
+
+  <div class="widget">
+    <p class="widget-title">Does “95%” really mean 95%?</p>
+    <p class="cap">Coverage (up) for every true percentage (across), worked out exactly.</p>
+    <div class="controls">
+      <label class="ctrl">sample size <input type="range" id="cvN" min="0" max="7" step="1" value="1"><output id="cvNOut"></output></label>
+    </div>
+    <canvas id="cvChart" style="height:260px" role="img" aria-label="The exact coverage of the simple and the Wilson 95% intervals for a proportion, for every true percentage from 0 to 100, at the chosen sample size"></canvas>
+    <div class="legend"><span><i class="sw line" style="border-top:2px solid var(--zero)"></i><span>simple interval (estimate ± 1.96 SE)</span></span><span><i class="sw line" style="border-top:2px solid var(--one)"></i><span>Wilson interval</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>the promised 95%</span></span></div>
+    <div class="readout" id="cvRead" aria-live="polite"></div>
+  </div>
+
+  <p>The simple interval collapses near the edges. With 20 people and a true rate of 5%, it catches the truth only about 64% of the time while claiming 95%. At the extreme, if 0 of 20 customers complain, it reports 0% ± 0%, as if a sample of 20 could prove that nobody ever complains. The Wilson interval, from 1927, stays close to 95% almost everywhere and gives 0% to 16% for that case. The jagged lines are real: because counts are whole numbers, coverage jumps as the true rate shifts (Brown, Cai and DasGupta 2001). The lesson generalizes. A confidence level is a promise that rests on assumptions, and it is worth checking, by simulation or exact calculation, when the data are small or lopsided.</p>
+</section>
+
+<!-- 6 -->
+<section id="misread">
+  <div class="secnum">06</div>
+  <h2>Misreadings</h2>
+  <p>A poll reports 52%, with a 95% confidence interval of 49% to 55%. Which of these readings hold up?</p>
+  <div class="table-wrap">
+    <table class="summary">
+      <thead><tr><th>Reading</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td>“The method behind this range catches the true support in 95% of polls.”</td><td><span class="ok">Right.</span> That is the definition.</td></tr>
+        <tr><td>“Support between 49% and 55% fits these data; values far outside it don’t.”</td><td><span class="ok">Right.</span> A fair everyday summary.</td></tr>
+        <tr><td>“There is a 95% probability the true support is between 49% and 55%.”</td><td><span class="warn">Not quite.</span> In this framework the truth is fixed and this range either contains it or not. A statement of that form needs a prior and Bayes’ theorem: see <em>Credible intervals</em>, later in the series. (With lots of data and no strong prior, the numbers often come out similar.)</td></tr>
+        <tr><td>“95% of voters have a view between 49% and 55%.”</td><td><span class="warn">Wrong.</span> The interval is about the uncertainty in one number, the overall percentage, not about the spread of individuals.</td></tr>
+        <tr><td>“A repeat poll will land inside 49% to 55% 95% of the time.”</td><td><span class="warn">Wrong.</span> The repeat wobbles too. Only about 83% of repeat estimates land inside the original 95% interval.</td></tr>
+        <tr><td>“The truth is more likely to be near 52% than near 49%.”</td><td><span class="warn">Careful.</span> Values near the middle fit the data better, but the confidence interval itself only marks a range, not a probability for each value inside it.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 7 -->
+<section id="uses">
+  <div class="secnum">07</div>
+  <h2>Where you will meet it</h2>
+  <div class="cards">
+    <div class="card"><h4>Polls</h4><p>The “margin of error” is half the width of a 95% interval. It covers only the wobble of random sampling, not who refused to answer or how the question was worded.</p></div>
+    <div class="card"><h4>Medicine</h4><p>Trial reports give the treatment effect with a 95% interval. In a meta-analysis, a “forest plot” lines up the intervals from many studies, one above another, exactly like the rain on this page.</p></div>
+    <div class="card"><h4>A/B testing</h4><p>Good dashboards show the lift with an interval, so a team can see both whether it might be zero and how big it might plausibly be.</p></div>
+    <div class="card"><h4>Science graphs</h4><p>Error bars may be standard deviations, standard errors or 95% intervals, which differ a lot. A good caption says which.</p></div>
+    <div class="card"><h4>Official statistics</h4><p>Monthly figures from surveys, such as job counts and unemployment rates, come with confidence intervals, and the month-to-month change is often inside them.</p></div>
+    <div class="card"><h4>Machine learning</h4><p>A model’s accuracy on a test set is a proportion, so it deserves an interval. On a small test set, two models a point apart may be indistinguishable.</p></div>
+  </div>
+
+  <h3>Check yourself</h3>
+  <div class="widget">
+    <div class="quiz" id="quiz"></div>
+    <div class="readout" id="quizScore" style="margin-top:10px" aria-live="polite"></div>
+  </div>
+
+  <p>An interval that includes 0 means the data couldn’t tell. Any time a decision is made from data, two kinds of mistake are possible: acting on a fluke, and missing something real. Balancing them is the next page, <strong>Errors and decisions</strong> (coming soon).</p>
+</section>
+
+</main>
+
+<script>
+(function(){
+'use strict';
+/* ---------- helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const root = document.documentElement;
+const C = n => getComputedStyle(root).getPropertyValue(n).trim();
+const f2 = x => x.toFixed(2);
+const fmtN = x => Math.abs(x - Math.round(x)) < 1e-9 ? String(Math.round(x)) : String(+x.toFixed(2));
+const pct = x => (100 * x).toFixed(1) + '%';
+const MONO = 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
+const TAU = Math.PI * 2;
+const comma = n => n.toLocaleString('en-US');
+
+function fit(c){
+  const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+  if (c.width !== w*dpr || c.height !== h*dpr) { c.width = w*dpr; c.height = h*dpr; }
+  const ctx = c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  return {ctx, w, h};
+}
+const redraws = [];
+function redrawAll(){ redraws.forEach(f => f()); }
+let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(redrawAll, 80); });
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+if (mq.addEventListener) mq.addEventListener('change', redrawAll);
+new MutationObserver(redrawAll).observe(root, {attributes:true, attributeFilter:['data-theme']});
+
+function niceTicks(max, count){
+  const raw = max / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const step = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag;
+  const t = []; for (let v = 0; v <= max + 1e-9; v += step) t.push(v); return t;
+}
+function stepFmt(ticks){ const st = ticks.length > 1 ? ticks[1] - ticks[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9)); return v => v.toFixed(d); }
+function yGrid(ctx, X0, X1, ys, ticks, fmt){
+  ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ticks.forEach(v => {
+    const y = Math.round(ys(v)) + .5;
+    ctx.strokeStyle = C('--line'); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X0, y); ctx.lineTo(X1, y); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.fillText(fmt(v), X0 - 6, y);
+  });
+}
+function intStep(px, minPx){
+  for (const s of [1,2,5,10,20,25,50,100]) if (s * px >= minPx) return s;
+  return 100;
+}
+function roundRect(ctx, x, y, w, h, r){
+  r = Math.max(0, Math.min(r, w/2, Math.abs(h)/2));
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+function dot(ctx, x, y, r){ ctx.beginPath(); ctx.arc(x, y, Math.max(0.5, r), 0, TAU); ctx.fill(); }
+function vline(ctx, x, y0, y1, color, dash, lw){
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw || 1.5; if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(Math.round(x) + .5, y0); ctx.lineTo(Math.round(x) + .5, y1); ctx.stroke(); ctx.restore();
+}
+/* integer-valued bar charts: bars at k = lo..hi */
+function frame(ctx, w, h, o){
+  const X0 = o.left != null ? o.left : 40, X1 = w - 10, Y0 = h - 24, Y1 = o.top != null ? o.top : 12;
+  const span = o.hi - o.lo + 1, bw = (X1 - X0) / span;
+  const xc = k => X0 + bw * (k - o.lo + .5), ys = v => Y0 - (v / o.ymax) * (Y0 - Y1);
+  const t = niceTicks(o.ymax, 3).filter(v => v <= o.ymax * 1.0001); yGrid(ctx, X0, X1, ys, t, o.yfmt || stepFmt(t));
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  const st = o.step || intStep(bw, 24);
+  for (let k = Math.ceil(o.lo / st) * st; k <= o.hi; k += st) ctx.fillText(o.lab ? o.lab(k) : k, xc(k), Y0 + 6);
+  return {X0, X1, Y0, Y1, bw, xc, ys};
+}
+function drawBars(ctx, F, lo, hi, val, color, frac){
+  const bwid = Math.max(1, F.bw * (frac == null ? .8 : frac));
+  for (let k = lo; k <= hi; k++) {
+    const v = val(k); if (!(v > 0)) continue;
+    const y = F.ys(v), hh = F.Y0 - y; if (hh < 0.2) continue;
+    const x = F.xc(k) - bwid / 2;
+    ctx.fillStyle = typeof color === 'function' ? color(k) : color;
+    if (bwid >= 6 && hh >= 3) { roundRect(ctx, x, y, bwid, hh, Math.min(3, bwid / 4)); ctx.fill(); }
+    else ctx.fillRect(x, y, bwid, hh);
+  }
+}
+function emptyNote(ctx, w, h, text){
+  ctx.fillStyle = C('--ink-3'); ctx.font = '13px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(text, w / 2, h / 2 - 8);
+}
+
+/* randomness */
+let spare = null;
+function gauss(){
+  if (spare != null) { const s = spare; spare = null; return s; }
+  let u = 0, v = 0; while (u === 0) u = Math.random(); v = Math.random();
+  const r = Math.sqrt(-2 * Math.log(u)); spare = r * Math.sin(TAU * v); return r * Math.cos(TAU * v);
+}
+function shuffled(a){ const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; }
+function corr(x, y){
+  const n = x.length; let mx = 0, my = 0; for (let i = 0; i < n; i++) { mx += x[i]; my += y[i]; } mx /= n; my /= n;
+  let sxy = 0, sxx = 0, syy = 0; for (let i = 0; i < n; i++) { const a = x[i] - mx, b = y[i] - my; sxy += a * b; sxx += a * a; syy += b * b; }
+  return sxy / Math.sqrt(sxx * syy);
+}
+function binom(n, p){ let k = 0; for (let i = 0; i < n; i++) if (Math.random() < p) k++; return k; }
+function flips(n){ const a = new Array(n); for (let i = 0; i < n; i++) a[i] = Math.random() < .5 ? 1 : 0; return a; }
+function longestRun(a){
+  let best = 1, cur = 1, start = 0, bs = 0;
+  for (let i = 1; i < a.length; i++) { if (a[i] === a[i-1]) cur++; else { cur = 1; start = i; } if (cur > best) { best = cur; bs = start; } }
+  return {len: best, start: bs};
+}
+function switches(a){ let s = 0; for (let i = 1; i < a.length; i++) if (a[i] !== a[i-1]) s++; return s; }
+const RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+function ticksIn(lo, hi, count){
+  const raw = (hi - lo) / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const st = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag, t = [];
+  for (let v = Math.ceil(lo / st - 1e-9) * st; v <= hi + 1e-9; v += st) t.push(+v.toFixed(10));
+  return t;
+}
+function xAxis(ctx, X0, X1, Y0, lo, hi, fmt){
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  const t = ticksIn(lo, hi, Math.max(2, Math.floor((X1 - X0) / 60)));
+  const st = t.length > 1 ? t[1] - t[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9));
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  t.forEach(v => ctx.fillText(fmt ? fmt(v) : v.toFixed(d), X0 + (v - lo) / (hi - lo) * (X1 - X0), Y0 + 5));
+}
+function label(ctx, x, y, text, color, X0, X1){
+  ctx.font = '600 11px ' + MONO; ctx.fillStyle = color; ctx.textBaseline = 'top';
+  const right = x > (X0 + X1) / 2; ctx.textAlign = right ? 'right' : 'left';
+  ctx.fillText(text, x + (right ? -5 : 5), y);
+}
+
+function bar(ctx, x, w, y, Y0, color){
+  const hh = Y0 - y; if (!(hh > .2)) return;
+  ctx.fillStyle = color;
+  if (w >= 6 && hh >= 3) { roundRect(ctx, x, y, w, hh, Math.min(3, w / 4)); ctx.fill(); } else ctx.fillRect(x, y, w, hh);
+}
+
+
+/* ---------- shared ---------- */
+const TRUE_P = .506;
+const ZS = [1.2816, 1.6449, 1.96, 2.5758], LV = [80, 90, 95, 99];
+function erfc(x){
+  const z = Math.abs(x), t = 1 / (1 + .5 * z);
+  const r = t * Math.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (.37409196 + t * (.09678418 + t * (-.18628806 + t * (.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-.82215223 + t * .17087277)))))))));
+  return x >= 0 ? r : 2 - r;
+}
+const pTwo = z => Math.min(1, erfc(Math.abs(z) / Math.SQRT2));
+const signed = (v, d) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(d);
+function pollInterval(n, z){ const k = binom(n, TRUE_P), ph = k / n, m = z * Math.sqrt(ph * (1 - ph) / n); return {est: ph, lo: ph - m, hi: ph + m, hit: ph - m <= TRUE_P && TRUE_P <= ph + m}; }
+
+/* intervals stacked top (newest) to bottom against the truth */
+function drawIntervals(cv, list, lo, hi, maxRows, fmtTick){
+  const {ctx, w, h} = fit(cv), X0 = 16, X1 = w - 16, Y0 = h - 22, Y1 = 6, xs = v => X0 + (v - lo) / (hi - lo) * (X1 - X0);
+  xAxis(ctx, X0, X1, Y0, lo * 100, hi * 100, fmtTick || (v => v + '%'));
+  const rows = Math.min(maxRows, list.length), rh = (Y0 - Y1 - 4) / maxRows, bh = Math.max(1.2, rh * .62);
+  for (let r = 0; r < rows; r++) {
+    const iv = list[list.length - 1 - r], y = Y1 + r * rh + (rh - bh) / 2;
+    const a = xs(Math.max(lo, iv.lo)), b = xs(Math.min(hi, iv.hi));
+    ctx.fillStyle = r === 0 ? C('--accent') : iv.hit ? C('--ink-3') : C('--zero');
+    ctx.fillRect(a, y, Math.max(1, b - a), bh);
+    if (rh >= 4) { ctx.fillStyle = C('--surface'); ctx.fillRect(xs(iv.est) - 1, y, 2, bh); }
+  }
+  vline(ctx, xs(TRUE_P), Y1, Y0, C('--ink'), [5, 4], 1.5);
+  if (!list.length) emptyNote(ctx, w, h, 'no polls yet');
+}
+
+/* ---------- hero: 100 polls, 100 intervals ---------- */
+(function(){
+  const hint = $('#heroHint'), LO = .44, HI = .58;
+  let guess = null, list = [], timer = null;
+  const draw = () => drawIntervals($('#heroRain'), list, LO, HI, 100);
+  function message(){
+    const miss = list.filter(i => !i.hit).length;
+    if (guess != null) $$('#heroPred .btn').forEach(b => { b.classList.remove('right', 'wrong'); if (+b.dataset.g === guess) b.classList.add(guess === 5 ? 'right' : 'wrong'); });
+    hint.innerHTML = `<b>${miss} of 100</b> ranges missed the true support of 50.6%. ` + (guess === 5 ? 'As you guessed: about 5. ' : guess != null ? 'The answer is about 5. ' : '') +
+      'That is the promise behind “± 3%”, which is a 95% confidence interval: the method catches the truth in about 95 polls out of 100. It does not say which polls are the unlucky 5, and from inside one poll you can’t tell.';
+  }
+  function open(){ $('#heroGo').disabled = false; $('#heroSkip').hidden = true; }
+  $$('#heroPred .btn').forEach(b => b.addEventListener('click', () => { guess = +b.dataset.g; $$('#heroPred .btn').forEach(x => x.classList.toggle('guess', x === b)); open(); if (list.length === 100) message(); }));
+  $('#heroSkip').addEventListener('click', open);
+  $('#heroGo').addEventListener('click', () => {
+    clearInterval(timer); list = []; hint.textContent = 'Polling…';
+    const add = () => { list.push(pollInterval(1000, 1.96)); draw(); if (list.length >= 100) { clearInterval(timer); timer = null; message(); $('#heroGo').textContent = 'Run 100 new polls'; } };
+    if (RM) { while (list.length < 99) list.push(pollInterval(1000, 1.96)); add(); return; }
+    timer = setInterval(add, 25);
+  });
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 1. the flip ---------- */
+(function(){
+  const cv = $('#flChart'), SE = Math.sqrt(TRUE_P * (1 - TRUE_P) / 1000), M = 1.96 * SE, LO = .43, HI = .58;
+  let poll = .52, drag = false;
+  const geo = () => { const w = cv.getBoundingClientRect().width; return {X0: 16, X1: w - 16}; };
+  function draw(){
+    const {ctx, w, h} = fit(cv), {X0, X1} = geo(), xs = v => X0 + (v - LO) / (HI - LO) * (X1 - X0), Yb = h - 86, Y1 = 22;
+    const pdf = v => Math.exp(-.5 * ((v - TRUE_P) / SE) ** 2), ys = d => Yb - d * (Yb - Y1);
+    ctx.fillStyle = C('--accent-soft'); ctx.beginPath(); ctx.moveTo(xs(TRUE_P - M), Yb);
+    for (let i = 0; i <= 80; i++) { const v = TRUE_P - M + 2 * M * i / 80; ctx.lineTo(xs(v), ys(pdf(v))); }
+    ctx.lineTo(xs(TRUE_P + M), Yb); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2; ctx.beginPath();
+    for (let i = 0; i <= 200; i++) { const v = LO + (HI - LO) * i / 200; i ? ctx.lineTo(xs(v), ys(pdf(v))) : ctx.moveTo(xs(v), ys(pdf(v))); }
+    ctx.stroke();
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--accent'); ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+    ctx.fillText('where 95% of polls land', xs(TRUE_P) - 8, ys(.3));
+    ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Yb + .5); ctx.lineTo(X1, Yb + .5); ctx.stroke();
+    vline(ctx, xs(TRUE_P), 4, h - 22, C('--ink'), [5, 4], 1.5);
+    ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--ink'); ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText('truth 50.6%', xs(TRUE_P) + 5, 2);
+    const inside = Math.abs(poll - TRUE_P) <= M, col = inside ? C('--one') : C('--zero');
+    ctx.fillStyle = C('--gold'); dot(ctx, xs(poll), Yb, 7);
+    const yi = Yb + 36; ctx.fillStyle = col; roundRect(ctx, xs(poll - M), yi - 5, xs(poll + M) - xs(poll - M), 10, 4); ctx.fill();
+    ctx.fillStyle = C('--gold'); dot(ctx, xs(poll), yi, 5);
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-2'); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText('your poll ± 3.1', xs(poll), yi + 9);
+    xAxis(ctx, X0, X1, h - 20, LO * 100, HI * 100, v => v + '%');
+    $('#flRead').innerHTML = `poll <b>${(100 * poll).toFixed(1)}%</b> → interval ${(100 * (poll - M)).toFixed(1)}% to ${(100 * (poll + M)).toFixed(1)}% · ${inside ? '<span class="ok">reaches the truth</span>: the poll landed inside the shaded middle 95%' : '<span class="warn">misses the truth</span>: the poll landed out in the 5% of tails'}`;
+  }
+  const toV = e => { const r = cv.getBoundingClientRect(), {X0, X1} = geo(); return Math.max(LO, Math.min(HI, LO + (e.clientX - r.left - X0) / (X1 - X0) * (HI - LO))); };
+  cv.addEventListener('pointerdown', e => { drag = true; poll = toV(e); try { cv.setPointerCapture(e.pointerId); } catch (_) {} draw(); });
+  cv.addEventListener('pointermove', e => { if (drag) { poll = toV(e); draw(); } });
+  cv.addEventListener('pointerup', () => drag = false); cv.addEventListener('pointercancel', () => drag = false);
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 2–3. the interval rain with dials ---------- */
+(function(){
+  const NS = [25, 100, 400, 1600, 6400], nIn = $('#irN'), LO = .2, HI = .8;
+  let lvl = 2, list = [], total = 0, hits = 0, timer = null;
+  const n = () => NS[+nIn.value];
+  function add(k){ for (let i = 0; i < k; i++) { const iv = pollInterval(n(), ZS[lvl]); total++; if (iv.hit) hits++; list.push(iv); } if (list.length > 400) list = list.slice(-120); draw(); }
+  function draw(){
+    drawIntervals($('#irChart'), list, LO, HI, 60);
+    const m = 100 * ZS[lvl] * Math.sqrt(TRUE_P * (1 - TRUE_P) / n());
+    $('#irRead').innerHTML = `${LV[lvl]}% intervals from polls of ${comma(n())} · each about <b>± ${m.toFixed(1)} points</b> wide` +
+      (total ? `<br><b>${comma(total)}</b> polls · caught the truth <b>${comma(hits)}</b> · coverage <b>${(100 * hits / total).toFixed(1)}%</b> (promised ${LV[lvl]}%)` : '');
+  }
+  function stop(){ clearInterval(timer); timer = null; $('#irRun').textContent = '▶ Run'; }
+  function reset(){ stop(); list = []; total = hits = 0; $('#irNOut').textContent = comma(n()); draw(); }
+  $$('[data-lvl]').forEach(b => b.addEventListener('click', () => { lvl = +b.dataset.lvl; $$('[data-lvl]').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); }); reset(); }));
+  nIn.addEventListener('input', reset);
+  $('#irOne').addEventListener('click', () => add(1));
+  $('#irMany').addEventListener('click', () => add(1000));
+  $('#irRun').addEventListener('click', () => { if (timer) return stop(); $('#irRun').textContent = '❚❚ Pause'; timer = setInterval(() => add(1), RM ? 300 : 60); });
+  $('#irClear').addEventListener('click', reset);
+  reset(); redraws.push(draw);
+})();
+
+/* ---------- 4. intervals and tests ---------- */
+(function(){
+  const bIn = $('#dlB'), NA = 1000, NB = 1000, KA = 50, LO = -4, HI = 6;
+  function draw(){
+    const kb = +bIn.value, pa = KA / NA, pb = kb / NB, d = pb - pa, se = Math.sqrt(pa * (1 - pa) / NA + pb * (1 - pb) / NB);
+    const a = d - 1.96 * se, b = d + 1.96 * se, p = pTwo(d / se), excl = a > 0 || b < 0;
+    const {ctx, w, h} = fit($('#dlChart')), X0 = 16, X1 = w - 16, Y0 = h - 22, xs = v => X0 + (v - LO) / (HI - LO) * (X1 - X0), y = 46;
+    xAxis(ctx, X0, X1, Y0, LO, HI, v => signed(v, 0) + ' pts');
+    vline(ctx, xs(0), 4, Y0, C('--ink'), [5, 4], 1.5);
+    ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--ink'); ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText('no difference', xs(0) + 5, 2);
+    ctx.fillStyle = C('--accent'); roundRect(ctx, xs(Math.max(LO, 100 * a)), y - 6, xs(Math.min(HI, 100 * b)) - xs(Math.max(LO, 100 * a)), 12, 5); ctx.fill();
+    ctx.fillStyle = C('--surface'); dot(ctx, xs(100 * d), y, 4.5);
+    $('#dlBOut').textContent = kb;
+    $('#dlRead').innerHTML = `orange ${kb} vs grey 50 clicks · gap <b>${signed(100 * d, 1)} points</b> · 95% interval <b>${signed(100 * a, 1)} to ${signed(100 * b, 1)}</b> → ${excl ? '<span class="ok">excludes 0</span>' : 'includes 0'} · p = <b>${p < .001 ? '&lt; 0.001' : p.toFixed(3)}</b> → ${p < .05 ? '<span class="ok">below 0.05</span>' : 'not below 0.05'}`;
+  }
+  bIn.addEventListener('input', draw);
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 5. exact coverage: simple vs Wilson ---------- */
+(function(){
+  const NS = [10, 20, 30, 50, 100, 200, 500, 1000], nIn = $('#cvN'), Z = 1.959964;
+  const lf = [0]; for (let i = 1; i <= 1000; i++) lf[i] = lf[i - 1] + Math.log(i);
+  const wald = (k, n) => { const ph = k / n, m = Z * Math.sqrt(ph * (1 - ph) / n); return [ph - m, ph + m]; };
+  const wilson = (k, n) => { const ph = k / n, d = 1 + Z * Z / n, c = (ph + Z * Z / (2 * n)) / d, m = Z * Math.sqrt(ph * (1 - ph) / n + Z * Z / (4 * n * n)) / d; return [c - m, c + m]; };
+  function coverage(n, p, ivs){
+    let s = 0; const lp = Math.log(p), lq = Math.log(1 - p);
+    for (let k = 0; k <= n; k++) { const [a, b] = ivs[k]; if (p >= a && p <= b) s += Math.exp(lf[n] - lf[k] - lf[n - k] + k * lp + (n - k) * lq); }
+    return s;
+  }
+  const cache = {};
+  function curves(n){
+    if (cache[n]) return cache[n];
+    const W = [], L = [], P = [];
+    for (let k = 0; k <= n; k++) { W.push(wald(k, n)); L.push(wilson(k, n)); }
+    const cw = [], cl = [];
+    for (let i = 1; i < 400; i++) { const p = i / 400; P.push(p); cw.push(coverage(n, p, W)); cl.push(coverage(n, p, L)); }
+    return (cache[n] = {P, cw, cl, W, L});
+  }
+  function draw(){
+    const n = NS[+nIn.value], c = curves(n);
+    const {ctx, w, h} = fit($('#cvChart')), X0 = 44, X1 = w - 14, Y0 = h - 24, Y1 = 8, lo = .5;
+    const xs = p => X0 + p * (X1 - X0), ys = v => Y0 - (Math.max(lo, v) - lo) / (1 - lo) * (Y0 - Y1);
+    yGrid(ctx, X0, X1, ys, [.5, .6, .7, .8, .9, 1], v => Math.round(v * 100) + '%');
+    xAxis(ctx, X0, X1, Y0, 0, 100, v => v + '%');
+    ctx.save(); ctx.strokeStyle = C('--ink'); ctx.setLineDash([5, 4]); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(X0, ys(.95)); ctx.lineTo(X1, ys(.95)); ctx.stroke(); ctx.restore();
+    [[c.cw, C('--zero')], [c.cl, C('--one')]].forEach(([arr, col]) => {
+      ctx.strokeStyle = col; ctx.lineWidth = 1.6; ctx.beginPath();
+      arr.forEach((v, i) => { const x = xs(c.P[i]), y = ys(v); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.stroke();
+    });
+    $('#cvNOut').textContent = n;
+    const i5 = 19, mw = c.cw.reduce((a, v) => a + v, 0) / c.cw.length, ml = c.cl.reduce((a, v) => a + v, 0) / c.cl.length;
+    const z0 = c.W[0], l0 = c.L[0];
+    $('#cvRead').innerHTML = `sample of ${n} · at a true rate of 5%: simple catches it <b style="color:var(--zero)">${(100 * c.cw[i5]).toFixed(0)}%</b> of the time, Wilson <b style="color:var(--one)">${(100 * c.cl[i5]).toFixed(0)}%</b> · averaged over all rates: ${(100 * mw).toFixed(1)}% vs ${(100 * ml).toFixed(1)}%` +
+      `<br>0 of ${n}: simple says ${(100 * Math.max(0, z0[0])).toFixed(1)}% to ${(100 * z0[1]).toFixed(1)}%, Wilson says 0% to ${(100 * l0[1]).toFixed(1)}%`;
+  }
+  nIn.addEventListener('input', draw);
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 7. quiz ---------- */
+(function(){
+  const Q = [
+    {s: 'Predict: 100 pollsters each report a 95% confidence interval. About how many intervals miss the truth?',
+     o: ['None', 'About 5', 'About 50'], a: 1,
+     e: 'A 95% method catches the truth about 95 times in 100, so about 5 intervals miss. Nobody can tell which 5.'},
+    {s: 'You poll four times as many people. The margin of error…',
+     o: ['halves', 'shrinks to a quarter', 'stays the same'], a: 0,
+     e: 'The standard error shrinks like 1/√n, and √4 = 2. Halving it again would take 16 times the original sample.'},
+    {s: 'A poll gives 52% with a 95% interval of 49% to 55%. Which reading is <em>wrong</em>?',
+     o: ['The method behind this interval catches the truth in 95% of polls', '95% of voters have views between 49% and 55%', 'True support between 49% and 55% fits the data'], a: 1,
+     e: 'The interval is about the uncertainty in one number, the overall percentage. It says nothing about how individual voters are spread.'},
+    {s: 'The button test’s 95% interval for the gap is −0.6 to +3.4 points. Is the gap significant at the 0.05 level?',
+     o: ['Yes', 'No, because the interval includes 0'], a: 1,
+     e: 'A 95% interval contains exactly the values a 0.05-level test wouldn’t reject. Zero is inside, so the test can’t reject “no difference”: p ≈ 0.18.'},
+    {s: 'Compared with a 95% interval from the same data, a 99% interval is…',
+     o: ['narrower', 'wider'], a: 1,
+     e: 'To catch the truth more often you need a wider net: 2.58 standard errors instead of 1.96.'},
+    {s: '0 of 20 customers complain. The simple interval says 0% to 0%. What should you report?',
+     o: ['0% to 0%: nobody complains', 'Something like the Wilson interval: 0% to about 16%'], a: 1,
+     e: 'Twenty customers can’t prove that nobody ever complains. The simple interval breaks down at the edges; Wilson’s stays honest.'},
+    {s: 'Predict: a second poll of the same size lands inside the first poll’s 95% interval about…',
+     o: ['95% of the time', '83% of the time', '50% of the time'], a: 1,
+     e: 'Both polls wobble, so their difference wobbles about 1.4 times as much as either one. That puts the second poll inside the first one’s interval only about 83% of the time.'}
+  ];
+  const box = $('#quiz'); let answered = 0, right = 0;
+  Q.forEach(qq => {
+    const d = document.createElement('div'); d.className = 'qitem';
+    d.innerHTML = `<p>${qq.s}</p><div class="qbtns">${qq.o.map((t, i) => `<button class="btn" data-i="${i}">${t}</button>`).join('')}</div><p class="qexp" hidden></p>`;
+    const exp = d.querySelector('.qexp');
+    d.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      const ok = +b.dataset.i === qq.a;
+      if (!d.dataset.done) { d.dataset.done = '1'; answered++; if (ok) right++; }
+      d.querySelectorAll('button').forEach(x => x.classList.remove('right', 'wrong'));
+      b.classList.add(ok ? 'right' : 'wrong');
+      exp.hidden = false; exp.innerHTML = `<b>${ok ? '✓ Right.' : '✗ Not quite.'}</b> ${qq.e}`;
+      $('#quizScore').textContent = `${answered} of ${Q.length} answered · ${right} right on the first try`;
+    }));
+    box.appendChild(d);
+  });
+})();
+
+})();
+</script>
+</body>
+</html>
