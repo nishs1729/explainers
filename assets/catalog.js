@@ -162,7 +162,7 @@ window.EXPLAINERS = {
           "id": "learning-from-data",
           "title": "Learning from data",
           "blurb": "Could chance alone have done this? Starting from line-ups and coin streaks, the series builds the tools for answering that question: sampling, estimation, resampling, tests, intervals and power, ending with the 1954 polio vaccine trial.",
-          "topics": ["is-it-real", "sampling-distributions", "selection-bias", "estimation", "bootstrap"]
+          "topics": ["is-it-real", "sampling-distributions", "selection-bias", "estimation", "bootstrap", "permutation-tests"]
         }
       ],
       "topics": [
@@ -209,6 +209,15 @@ window.EXPLAINERS = {
           "summary": "One sample, no formula for the median: resample your own data with replacement to see how much an estimate wobbles, check it against s/√n, and watch where it fails.",
           "tags": ["bootstrap", "resampling", "standard error", "percentile interval", "Efron"],
           "preview": { "select": "#heroPlay", "click": ["#heroSkip", "#heroGo"] }
+        },
+        {
+          "id": "permutation-tests",
+          "title": "Shuffling to Test",
+          "short": "Shuffling",
+          "path": "statistics/permutation-tests.html",
+          "summary": "If the groups don't matter, shuffling the labels changes nothing. Taste tea like Fisher's lady, shuffle the button test, and flip all 1,024 signs of the sleep trial.",
+          "tags": ["permutation test", "randomization", "lady tasting tea", "sign flip", "Fisher"],
+          "preview": { "select": "#heroPlay", "click": ["#heroAll4"] }
         }
       ]
     }

@@ -26,7 +26,7 @@ See [Statistics: how every page works](#statistics-conventions) first.
 - [x] [3. ⚠ Who's missing?](https://nishs1729.github.io/explainers/statistics/selection-bias.html)
 - [x] [4. What makes a good guess](https://nishs1729.github.io/explainers/statistics/estimation.html)
 - [x] [5. The bootstrap](https://nishs1729.github.io/explainers/statistics/bootstrap.html)
-- [ ] [6. Shuffling to test](#permutation-tests)
+- [x] [6. Shuffling to test](https://nishs1729.github.io/explainers/statistics/permutation-tests.html)
 - [ ] [7. p-values](#p-values)
 - [ ] [8. Confidence intervals](#confidence-intervals)
 - [ ] [9. Errors and decisions](#errors)
@@ -334,6 +334,8 @@ Assumes the probability series, especially Normal (CLT, √n law) and Chi-square
 > **Data:** button test, sleep trial.
 >
 > **Links:** builds on Binomial (counting arrangements), The bootstrap. Leads to p-values.
+>
+> **Built:** the hero asks how many of the 4 milk-first cups she must catch (at least 2, at least 3, or all 4) and shows the 70-way distribution (1/16/36/16/1) with the reader's threshold in gold. The tea set has 8 clickable cups poured at random; after picking 4 and revealing, all 70 choices are drawn as strips stacked into a histogram by number right, with the reader's choice outlined. The shuffler shows two 50×20 grids of 1,000 visitors with the 50/64 clicks, a predict-first step (answer: about 1 in 5), and a gap histogram (exact permutation p = 0.21 two-sided; the text notes page 1's 19% came from a slightly different chance world). In the sign flips, clicking a patient flips that bar, alongside random and all-1,024 buttons (2 patterns ≥ +1.58, 4 two-sided = 0.4%; patient 5's 0.0 doubles every pattern). Section 4 gives Downey's three steps and a table covering tea, button, sleep and heights.
 
 <a id="p-values"></a>
 ### **7. p-values**

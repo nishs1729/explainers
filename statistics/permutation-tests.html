@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Shuffling to Test — a visual introduction</title>
+<style>
+:root{
+  --bg:#faf8f4; --surface:#ffffff; --surface-2:#f2efe8; --ink:#1c1c1e; --ink-2:#4c4e55; --ink-3:#8b8d93; --line:#e3dfd5;
+  --one:#16917c; --one-soft:rgba(22,145,124,.15);
+  --zero:#d9573a; --zero-soft:rgba(217,87,58,.15);
+  --accent:#3654c9; --accent-soft:rgba(54,84,201,.11);
+  --gold:#b98317; --gold-soft:rgba(185,131,23,.22);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+    --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+    --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+    --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+    --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+  --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+  --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+  --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+  --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.68 var(--sans);-webkit-font-smoothing:antialiased}
+main{max-width:820px;margin:0 auto;padding:0 20px 80px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;letter-spacing:-.01em}
+h1{font-size:clamp(2.2rem,6vw,3.4rem);margin:.2em 0 .3em}
+h2{font-size:clamp(1.6rem,4vw,2.1rem);margin:0 0 .5em}
+h3{font-size:1.2rem;margin:1.6em 0 .4em}
+p{margin:0 0 1em}
+a{color:var(--accent)}
+strong{font-weight:650}
+em.term{font-style:normal;font-weight:650;color:var(--accent)}
+.muted{color:var(--ink-2)}
+small,.small{font-size:14px}
+
+/* hero */
+.hero{text-align:center;padding:64px 0 24px}
+.kicker{text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--ink-3);margin:0}
+.lede{font-size:1.2rem;color:var(--ink-2);max-width:620px;margin:0 auto}
+.hero-play{max-width:640px;margin:30px auto 0;text-align:left}
+.hero-play .controls{justify-content:center}
+.hint{font-size:15px;color:var(--ink-2);min-height:3.2em;margin:10px 0 0;text-align:center}
+.ask{font-family:var(--serif);font-size:1.25rem;text-align:center;margin:0 0 12px}
+
+.toc{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;margin:28px 0 8px}
+.toc ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 20px;counter-reset:t}
+.toc li{counter-increment:t;font-size:15px}
+.toc li::before{content:counter(t,decimal-leading-zero);font-family:var(--mono);color:var(--ink-3);margin-right:10px;font-size:13px}
+.toc a{color:var(--ink);text-decoration:none}
+.toc a:hover{color:var(--accent)}
+
+section{padding-top:56px}
+.secnum{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.08em;margin-bottom:4px}
+
+.widget{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin:26px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.widget-title{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);margin:0 0 12px;font-weight:600}
+.controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:12px 0}
+.ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:15px}
+.ctrl output{font-family:var(--mono);font-size:14px;min-width:5.5em;color:var(--ink)}
+input[type=range]{accent-color:var(--accent);width:170px;max-width:100%}
+.btn{font:inherit;font-size:14px;line-height:1.2;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;transition:background .15s,transform .1s}
+.btn:hover{border-color:var(--ink-3)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn.guess{background:var(--gold-soft);border-color:var(--gold);color:var(--ink)}
+.btn.right{background:var(--one-soft);border-color:var(--one);color:var(--one)}
+.btn.wrong{background:var(--zero-soft);border-color:var(--zero);color:var(--zero)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:6px}
+.readout{font-family:var(--mono);font-size:14px;color:var(--ink-2);line-height:1.6}
+.readout b{color:var(--ink);font-weight:600}
+.readout .ok{color:var(--one);font-weight:600}
+.readout .warn{color:var(--zero);font-weight:600}
+.readout .gd{color:var(--gold);font-weight:600}
+.msg{font-size:15px;color:var(--ink-2);min-height:3.4em;margin:10px 0 0}
+.msg b{color:var(--ink)}
+canvas{display:block;width:100%}
+.cap{font-size:13px;color:var(--ink-3);margin:2px 0 6px}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:20px 0}
+.callout p:last-child{margin-bottom:0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin-top:8px}
+.legend > span{display:inline-block}
+.legend .sw{vertical-align:middle;margin:0 6px 2px 0}
+.sw{display:inline-block;width:16px;height:10px;border-radius:2px}
+.sw.dot{width:8px;height:8px;border-radius:50%}
+.sw.line{height:0;border-top:2px solid var(--ink)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+@media (max-width:640px){.pair{grid-template-columns:1fr}}
+.mcap{font-size:13px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+
+/* cast */
+.cast-q{font-family:var(--serif);font-size:1.08rem;margin:0 0 10px}
+.datarow{font-family:var(--mono);font-size:14px;color:var(--ink-2);margin:0 0 6px}
+.datarow b{color:var(--ink)}
+
+/* recipe */
+.facts{counter-reset:f;list-style:none;padding:0;margin:18px 0}
+.facts li{counter-increment:f;position:relative;padding:12px 0 12px 44px;border-bottom:1px solid var(--line)}
+.facts li::before{content:counter(f);position:absolute;left:0;top:12px;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:600 13px var(--mono)}
+.facts li strong{display:block}
+.table-wrap{overflow-x:auto}
+table.summary{border-collapse:collapse;width:100%;font-size:15px;margin:14px 0}
+table.summary td,table.summary th{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3)}
+@media (max-width:480px){table.summary td,table.summary th{padding:8px 5px}}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:18px 0}
+.card{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
+.card h4{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+.card p{font-size:15px;margin:0;color:var(--ink-2)}
+
+/* quiz */
+.quiz{display:grid;gap:10px}
+.qitem{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg)}
+.qitem p{margin:0 0 8px;font-size:16px}
+.qbtns{display:flex;flex-wrap:wrap;gap:8px}
+.qexp{font-size:15px;color:var(--ink-2);margin:10px 0 0!important}
+
+@media (max-width:480px){
+  main{padding:0 16px 80px}
+  .widget{padding:14px}
+  input[type=range]{width:150px}
+}
+/* page 6 */
+.linkbtn{all:unset;cursor:pointer;font-size:14px;color:var(--accent);text-decoration:underline}
+.linkbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.linkbtn[hidden]{display:none}
+.cups{display:flex;justify-content:center;gap:8px 18px;flex-wrap:wrap;margin:2px 0 6px}
+.cup{width:38px;height:34px;border:2px solid var(--ink-2);border-top-width:3px;border-radius:0 0 14px 14px;display:grid;place-items:center;font:600 14px var(--mono);color:var(--ink-3);position:relative;background:var(--surface)}
+.cup::after{content:"";position:absolute;right:-9px;top:6px;width:7px;height:12px;border:2px solid var(--ink-2);border-left:0;border-radius:0 8px 8px 0}
+.teacups{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
+@media (max-width:560px){.teacups{grid-template-columns:repeat(4,1fr)}}
+.tcup{font:inherit;cursor:pointer;border:2px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);padding:10px 2px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;transition:border-color .12s,background .12s}
+.tcup:hover{border-color:var(--ink-3)}
+.tcup:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tcup .tn{font:600 15px var(--mono)}
+.tcup .tl{font-size:11px;color:var(--ink-2);min-height:1.3em;text-align:center;line-height:1.2}
+.tcup.on{border-color:var(--gold);background:var(--gold-soft)}
+.tcup.right{border-color:var(--one);background:var(--one-soft)}
+.tcup.wrong{border-color:var(--zero);background:var(--zero-soft)}
+.tcup.missed{border-style:dashed;border-color:var(--one)}
+canvas.clicky{cursor:pointer}
+</style>
+<script>try{var t=localStorage.getItem('xp-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/catalog.js" defer></script>
+<script src="../assets/site.js" defer></script>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <p class="kicker">A visual introduction</p>
+  <h1>Shuffling to Test</h1>
+  <p class="lede">If the groups make no difference, the labels on the data are arbitrary, and shuffling them changes nothing that matters. So shuffle them, many times, and see what chance alone produces. Then see where the real data lands.</p>
+  <div class="hero-play" id="heroPlay">
+    <p class="ask">A lady claims she can taste whether the milk or the tea went into the cup first. You pour 8 cups, 4 of each, and she must pick out the 4 milk-first cups. How many must she get right before you believe her?</p>
+    <div class="cups" aria-hidden="true"><span class="cup">?</span><span class="cup">?</span><span class="cup">?</span><span class="cup">?</span><span class="cup">?</span><span class="cup">?</span><span class="cup">?</span><span class="cup">?</span></div>
+    <div class="controls" id="heroPred">
+      <button class="btn" data-k="2">At least 2 of the 4</button>
+      <button class="btn" data-k="3">At least 3 of the 4</button>
+      <button class="btn" data-k="4" id="heroAll4">All 4</button>
+    </div>
+    <canvas id="heroBars" style="height:190px" role="img" aria-label="Bar chart of how many of the 70 possible guesses get 0, 1, 2, 3 or 4 milk-first cups right"></canvas>
+    <p class="hint" id="heroHint" aria-live="polite">Pick the score that would convince you. Then see how often someone who is purely guessing would reach it.</p>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#tea">The tea test</a></li>
+    <li><a href="#shuffle">Shuffle the labels</a></li>
+    <li><a href="#flips">Sign flips for paired data</a></li>
+    <li><a href="#onetest">Every test is this test</a></li>
+    <li><a href="#uses">Where you will meet it</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<section id="tea">
+  <div class="secnum">01</div>
+  <h2>The tea test</h2>
+  <p>The story comes from the statistician Ronald Fisher, who used it to explain the logic of experiments in his book <em>The Design of Experiments</em> (1935). The lady was Muriel Bristol, a colleague at an agricultural research station in England. Fisher’s point was not about tea. It was about how to decide, before pouring a single cup, what result would count as evidence.</p>
+  <p>His reasoning: suppose she can’t taste the difference at all. Then her choice of 4 cups is just one of the ways to pick 4 cups out of 8, and every way is equally likely. There are exactly 70 of them (the <a href="../probability/binomial.html">counting from the Binomial page</a>: 8 × 7 × 6 × 5 ÷ (4 × 3 × 2 × 1) = 70). Only one of them is all correct. So a pure guesser gets all 4 right 1 time in 70.</p>
+  <p>Be the guesser yourself. The cups below have been poured at random; you can’t taste anything, so just pick 4.</p>
+
+  <div class="widget">
+    <p class="widget-title">The tea set</p>
+    <div class="teacups" id="teaCups" role="group" aria-label="Eight cups; pick the four you think had milk poured first"></div>
+    <div class="controls">
+      <button class="btn primary" id="teaReveal" disabled>Reveal the cups</button>
+      <button class="btn" id="teaNext">Pour a new set</button>
+      <button class="btn" id="teaAuto">Guess 100 sets for me</button>
+    </div>
+    <div class="readout" id="teaRead" aria-live="polite">Pick 4 cups.</div>
+    <p class="mcap" style="margin-top:12px">All 70 ways to pick 4 cups, sorted by how many milk-first cups they catch</p>
+    <canvas id="teaAll" style="height:330px" role="img" aria-label="All 70 ways to choose 4 of the 8 cups, each drawn as a strip of 8 cells, stacked into columns by how many milk-first cups the choice gets right: 1, 16, 36, 16 and 1 ways"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--one)"></i><span>picked, milk first (right)</span></span><span><i class="sw" style="background:var(--zero)"></i><span>picked, tea first (wrong)</span></span><span><i class="sw" style="border:2px solid var(--gold);background:transparent"></i><span>your pick</span></span><span id="teaTally" class="muted"></span></div>
+  </div>
+
+  <p>The 70 strips form a histogram made of every possible guess: 1 way to get none right, 16 ways to get 1, 36 ways to get 2, 16 to get 3, and 1 to get all 4. Getting 3 or more right happens 17 times in 70, about 1 in 4, which is far too often to convince anyone. Only a perfect score is rare enough. According to a colleague who was there, Muriel Bristol got all eight cups right; the story was retold in David Salsburg’s book <em>The Lady Tasting Tea</em> (2001).</p>
+</section>
+
+<!-- 2 -->
+<section id="shuffle">
+  <div class="secnum">02</div>
+  <h2>Shuffle the labels</h2>
+  <p>The tea test had only 70 possibilities, so Fisher could list them all. Most data have far too many, but the same idea works by random sampling. Take the button test from the <a href="is-it-real.html">first page</a>: 1,000 visitors saw the grey button and 50 clicked (5.0%); 1,000 saw the orange one and 64 clicked (6.4%). A gap of 1.4 points.</p>
+  <p>If the color makes no difference, each visitor would have clicked or not whichever button they saw. Then the labels “grey” and “orange” are arbitrary: deal the same 2,000 visitors, with their 114 clicks, into two new groups of 1,000 at random, and you get a gap that chance alone produced. Do that many times and you see how big chance’s gaps get.</p>
+
+  <div class="widget">
+    <p class="widget-title">The shuffler</p>
+    <p class="cast-q">Before shuffling: how often do you think a shuffle produces a gap of 1.4 points or more, either way?</p>
+    <div class="controls" id="shPred">
+      <button class="btn" data-g="0">Almost never (under 1%)</button>
+      <button class="btn" data-g="1">Now and then (about 5%)</button>
+      <button class="btn" data-g="2">Often (about 1 in 5)</button>
+      <button class="btn" data-g="3">Usually (over half)</button>
+    </div>
+    <canvas id="shGrid" style="height:190px" role="img" aria-label="Two blocks of 1,000 visitors each, with the visitors who clicked highlighted; shuffling deals the same visitors into two new groups"></canvas>
+    <p class="mcap" style="margin-top:10px">Gap between the groups (B − A, in percentage points) in every shuffle</p>
+    <canvas id="shHist" style="height:200px" role="img" aria-label="Histogram of the gap in click rate over all shuffles so far, with the real gap of 1.4 points and its mirror marked"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>shuffles</span></span><span><i class="sw" style="background:var(--accent)"></i><span>shuffles at least as extreme as the real gap</span></span><span><i class="sw line" style="border-top:2px solid var(--accent)"></i><span>real gap +1.4</span></span></div>
+    <div class="controls">
+      <button class="btn primary" id="shOne" disabled>Shuffle once</button>
+      <button class="btn" id="shMany" disabled>+1,000 shuffles</button>
+      <button class="btn" id="shReal">Real labels</button>
+      <button class="btn" id="shClear">Clear</button>
+      <button class="linkbtn" id="shSkip">skip the guess</button>
+    </div>
+    <div class="readout" id="shRead" aria-live="polite"></div>
+  </div>
+
+  <p>About 21% of shuffles produce a gap at least as big as the real one, in one direction or the other. Chance alone does this roughly 1 time in 5, so the button test can’t show that orange is better. (On the first page, a slightly different chance world, two identical buttons each shown to 1,000 fresh visitors, gave about 19%. Both say the same thing.)</p>
+  <p>This is a <em class="term">permutation test</em>, also called a <em>randomization test</em>. The fraction of shuffles at least as extreme as the real data is the famous <strong>p-value</strong>, the subject of the next page.</p>
+  <div class="callout">
+    <p><strong>Why shuffling is allowed.</strong> The shuffle is a fair stand-in for chance because the visitors were assigned to the buttons at random in the first place. If color does nothing, the real split was just one of the many random splits the shuffle explores. Random assignment, the cure from <a href="selection-bias.html">Who’s Missing?</a>, is what licenses the test.</p>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="flips">
+  <div class="secnum">03</div>
+  <h2>Sign flips for paired data</h2>
+  <p>The sleep trial is different. Each of the 10 patients took <em>both</em> drugs, so the data come in pairs, and shuffling patients between groups would break those pairs apart. Here the shuffle happens inside each patient. If the two drugs work the same, it was a coin toss which of the two nights came out better, so each patient’s difference could just as well have had the opposite sign. Flipping signs is how this data gets shuffled.</p>
+  <p>With 10 patients there are 2<sup>10</sup> = 1,024 ways to choose the signs, few enough to try every one. Click a patient to flip their sign, or try them all:</p>
+
+  <div class="widget">
+    <p class="widget-title">Flipping signs, patient by patient</p>
+    <canvas id="sfBars" class="clicky" style="height:236px" role="img" aria-label="Each patient's extra hours of sleep on drug 2, as a bar to the right (more sleep) or left (less); click a bar to flip its sign"></canvas>
+    <div class="controls">
+      <button class="btn" id="sfRand">Flip at random</button>
+      <button class="btn primary" id="sfAll">All 1,024 flips</button>
+      <button class="btn" id="sfReal">Real signs</button>
+    </div>
+    <p class="mcap" style="margin-top:6px">Average gain under every set of signs tried</p>
+    <canvas id="sfHist" style="height:190px" role="img" aria-label="Histogram of the average gain over the sign patterns tried, with the real average of 1.58 hours marked"></canvas>
+    <div class="readout" id="sfRead" aria-live="polite"></div>
+  </div>
+
+  <p>Of all 1,024 sign patterns, only 2 give an average gain of 1.58 hours or more, and 4 give an average that far from zero in either direction: 0.4%. (Each pattern is counted twice, because one patient’s difference is exactly 0 and flipping it changes nothing.) Unlike the button test, this is something chance alone almost never does. On the first page that was the bottom line; now you have seen exactly how it was computed.</p>
+</section>
+
+<!-- 4 -->
+<section id="onetest">
+  <div class="secnum">04</div>
+  <h2>Every test is this test</h2>
+  <p>Three different problems, one recipe. The statistician Allen Downey summed it up as “there is only one test”:</p>
+  <ol class="facts">
+    <li><strong>Compute a number from the data</strong> that measures the effect you care about: cups right, a gap, an average gain.</li>
+    <li><strong>Build the world where nothing is going on</strong>, by shuffling whatever would be arbitrary in that world: cup choices, group labels, signs.</li>
+    <li><strong>See where the real number lands</strong> among the shuffled ones. If it sits among them, chance is a fine explanation; if it is out beyond almost all of them, chance struggles.</li>
+  </ol>
+  <div class="table-wrap">
+    <table class="summary">
+      <thead><tr><th>Data</th><th>The number</th><th>World where nothing happens</th><th>Shuffle</th><th>Where it landed</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Tea</strong></td><td>4 of 4 right</td><td>she is guessing</td><td>all 70 ways to pick 4 cups</td><td>1 of 70 (1.4%)</td></tr>
+        <tr><td><strong>Button test</strong></td><td>gap of 1.4 points</td><td>color makes no difference</td><td>deal visitors into new groups</td><td>about 21%, either way</td></tr>
+        <tr><td><strong>Sleep trial</strong></td><td>average gain 1.58 hours</td><td>the drugs are the same</td><td>flip each patient’s sign: 1,024 ways</td><td>4 of 1,024 (0.4%), either way</td></tr>
+        <tr><td><strong>Heights</strong></td><td>correlation 0.48</td><td>sons unrelated to parents</td><td>shuffle sons among families</td><td>none of 1,000</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>The named tests later in this series, the <em>t</em>-test, the chi-square test, ANOVA, the test for a regression slope, all follow this recipe. They replace the shuffling with a formula for where the shuffled numbers would fall, which was essential before computers. Each of those pages will show its formula next to the shuffle it stands in for, and they will agree. The tea test itself survives under the name <em>Fisher’s exact test</em>.</p>
+</section>
+
+<!-- 5 -->
+<section id="uses">
+  <div class="secnum">05</div>
+  <h2>Where you will meet it</h2>
+  <div class="cards">
+    <div class="card"><h4>A/B testing</h4><p>Shuffling which users saw which version is a standard way to check a website experiment, and it works for any metric, from click rates to revenue per user.</p></div>
+    <div class="card"><h4>Clinical trials</h4><p>When patients are randomized, re-randomizing the treatment labels on the computer gives a test that rests on nothing but the trial’s own design.</p></div>
+    <div class="card"><h4>Genetics and brain imaging</h4><p>With thousands of genes or brain regions tested at once, shuffling the labels and rerunning the whole analysis shows how many “hits” chance alone produces.</p></div>
+    <div class="card"><h4>Machine learning</h4><p><em>Permutation importance</em> shuffles one input column and measures how much a model’s accuracy drops. A feature whose shuffling costs nothing wasn’t helping.</p></div>
+    <div class="card"><h4>Ecology and geography</h4><p>Are species that live close together more alike? Shuffling which location goes with which sample builds the world where geography doesn’t matter.</p></div>
+    <div class="card"><h4>Sports and streaks</h4><p>Shuffling the order of a player’s hits and misses shows how streaky a player with no “hot hand” would look, exactly like the coin streaks on the first page.</p></div>
+  </div>
+
+  <h3>Check yourself</h3>
+  <div class="widget">
+    <div class="quiz" id="quiz"></div>
+    <div class="readout" id="quizScore" style="margin-top:10px" aria-live="polite"></div>
+  </div>
+
+  <p>Every test on this page ended with a fraction: 1 in 70, 21%, 4 in 1,024. That fraction has a name, a long history of misuse, and a page of its own: <strong>p-values</strong> (coming soon).</p>
+</section>
+
+</main>
+
+<script>
+(function(){
+'use strict';
+/* ---------- helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const root = document.documentElement;
+const C = n => getComputedStyle(root).getPropertyValue(n).trim();
+const f2 = x => x.toFixed(2);
+const fmtN = x => Math.abs(x - Math.round(x)) < 1e-9 ? String(Math.round(x)) : String(+x.toFixed(2));
+const pct = x => (100 * x).toFixed(1) + '%';
+const MONO = 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
+const TAU = Math.PI * 2;
+const comma = n => n.toLocaleString('en-US');
+
+function fit(c){
+  const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+  if (c.width !== w*dpr || c.height !== h*dpr) { c.width = w*dpr; c.height = h*dpr; }
+  const ctx = c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  return {ctx, w, h};
+}
+const redraws = [];
+function redrawAll(){ redraws.forEach(f => f()); }
+let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(redrawAll, 80); });
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+if (mq.addEventListener) mq.addEventListener('change', redrawAll);
+new MutationObserver(redrawAll).observe(root, {attributes:true, attributeFilter:['data-theme']});
+
+function niceTicks(max, count){
+  const raw = max / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const step = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag;
+  const t = []; for (let v = 0; v <= max + 1e-9; v += step) t.push(v); return t;
+}
+function stepFmt(ticks){ const st = ticks.length > 1 ? ticks[1] - ticks[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9)); return v => v.toFixed(d); }
+function yGrid(ctx, X0, X1, ys, ticks, fmt){
+  ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ticks.forEach(v => {
+    const y = Math.round(ys(v)) + .5;
+    ctx.strokeStyle = C('--line'); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X0, y); ctx.lineTo(X1, y); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.fillText(fmt(v), X0 - 6, y);
+  });
+}
+function intStep(px, minPx){
+  for (const s of [1,2,5,10,20,25,50,100]) if (s * px >= minPx) return s;
+  return 100;
+}
+function roundRect(ctx, x, y, w, h, r){
+  r = Math.max(0, Math.min(r, w/2, Math.abs(h)/2));
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+function dot(ctx, x, y, r){ ctx.beginPath(); ctx.arc(x, y, Math.max(0.5, r), 0, TAU); ctx.fill(); }
+function vline(ctx, x, y0, y1, color, dash, lw){
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw || 1.5; if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(Math.round(x) + .5, y0); ctx.lineTo(Math.round(x) + .5, y1); ctx.stroke(); ctx.restore();
+}
+/* integer-valued bar charts: bars at k = lo..hi */
+function frame(ctx, w, h, o){
+  const X0 = o.left != null ? o.left : 40, X1 = w - 10, Y0 = h - 24, Y1 = o.top != null ? o.top : 12;
+  const span = o.hi - o.lo + 1, bw = (X1 - X0) / span;
+  const xc = k => X0 + bw * (k - o.lo + .5), ys = v => Y0 - (v / o.ymax) * (Y0 - Y1);
+  const t = niceTicks(o.ymax, 3).filter(v => v <= o.ymax * 1.0001); yGrid(ctx, X0, X1, ys, t, o.yfmt || stepFmt(t));
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  const st = o.step || intStep(bw, 24);
+  for (let k = Math.ceil(o.lo / st) * st; k <= o.hi; k += st) ctx.fillText(o.lab ? o.lab(k) : k, xc(k), Y0 + 6);
+  return {X0, X1, Y0, Y1, bw, xc, ys};
+}
+function drawBars(ctx, F, lo, hi, val, color, frac){
+  const bwid = Math.max(1, F.bw * (frac == null ? .8 : frac));
+  for (let k = lo; k <= hi; k++) {
+    const v = val(k); if (!(v > 0)) continue;
+    const y = F.ys(v), hh = F.Y0 - y; if (hh < 0.2) continue;
+    const x = F.xc(k) - bwid / 2;
+    ctx.fillStyle = typeof color === 'function' ? color(k) : color;
+    if (bwid >= 6 && hh >= 3) { roundRect(ctx, x, y, bwid, hh, Math.min(3, bwid / 4)); ctx.fill(); }
+    else ctx.fillRect(x, y, bwid, hh);
+  }
+}
+function emptyNote(ctx, w, h, text){
+  ctx.fillStyle = C('--ink-3'); ctx.font = '13px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(text, w / 2, h / 2 - 8);
+}
+
+/* randomness */
+let spare = null;
+function gauss(){
+  if (spare != null) { const s = spare; spare = null; return s; }
+  let u = 0, v = 0; while (u === 0) u = Math.random(); v = Math.random();
+  const r = Math.sqrt(-2 * Math.log(u)); spare = r * Math.sin(TAU * v); return r * Math.cos(TAU * v);
+}
+function shuffled(a){ const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; }
+function corr(x, y){
+  const n = x.length; let mx = 0, my = 0; for (let i = 0; i < n; i++) { mx += x[i]; my += y[i]; } mx /= n; my /= n;
+  let sxy = 0, sxx = 0, syy = 0; for (let i = 0; i < n; i++) { const a = x[i] - mx, b = y[i] - my; sxy += a * b; sxx += a * a; syy += b * b; }
+  return sxy / Math.sqrt(sxx * syy);
+}
+function binom(n, p){ let k = 0; for (let i = 0; i < n; i++) if (Math.random() < p) k++; return k; }
+function flips(n){ const a = new Array(n); for (let i = 0; i < n; i++) a[i] = Math.random() < .5 ? 1 : 0; return a; }
+function longestRun(a){
+  let best = 1, cur = 1, start = 0, bs = 0;
+  for (let i = 1; i < a.length; i++) { if (a[i] === a[i-1]) cur++; else { cur = 1; start = i; } if (cur > best) { best = cur; bs = start; } }
+  return {len: best, start: bs};
+}
+function switches(a){ let s = 0; for (let i = 1; i < a.length; i++) if (a[i] !== a[i-1]) s++; return s; }
+const RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+function ticksIn(lo, hi, count){
+  const raw = (hi - lo) / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const st = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag, t = [];
+  for (let v = Math.ceil(lo / st - 1e-9) * st; v <= hi + 1e-9; v += st) t.push(+v.toFixed(10));
+  return t;
+}
+function xAxis(ctx, X0, X1, Y0, lo, hi, fmt){
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  const t = ticksIn(lo, hi, Math.max(2, Math.floor((X1 - X0) / 60)));
+  const st = t.length > 1 ? t[1] - t[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9));
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  t.forEach(v => ctx.fillText(fmt ? fmt(v) : v.toFixed(d), X0 + (v - lo) / (hi - lo) * (X1 - X0), Y0 + 5));
+}
+function label(ctx, x, y, text, color, X0, X1){
+  ctx.font = '600 11px ' + MONO; ctx.fillStyle = color; ctx.textBaseline = 'top';
+  const right = x > (X0 + X1) / 2; ctx.textAlign = right ? 'right' : 'left';
+  ctx.fillText(text, x + (right ? -5 : 5), y);
+}
+
+function bar(ctx, x, w, y, Y0, color){
+  const hh = Y0 - y; if (!(hh > .2)) return;
+  ctx.fillStyle = color;
+  if (w >= 6 && hh >= 3) { roundRect(ctx, x, y, w, hh, Math.min(3, w / 4)); ctx.fill(); } else ctx.fillRect(x, y, w, hh);
+}
+
+
+/* ---------- shared ---------- */
+const TEA = [1, 16, 36, 16, 1];   // ways to get 0..4 milk-first cups right when picking 4 of 8 at random
+const pop = m => { let c = 0; while (m) { c += m & 1; m >>= 1; } return c; };
+const COMBOS = []; for (let m = 0; m < 256; m++) if (pop(m) === 4) COMBOS.push(m);   // the 70 ways
+const signed = (v, d) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(d);
+
+/* ---------- hero: how many must she get right? ---------- */
+(function(){
+  const hint = $('#heroHint');
+  let k = null;
+  function draw(){
+    const {ctx, w, h} = fit($('#heroBars'));
+    if (k == null) { emptyNote(ctx, w, h, 'pick a score above'); return; }
+    const F = frame(ctx, w, h, {lo: 0, hi: 4, ymax: 42, left: 40, step: 1, top: 18, lab: i => `${i} right`, yfmt: v => String(v)});
+    drawBars(ctx, F, 0, 4, i => TEA[i], i => i >= k ? C('--gold') : C('--ink-3'), .62);
+    ctx.font = '600 12px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    TEA.forEach((c, i) => { ctx.fillStyle = i >= k ? C('--gold') : C('--ink-2'); ctx.fillText(`${c} of 70`, F.xc(i), F.ys(c) - 3); });
+  }
+  $$('#heroPred .btn').forEach(b => b.addEventListener('click', () => {
+    k = +b.dataset.k; $$('#heroPred .btn').forEach(x => x.classList.toggle('guess', x === b));
+    const n = TEA.slice(k).reduce((a, c) => a + c, 0);
+    hint.innerHTML = `Someone purely guessing reaches ${k === 4 ? 'a perfect score' : `at least ${k} right`} in <b>${n} of the 70</b> equally likely ways to pick 4 cups: <b>${(100 * n / 70).toFixed(1)}%</b>. ` +
+      (k === 4 ? 'That was Fisher’s answer: only a perfect score is rare enough to be convincing.' : k === 3 ? 'About 1 in 4. A guesser would convince you far too often. Fisher demanded all 4.' : 'More often than not. A guesser would convince you most of the time. Fisher demanded all 4.');
+    draw();
+  }));
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 1. the tea set ---------- */
+(function(){
+  const box = $('#teaCups'), out = $('#teaRead');
+  let truth = 0, picks = 0, revealed = false, tally = [0, 0, 0, 0, 0], rounds = 0;
+  const cups = [];
+  for (let i = 0; i < 8; i++) {
+    const b = document.createElement('button'); b.className = 'tcup'; b.setAttribute('aria-pressed', 'false');
+    b.innerHTML = `<span class="tn">${i + 1}</span><span class="tl"></span>`;
+    b.addEventListener('click', () => toggle(i)); box.appendChild(b); cups.push(b);
+  }
+  const pour = () => COMBOS[Math.floor(Math.random() * 70)];
+  function toggle(i){
+    if (revealed) return;
+    const bit = 1 << i;
+    if (picks & bit) picks &= ~bit; else if (pop(picks) < 4) picks |= bit;
+    sync();
+  }
+  function sync(){
+    cups.forEach((b, i) => {
+      const bit = 1 << i, picked = !!(picks & bit), milk = !!(truth & bit);
+      b.classList.toggle('on', picked); b.setAttribute('aria-pressed', picked);
+      b.classList.toggle('right', revealed && picked && milk); b.classList.toggle('wrong', revealed && picked && !milk);
+      b.classList.toggle('missed', revealed && !picked && milk);
+      b.querySelector('.tl').textContent = revealed ? (milk ? 'milk first' : 'tea first') : '';
+    });
+    $('#teaReveal').disabled = revealed || pop(picks) !== 4;
+    const right = pop(picks & truth);
+    out.innerHTML = revealed ? `You caught <b>${right} of 4</b> milk-first cups. A guesser does at least that well in <b>${TEA.slice(right).reduce((a, c) => a + c, 0)} of 70</b> ways.` :
+      pop(picks) < 4 ? `Pick ${4 - pop(picks)} more cup${4 - pop(picks) === 1 ? '' : 's'}.` : 'Ready: reveal the cups.';
+    $('#teaTally').textContent = rounds ? `your ${rounds} set${rounds === 1 ? '' : 's'}: ${tally.map((c, i) => `${i} right ×${c}`).join(', ')}` : '';
+    drawAll();
+  }
+  function drawAll(){
+    const {ctx, w, h} = fit($('#teaAll'));
+    if (!revealed) { emptyNote(ctx, w, h, 'reveal the cups to sort all 70 ways'); return; }
+    const colW = (w - 20) / 5, Y0 = h - 34, sh = Math.max(3, Math.min(7, (Y0 - 8) / 36 - 1.5)), gap = Math.max(1, Math.min(2, sh * .3)), cw = Math.min(11, (colW - 10) / 8);
+    const cols = [[], [], [], [], []];
+    COMBOS.forEach(m => cols[pop(m & truth)].push(m));
+    cols.forEach((list, c) => {
+      const x0 = 10 + c * colW + (colW - 8 * cw) / 2;
+      list.forEach((m, r) => {
+        const y = Y0 - (r + 1) * (sh + gap);
+        for (let i = 0; i < 8; i++) {
+          const bit = 1 << i, picked = !!(m & bit);
+          ctx.fillStyle = picked ? (truth & bit ? C('--one') : C('--zero')) : C('--line');
+          ctx.fillRect(x0 + i * cw + .5, y, cw - 1, sh);
+        }
+        if (m === picks) { ctx.strokeStyle = C('--gold'); ctx.lineWidth = 2.5; ctx.strokeRect(x0 - 2, y - 2, 8 * cw + 3, sh + 4); }
+      });
+      ctx.font = '600 12px ' + MONO; ctx.fillStyle = C('--ink-2'); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.fillText(`${c} right`, 10 + (c + .5) * colW, Y0 + 4);
+      ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.fillText(`${list.length} way${list.length === 1 ? '' : 's'}`, 10 + (c + .5) * colW, Y0 + 18);
+    });
+  }
+  function reveal(){ revealed = true; tally[pop(picks & truth)]++; rounds++; sync(); }
+  $('#teaReveal').addEventListener('click', reveal);
+  $('#teaNext').addEventListener('click', () => { truth = pour(); picks = 0; revealed = false; sync(); });
+  $('#teaAuto').addEventListener('click', () => {
+    for (let r = 0; r < 100; r++) tally[pop(pour() & pour())]++;
+    rounds += 100;
+    if (!revealed) { truth = pour(); picks = pour(); revealed = true; tally[pop(picks & truth)]++; rounds++; }
+    sync();
+  });
+  truth = pour(); sync(); redraws.push(drawAll);
+})();
+
+/* ---------- 2. the shuffler: the button test ---------- */
+(function(){
+  const N = 1000, CA = 50, CB = 64, K = CA + CB, OBS = CB - CA, LO = -40, HI = 40;
+  const real = new Uint8Array(2 * N);
+  (function(){ const a = shuffled(Array.from({length: N}, (_, i) => i)).slice(0, CA), b = shuffled(Array.from({length: N}, (_, i) => i)).slice(0, CB); a.forEach(i => real[i] = 1); b.forEach(i => real[N + i] = 1); })();
+  let view = real, isReal = true, gaps = [], beyond = 0, guess = null, open = false;
+  function shuffleOnce(){ const a = Array.from(real); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return Uint8Array.from(a); }
+  function fastGap(){   // clicks landing in group B when 2,000 visitors are dealt at random
+    let left = K, x = 0; for (let i = 0; i < N; i++) { if (Math.random() * (2 * N - i) < left) { x++; left--; } } return x - (K - x);
+  }
+  function add(g){ gaps.push(g); if (Math.abs(g) >= OBS) beyond++; }
+  function drawGrid(){
+    const {ctx, w, h} = fit($('#shGrid'));
+    const gap = 18, pw = (w - gap) / 2, top = 34, cs = Math.min(pw / 50, (h - top - 4) / 20), gw = cs * 50, gh = cs * 20;
+    ['A · grey button', 'B · orange button'].forEach((name, g) => {
+      const x0 = g * (pw + gap) + (pw - gw) / 2;
+      let clicks = 0; for (let i = 0; i < N; i++) clicks += view[g * N + i];
+      ctx.font = '600 12px ' + MONO; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillStyle = C('--ink');
+      ctx.fillText(name, x0, 0);
+      ctx.font = '12px ' + MONO; ctx.fillStyle = isReal ? C('--accent') : C('--ink-2');
+      ctx.fillText(`${clicks} clicks · ${(clicks / 10).toFixed(1)}%`, x0, 16);
+      const on = isReal ? C('--accent') : C('--ink-2'), off = C('--line');
+      for (let i = 0; i < N; i++) {
+        const c = i % 50, r = Math.floor(i / 50);
+        ctx.fillStyle = view[g * N + i] ? on : off;
+        ctx.fillRect(x0 + c * cs, top + r * cs, Math.max(1, cs - .8), Math.max(1, cs - .8));
+      }
+    });
+  }
+  function drawHist(){
+    const {ctx, w, h} = fit($('#shHist'));
+    const cnt = {}; gaps.forEach(g => cnt[g] = (cnt[g] || 0) + 1);
+    const n = gaps.length, ym = n ? Math.max(...Object.values(cnt)) / n * 1.15 : .1;
+    const F = frame(ctx, w, h, {lo: LO, hi: HI, ymax: ym, step: 10, left: 46, lab: k => signed(k / 10, 0), yfmt: v => (v * 100).toFixed(0) + '%'});
+    if (n) drawBars(ctx, F, LO, HI, k => (cnt[k] || 0) / n, k => Math.abs(k) >= OBS ? C('--accent') : C('--ink-3'), 1.6);
+    else emptyNote(ctx, w, h, open ? 'no shuffles yet' : 'make your guess above first');
+    vline(ctx, F.xc(OBS), F.Y1, F.Y0, C('--accent'), null, 2);
+    vline(ctx, F.xc(-OBS), F.Y1, F.Y0, C('--accent'), [4, 3], 1.2);
+    ctx.fillStyle = C('--accent'); ctx.font = '600 12px ' + MONO; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText('real +1.4', F.xc(OBS) + 5, F.Y1);
+  }
+  function read(){
+    const n = gaps.length, out = $('#shRead');
+    if (!n) { out.innerHTML = isReal ? `real labels: gap <b>+1.4 points</b> (64 − 50 clicks)` : ''; return; }
+    const f = beyond / n, last = gaps[n - 1];
+    let t = `<b>${comma(n)}</b> shuffles · latest gap ${signed(last / 10, 1)} points · at least 1.4 either way: <b>${comma(beyond)}</b> = <b>${(100 * f).toFixed(1)}%</b>`;
+    if (guess != null && n >= 300) {
+      const ok = guess === 2;
+      t += `<br>${ok ? '<span class="ok">Your guess was right:</span>' : '<span class="warn">Not what you guessed:</span>'} chance alone makes a gap this big about 1 time in 5.`;
+      $$('#shPred .btn').forEach(b => { b.classList.remove('right', 'wrong'); if (+b.dataset.g === guess) b.classList.add(ok ? 'right' : 'wrong'); });
+    }
+    out.innerHTML = t;
+  }
+  function drawAll(){ drawGrid(); drawHist(); read(); }
+  function setOpen(){ open = true; $('#shOne').disabled = $('#shMany').disabled = false; $('#shSkip').hidden = true; drawHist(); }
+  $$('#shPred .btn').forEach(b => b.addEventListener('click', () => { guess = +b.dataset.g; $$('#shPred .btn').forEach(x => x.classList.toggle('guess', x === b)); setOpen(); read(); }));
+  $('#shSkip').addEventListener('click', setOpen);
+  $('#shOne').addEventListener('click', () => {
+    view = shuffleOnce(); isReal = false;
+    let b = 0; for (let i = N; i < 2 * N; i++) b += view[i];
+    add(b - (K - b)); drawAll();
+  });
+  $('#shMany').addEventListener('click', () => { for (let i = 0; i < 1000; i++) add(fastGap()); drawAll(); });
+  $('#shReal').addEventListener('click', () => { view = real; isReal = true; drawAll(); });
+  $('#shClear').addEventListener('click', () => { gaps = []; beyond = 0; view = real; isReal = true; $$('#shPred .btn').forEach(b => b.classList.remove('right', 'wrong')); drawAll(); });
+  drawAll(); redraws.push(drawAll);
+})();
+
+/* ---------- 3. sign flips: the sleep trial ---------- */
+(function(){
+  const D = [1.2, 2.4, 1.3, 1.3, 0.0, 1.0, 1.8, 0.8, 4.6, 1.4], OBS = 158;   // differences in tenths of an hour; OBS = sum
+  const T = D.map(v => Math.round(v * 10));
+  const cv = $('#sfBars');
+  let mask = 0, tried = new Map(), lastMask = null;   // bit i set = patient i flipped
+  const sumOf = m => T.reduce((a, d, i) => a + (m >> i & 1 ? -d : d), 0);
+  function tryMask(m){ tried.set(m, sumOf(m)); lastMask = m; }
+  function rowGeo(){ const h = cv.getBoundingClientRect().height; return {top: 6, rh: (h - 30) / 10}; }
+  function drawBars(){
+    const {ctx, w, h} = fit(cv), {top, rh} = rowGeo(), X0 = 84, X1 = w - 12, mid = (X0 + X1) / 2, sc = (X1 - mid) / 5.7;
+    ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(Math.round(mid) + .5, top); ctx.lineTo(Math.round(mid) + .5, top + 10 * rh); ctx.stroke();
+    const m = sumOf(mask) / 100, xm = mid + m * sc;
+    vline(ctx, xm, top, top + 10 * rh, mask ? C('--ink') : C('--accent'), [4, 3], 2);
+    ctx.font = '11px ' + MONO; ctx.textBaseline = 'middle';
+    D.forEach((d, i) => {
+      const s = mask >> i & 1 ? -1 : 1, y = top + i * rh + rh / 2, x = mid + s * d * sc;
+      ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'left'; ctx.fillText(`patient ${i + 1}`, 4, y);
+      ctx.fillStyle = s > 0 ? C('--accent') : C('--zero');
+      if (d) { roundRect(ctx, Math.min(mid, x), y - rh * .32, Math.abs(x - mid), rh * .64, 3); ctx.fill(); }
+      else ctx.fillRect(mid - 1, y - rh * .32, 3, rh * .64);
+      const t = signed(s * d, 1), tw = ctx.measureText(t).width, tx = s > 0 ? x + 5 : x - 5 - tw;
+      ctx.fillStyle = C('--surface'); ctx.fillRect(tx - 2, y - 7, tw + 4, 14);
+      ctx.fillStyle = C('--ink-2'); ctx.textAlign = 'left'; ctx.fillText(t, tx, y);
+    });
+    ctx.font = '600 12px ' + MONO; ctx.fillStyle = mask ? C('--ink') : C('--accent'); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText(`average ${signed(m, 2)} h`, Math.max(X0 + 50, Math.min(X1 - 50, xm)), top + 10 * rh + 6);
+  }
+  function drawHist(){
+    const {ctx, w, h} = fit($('#sfHist')), LO = -20, HI = 20, n = tried.size;
+    const cnt = new Array(HI - LO + 1).fill(0); tried.forEach(s => { const b = Math.max(LO, Math.min(HI, Math.round(s / 10))); cnt[b - LO]++; });
+    const ym = n ? Math.max(...cnt) / n * 1.15 : .2;
+    const F = frame(ctx, w, h, {lo: LO, hi: HI, ymax: ym, step: 5, left: 46, lab: k => signed(k / 10, 1), yfmt: v => (v * 100).toFixed(0) + '%'});
+    if (n) drawBars2(ctx, F, LO, HI, k => cnt[k - LO] / n, k => Math.abs(k * 10) >= OBS - 5 ? C('--accent') : C('--ink-3'));
+    else emptyNote(ctx, w, h, 'flip some signs');
+    const xo = F.xc(OBS / 10);
+    vline(ctx, xo, F.Y1, F.Y0, C('--accent'), null, 2); vline(ctx, F.xc(-OBS / 10), F.Y1, F.Y0, C('--accent'), [4, 3], 1.2);
+    ctx.fillStyle = C('--accent'); ctx.font = '600 12px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'top'; ctx.fillText('real +1.58', xo - 5, F.Y1);
+    let up = 0, both = 0; tried.forEach(s => { if (s >= OBS) up++; if (Math.abs(s) >= OBS) both++; });
+    $('#sfRead').innerHTML = n ? `<b>${comma(n)}</b> of 1,024 sign patterns tried · average ≥ 1.58: <b>${up}</b> · at least 1.58 from zero either way: <b>${both}</b>${n === 1024 ? ` = <b>${(100 * both / 1024).toFixed(1)}%</b>` : ''}${lastMask != null ? ` · current pattern: average ${signed(sumOf(mask) / 100, 2)} h` : ''}` : '';
+  }
+  function drawBars2(ctx, F, lo, hi, val, color){ drawBarsH(ctx, F, lo, hi, val, color); }
+  function drawBarsH(ctx, F, lo, hi, val, color){
+    const bwid = Math.max(1, F.bw * .85);
+    for (let k = lo; k <= hi; k++) { const v = val(k); if (!(v > 0)) continue; const y = F.ys(v); bar(ctx, F.xc(k) - bwid / 2, bwid, y, F.Y0, color(k)); }
+  }
+  function draw(){ drawBars(); drawHist(); }
+  cv.addEventListener('click', e => {
+    const r = cv.getBoundingClientRect(), {top, rh} = rowGeo(), i = Math.floor((e.clientY - r.top - top) / rh);
+    if (i < 0 || i > 9) return;
+    mask ^= 1 << i; tryMask(mask); draw();
+  });
+  $('#sfRand').addEventListener('click', () => { mask = Math.floor(Math.random() * 1024); tryMask(mask); draw(); });
+  $('#sfAll').addEventListener('click', () => { for (let m = 0; m < 1024; m++) tried.set(m, sumOf(m)); lastMask = mask; draw(); });
+  $('#sfReal').addEventListener('click', () => { mask = 0; tryMask(0); draw(); });
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 5. quiz ---------- */
+(function(){
+  const Q = [
+    {s: 'Predict: a guesser picks 4 of the 8 cups. How often do they catch at least 3 of the 4 milk-first cups?',
+     o: ['1 in 70', 'About 1 in 4', 'About half the time'], a: 1,
+     e: '16 ways to get exactly 3 plus 1 way to get all 4: 17 of 70, about 24%. That is why Fisher demanded a perfect score.'},
+    {s: 'In the button test, what does one shuffle of the labels represent?',
+     o: ['A world where the button color makes no difference', 'A world where orange is better', 'A repeat of the real experiment'], a: 0,
+     e: 'If color made no difference, every visitor would have clicked (or not) whichever button they saw, so any split of the 2,000 visitors is as good as the real one.'},
+    {s: 'About 21% of shuffles give a gap as big as the real 1.4 points. Which reading is <em>wrong</em>?',
+     o: ['Chance alone often produces gaps this big', 'There is a 21% chance that the buttons are equally good', 'This test can’t show that orange is better'], a: 1,
+     e: 'The 21% is how often chance produces such a gap if the buttons are equal. It is not the probability that they are equal; that question needs a different approach, which the Bayesian pages take up.'},
+    {s: 'Why flip signs for the sleep trial instead of shuffling patients between two groups?',
+     o: ['Each patient took both drugs, so each pair must stay together', 'Sign flips are quicker to compute'], a: 0,
+     e: 'The differences belong to individual patients. If the drugs are the same, the only arbitrary thing is which night came out better, so the sign of each difference is what gets shuffled.'},
+    {s: 'One patient’s difference is exactly 0. What does flipping its sign do?',
+     o: ['Changes the average', 'Nothing'], a: 1,
+     e: 'That is why every pattern of signs appears twice among the 1,024, and the count of extreme patterns (4) is even.'},
+    {s: 'Predict: with 40 patients showing differences like these, the share of sign flips as extreme as the real average would be…',
+     o: ['larger', 'about the same', 'smaller'], a: 2,
+     e: 'More patients means random signs cancel more thoroughly, so shuffled averages huddle closer to zero while the real average stays near 1.58. The real result becomes even more extreme by comparison.'},
+    {s: 'Why is shuffling the button labels a fair way to model chance?',
+     o: ['Because the visitors were assigned to the buttons at random', 'Because 2,000 visitors is a big sample'], a: 0,
+     e: 'Random assignment means the real split was one of many equally likely splits. The shuffle explores those splits. Without random assignment, a gap could come from who chose which button, and shuffling can’t see that.'}
+  ];
+  const box = $('#quiz'); let answered = 0, right = 0;
+  Q.forEach(qq => {
+    const d = document.createElement('div'); d.className = 'qitem';
+    d.innerHTML = `<p>${qq.s}</p><div class="qbtns">${qq.o.map((t, i) => `<button class="btn" data-i="${i}">${t}</button>`).join('')}</div><p class="qexp" hidden></p>`;
+    const exp = d.querySelector('.qexp');
+    d.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      const ok = +b.dataset.i === qq.a;
+      if (!d.dataset.done) { d.dataset.done = '1'; answered++; if (ok) right++; }
+      d.querySelectorAll('button').forEach(x => x.classList.remove('right', 'wrong'));
+      b.classList.add(ok ? 'right' : 'wrong');
+      exp.hidden = false; exp.innerHTML = `<b>${ok ? '✓ Right.' : '✗ Not quite.'}</b> ${qq.e}`;
+      $('#quizScore').textContent = `${answered} of ${Q.length} answered · ${right} right on the first try`;
+    }));
+    box.appendChild(d);
+  });
+})();
+
+})();
+</script>
+</body>
+</html>
