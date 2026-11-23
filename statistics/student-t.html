@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Student’s t — a visual introduction</title>
+<style>
+:root{
+  --bg:#faf8f4; --surface:#ffffff; --surface-2:#f2efe8; --ink:#1c1c1e; --ink-2:#4c4e55; --ink-3:#8b8d93; --line:#e3dfd5;
+  --one:#16917c; --one-soft:rgba(22,145,124,.15);
+  --zero:#d9573a; --zero-soft:rgba(217,87,58,.15);
+  --accent:#3654c9; --accent-soft:rgba(54,84,201,.11);
+  --gold:#b98317; --gold-soft:rgba(185,131,23,.22);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+    --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+    --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+    --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+    --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+  --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+  --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+  --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+  --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.68 var(--sans);-webkit-font-smoothing:antialiased}
+main{max-width:820px;margin:0 auto;padding:0 20px 80px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;letter-spacing:-.01em}
+h1{font-size:clamp(2.2rem,6vw,3.4rem);margin:.2em 0 .3em}
+h2{font-size:clamp(1.6rem,4vw,2.1rem);margin:0 0 .5em}
+h3{font-size:1.2rem;margin:1.6em 0 .4em}
+p{margin:0 0 1em}
+a{color:var(--accent)}
+strong{font-weight:650}
+em.term{font-style:normal;font-weight:650;color:var(--accent)}
+.muted{color:var(--ink-2)}
+small,.small{font-size:14px}
+
+/* hero */
+.hero{text-align:center;padding:64px 0 24px}
+.kicker{text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--ink-3);margin:0}
+.lede{font-size:1.2rem;color:var(--ink-2);max-width:620px;margin:0 auto}
+.hero-play{max-width:640px;margin:30px auto 0;text-align:left}
+.hero-play .controls{justify-content:center}
+.hint{font-size:15px;color:var(--ink-2);min-height:3.2em;margin:10px 0 0;text-align:center}
+.ask{font-family:var(--serif);font-size:1.25rem;text-align:center;margin:0 0 12px}
+
+.toc{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;margin:28px 0 8px}
+.toc ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 20px;counter-reset:t}
+.toc li{counter-increment:t;font-size:15px}
+.toc li::before{content:counter(t,decimal-leading-zero);font-family:var(--mono);color:var(--ink-3);margin-right:10px;font-size:13px}
+.toc a{color:var(--ink);text-decoration:none}
+.toc a:hover{color:var(--accent)}
+
+section{padding-top:56px}
+.secnum{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.08em;margin-bottom:4px}
+
+.widget{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin:26px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.widget-title{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);margin:0 0 12px;font-weight:600}
+.controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:12px 0}
+.ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:15px}
+.ctrl output{font-family:var(--mono);font-size:14px;min-width:5.5em;color:var(--ink)}
+input[type=range]{accent-color:var(--accent);width:170px;max-width:100%}
+.btn{font:inherit;font-size:14px;line-height:1.2;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;transition:background .15s,transform .1s}
+.btn:hover{border-color:var(--ink-3)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn.guess{background:var(--gold-soft);border-color:var(--gold);color:var(--ink)}
+.btn.right{background:var(--one-soft);border-color:var(--one);color:var(--one)}
+.btn.wrong{background:var(--zero-soft);border-color:var(--zero);color:var(--zero)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:6px}
+.readout{font-family:var(--mono);font-size:14px;color:var(--ink-2);line-height:1.6}
+.readout b{color:var(--ink);font-weight:600}
+.readout .ok{color:var(--one);font-weight:600}
+.readout .warn{color:var(--zero);font-weight:600}
+.readout .gd{color:var(--gold);font-weight:600}
+.msg{font-size:15px;color:var(--ink-2);min-height:3.4em;margin:10px 0 0}
+.msg b{color:var(--ink)}
+canvas{display:block;width:100%}
+.cap{font-size:13px;color:var(--ink-3);margin:2px 0 6px}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:20px 0}
+.callout p:last-child{margin-bottom:0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin-top:8px}
+.legend > span{display:inline-block}
+.legend .sw{vertical-align:middle;margin:0 6px 2px 0}
+.sw{display:inline-block;width:16px;height:10px;border-radius:2px}
+.sw.dot{width:8px;height:8px;border-radius:50%}
+.sw.line{height:0;border-top:2px solid var(--ink)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+@media (max-width:640px){.pair{grid-template-columns:1fr}}
+.mcap{font-size:13px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+
+/* cast */
+.cast-q{font-family:var(--serif);font-size:1.08rem;margin:0 0 10px}
+.datarow{font-family:var(--mono);font-size:14px;color:var(--ink-2);margin:0 0 6px}
+.datarow b{color:var(--ink)}
+
+/* recipe */
+.facts{counter-reset:f;list-style:none;padding:0;margin:18px 0}
+.facts li{counter-increment:f;position:relative;padding:12px 0 12px 44px;border-bottom:1px solid var(--line)}
+.facts li::before{content:counter(f);position:absolute;left:0;top:12px;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:600 13px var(--mono)}
+.facts li strong{display:block}
+.table-wrap{overflow-x:auto}
+table.summary{border-collapse:collapse;width:100%;font-size:15px;margin:14px 0}
+table.summary td,table.summary th{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3)}
+@media (max-width:480px){table.summary td,table.summary th{padding:8px 5px}}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:18px 0}
+.card{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
+.card h4{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+.card p{font-size:15px;margin:0;color:var(--ink-2)}
+
+/* quiz */
+.quiz{display:grid;gap:10px}
+.qitem{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg)}
+.qitem p{margin:0 0 8px;font-size:16px}
+.qbtns{display:flex;flex-wrap:wrap;gap:8px}
+.qexp{font-size:15px;color:var(--ink-2);margin:10px 0 0!important}
+
+@media (max-width:480px){
+  main{padding:0 16px 80px}
+  .widget{padding:14px}
+  input[type=range]{width:150px}
+}
+/* page 11 */
+.linkbtn{all:unset;cursor:pointer;font-size:14px;color:var(--accent);text-decoration:underline}
+.linkbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.linkbtn[hidden]{display:none}
+.legend > span[hidden]{display:none}
+table.summary.num{font-size:14px}
+table.summary.num td,table.summary.num th{text-align:right;white-space:nowrap}
+table.summary.num td:first-child,table.summary.num th:first-child{text-align:left;white-space:normal}
+</style>
+<script>try{var t=localStorage.getItem('xp-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/catalog.js" defer></script>
+<script src="../assets/site.js" defer></script>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <p class="kicker">A visual introduction</p>
+  <h1>Student’s t</h1>
+  <p class="lede">When the spread has to be estimated from the data as well, small samples produce extreme results far more often than the bell curve says. Student’s t is the corrected curve, and the shortcut behind the most-used test in science.</p>
+  <div class="hero-play" id="heroPlay">
+    <p class="ask">A Guinness brewer can only afford a handful of samples. How far can he trust the bell curve?</p>
+    <p class="hint" style="min-height:0;margin:0 0 10px">Take 3 measurements from a bell-shaped population, and measure how far their average is from the true mean in units of the sample’s <em>own</em> spread. The bell curve says a result beyond ±3 happens about 3 times in 1,000. With samples of 3, how often does it really happen?</p>
+    <div class="controls" id="heroPred">
+      <button class="btn" data-g="0">Less often</button>
+      <button class="btn" data-g="1">About 3 in 1,000</button>
+      <button class="btn" data-g="2">About 1 in 100</button>
+      <button class="btn" data-g="3">About 1 in 10</button>
+    </div>
+    <canvas id="heroHist" style="height:250px" role="img" aria-label="Histogram of 2,000 standardized averages of samples of 3, against the bell curve; results beyond plus or minus 3 are highlighted and counted"></canvas>
+    <div class="legend" style="justify-content:center"><span><i class="sw" style="background:var(--ink-3)"></i><span>samples of 3</span></span><span><i class="sw" style="background:var(--zero)"></i><span>beyond ±3</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>bell curve</span></span><span id="heroLegT" hidden><i class="sw line" style="border-top:2.5px solid var(--one)"></i><span>Student’s curve</span></span></div>
+    <div class="controls">
+      <button class="btn primary" id="heroGo" disabled>Draw 2,000 samples of 3</button>
+      <button class="linkbtn" id="heroSkip">skip the guess</button>
+    </div>
+    <p class="hint" id="heroHint" aria-live="polite">Make your guess, then draw the samples.</p>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#guinness">The Guinness story</a></li>
+    <li><a href="#wobbly">Dividing by a wobbly s</a></li>
+    <li><a href="#df">Degrees of freedom</a></li>
+    <li><a href="#shortcut">A shortcut to the shuffle</a></li>
+    <li><a href="#tests">t-tests and t intervals</a></li>
+    <li><a href="#uses">Where you will meet it</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<section id="guinness">
+  <div class="secnum">01</div>
+  <h2>The Guinness story</h2>
+  <p>William Sealy Gosset joined the Guinness brewery in Dublin in 1899, fresh from studying chemistry and mathematics at Oxford. The brewery wanted to choose barley, hops and processes by experiment, and Gosset was handed the numbers. His problem was that experiments in a brewery are expensive: he often had only a few measurements to go on, sometimes as few as two or three.</p>
+  <p>The statistics of the day, built by Karl Pearson and others for large biological surveys, treated the spread of the data as known. With hundreds of measurements that is harmless: the sample’s spread <em>s</em> is almost exactly the true spread σ. With 3 measurements it is not, and the standard formulas made Gosset’s small experiments look more conclusive than they were.</p>
+  <p>He worked out the right curve, checked it by simulation done by hand (writing the measurements of 3,000 criminals on cards, shuffling them, and dealing out 750 samples of 4), and published it in 1908 in Biometrika as “The probable error of a mean”. He signed it <strong>Student</strong> because Guinness did not let its staff publish work done for the firm. Among his examples was the sleep trial used throughout this series. Ronald Fisher later recast the result in the form used today, called it <em class="term">t</em>, and gave it its “degrees of freedom”.</p>
+</section>
+
+<!-- 2 -->
+<section id="wobbly">
+  <div class="secnum">02</div>
+  <h2>Dividing by a wobbly s</h2>
+  <p>On <a href="sampling-distributions.html">Sampling Distributions</a>, an average was standardized by subtracting the true mean and dividing by its standard error σ/√<em>n</em>. The result follows the bell curve exactly when the data are bell-shaped, whatever <em>n</em> is. But σ is almost never known. In practice you divide by <em>s</em>/√<em>n</em>, using the spread of the same small sample, and <em>s</em> wobbles too.</p>
+  <p>Below, each sample is <em>n</em> measurements from a population with true mean 100 and spread σ = 10. Each sample is standardized twice: once with the true σ, once with its own <em>s</em>.</p>
+
+  <div class="widget">
+    <p class="widget-title">The standardizer</p>
+    <div class="controls">
+      <label class="ctrl">measurements per sample <input type="range" id="sdN" min="0" max="9" step="1" value="1"><output id="sdNOut"></output></label>
+    </div>
+    <canvas id="sdSample" style="height:110px" role="img" aria-label="The latest sample's measurements on a scale, with the true mean, the sample average, and bars showing the standard error from the true sigma and from the sample's own s"></canvas>
+    <div class="readout" id="sdOne" aria-live="polite"></div>
+    <div class="pair">
+      <div><div class="mcap">Divided by the true <span style="text-transform:none">σ</span></div><canvas id="sdZ" style="height:200px" role="img" aria-label="Histogram of averages standardized with the true sigma, against the bell curve"></canvas><div class="readout" id="sdZRead"></div></div>
+      <div><div class="mcap">Divided by the sample’s own <span style="text-transform:none"><em>s</em></span></div><canvas id="sdT" style="height:200px" role="img" aria-label="Histogram of averages standardized with the sample's own s, against the bell curve and optionally Student's t curve"></canvas><div class="readout" id="sdTRead"></div></div>
+    </div>
+    <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>standardized averages</span></span><span><i class="sw" style="background:var(--zero)"></i><span>beyond ±2</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>bell curve</span></span><span><i class="sw line" style="border-top:2.5px solid var(--one)"></i><span>Student’s curve</span></span></div>
+    <div class="controls">
+      <button class="btn primary" id="sdOneBtn">One sample</button>
+      <button class="btn" id="sdRun">▶ Run</button>
+      <button class="btn" id="sdMany">+2,000 samples</button>
+      <button class="btn" id="sdCurve" aria-pressed="false">Show Student’s curve</button>
+      <button class="btn" id="sdClear">Clear</button>
+    </div>
+    <div class="mcap" style="margin-top:12px">How wobbly <span style="text-transform:none"><em>s</em></span> is: each sample’s <span style="text-transform:none"><em>s</em></span> as a share of the true <span style="text-transform:none">σ</span></div>
+    <canvas id="sdS" style="height:120px" role="img" aria-label="Histogram of each sample's s divided by the true sigma, with the region below one half highlighted"></canvas>
+    <div class="readout" id="sdSRead"></div>
+  </div>
+
+  <p>The left histogram fits the bell curve at every <em>n</em>. The right one has the same middle but much fatter tails, and the reason is in the bottom chart. With 3 measurements, <em>s</em> comes out below half of σ about 22% of the time, and whenever it does, dividing by it at least doubles the result. An ordinary average divided by an unluckily small <em>s</em> becomes an “extreme” result.</p>
+  <p>Student found the exact shape of that ratio: a bell-shaped numerator divided by an independently wobbling <em>s</em>, whose spread is described by the chi distribution on <a href="../probability/chi-square.html#chi">the Chi-square page</a>. Switch on Student’s curve to see it fit.</p>
+</section>
+
+<!-- 3 -->
+<section id="df">
+  <div class="secnum">03</div>
+  <h2>Degrees of freedom</h2>
+  <p>The more measurements, the steadier <em>s</em> is, and the closer the t curve comes to the bell. Its shape is set by one number, the <em class="term">degrees of freedom</em>: for a single sample, <em>n</em> − 1. One is lost because <em>s</em> measures spread around the sample’s own average rather than the true mean; once the average is fixed, the last deviation is determined by the others, so only <em>n</em> − 1 of them carry information about spread.</p>
+
+  <div class="widget">
+    <p class="widget-title">Heavy at 3, nearly normal by 30</p>
+    <div class="controls">
+      <label class="ctrl">degrees of freedom <input type="range" id="dfK" min="0" max="10" step="1" value="1"><output id="dfKOut"></output></label>
+    </div>
+    <canvas id="dfChart" style="height:230px" role="img" aria-label="Student's t curve for the chosen degrees of freedom against the bell curve, with the central 95% marked"></canvas>
+    <div class="legend"><span><i class="sw line" style="border-top:2.5px solid var(--one)"></i><span>Student’s t</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>bell curve</span></span><span><i class="sw" style="background:var(--one-soft);border:1px solid var(--one)"></i><span>middle 95% of t</span></span></div>
+    <div class="readout" id="dfRead" aria-live="polite"></div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="summary num">
+      <thead><tr><th>Measurements <em>n</em></th><th>2</th><th>3</th><th>5</th><th>10</th><th>20</th><th>30</th><th>∞</th></tr></thead>
+      <tbody>
+        <tr><td>Degrees of freedom</td><td>1</td><td>2</td><td>4</td><td>9</td><td>19</td><td>29</td><td>∞</td></tr>
+        <tr><td>95% multiplier (instead of 1.96)</td><td>12.71</td><td>4.30</td><td>2.78</td><td>2.26</td><td>2.09</td><td>2.05</td><td>1.96</td></tr>
+        <tr><td>What “± 1.96 × s/√n” really covers</td><td>70%</td><td>81%</td><td>88%</td><td>92%</td><td>94%</td><td>94%</td><td>95%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>With 3 measurements, an honest 95% interval needs 4.30 standard errors, not 1.96; the bell-curve version would catch the truth only 81% of the time. By 30 the difference is small, which is where the old rule “use the normal above 30” comes from.</p>
+</section>
+
+<!-- 4 -->
+<section id="shortcut">
+  <div class="secnum">04</div>
+  <h2>A shortcut to the shuffle</h2>
+  <p>On <a href="permutation-tests.html">Shuffling to Test</a>, the sleep trial was tested by flipping the sign of each patient’s difference in all 1,024 possible ways. Here are those 1,024 flips again, each turned into a t statistic (average ÷ (s/√10)) so they can sit on the same scale as Student’s curve. The t-test is the claim that the curve, with 9 degrees of freedom, is a good stand-in for the flips.</p>
+
+  <div class="widget">
+    <p class="widget-title">1,024 sign flips against the formula</p>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Data">
+        <button class="btn on" data-ds="0" aria-pressed="true">Drug 2 − drug 1 (pairs)</button>
+        <button class="btn" data-ds="1" aria-pressed="false">Drug 1 alone</button>
+        <button class="btn" data-ds="2" aria-pressed="false">Drug 2 alone</button>
+      </div>
+    </div>
+    <p class="datarow" id="shData"></p>
+    <canvas id="shChart" style="height:250px" role="img" aria-label="Histogram of the t statistics from all 1,024 sign flips of the sleep data, with the observed t marked, and optional Student's t and bell curves"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>sign flips</span></span><span><i class="sw" style="background:var(--accent)"></i><span>flips at least as extreme as the data</span></span><span><i class="sw line" style="border-top:2px solid var(--accent)"></i><span>the real data</span></span></div>
+    <div class="controls">
+      <button class="btn" id="shT" aria-pressed="false">Overlay Student’s t (9 df)</button>
+      <button class="btn" id="shZ" aria-pressed="false">Overlay the bell curve</button>
+    </div>
+    <div class="readout" id="shRead" aria-live="polite"></div>
+  </div>
+
+  <p>For the paired differences, the flips give p = 4 in 1,024 = 0.39%, and Student’s formula gives 0.28%: two routes to the same answer. The bell curve, used with <em>s</em>, would give 0.005%, claiming 80 times more certainty than 10 patients can provide. That is the mistake Student’s curve exists to prevent. For drug 1 alone, nothing is going on, and all three agree that chance explains it.</p>
+  <p>This is the pattern for the rest of the series: every classical test is a formula that approximates a shuffle, and it can be checked against one.</p>
+</section>
+
+<!-- 5 -->
+<section id="tests">
+  <div class="secnum">05</div>
+  <h2>t-tests and t intervals</h2>
+  <p>The same curve answers several everyday questions. In each, the statistic is an estimate divided by its estimated standard error.</p>
+  <div class="table-wrap">
+    <table class="summary">
+      <thead><tr><th>Question</th><th>Tool</th><th>Sleep trial</th></tr></thead>
+      <tbody>
+        <tr><td>Does one average differ from a fixed value?</td><td><strong>One-sample t-test</strong>, <em>n</em> − 1 df</td><td>Drug 1 vs no change: t = 1.33, p = 0.22</td></tr>
+        <tr><td>Do paired measurements differ?</td><td><strong>Paired t-test</strong>: a one-sample test on the differences</td><td>Drug 2 − drug 1: t = 4.06, p = 0.003</td></tr>
+        <tr><td>Do two separate groups differ?</td><td><strong>Two-sample t-test</strong>; Welch’s version doesn’t assume equal spreads</td><td>If the 20 nights had come from 20 different people: t = 1.86, p = 0.08</td></tr>
+        <tr><td>How big is an average, give or take?</td><td><strong>t interval</strong>: x̄ ± t* × s/√<em>n</em></td><td>1.58 ± 2.26 × 0.39 = 0.70 to 2.46 extra hours</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>The two-sample line is a warning. The same 20 numbers give p = 0.003 when analyzed as pairs and p = 0.08 when analyzed as two separate groups. Pairing matters because some patients sleep much more than others whichever drug they take; comparing each patient with themselves removes that variation. Choose the test that matches how the data were collected, never the one that gives the smaller p.</p>
+  <h3>When to prefer the shuffle</h3>
+  <ul>
+    <li><strong>Small, skewed or outlier-prone data.</strong> The t curve assumes bell-shaped data. Thanks to the central limit theorem it is forgiving for averages of moderate samples, but with a handful of lopsided measurements a sign flip or permutation test is safer.</li>
+    <li><strong>Statistics other than the mean.</strong> Medians, trimmed means and ratios have no t curve; shuffling and the bootstrap still work.</li>
+    <li><strong>When you can.</strong> With a computer the exact answer is often cheap. The t-test remains the quick, standard summary, and when the two agree, as they do here, you can report either with confidence.</li>
+  </ul>
+</section>
+
+<!-- 6 -->
+<section id="uses">
+  <div class="secnum">06</div>
+  <h2>Where you will meet it</h2>
+  <div class="cards">
+    <div class="card"><h4>Medicine</h4><p>Before-and-after measurements on the same patients, such as blood pressure or sleep, are compared with a paired t-test.</p></div>
+    <div class="card"><h4>A/B tests on averages</h4><p>Average order value or time on a page, rather than click rates, is compared with a two-sample t-test, usually Welch’s.</p></div>
+    <div class="card"><h4>Lab science</h4><p>Experiments with 3 to 6 replicates are everywhere in biology. That is exactly Gosset’s situation, and why the multiplier is 2.6 to 4.3, not 2.</p></div>
+    <div class="card"><h4>Regression</h4><p>Each slope in a regression table comes with a t statistic and a p-value from Student’s curve: a later page.</p></div>
+    <div class="card"><h4>Manufacturing</h4><p>Gosset’s own field: is this batch’s average on target? A handful of measurements and a t interval answer it.</p></div>
+    <div class="card"><h4>Error bars</h4><p>A 95% error bar from 3 replicates should be about 4.3 standard errors long on each side. Bars drawn at ±2 standard errors overstate the precision.</p></div>
+  </div>
+
+  <h3>Check yourself</h3>
+  <div class="widget">
+    <div class="quiz" id="quiz"></div>
+    <div class="readout" id="quizScore" style="margin-top:10px" aria-live="polite"></div>
+  </div>
+
+  <p>The t-test compares averages. Many questions are about counts instead: how many of each kind, against how many you’d expect. Adding up those gaps is the next page, <strong>Chi-square tests</strong> (coming soon).</p>
+</section>
+
+</main>
+
+<script>
+(function(){
+'use strict';
+/* ---------- helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const root = document.documentElement;
+const C = n => getComputedStyle(root).getPropertyValue(n).trim();
+const f2 = x => x.toFixed(2);
+const fmtN = x => Math.abs(x - Math.round(x)) < 1e-9 ? String(Math.round(x)) : String(+x.toFixed(2));
+const pct = x => (100 * x).toFixed(1) + '%';
+const MONO = 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
+const TAU = Math.PI * 2;
+const comma = n => n.toLocaleString('en-US');
+
+function fit(c){
+  const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+  if (c.width !== w*dpr || c.height !== h*dpr) { c.width = w*dpr; c.height = h*dpr; }
+  const ctx = c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  return {ctx, w, h};
+}
+const redraws = [];
+function redrawAll(){ redraws.forEach(f => f()); }
+let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(redrawAll, 80); });
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+if (mq.addEventListener) mq.addEventListener('change', redrawAll);
+new MutationObserver(redrawAll).observe(root, {attributes:true, attributeFilter:['data-theme']});
+
+function niceTicks(max, count){
+  const raw = max / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const step = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag;
+  const t = []; for (let v = 0; v <= max + 1e-9; v += step) t.push(v); return t;
+}
+function stepFmt(ticks){ const st = ticks.length > 1 ? ticks[1] - ticks[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9)); return v => v.toFixed(d); }
+function yGrid(ctx, X0, X1, ys, ticks, fmt){
+  ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ticks.forEach(v => {
+    const y = Math.round(ys(v)) + .5;
+    ctx.strokeStyle = C('--line'); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X0, y); ctx.lineTo(X1, y); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.fillText(fmt(v), X0 - 6, y);
+  });
+}
+function intStep(px, minPx){
+  for (const s of [1,2,5,10,20,25,50,100]) if (s * px >= minPx) return s;
+  return 100;
+}
+function roundRect(ctx, x, y, w, h, r){
+  r = Math.max(0, Math.min(r, w/2, Math.abs(h)/2));
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+function dot(ctx, x, y, r){ ctx.beginPath(); ctx.arc(x, y, Math.max(0.5, r), 0, TAU); ctx.fill(); }
+function vline(ctx, x, y0, y1, color, dash, lw){
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw || 1.5; if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(Math.round(x) + .5, y0); ctx.lineTo(Math.round(x) + .5, y1); ctx.stroke(); ctx.restore();
+}
+/* integer-valued bar charts: bars at k = lo..hi */
+function frame(ctx, w, h, o){
+  const X0 = o.left != null ? o.left : 40, X1 = w - 10, Y0 = h - 24, Y1 = o.top != null ? o.top : 12;
+  const span = o.hi - o.lo + 1, bw = (X1 - X0) / span;
+  const xc = k => X0 + bw * (k - o.lo + .5), ys = v => Y0 - (v / o.ymax) * (Y0 - Y1);
+  const t = niceTicks(o.ymax, 3).filter(v => v <= o.ymax * 1.0001); yGrid(ctx, X0, X1, ys, t, o.yfmt || stepFmt(t));
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  const st = o.step || intStep(bw, 24);
+  for (let k = Math.ceil(o.lo / st) * st; k <= o.hi; k += st) ctx.fillText(o.lab ? o.lab(k) : k, xc(k), Y0 + 6);
+  return {X0, X1, Y0, Y1, bw, xc, ys};
+}
+function drawBars(ctx, F, lo, hi, val, color, frac){
+  const bwid = Math.max(1, F.bw * (frac == null ? .8 : frac));
+  for (let k = lo; k <= hi; k++) {
+    const v = val(k); if (!(v > 0)) continue;
+    const y = F.ys(v), hh = F.Y0 - y; if (hh < 0.2) continue;
+    const x = F.xc(k) - bwid / 2;
+    ctx.fillStyle = typeof color === 'function' ? color(k) : color;
+    if (bwid >= 6 && hh >= 3) { roundRect(ctx, x, y, bwid, hh, Math.min(3, bwid / 4)); ctx.fill(); }
+    else ctx.fillRect(x, y, bwid, hh);
+  }
+}
+function emptyNote(ctx, w, h, text){
+  ctx.fillStyle = C('--ink-3'); ctx.font = '13px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(text, w / 2, h / 2 - 8);
+}
+
+/* randomness */
+let spare = null;
+function gauss(){
+  if (spare != null) { const s = spare; spare = null; return s; }
+  let u = 0, v = 0; while (u === 0) u = Math.random(); v = Math.random();
+  const r = Math.sqrt(-2 * Math.log(u)); spare = r * Math.sin(TAU * v); return r * Math.cos(TAU * v);
+}
+function shuffled(a){ const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; }
+function corr(x, y){
+  const n = x.length; let mx = 0, my = 0; for (let i = 0; i < n; i++) { mx += x[i]; my += y[i]; } mx /= n; my /= n;
+  let sxy = 0, sxx = 0, syy = 0; for (let i = 0; i < n; i++) { const a = x[i] - mx, b = y[i] - my; sxy += a * b; sxx += a * a; syy += b * b; }
+  return sxy / Math.sqrt(sxx * syy);
+}
+function binom(n, p){ let k = 0; for (let i = 0; i < n; i++) if (Math.random() < p) k++; return k; }
+function flips(n){ const a = new Array(n); for (let i = 0; i < n; i++) a[i] = Math.random() < .5 ? 1 : 0; return a; }
+function longestRun(a){
+  let best = 1, cur = 1, start = 0, bs = 0;
+  for (let i = 1; i < a.length; i++) { if (a[i] === a[i-1]) cur++; else { cur = 1; start = i; } if (cur > best) { best = cur; bs = start; } }
+  return {len: best, start: bs};
+}
+function switches(a){ let s = 0; for (let i = 1; i < a.length; i++) if (a[i] !== a[i-1]) s++; return s; }
+const RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+function ticksIn(lo, hi, count){
+  const raw = (hi - lo) / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const st = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag, t = [];
+  for (let v = Math.ceil(lo / st - 1e-9) * st; v <= hi + 1e-9; v += st) t.push(+v.toFixed(10));
+  return t;
+}
+function xAxis(ctx, X0, X1, Y0, lo, hi, fmt){
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  const t = ticksIn(lo, hi, Math.max(2, Math.floor((X1 - X0) / 60)));
+  const st = t.length > 1 ? t[1] - t[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9));
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  t.forEach(v => ctx.fillText(fmt ? fmt(v) : v.toFixed(d), X0 + (v - lo) / (hi - lo) * (X1 - X0), Y0 + 5));
+}
+function label(ctx, x, y, text, color, X0, X1){
+  ctx.font = '600 11px ' + MONO; ctx.fillStyle = color; ctx.textBaseline = 'top';
+  const right = x > (X0 + X1) / 2; ctx.textAlign = right ? 'right' : 'left';
+  ctx.fillText(text, x + (right ? -5 : 5), y);
+}
+
+function bar(ctx, x, w, y, Y0, color){
+  const hh = Y0 - y; if (!(hh > .2)) return;
+  ctx.fillStyle = color;
+  if (w >= 6 && hh >= 3) { roundRect(ctx, x, y, w, hh, Math.min(3, w / 4)); ctx.fill(); } else ctx.fillRect(x, y, w, hh);
+}
+
+/* ---------- shared: t distribution ---------- */
+function gammaln(x){
+  const c = [76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155, .1208650973866179e-2, -.5395239384953e-5];
+  let y = x, t = x + 5.5; t -= (x + .5) * Math.log(t); let s = 1.000000000190015;
+  for (let j = 0; j < 6; j++) s += c[j] / ++y;
+  return -t + Math.log(2.5066282746310005 * s / x);
+}
+function betacf(a, b, x){
+  const FP = 1e-300; let qab = a + b, qap = a + 1, qam = a - 1, c = 1, d = 1 - qab * x / qap;
+  if (Math.abs(d) < FP) d = FP; d = 1 / d; let h = d;
+  for (let m = 1; m <= 200; m++) {
+    const m2 = 2 * m; let aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+    d = 1 + aa * d; if (Math.abs(d) < FP) d = FP; c = 1 + aa / c; if (Math.abs(c) < FP) c = FP; d = 1 / d; h *= d * c;
+    aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+    d = 1 + aa * d; if (Math.abs(d) < FP) d = FP; c = 1 + aa / c; if (Math.abs(c) < FP) c = FP; d = 1 / d;
+    const del = d * c; h *= del; if (Math.abs(del - 1) < 3e-14) break;
+  }
+  return h;
+}
+function ibeta(a, b, x){
+  if (x <= 0) return 0; if (x >= 1) return 1;
+  const bt = Math.exp(gammaln(a + b) - gammaln(a) - gammaln(b) + a * Math.log(x) + b * Math.log(1 - x));
+  return x < (a + 1) / (a + b + 2) ? bt * betacf(a, b, x) / a : 1 - bt * betacf(b, a, 1 - x) / b;
+}
+function erfc(x){
+  const z = Math.abs(x), t = 1 / (1 + .5 * z);
+  const r = t * Math.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (.37409196 + t * (.09678418 + t * (-.18628806 + t * (.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-.82215223 + t * .17087277)))))))));
+  return x >= 0 ? r : 2 - r;
+}
+const npdf = x => Math.exp(-.5 * x * x) / Math.sqrt(TAU);
+const zTwo = z => erfc(Math.abs(z) / Math.SQRT2);
+function tpdf(x, df){ if (!isFinite(df)) return npdf(x); return Math.exp(gammaln((df + 1) / 2) - gammaln(df / 2) - .5 * Math.log(df * Math.PI) - (df + 1) / 2 * Math.log(1 + x * x / df)); }
+function tTwo(t, df){ if (!isFinite(df)) return zTwo(t); return ibeta(df / 2, .5, df / (df + t * t)); }
+function tq975(df){ if (!isFinite(df)) return 1.959964; let lo = 0, hi = 2000; for (let i = 0; i < 100; i++) { const m = (lo + hi) / 2; if (tTwo(m, df) > .05) lo = m; else hi = m; } return (lo + hi) / 2; }
+const pc = (x, d) => (100 * x).toFixed(d == null ? 1 : d) + '%';
+function pfmt(p){ if (p >= .01) return (100 * p).toFixed(1) + '%'; if (p >= .0001) return (100 * p).toFixed(2) + '%'; return (100 * p).toFixed(4) + '%'; }
+const signed = (v, d) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(d);
+function meanSd(x){ const n = x.length; let m = 0; for (const v of x) m += v; m /= n; let q = 0; for (const v of x) q += (v - m) ** 2; return {m, s: Math.sqrt(q / (n - 1))}; }
+
+/* histogram of values in [lo,hi) with optional density curves (scaled to counts) */
+function histPanel(cv, vals, o){
+  const {ctx, w, h} = fit(cv), X0 = o.left || 12, X1 = w - 12, Y0 = h - 22, Y1 = o.top || 8;
+  const nb = Math.round((o.hi - o.lo) / o.bw), counts = new Array(nb).fill(0);
+  vals.forEach(v => { if (v >= o.lo && v < o.hi) counts[Math.floor((v - o.lo) / o.bw)]++; });
+  const N = o.N || vals.length || 1, scale = N * o.bw;
+  let ymax = Math.max(1, ...counts); (o.curves || []).forEach(c => { ymax = Math.max(ymax, scale * c.f(0)); });
+  if (o.ymin) ymax = Math.max(ymax, o.ymin);
+  ymax *= 1.06;
+  const xs = v => X0 + (v - o.lo) / (o.hi - o.lo) * (X1 - X0), ys = v => Y0 - v / ymax * (Y0 - Y1), bw = Math.max(1, (X1 - X0) / nb - 1);
+  for (let k = 0; k < nb; k++) {
+    const c0 = o.lo + (k + .5) * o.bw;
+    bar(ctx, xs(o.lo + k * o.bw) + .5, bw, ys(counts[k]), Y0, o.color ? o.color(c0) : C('--ink-3'));
+  }
+  xAxis(ctx, X0, X1, Y0, o.lo, o.hi, o.fmt);
+  (o.curves || []).forEach(c => {
+    ctx.save(); ctx.strokeStyle = c.col; ctx.lineWidth = c.lw || 2; if (c.dash) ctx.setLineDash(c.dash); ctx.beginPath();
+    for (let i = 0; i <= 300; i++) { const v = o.lo + (o.hi - o.lo) * i / 300, y = Math.max(Y1 - 6, ys(scale * c.f(v))); i ? ctx.lineTo(xs(v), y) : ctx.moveTo(xs(v), y); }
+    ctx.stroke(); ctx.restore();
+  });
+  return {ctx, w, h, X0, X1, Y0, Y1, xs, ys};
+}
+
+/* ---------- hero: samples of 3, standardized with their own s ---------- */
+(function(){
+  const cv = $('#heroHist'), hint = $('#heroHint'), N = 2000, LO = -8, HI = 8;
+  let guess = null, vals = [], timer = null, done = false;
+  const one = () => { const x = [gauss(), gauss(), gauss()], {m, s} = meanSd(x); return m / (s / Math.sqrt(3)); };
+  function draw(){
+    const curves = [{f: npdf, col: C('--ink'), dash: [5, 4], lw: 2}];
+    if (done) curves.push({f: x => tpdf(x, 2), col: C('--one'), lw: 2.5});
+    const F = histPanel(cv, vals, {lo: LO, hi: HI, bw: .25, N, curves, color: c => Math.abs(c) > 3 ? C('--zero') : C('--ink-3'), fmt: v => signed(v, 0)});
+    const {ctx, xs, Y0, Y1} = F;
+    [-3, 3].forEach(v => vline(ctx, xs(v), Y1, Y0, C('--zero'), [2, 3], 1));
+    if (vals.length) {
+      const l = vals.filter(v => v < -3).length, r = vals.filter(v => v > 3).length;
+      ctx.font = '600 12px ' + MONO; ctx.fillStyle = C('--zero'); ctx.textBaseline = 'top';
+      ctx.textAlign = 'right'; ctx.fillText(`${l} below −3`, xs(-3) - 6, Y1 + 30);
+      ctx.textAlign = 'left'; ctx.fillText(`${r} above +3`, xs(3) + 6, Y1 + 30);
+    }
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    if (!vals.length) ctx.fillText('the bell curve’s prediction for 2,000 samples', xs(0), Y1 + 4);
+  }
+  function message(){
+    const k = vals.filter(v => Math.abs(v) > 3).length, share = k / N;
+    $$('#heroPred .btn').forEach(b => { b.classList.remove('right', 'wrong'); if (guess != null && +b.dataset.g === guess) b.classList.add(guess === 3 ? 'right' : 'wrong'); });
+    hint.innerHTML = `<b>${k} of 2,000</b> samples (${pc(share)}) landed beyond ±3, about <b>1 in ${Math.round(1 / share)}</b>, where the bell curve promised 3 in 1,000: some ${Math.round(share / .0027)} times as often. ` +
+      (guess === 3 ? 'As you guessed. ' : guess != null ? '' : '') +
+      'The culprit is the spread: with only 3 measurements, the sample’s own spread is often far too small, and dividing by it turns ordinary averages into “extreme” ones. The green curve is Student’s correction, which fits.';
+    $('#heroLegT').hidden = false;
+  }
+  function open(){ $('#heroGo').disabled = false; $('#heroSkip').hidden = true; }
+  $$('#heroPred .btn').forEach(b => b.addEventListener('click', () => { guess = +b.dataset.g; $$('#heroPred .btn').forEach(x => x.classList.toggle('guess', x === b)); open(); if (done) message(); }));
+  $('#heroSkip').addEventListener('click', open);
+  $('#heroGo').addEventListener('click', () => {
+    clearInterval(timer); vals = []; done = false; hint.textContent = 'Sampling…'; $('#heroLegT').hidden = true;
+    const finish = () => { done = true; draw(); message(); $('#heroGo').textContent = 'Draw 2,000 new samples'; };
+    if (RM) { while (vals.length < N) vals.push(one()); return finish(); }
+    timer = setInterval(() => { for (let i = 0; i < 50; i++) vals.push(one()); draw(); if (vals.length >= N) { clearInterval(timer); timer = null; finish(); } }, 25);
+  });
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 2. the standardizer ---------- */
+(function(){
+  const NS = [2, 3, 4, 5, 6, 8, 10, 15, 20, 30], MU = 100, SG = 10, nIn = $('#sdN');
+  let zs = [], ts = [], ss = [], last = null, timer = null, showT = false;
+  const n = () => NS[+nIn.value];
+  function sample(){
+    const k = n(), x = []; for (let i = 0; i < k; i++) x.push(MU + SG * gauss());
+    const {m, s} = meanSd(x), z = (m - MU) / (SG / Math.sqrt(k)), t = (m - MU) / (s / Math.sqrt(k));
+    zs.push(z); ts.push(t); ss.push(s / SG); last = {x, m, s, z, t};
+  }
+  function add(k){ for (let i = 0; i < k; i++) sample(); draw(); }
+  function drawSample(){
+    const {ctx, w, h} = fit($('#sdSample')), X0 = 14, X1 = w - 14, Y0 = h - 22, LO = 60, HI = 140;
+    const xs = v => X0 + (Math.max(LO, Math.min(HI, v)) - LO) / (HI - LO) * (X1 - X0);
+    xAxis(ctx, X0, X1, Y0, LO, HI);
+    vline(ctx, xs(MU), 4, Y0, C('--ink'), [5, 4], 1.4);
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink'); ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText('true mean 100', xs(MU) + 5, 2);
+    if (!last) return emptyNote(ctx, w, h, 'no sample yet');
+    const k = n(), se = SG / Math.sqrt(k), sse = last.s / Math.sqrt(k);
+    const rows = [{y: 26, half: se, col: C('--ink-3'), name: 'true σ/√n'}, {y: 44, half: sse, col: C('--accent'), name: 'own s/√n'}];
+    rows.forEach(r => {
+      ctx.fillStyle = r.col; ctx.globalAlpha = .9; roundRect(ctx, xs(last.m - r.half), r.y - 4, Math.max(2, xs(last.m + r.half) - xs(last.m - r.half)), 8, 4); ctx.fill(); ctx.globalAlpha = 1;
+      ctx.font = '11px ' + MONO; ctx.fillStyle = r.col; ctx.textBaseline = 'middle';
+      const right = xs(last.m + r.half) + 6 + 70 > X1; ctx.textAlign = right ? 'right' : 'left';
+      ctx.fillText(r.name, right ? xs(last.m - r.half) - 6 : xs(last.m + r.half) + 6, r.y);
+    });
+    last.x.forEach(v => { ctx.fillStyle = C('--surface'); dot(ctx, xs(v), Y0 - 12, 6); ctx.fillStyle = C('--accent'); dot(ctx, xs(v), Y0 - 12, 4.5); });
+    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(xs(last.m), 18); ctx.lineTo(xs(last.m), Y0); ctx.stroke();
+    $('#sdOne').innerHTML = `latest sample: average <b>${last.m.toFixed(1)}</b>, own spread s = <b>${last.s.toFixed(1)}</b> (true σ = 10) → divided by σ: <b>${signed(last.z, 2)}</b> · divided by s: <b style="color:var(--accent)">${signed(last.t, 2)}</b>`;
+  }
+  function draw(){
+    const df = n() - 1, tail = c => Math.abs(c) > 2 ? C('--zero') : C('--ink-3');
+    const bell = {f: npdf, col: C('--ink'), dash: [5, 4], lw: 2};
+    histPanel($('#sdZ'), zs, {lo: -6, hi: 6, bw: .25, curves: zs.length ? [bell] : [], color: tail, fmt: v => signed(v, 0)});
+    histPanel($('#sdT'), ts, {lo: -6, hi: 6, bw: .25, curves: ts.length ? (showT ? [bell, {f: x => tpdf(x, df), col: C('--one'), lw: 2.5}] : [bell]) : [], color: tail, fmt: v => signed(v, 0)});
+    const share = a => a.length ? a.filter(v => Math.abs(v) > 2).length / a.length : 0;
+    $('#sdZRead').innerHTML = zs.length ? `beyond ±2: <b>${pc(share(zs))}</b> · bell curve: 4.6%` : '';
+    $('#sdTRead').innerHTML = ts.length ? `beyond ±2: <b style="color:var(--zero)">${pc(share(ts))}</b> · bell curve: 4.6%` + (showT ? ` · Student: <b style="color:var(--one)">${pc(tTwo(2, df))}</b>` : '') : '';
+    const F = histPanel($('#sdS'), ss, {lo: 0, hi: 2.5, bw: .05, color: c => c < .5 ? C('--zero') : C('--ink-3'), fmt: v => v.toFixed(1) + 'σ'});
+    vline(F.ctx, F.xs(1), F.Y1, F.Y0, C('--ink'), [5, 4], 1.4);
+    const low = ss.length ? ss.filter(v => v < .5).length / ss.length : 0;
+    $('#sdSRead').innerHTML = ss.length ? `${comma(ss.length)} samples of ${n()} · s below half of the true σ: <b style="color:var(--zero)">${pc(low)}</b>` : '';
+    $('#sdNOut').textContent = n() + ` (df ${n() - 1})`;
+    drawSample();
+  }
+  function stop(){ clearInterval(timer); timer = null; $('#sdRun').textContent = '▶ Run'; }
+  function reset(){ stop(); zs = []; ts = []; ss = []; last = null; draw(); }
+  nIn.addEventListener('input', reset);
+  $('#sdOneBtn').addEventListener('click', () => add(1));
+  $('#sdMany').addEventListener('click', () => add(2000));
+  $('#sdRun').addEventListener('click', () => { if (timer) return stop(); $('#sdRun').textContent = '❚❚ Pause'; timer = setInterval(() => add(RM ? 20 : 5), RM ? 300 : 50); });
+  $('#sdCurve').addEventListener('click', () => { showT = !showT; $('#sdCurve').classList.toggle('on', showT); $('#sdCurve').setAttribute('aria-pressed', showT); $('#sdCurve').textContent = showT ? 'Hide Student’s curve' : 'Show Student’s curve'; draw(); });
+  $('#sdClear').addEventListener('click', reset);
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 3. degrees of freedom ---------- */
+(function(){
+  const DF = [1, 2, 3, 4, 5, 9, 14, 19, 29, 59, Infinity], kIn = $('#dfK'), LO = -6, HI = 6;
+  function draw(){
+    const df = DF[+kIn.value], q = tq975(df), {ctx, w, h} = fit($('#dfChart')), X0 = 12, X1 = w - 12, Y0 = h - 22, Y1 = 22;
+    const xs = v => X0 + (v - LO) / (HI - LO) * (X1 - X0), ys = d => Y0 - d / .42 * (Y0 - Y1);
+    const a = Math.max(LO, -q), b = Math.min(HI, q);
+    ctx.fillStyle = C('--one-soft'); ctx.beginPath(); ctx.moveTo(xs(a), Y0);
+    for (let i = 0; i <= 200; i++) { const v = a + (b - a) * i / 200; ctx.lineTo(xs(v), ys(tpdf(v, df))); }
+    ctx.lineTo(xs(b), Y0); ctx.closePath(); ctx.fill();
+    xAxis(ctx, X0, X1, Y0, LO, HI, v => signed(v, 0));
+    ctx.save(); ctx.strokeStyle = C('--ink'); ctx.setLineDash([5, 4]); ctx.lineWidth = 2; ctx.beginPath();
+    for (let i = 0; i <= 300; i++) { const v = LO + (HI - LO) * i / 300; i ? ctx.lineTo(xs(v), ys(npdf(v))) : ctx.moveTo(xs(v), ys(npdf(v))); } ctx.stroke(); ctx.restore();
+    ctx.strokeStyle = C('--one'); ctx.lineWidth = 2.5; ctx.beginPath();
+    for (let i = 0; i <= 300; i++) { const v = LO + (HI - LO) * i / 300; i ? ctx.lineTo(xs(v), ys(tpdf(v, df))) : ctx.moveTo(xs(v), ys(tpdf(v, df))); } ctx.stroke();
+    [-q, q].forEach(v => { if (v > LO && v < HI) vline(ctx, xs(v), Y1 - 6, Y0, C('--one'), null, 1.5); });
+    ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--one'); ctx.textBaseline = 'top'; ctx.textAlign = 'center';
+    if (q < HI) { ctx.fillText(signed(q, 2), xs(q), 2); ctx.fillText(signed(-q, 2), xs(-q), 2); }
+    else { ctx.textAlign = 'right'; ctx.fillText(`95% reaches out to ±${q.toFixed(1)} →`, X1, 2); }
+    const dfTxt = isFinite(df) ? `${df} degree${df > 1 ? 's' : ''} of freedom (${df + 1} measurements)` : 'infinite degrees of freedom: the bell curve itself';
+    $('#dfKOut').textContent = isFinite(df) ? df : '∞';
+    $('#dfRead').innerHTML = `${dfTxt} · the middle 95% of t lies within <b style="color:var(--one)">±${q.toFixed(2)}</b> (bell curve: ±1.96) · share of t beyond ±1.96: <b>${pc(tTwo(1.96, df))}</b> (bell curve: 5.0%)`;
+  }
+  kIn.addEventListener('input', draw);
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 4. sign flips vs the t curve ---------- */
+(function(){
+  const D1 = [0.7, -1.6, -0.2, -1.2, -0.1, 3.4, 3.7, 0.8, 0.0, 2.0], D2 = [1.9, 0.8, 1.1, 0.1, -0.1, 4.4, 5.5, 1.6, 4.6, 3.4];
+  const SETS = [
+    {name: 'extra hours, drug 2 − drug 1', x: D2.map((v, i) => Math.round(10 * (v - D1[i])) / 10)},
+    {name: 'extra hours on drug 1', x: D1},
+    {name: 'extra hours on drug 2', x: D2}
+  ];
+  SETS.forEach(S => {
+    const n = S.x.length, st = meanSd(S.x); S.t = st.m / (st.s / Math.sqrt(n)); S.m = st.m; S.s = st.s; S.flips = [];
+    for (let mask = 0; mask < 1 << n; mask++) {
+      const y = S.x.map((v, i) => (mask >> i & 1) ? -v : v), q = meanSd(y);
+      S.flips.push(q.s > 0 ? q.m / (q.s / Math.sqrt(n)) : 0);
+    }
+    const ex = S.flips.filter(t => Math.abs(t) >= Math.abs(S.t) - 1e-9);
+    S.ext = ex.length; S.extBins = new Set(ex.map(t => Math.floor((t + 6) / .25)));
+  });
+  let ds = 0, showT = false, showZ = false;
+  function draw(){
+    const S = SETS[ds], ob = Math.abs(S.t), curves = [];
+    if (showZ) curves.push({f: npdf, col: C('--ink'), dash: [5, 4], lw: 2});
+    if (showT) curves.push({f: x => tpdf(x, 9), col: C('--one'), lw: 2.5});
+    const F = histPanel($('#shChart'), S.flips, {lo: -6, hi: 6, bw: .25, curves, top: 22, color: c => S.extBins.has(Math.floor((c + 6) / .25)) ? C('--accent') : C('--ink-3'), fmt: v => signed(v, 0)});
+    const {ctx, xs, Y0, Y1} = F;
+    vline(ctx, xs(S.t), 14, Y0, C('--accent'), null, 2.2); vline(ctx, xs(-S.t), 14, Y0, C('--accent'), [4, 3], 1.5);
+    ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--accent'); ctx.textBaseline = 'top';
+    const right = xs(S.t) > (F.X0 + F.X1) * .7; ctx.textAlign = right ? 'right' : 'left';
+    ctx.fillText('the data: t = ' + S.t.toFixed(2), xs(S.t) + (right ? -5 : 5), 0);
+    $('#shData').innerHTML = `${S.name}: ${S.x.map(v => signed(v, 1)).join(', ')} · average <b>${S.m.toFixed(2)}</b> · s = <b>${S.s.toFixed(2)}</b> · t = <b>${S.t.toFixed(2)}</b>`;
+    $('#shRead').innerHTML = `sign flips at least as extreme: <b>${S.ext} of 1,024</b> = <b style="color:var(--accent)">${pfmt(S.ext / 1024)}</b>` +
+      (showT ? ` · Student’s t, 9 df: p = <b style="color:var(--one)">${pfmt(tTwo(S.t, 9))}</b>` : '') +
+      (showZ ? ` · bell curve: p = <b>${pfmt(zTwo(S.t))}</b>` : '');
+  }
+  const tog = (id, get, set) => $(id).addEventListener('click', () => { set(!get()); $(id).classList.toggle('on', get()); $(id).setAttribute('aria-pressed', get()); draw(); });
+  tog('#shT', () => showT, v => showT = v);
+  tog('#shZ', () => showZ, v => showZ = v);
+  $$('[data-ds]').forEach(b => b.addEventListener('click', () => { ds = +b.dataset.ds; $$('[data-ds]').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); }); draw(); }));
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 6. quiz ---------- */
+(function(){
+  const Q = [
+    {s: 'Predict: averages of 3 measurements, standardized with the sample’s own s. How often do they land beyond ±3?',
+     o: ['About 3 in 1,000, as the bell curve says', 'About 1 in 10'], a: 1,
+     e: 'About 9.5% of the time, some 35 times what the bell curve says. Dividing by an unluckily small s inflates the result.'},
+    {s: 'Where do the heavy tails of Student’s t come from?',
+     o: ['The data aren’t bell-shaped', 'The sample’s spread s is sometimes much smaller than σ', 'The average is biased'], a: 1,
+     e: 'Even with perfectly bell-shaped data, the ratio has heavy tails, because the denominator s wobbles and is sometimes far too small.'},
+    {s: 'A one-sample t-test on 10 measurements uses how many degrees of freedom?',
+     o: ['10', '9', '8'], a: 1,
+     e: 'n − 1: one is used up by measuring spread around the sample’s own average.'},
+    {s: 'With 3 measurements, a 95% interval for the mean is x̄ ± ? × s/√n',
+     o: ['1.96', '2.26', '4.30'], a: 2,
+     e: 'With 2 degrees of freedom the multiplier is 4.30. Using 1.96 would catch the truth only about 81% of the time.'},
+    {s: 'Which reading is <em>wrong</em>?',
+     o: ['t is needed because σ is estimated from the data', 'With 30 or more measurements, t and the bell curve nearly agree', 't is needed because the data aren’t bell-shaped'], a: 2,
+     e: 'Student’s curve is exact for bell-shaped data; its purpose is to account for estimating σ. Strongly non-bell-shaped small samples are a reason to prefer a shuffle instead.'},
+    {s: 'The sleep data give p = 0.003 as pairs but p = 0.08 as two separate groups. Why?',
+     o: ['Pairing removes the differences between patients', 'The paired test is just more generous'], a: 0,
+     e: 'Some patients sleep much more than others on either drug. Comparing each patient with themselves removes that variation, leaving the drug difference much clearer.'},
+    {s: 'For the sleep trial, the sign-flip p is 0.39% and the t-test p is 0.28%. What does the agreement tell you?',
+     o: ['Student’s formula is a good shortcut to the shuffle here', 'One of the two must be wrong'], a: 0,
+     e: 'Both ask how surprising the data would be if the drugs were the same. The t curve approximates the exact flip distribution well for these data.'}
+  ];
+  const box = $('#quiz'); let answered = 0, right = 0;
+  Q.forEach(qq => {
+    const d = document.createElement('div'); d.className = 'qitem';
+    d.innerHTML = `<p>${qq.s}</p><div class="qbtns">${qq.o.map((t, i) => `<button class="btn" data-i="${i}">${t}</button>`).join('')}</div><p class="qexp" hidden></p>`;
+    const exp = d.querySelector('.qexp');
+    d.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      const ok = +b.dataset.i === qq.a;
+      if (!d.dataset.done) { d.dataset.done = '1'; answered++; if (ok) right++; }
+      d.querySelectorAll('button').forEach(x => x.classList.remove('right', 'wrong'));
+      b.classList.add(ok ? 'right' : 'wrong');
+      exp.hidden = false; exp.innerHTML = `<b>${ok ? '✓ Right.' : '✗ Not quite.'}</b> ${qq.e}`;
+      $('#quizScore').textContent = `${answered} of ${Q.length} answered · ${right} right on the first try`;
+    }));
+    box.appendChild(d);
+  });
+})();
+
+})();
+</script>
+</body>
+</html>

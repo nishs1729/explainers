@@ -31,7 +31,7 @@ See [Statistics: how every page works](#statistics-conventions) first.
 - [x] [8. Confidence intervals](https://nishs1729.github.io/explainers/statistics/confidence-intervals.html)
 - [x] [9. Errors and decisions](https://nishs1729.github.io/explainers/statistics/errors.html)
 - [x] [10. Power and sample size](https://nishs1729.github.io/explainers/statistics/power.html)
-- [ ] [11. Student's t](#student-t)
+- [x] [11. Student's t](https://nishs1729.github.io/explainers/statistics/student-t.html)
 - [ ] [12. Chi-square tests](#chi-square-tests)
 - [ ] [13. ANOVA](#anova)
 - [ ] [14. ⚠ The garden of forking paths](#forking-paths)
@@ -466,6 +466,8 @@ Assumes the probability series, especially Normal (CLT, √n law) and Chi-square
 > **Data:** sleep trial (Student's own example: t ≈ 4.06).
 >
 > **Links:** builds on Normal, Chi-square (the chi section), Shuffling to test, p-values.
+>
+> **Built:** the hero asks how often samples of 3, standardized with their own s, land beyond ±3 (Less often / 3 in 1,000 / 1 in 100 / 1 in 10; answer ~9.5%, about 35× the bell curve's 0.27%), then builds a histogram of 2,000 such values with the tails in red and counted, and overlays Student's t(2) at the end. Section 1 tells the Guinness story (Gosset joined 1899; 1908 Biometrika "The probable error of a mean" as Student; 3,000 criminals' measurements on cards dealt into 750 samples of 4; Fisher's later t and degrees of freedom). Section 2 is the standardizer: n = 2–30 from N(100, 10); the latest sample with σ/√n and s/√n bars; side-by-side histograms divided by σ vs by s (beyond ±2: 4.6% vs ~18% at n = 3) with a toggle for Student's curve; and a histogram of s/σ (below half of σ ~22% at n = 3). Section 3 has a df slider (1–59, ∞) showing t vs normal and the 95% multiplier, plus a table (12.71/4.30/2.78/2.26/2.09/2.05/1.96 and z-interval coverage 70/81/88/92/94/94/95%). Section 4 shows the t statistics of all 1,024 sign flips for the sleep differences, drug 1 alone and drug 2 alone, with t(9) and normal overlays (pairs: flips 0.39%, t 0.28%, normal 0.0049%; drug 1: 23.8%/21.8%/18.5%; drug 2: 0.59%/0.51%/0.02%). Section 5 is a table of one-sample, paired, Welch two-sample (sleep as 20 people: t = 1.86, p = 0.08) and t interval (0.70 to 2.46 h), plus when to prefer the shuffle.
 
 <a id="chi-square-tests"></a>
 ### **12. Chi-square tests**

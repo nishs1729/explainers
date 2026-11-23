@@ -162,7 +162,7 @@ window.EXPLAINERS = {
           "id": "learning-from-data",
           "title": "Learning from data",
           "blurb": "Could chance alone have done this? Starting from line-ups and coin streaks, the series builds the tools for answering that question: sampling, estimation, resampling, tests, intervals and power, ending with the 1954 polio vaccine trial.",
-          "topics": ["is-it-real", "sampling-distributions", "selection-bias", "estimation", "bootstrap", "permutation-tests", "p-values", "confidence-intervals", "errors", "power"]
+          "topics": ["is-it-real", "sampling-distributions", "selection-bias", "estimation", "bootstrap", "permutation-tests", "p-values", "confidence-intervals", "errors", "power", "student-t"]
         }
       ],
       "topics": [
@@ -253,6 +253,15 @@ window.EXPLAINERS = {
           "path": "statistics/power.html",
           "summary": "Why the button test found nothing: run 100 tests at 1,000 visitors per button and only about 27 catch a real lift. Trace power curves, plan a study, and watch underpowered winners exaggerate.",
           "tags": ["power", "sample size", "type II error", "winner's curse", "type M error"],
+          "preview": { "select": "#heroPlay", "click": ["#heroSkip", "#heroGo"] }
+        },
+        {
+          "id": "student-t",
+          "title": "Student’s t",
+          "short": "Student’s t",
+          "path": "statistics/student-t.html",
+          "summary": "Why samples of 3 land beyond ±3 one time in ten when the bell curve says three in a thousand: a wobbly s, Gosset’s fix at Guinness, degrees of freedom, and the t-test checked against 1,024 sign flips.",
+          "tags": ["t distribution", "t-test", "degrees of freedom", "Gosset", "small samples"],
           "preview": { "select": "#heroPlay", "click": ["#heroSkip", "#heroGo"] }
         }
       ]
