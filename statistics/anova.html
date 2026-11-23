@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ANOVA — a visual introduction</title>
+<style>
+:root{
+  --bg:#faf8f4; --surface:#ffffff; --surface-2:#f2efe8; --ink:#1c1c1e; --ink-2:#4c4e55; --ink-3:#8b8d93; --line:#e3dfd5;
+  --one:#16917c; --one-soft:rgba(22,145,124,.15);
+  --zero:#d9573a; --zero-soft:rgba(217,87,58,.15);
+  --accent:#3654c9; --accent-soft:rgba(54,84,201,.11);
+  --gold:#b98317; --gold-soft:rgba(185,131,23,.22);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+    --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+    --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+    --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+    --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+  --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+  --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+  --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+  --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.68 var(--sans);-webkit-font-smoothing:antialiased}
+main{max-width:820px;margin:0 auto;padding:0 20px 80px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;letter-spacing:-.01em}
+h1{font-size:clamp(2.2rem,6vw,3.4rem);margin:.2em 0 .3em}
+h2{font-size:clamp(1.6rem,4vw,2.1rem);margin:0 0 .5em}
+h3{font-size:1.2rem;margin:1.6em 0 .4em}
+p{margin:0 0 1em}
+a{color:var(--accent)}
+strong{font-weight:650}
+em.term{font-style:normal;font-weight:650;color:var(--accent)}
+.muted{color:var(--ink-2)}
+small,.small{font-size:14px}
+
+/* hero */
+.hero{text-align:center;padding:64px 0 24px}
+.kicker{text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--ink-3);margin:0}
+.lede{font-size:1.2rem;color:var(--ink-2);max-width:620px;margin:0 auto}
+.hero-play{max-width:640px;margin:30px auto 0;text-align:left}
+.hero-play .controls{justify-content:center}
+.hint{font-size:15px;color:var(--ink-2);min-height:3.2em;margin:10px 0 0;text-align:center}
+.ask{font-family:var(--serif);font-size:1.25rem;text-align:center;margin:0 0 12px}
+
+.toc{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;margin:28px 0 8px}
+.toc ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 20px;counter-reset:t}
+.toc li{counter-increment:t;font-size:15px}
+.toc li::before{content:counter(t,decimal-leading-zero);font-family:var(--mono);color:var(--ink-3);margin-right:10px;font-size:13px}
+.toc a{color:var(--ink);text-decoration:none}
+.toc a:hover{color:var(--accent)}
+
+section{padding-top:56px}
+.secnum{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.08em;margin-bottom:4px}
+
+.widget{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin:26px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.widget-title{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);margin:0 0 12px;font-weight:600}
+.controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:12px 0}
+.ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:15px}
+.ctrl output{font-family:var(--mono);font-size:14px;min-width:5.5em;color:var(--ink)}
+input[type=range]{accent-color:var(--accent);width:170px;max-width:100%}
+.btn{font:inherit;font-size:14px;line-height:1.2;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;transition:background .15s,transform .1s}
+.btn:hover{border-color:var(--ink-3)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn.guess{background:var(--gold-soft);border-color:var(--gold);color:var(--ink)}
+.btn.right{background:var(--one-soft);border-color:var(--one);color:var(--one)}
+.btn.wrong{background:var(--zero-soft);border-color:var(--zero);color:var(--zero)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:6px}
+.readout{font-family:var(--mono);font-size:14px;color:var(--ink-2);line-height:1.6}
+.readout b{color:var(--ink);font-weight:600}
+.readout .ok{color:var(--one);font-weight:600}
+.readout .warn{color:var(--zero);font-weight:600}
+.readout .gd{color:var(--gold);font-weight:600}
+.msg{font-size:15px;color:var(--ink-2);min-height:3.4em;margin:10px 0 0}
+.msg b{color:var(--ink)}
+canvas{display:block;width:100%}
+.cap{font-size:13px;color:var(--ink-3);margin:2px 0 6px}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:20px 0}
+.callout p:last-child{margin-bottom:0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin-top:8px}
+.legend > span{display:inline-block}
+.legend .sw{vertical-align:middle;margin:0 6px 2px 0}
+.sw{display:inline-block;width:16px;height:10px;border-radius:2px}
+.sw.dot{width:8px;height:8px;border-radius:50%}
+.sw.line{height:0;border-top:2px solid var(--ink)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+@media (max-width:640px){.pair{grid-template-columns:1fr}}
+.mcap{font-size:13px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+
+/* cast */
+.cast-q{font-family:var(--serif);font-size:1.08rem;margin:0 0 10px}
+.datarow{font-family:var(--mono);font-size:14px;color:var(--ink-2);margin:0 0 6px}
+.datarow b{color:var(--ink)}
+
+/* recipe */
+.facts{counter-reset:f;list-style:none;padding:0;margin:18px 0}
+.facts li{counter-increment:f;position:relative;padding:12px 0 12px 44px;border-bottom:1px solid var(--line)}
+.facts li::before{content:counter(f);position:absolute;left:0;top:12px;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:600 13px var(--mono)}
+.facts li strong{display:block}
+.table-wrap{overflow-x:auto}
+table.summary{border-collapse:collapse;width:100%;font-size:15px;margin:14px 0}
+table.summary td,table.summary th{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3)}
+@media (max-width:480px){table.summary td,table.summary th{padding:8px 5px}}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:18px 0}
+.card{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
+.card h4{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+.card p{font-size:15px;margin:0;color:var(--ink-2)}
+
+/* quiz */
+.quiz{display:grid;gap:10px}
+.qitem{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg)}
+.qitem p{margin:0 0 8px;font-size:16px}
+.qbtns{display:flex;flex-wrap:wrap;gap:8px}
+.qexp{font-size:15px;color:var(--ink-2);margin:10px 0 0!important}
+
+@media (max-width:480px){
+  main{padding:0 16px 80px}
+  .widget{padding:14px}
+  input[type=range]{width:150px}
+}
+/* page 13 */
+.linkbtn{all:unset;cursor:pointer;font-size:14px;color:var(--accent);text-decoration:underline}
+.linkbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.linkbtn[hidden],.btn[hidden]{display:none}
+.legend > span[hidden]{display:none}
+table.summary.num{font-size:14px}
+table.summary.num td,table.summary.num th{text-align:right;white-space:nowrap}
+table.summary.num td:first-child,table.summary.num th:first-child{text-align:left;white-space:normal}
+.btn.sm{padding:3px 12px;font-size:14px}
+.panels{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:4px 0 6px}
+@media (max-width:640px){.panels{grid-template-columns:repeat(2,1fr)}}
+.panel{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:6px 6px 8px}
+.panel.is-real{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.pbtns{display:flex;gap:6px;align-items:center;justify-content:center;margin-top:4px}
+.pnum{font-family:var(--mono);font-size:12px;color:var(--ink-3);margin-right:2px}
+.pres{font-family:var(--mono);font-size:12px;color:var(--ink-2);text-align:center;margin:6px 0 0!important;line-height:1.4}
+.pres b{color:var(--ink)}
+.pres .warn{color:var(--zero);font-weight:600}
+code{font-family:var(--mono);font-size:.92em}
+</style>
+<script>try{var t=localStorage.getItem('xp-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/catalog.js" defer></script>
+<script src="../assets/site.js" defer></script>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <p class="kicker">A visual introduction</p>
+  <h1>ANOVA</h1>
+  <p class="lede">To compare many groups at once, don’t test them two at a time. Compare how far apart the group averages are with how much individuals inside each group vary: signal over noise, in one number called <em>F</em>.</p>
+  <div class="hero-play" id="heroPlay">
+    <p class="ask">Five fertilizers on five plots each. Does any of them matter?</p>
+    <p class="hint" style="min-height:0;margin:0 0 10px">Each panel is one experiment: the yields of five plots under each of fertilizers A to E. In some experiments the fertilizers really differ; in the others all five are identical and every difference is chance. Mark each panel, then reveal.</p>
+    <div class="panels" id="heroPanels"></div>
+    <div class="controls">
+      <button class="btn primary" id="heroGo" disabled>Reveal</button>
+      <button class="linkbtn" id="heroSkip">skip the guesses</button>
+      <button class="btn" id="heroNew" hidden>Six new experiments</button>
+    </div>
+    <p class="hint" id="heroHint" aria-live="polite">Mark all six panels “real” or “chance”, then reveal.</p>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#tentests">Why not ten t-tests</a></li>
+    <li><a href="#between">Between vs within</a></li>
+    <li><a href="#fdist">The F distribution</a></li>
+    <li><a href="#which">Which groups differ?</a></li>
+    <li><a href="#misleads">When it misleads</a></li>
+    <li><a href="#uses">Where you will meet it</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<section id="tentests">
+  <div class="secnum">01</div>
+  <h2>Why not ten t-tests</h2>
+  <p>The obvious plan is to compare the fertilizers in pairs with the <a href="student-t.html">t-test</a>: A against B, A against C, and so on. Five groups make ten pairs. Each test has a 5% chance of a false alarm when nothing is going on, and ten chances add up. Below, all five groups are pure noise: the same fertilizer five times.</p>
+
+  <div class="widget">
+    <p class="widget-title">Ten t-tests on pure noise</p>
+    <canvas id="ttStrips" style="height:190px" role="img" aria-label="Five groups of five plots, all drawn from the same population, as dot strips with each group's average"></canvas>
+    <div class="mcap" style="margin-top:8px">The ten pairwise t-tests (p-values; red = “significant”)</div>
+    <canvas id="ttGrid" style="height:170px" role="img" aria-label="A triangle of the ten pairwise comparisons with their p-values, false alarms in red"></canvas>
+    <div class="controls">
+      <button class="btn primary" id="ttNew">New experiment</button>
+      <button class="btn" id="ttMany">Run 1,000 experiments</button>
+      <button class="btn" id="ttReset">Reset tally</button>
+    </div>
+    <div class="readout" id="ttRead" aria-live="polite"></div>
+  </div>
+
+  <p>About 29% of pure-noise experiments produce at least one “significant” pair. That is less than the 40% you would get from ten unrelated tests, because the tests share groups, but it is six times the promised 5%. And it grows fast:</p>
+  <div class="table-wrap">
+    <table class="summary num">
+      <thead><tr><th>Groups (5 plots each)</th><th>3</th><th>5</th><th>7</th><th>10</th></tr></thead>
+      <tbody>
+        <tr><td>Pairwise t-tests</td><td>3</td><td>10</td><td>21</td><td>45</td></tr>
+        <tr><td>Noise experiments with at least one false alarm</td><td>12%</td><td>29%</td><td>45%</td><td>63%</td></tr>
+        <tr><td>ANOVA false alarms</td><td>5%</td><td>5%</td><td>5%</td><td>5%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>(By simulation, 40,000 experiments each.) The fix is to ask one question first, “do these groups differ at all?”, with one test whose false-alarm rate really is 5%. That test is the <em class="term">analysis of variance</em>, or ANOVA.</p>
+</section>
+
+<!-- 2 -->
+<section id="between">
+  <div class="secnum">02</div>
+  <h2>Between vs within</h2>
+  <p>Look at any panel above. Two kinds of variation are mixed together. <strong>Within</strong> each group, plots given the same fertilizer still differ: soil, drainage, luck. That is pure noise. <strong>Between</strong> groups, the averages differ, partly from that same noise and partly, perhaps, from the fertilizers. If the fertilizers do nothing, the averages should be about as spread out as noise alone makes averages of 5 plots.</p>
+  <p>ANOVA turns that into a ratio. The <strong>between-group variance</strong> measures how far the group averages sit from the overall average (scaled up by the group size, so it is on the same footing as single plots). The <strong>within-group variance</strong> is the pooled spread of plots around their own group average. Their ratio is <em class="term">F</em>: signal plus noise over noise. When nothing is going on, F hovers around 1.</p>
+
+  <div class="widget">
+    <p class="widget-title">★ The group spreader</p>
+    <p class="hint" style="min-height:0;margin:0 0 6px">Drag the gold bars to move each group’s average. The slider squeezes or loosens the plots around their averages.</p>
+    <canvas id="gsChart" style="height:280px;touch-action:none" role="img" aria-label="Five groups of five plots as dot strips; each group's average is a draggable bar, with the overall average dashed"></canvas>
+    <div class="legend"><span><i class="sw dot" style="background:var(--gold)"></i><span>plots</span></span><span><i class="sw" style="background:var(--gold)"></i><span>group average (drag)</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>overall average</span></span><span><i class="sw line" style="border-top:2px solid var(--accent)"></i><span>gap to the overall average</span></span></div>
+    <div class="controls">
+      <label class="ctrl">spread within groups <input type="range" id="gsS" min="0" max="40" step="1" value="20"><output id="gsSOut"></output></label>
+    </div>
+    <canvas id="gsBars" style="height:86px" role="img" aria-label="Between-group and within-group variance as two bars, and their ratio F"></canvas>
+    <div class="mcap" style="margin-top:8px">F from 2,000 shuffles of these 25 plots</div>
+    <canvas id="gsHist" style="height:190px" role="img" aria-label="Histogram of F from shuffling the plots among the groups, with the observed F marked and optionally the F curve"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>shuffles</span></span><span><i class="sw" style="background:var(--accent)"></i><span>shuffles with F at least as large</span></span><span><i class="sw line" style="border-top:2px solid var(--accent)"></i><span>your F</span></span><span id="gsLegC" hidden><i class="sw line" style="border-top:2.5px solid var(--one)"></i><span>F curve (4 and 20 df)</span></span></div>
+    <div class="controls">
+      <button class="btn" id="gsBunch">Bunch the averages</button>
+      <button class="btn" id="gsApart">Spread them apart</button>
+      <button class="btn" id="gsNew">New plots</button>
+      <button class="btn" id="gsCurve" aria-pressed="false">Overlay the F curve</button>
+    </div>
+    <div class="readout" id="gsRead" aria-live="polite"></div>
+  </div>
+
+  <p>Two ways to make F large: pull the averages apart (more signal), or squeeze the plots together (less noise). The same 2-kilogram gap between fertilizers is convincing when plots vary by 1 kg and invisible when they vary by 5. The shuffle builds the chance world as before: deal the 25 yields back out to the five fertilizers at random and recompute F. Your F is judged by where it lands among those.</p>
+  <div class="callout"><p><strong>F = between-group variance ÷ within-group variance.</strong> With <em>k</em> groups of <em>n</em>, between = <em>n</em> × Σ(group average − overall average)² ÷ (<em>k</em> − 1), and within = the pooled variance of plots around their group averages.</p></div>
+</section>
+
+<!-- 3 -->
+<section id="fdist">
+  <div class="secnum">03</div>
+  <h2>The F distribution</h2>
+  <p>Ronald Fisher joined Rothamsted Experimental Station in 1919, where decades of crop records and new field trials needed analyzing. In 1923 he and W. A. Mackenzie published the first analysis of variance in its modern form, on how potato varieties responded to different manures, and his 1925 book <em>Statistical Methods for Research Workers</em> spread it to every field that runs experiments. In 1934 George Snedecor tabulated the distribution of the ratio and named it <em>F</em> in Fisher’s honor.</p>
+  <p>The shortcut works like χ²: if the data are bell-shaped with equal spreads, both variances are scaled <a href="chi-square-tests.html">chi-square</a> quantities, and their ratio follows the <strong>F distribution</strong> with two degrees of freedom, <em>k</em> − 1 for the groups and <em>N</em> − <em>k</em> for the plots. Here it is against the shuffle for real data: R’s <code>PlantGrowth</code> experiment (from Dobson, 1983), the dried weight of 10 plants under a control and two treatments.</p>
+
+  <div class="widget">
+    <p class="widget-title">PlantGrowth: shuffle vs the F curve</p>
+    <canvas id="pgStrips" style="height:190px" role="img" aria-label="Dried plant weights for the control and two treatments, 10 plants each, as dot strips with group averages"></canvas>
+    <canvas id="pgHist" style="height:200px" role="img" aria-label="Histogram of F from shuffling the 30 plants among the groups, with the real F of 4.85 marked and optionally the F curve with 2 and 27 degrees of freedom"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>shuffles</span></span><span><i class="sw" style="background:var(--accent)"></i><span>at least as large</span></span><span><i class="sw line" style="border-top:2px solid var(--accent)"></i><span>the real F</span></span><span id="pgLegC" hidden><i class="sw line" style="border-top:2.5px solid var(--one)"></i><span>F curve (2 and 27 df)</span></span></div>
+    <div class="controls">
+      <button class="btn primary" id="pgShuf">Shuffle 2,000 times</button>
+      <button class="btn" id="pgCurve" aria-pressed="false">Overlay the F curve</button>
+      <button class="btn" id="pgClear">Clear</button>
+    </div>
+    <div class="readout" id="pgRead" aria-live="polite"></div>
+  </div>
+
+  <p>F = 4.85 with 2 and 27 degrees of freedom. The curve gives p = 0.016, and about 1.6–1.7% of shuffles reach it too: the two routes agree. With only two groups, ANOVA is the t-test in disguise: F = t². Treatment 1 against treatment 2 alone gives t = 3.01 and F = 9.06 = 3.01².</p>
+  <div class="table-wrap">
+    <table class="summary num">
+      <thead><tr><th>Source</th><th>Sum of squares</th><th>df</th><th>Variance (mean square)</th><th>F</th><th>p</th></tr></thead>
+      <tbody>
+        <tr><td>Between groups</td><td>3.77</td><td>2</td><td>1.88</td><td>4.85</td><td>0.016</td></tr>
+        <tr><td>Within groups</td><td>10.49</td><td>27</td><td>0.389</td><td></td><td></td></tr>
+        <tr><td>Total</td><td>14.26</td><td>29</td><td></td><td></td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>This is the classic ANOVA table. The name comes from its first column: the total variation in the 30 weights is split exactly into a between part and a within part (3.77 + 10.49 = 14.26), an “analysis” of the variance.</p>
+</section>
+
+<!-- 4 -->
+<section id="which">
+  <div class="secnum">04</div>
+  <h2>Which groups differ?</h2>
+  <p>A significant F says the averages are not all equal. It doesn’t say which ones differ. Now the pairwise comparisons come back, but they have to pay for being several, or the problem of section 1 returns. Here are the three PlantGrowth pairs:</p>
+  <div class="table-wrap">
+    <table class="summary num">
+      <thead><tr><th>Pair</th><th>Gap</th><th>Separate t-test</th><th>Bonferroni (× 3)</th><th>Tukey</th><th>Largest-gap shuffle</th></tr></thead>
+      <tbody>
+        <tr><td>Treatment 1 vs control</td><td>−0.37</td><td>0.25</td><td>0.75</td><td>0.39</td><td>≈ 0.48</td></tr>
+        <tr><td>Treatment 2 vs control</td><td>+0.49</td><td><strong>0.047</strong></td><td>0.14</td><td>0.20</td><td>≈ 0.26</td></tr>
+        <tr><td>Treatment 2 vs treatment 1</td><td>+0.87</td><td><strong>0.008</strong></td><td><strong>0.023</strong></td><td><strong>0.012</strong></td><td><strong>≈ 0.012</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>On its own, treatment 2 vs control looks “significant” at 0.047. But it was one of three comparisons, picked out after seeing which gaps were large. The simplest correction, <strong>Bonferroni</strong>, multiplies each p-value by the number of comparisons. A sharper one asks how often chance alone produces a gap this large <em>somewhere</em> among the pairs: shuffle the plants, record the largest of the three gaps, and compare each real gap with that. John Tukey’s “honestly significant difference” is the formula version of the same idea.</p>
+
+  <div class="widget">
+    <p class="widget-title">The largest gap chance produces</p>
+    <canvas id="lgHist" style="height:210px" role="img" aria-label="Histogram of the largest gap between the three group averages in shuffled data, with the three real gaps marked"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>largest gap in a shuffle</span></span><span><i class="sw line" style="border-top:2px solid var(--accent)"></i><span>the real gaps</span></span></div>
+    <div class="controls">
+      <button class="btn primary" id="lgShuf">Shuffle 2,000 times</button>
+      <button class="btn" id="lgClear">Clear</button>
+    </div>
+    <div class="readout" id="lgRead" aria-live="polite"></div>
+  </div>
+  <p>Only treatment 2 vs treatment 1 survives every correction. Treatment 2 vs control is worth a follow-up experiment, not a conclusion. The shuffle is a little more cautious than Tukey for the smaller gaps, because the real differences between groups are mixed into every shuffle, but both point the same way. The deeper version of this problem, where the comparisons you <em>could</em> have made are just as dangerous as the ones you did, is the next page.</p>
+</section>
+
+<!-- 5 -->
+<section id="misleads">
+  <div class="secnum">05</div>
+  <h2>When it misleads</h2>
+  <p>The F curve assumes bell-shaped noise with the <strong>same spread in every group</strong>. Moderate departures from the bell shape matter little, especially with equal group sizes. Unequal spreads matter a lot, especially when the groups also differ in size. In these simulations every group has the same true average, so every “significant” F is a false alarm:</p>
+  <div class="table-wrap">
+    <table class="summary num">
+      <thead><tr><th>Five groups, plots per group</th><th>Spread (SD) per group</th><th>False alarms (promised 5%)</th></tr></thead>
+      <tbody>
+        <tr><td>5, 5, 5, 5, 5</td><td>1, 1, 1, 1, 1</td><td>5%</td></tr>
+        <tr><td>5, 5, 5, 5, 5</td><td>1, 1, 1, 1, 3</td><td>10%</td></tr>
+        <tr><td>5, 5, 5, 5, 20</td><td>3, 3, 3, 3, 1</td><td>23%</td></tr>
+        <tr><td>20, 5, 5, 5, 5</td><td>3, 1, 1, 1, 1</td><td>0.3%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>When the small groups are the noisy ones, F raises false alarms nearly five times too often; when the big group is the noisy one, it almost never fires. The shuffle is no cure here, because it too assumes the groups are interchangeable. <strong>Welch’s ANOVA</strong>, which lets each group keep its own spread, is the usual fix, as Welch’s t-test is for two groups.</p>
+  <ul class="facts">
+    <li><strong>A significant F is not “all different”.</strong> It means at least one average differs. Find which with corrected comparisons.</li>
+    <li><strong>A non-significant F is not “all the same”.</strong> Small experiments miss real differences; look at the <a href="power.html">power</a> and the size of the gaps.</li>
+    <li><strong>Plots must be independent.</strong> Neighboring plots share soil. Fisher’s answer was to assign fertilizers to plots at random and to group plots into blocks of similar land, so that soil differences can’t masquerade as fertilizer effects.</li>
+    <li><strong>One F per question.</strong> Running ANOVA after ANOVA on different subsets or outcomes brings the many-tests problem straight back.</li>
+  </ul>
+</section>
+
+<!-- 6 -->
+<section id="uses">
+  <div class="secnum">06</div>
+  <h2>Where you will meet it</h2>
+  <div class="cards">
+    <div class="card"><h4>Field trials</h4><p>Varieties, fertilizers and irrigation schemes, laid out in randomized blocks: the setting ANOVA was invented for.</p></div>
+    <div class="card"><h4>A/B/n tests</h4><p>Several versions of a page compared on an average such as time on site or order value, before any pairwise comparison.</p></div>
+    <div class="card"><h4>Psychology</h4><p>Experiments with several conditions, and with two factors at once (two-way ANOVA), report F and its two degrees of freedom.</p></div>
+    <div class="card"><h4>Medicine</h4><p>Dose groups in a trial: does the response depend on the dose at all, before asking which doses differ?</p></div>
+    <div class="card"><h4>Manufacturing</h4><p>Do machines, shifts or suppliers produce different average dimensions, or is it all within-batch noise?</p></div>
+    <div class="card"><h4>Regression</h4><p>Every regression output has an ANOVA table: the variation the model explains against the variation it leaves, with an F test. A later page.</p></div>
+  </div>
+
+  <h3>Check yourself</h3>
+  <div class="widget">
+    <div class="quiz" id="quiz"></div>
+    <div class="readout" id="quizScore" style="margin-top:10px" aria-live="polite"></div>
+  </div>
+
+  <p>ANOVA protects one question from the many-tests problem. But the problem is bigger than the tests you run: every choice of which groups, outcomes and subsets to look at is another chance for noise to look like a finding. That is the next page, <strong>The garden of forking paths</strong> (coming soon).</p>
+</section>
+</main>
+
+<script>
+(function(){
+'use strict';
+/* ---------- helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const root = document.documentElement;
+const C = n => getComputedStyle(root).getPropertyValue(n).trim();
+const f2 = x => x.toFixed(2);
+const fmtN = x => Math.abs(x - Math.round(x)) < 1e-9 ? String(Math.round(x)) : String(+x.toFixed(2));
+const pct = x => (100 * x).toFixed(1) + '%';
+const MONO = 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
+const TAU = Math.PI * 2;
+const comma = n => n.toLocaleString('en-US');
+
+function fit(c){
+  const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+  if (c.width !== w*dpr || c.height !== h*dpr) { c.width = w*dpr; c.height = h*dpr; }
+  const ctx = c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  return {ctx, w, h};
+}
+const redraws = [];
+function redrawAll(){ redraws.forEach(f => f()); }
+let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(redrawAll, 80); });
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+if (mq.addEventListener) mq.addEventListener('change', redrawAll);
+new MutationObserver(redrawAll).observe(root, {attributes:true, attributeFilter:['data-theme']});
+
+function niceTicks(max, count){
+  const raw = max / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const step = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag;
+  const t = []; for (let v = 0; v <= max + 1e-9; v += step) t.push(v); return t;
+}
+function stepFmt(ticks){ const st = ticks.length > 1 ? ticks[1] - ticks[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9)); return v => v.toFixed(d); }
+function yGrid(ctx, X0, X1, ys, ticks, fmt){
+  ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ticks.forEach(v => {
+    const y = Math.round(ys(v)) + .5;
+    ctx.strokeStyle = C('--line'); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X0, y); ctx.lineTo(X1, y); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.fillText(fmt(v), X0 - 6, y);
+  });
+}
+function intStep(px, minPx){
+  for (const s of [1,2,5,10,20,25,50,100]) if (s * px >= minPx) return s;
+  return 100;
+}
+function roundRect(ctx, x, y, w, h, r){
+  r = Math.max(0, Math.min(r, w/2, Math.abs(h)/2));
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+function dot(ctx, x, y, r){ ctx.beginPath(); ctx.arc(x, y, Math.max(0.5, r), 0, TAU); ctx.fill(); }
+function vline(ctx, x, y0, y1, color, dash, lw){
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw || 1.5; if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(Math.round(x) + .5, y0); ctx.lineTo(Math.round(x) + .5, y1); ctx.stroke(); ctx.restore();
+}
+/* integer-valued bar charts: bars at k = lo..hi */
+function frame(ctx, w, h, o){
+  const X0 = o.left != null ? o.left : 40, X1 = w - 10, Y0 = h - 24, Y1 = o.top != null ? o.top : 12;
+  const span = o.hi - o.lo + 1, bw = (X1 - X0) / span;
+  const xc = k => X0 + bw * (k - o.lo + .5), ys = v => Y0 - (v / o.ymax) * (Y0 - Y1);
+  const t = niceTicks(o.ymax, 3).filter(v => v <= o.ymax * 1.0001); yGrid(ctx, X0, X1, ys, t, o.yfmt || stepFmt(t));
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  const st = o.step || intStep(bw, 24);
+  for (let k = Math.ceil(o.lo / st) * st; k <= o.hi; k += st) ctx.fillText(o.lab ? o.lab(k) : k, xc(k), Y0 + 6);
+  return {X0, X1, Y0, Y1, bw, xc, ys};
+}
+function drawBars(ctx, F, lo, hi, val, color, frac){
+  const bwid = Math.max(1, F.bw * (frac == null ? .8 : frac));
+  for (let k = lo; k <= hi; k++) {
+    const v = val(k); if (!(v > 0)) continue;
+    const y = F.ys(v), hh = F.Y0 - y; if (hh < 0.2) continue;
+    const x = F.xc(k) - bwid / 2;
+    ctx.fillStyle = typeof color === 'function' ? color(k) : color;
+    if (bwid >= 6 && hh >= 3) { roundRect(ctx, x, y, bwid, hh, Math.min(3, bwid / 4)); ctx.fill(); }
+    else ctx.fillRect(x, y, bwid, hh);
+  }
+}
+function emptyNote(ctx, w, h, text){
+  ctx.fillStyle = C('--ink-3'); ctx.font = '13px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(text, w / 2, h / 2 - 8);
+}
+
+/* randomness */
+let spare = null;
+function gauss(){
+  if (spare != null) { const s = spare; spare = null; return s; }
+  let u = 0, v = 0; while (u === 0) u = Math.random(); v = Math.random();
+  const r = Math.sqrt(-2 * Math.log(u)); spare = r * Math.sin(TAU * v); return r * Math.cos(TAU * v);
+}
+function shuffled(a){ const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; }
+function corr(x, y){
+  const n = x.length; let mx = 0, my = 0; for (let i = 0; i < n; i++) { mx += x[i]; my += y[i]; } mx /= n; my /= n;
+  let sxy = 0, sxx = 0, syy = 0; for (let i = 0; i < n; i++) { const a = x[i] - mx, b = y[i] - my; sxy += a * b; sxx += a * a; syy += b * b; }
+  return sxy / Math.sqrt(sxx * syy);
+}
+function binom(n, p){ let k = 0; for (let i = 0; i < n; i++) if (Math.random() < p) k++; return k; }
+function flips(n){ const a = new Array(n); for (let i = 0; i < n; i++) a[i] = Math.random() < .5 ? 1 : 0; return a; }
+function longestRun(a){
+  let best = 1, cur = 1, start = 0, bs = 0;
+  for (let i = 1; i < a.length; i++) { if (a[i] === a[i-1]) cur++; else { cur = 1; start = i; } if (cur > best) { best = cur; bs = start; } }
+  return {len: best, start: bs};
+}
+function switches(a){ let s = 0; for (let i = 1; i < a.length; i++) if (a[i] !== a[i-1]) s++; return s; }
+const RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+function ticksIn(lo, hi, count){
+  const raw = (hi - lo) / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const st = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag, t = [];
+  for (let v = Math.ceil(lo / st - 1e-9) * st; v <= hi + 1e-9; v += st) t.push(+v.toFixed(10));
+  return t;
+}
+function xAxis(ctx, X0, X1, Y0, lo, hi, fmt){
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  const t = ticksIn(lo, hi, Math.max(2, Math.floor((X1 - X0) / 60)));
+  const st = t.length > 1 ? t[1] - t[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9));
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  t.forEach(v => ctx.fillText(fmt ? fmt(v) : v.toFixed(d), X0 + (v - lo) / (hi - lo) * (X1 - X0), Y0 + 5));
+}
+function label(ctx, x, y, text, color, X0, X1){
+  ctx.font = '600 11px ' + MONO; ctx.fillStyle = color; ctx.textBaseline = 'top';
+  const right = x > (X0 + X1) / 2; ctx.textAlign = right ? 'right' : 'left';
+  ctx.fillText(text, x + (right ? -5 : 5), y);
+}
+
+function bar(ctx, x, w, y, Y0, color){
+  const hh = Y0 - y; if (!(hh > .2)) return;
+  ctx.fillStyle = color;
+  if (w >= 6 && hh >= 3) { roundRect(ctx, x, y, w, hh, Math.min(3, w / 4)); ctx.fill(); } else ctx.fillRect(x, y, w, hh);
+}
+
+/* ---------- shared: t and F distributions ---------- */
+function gammaln(x){
+  const c = [76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155, .1208650973866179e-2, -.5395239384953e-5];
+  let y = x, t = x + 5.5; t -= (x + .5) * Math.log(t); let s = 1.000000000190015;
+  for (let j = 0; j < 6; j++) s += c[j] / ++y;
+  return -t + Math.log(2.5066282746310005 * s / x);
+}
+function betacf(a, b, x){
+  const FP = 1e-300; let qab = a + b, qap = a + 1, qam = a - 1, c = 1, d = 1 - qab * x / qap;
+  if (Math.abs(d) < FP) d = FP; d = 1 / d; let h = d;
+  for (let m = 1; m <= 200; m++) {
+    const m2 = 2 * m; let aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+    d = 1 + aa * d; if (Math.abs(d) < FP) d = FP; c = 1 + aa / c; if (Math.abs(c) < FP) c = FP; d = 1 / d; h *= d * c;
+    aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+    d = 1 + aa * d; if (Math.abs(d) < FP) d = FP; c = 1 + aa / c; if (Math.abs(c) < FP) c = FP; d = 1 / d;
+    const del = d * c; h *= del; if (Math.abs(del - 1) < 3e-14) break;
+  }
+  return h;
+}
+function ibeta(a, b, x){
+  if (x <= 0) return 0; if (x >= 1) return 1;
+  const bt = Math.exp(gammaln(a + b) - gammaln(a) - gammaln(b) + a * Math.log(x) + b * Math.log(1 - x));
+  return x < (a + 1) / (a + b + 2) ? bt * betacf(a, b, x) / a : 1 - bt * betacf(b, a, 1 - x) / b;
+}
+const tTwo = (t, df) => ibeta(df / 2, .5, df / (df + t * t));
+const Fup = (F, d1, d2) => F <= 0 ? 1 : ibeta(d2 / 2, d1 / 2, d2 / (d2 + d1 * F));
+function fpdf(x, d1, d2){
+  if (x <= 0) return d1 === 2 ? 1 : 0;
+  return Math.exp((d1 / 2) * Math.log(d1 / d2) + (d1 / 2 - 1) * Math.log(x) - ((d1 + d2) / 2) * Math.log(1 + d1 * x / d2) - (gammaln(d1 / 2) + gammaln(d2 / 2) - gammaln((d1 + d2) / 2)));
+}
+const sum = a => a.reduce((s, v) => s + v, 0);
+const mean = a => sum(a) / a.length;
+function anova(groups){
+  const all = groups.flat(), N = all.length, k = groups.length, gm = mean(all), means = groups.map(mean);
+  let ssb = 0, ssw = 0;
+  groups.forEach((g, i) => { ssb += g.length * (means[i] - gm) ** 2; g.forEach(v => { ssw += (v - means[i]) ** 2; }); });
+  const msb = ssb / (k - 1), msw = ssw / (N - k);
+  return {F: msw > 0 ? msb / msw : Infinity, msb, msw, ssb, ssw, means, gm, d1: k - 1, d2: N - k};
+}
+/* F for values split into consecutive groups of the given sizes (fast, for shuffles) */
+function fastF(v, sizes){
+  let N = v.length, tot = 0, ssb = 0, ssw = 0, at = 0;
+  for (let i = 0; i < N; i++) tot += v[i];
+  const gm = tot / N;
+  for (const n of sizes) { let s = 0; for (let i = at; i < at + n; i++) s += v[i]; const m = s / n; ssb += n * (m - gm) ** 2; for (let i = at; i < at + n; i++) ssw += (v[i] - m) ** 2; at += n; }
+  return (ssb / (sizes.length - 1)) / (ssw / (N - sizes.length));
+}
+function shuffleInPlace(a){ for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function pfmt(p){
+  if (p >= .01) return (100 * p).toFixed(1) + '%';
+  if (p >= .0001) return (100 * p).toFixed(2) + '%';
+  return '< 0.01%';
+}
+const simP = (k, n) => k === 0 ? `fewer than 1 in ${comma(n)}` : pfmt(k / n);
+const pSim = (k, n) => k === 0 ? `p < 1 in ${comma(n)}` : `p ≈ ${pfmt(k / n)}`;
+const pnum = p => p >= .1 ? p.toFixed(2) : p >= .001 ? p.toFixed(3) : '< 0.001';
+const pEq = p => p < .001 ? 'p < 0.001' : 'p = ' + pnum(p);
+function pressSeg(sel, attr, v){ $$(sel).forEach(b => { const on = b.dataset[attr] === String(v); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }); }
+function toggleBtn(b, on){ b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }
+function dashH(ctx, x0, x1, y, color, lw){ ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw || 1.5; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(x0, Math.round(y) + .5); ctx.lineTo(x1, Math.round(y) + .5); ctx.stroke(); ctx.restore(); }
+function tag(ctx, text, x, y, color, align){
+  ctx.font = '600 11px ' + MONO; const tw = ctx.measureText(text).width;
+  const x0 = align === 'right' ? x - tw - 4 : align === 'center' ? x - tw / 2 - 2 : x - 2;
+  ctx.fillStyle = C('--surface'); ctx.globalAlpha = .9; ctx.fillRect(x0, y - 1, tw + 6, 15); ctx.globalAlpha = 1;
+  ctx.fillStyle = color; ctx.textBaseline = 'top'; ctx.textAlign = 'left'; ctx.fillText(text, x0 + 2, y + 1);
+}
+
+/* dot strips: one column per group, dots spread across the column, with group averages */
+function strips(ctx, w, h, groups, o){
+  const X0 = o.left != null ? o.left : 40, X1 = w - 8, Y0 = h - (o.labels ? 22 : 6), Y1 = o.top != null ? o.top : 8, k = groups.length, cw = (X1 - X0) / k;
+  const xc = i => X0 + cw * (i + .5), ys = v => Y0 - (v - o.lo) / (o.hi - o.lo) * (Y0 - Y1);
+  if (o.grid !== false) { const t = ticksIn(o.lo, o.hi, o.nt || 3); yGrid(ctx, X0, X1, ys, t, o.fmt || stepFmt(t)); }
+  if (o.labels) { ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'center'; ctx.textBaseline = 'top'; o.labels.forEach((l, i) => ctx.fillText(l, xc(i), Y0 + 6)); }
+  const all = groups.flat(), gm = mean(all);
+  if (o.grand) dashH(ctx, X0, X1, ys(gm), C('--ink'), 1.5);
+  const r = o.r || 3.5, spread = Math.min(cw * .5, (o.spreadPx || 60));
+  groups.forEach((g, i) => {
+    const n = g.length, m = mean(g), half = Math.min(cw * .36, 34);
+    ctx.fillStyle = typeof o.color === 'function' ? o.color(i) : o.color;
+    g.forEach((v, j) => { const x = xc(i) + (n > 1 ? (j / (n - 1) - .5) * spread : 0); ctx.globalAlpha = .85; dot(ctx, x, Math.max(Y1, Math.min(Y0, ys(v))), r); });
+    ctx.globalAlpha = 1;
+    if (o.means !== false) { ctx.fillStyle = o.meanColor || C('--ink'); const y = ys(m); ctx.fillRect(xc(i) - half, Math.round(y) - (o.meanW || 2) / 2, half * 2, o.meanW || 2); }
+  });
+  return {X0, X1, Y0, Y1, xc, ys, cw, gm};
+}
+
+/* histogram of a statistic on [0,hi) with optional density curve and observed value */
+function statHist(cv, vals, o){
+  const {ctx, w, h} = fit(cv), X0 = 40, X1 = w - 14, Y0 = h - 22, Y1 = 10;
+  const nb = Math.round(o.hi / o.bw), counts = new Array(nb).fill(0);
+  vals.forEach(v => { const k = Math.floor(v / o.bw); if (k >= 0 && k < nb) counts[k]++; });
+  const N = Math.max(1, vals.length), scale = N * o.bw;
+  let ymax = Math.max(...counts);
+  const cf = o.pdf ? (x => scale * o.pdf(x)) : null;
+  if (cf) { let m = 0; for (let i = 1; i <= 200; i++) m = Math.max(m, cf(Math.max(o.bw / 2, o.hi * i / 200))); ymax = vals.length ? Math.max(ymax, Math.min(m, ymax * 1.6)) : m; }
+  if (!(ymax > 0)) ymax = 1;
+  ymax *= 1.1;
+  const xs = v => X0 + v / o.hi * (X1 - X0), ys = v => Y0 - v / ymax * (Y0 - Y1), bw = Math.max(1, (X1 - X0) / nb - 1);
+  if (vals.length) { const t = niceTicks(ymax, 3).filter(v => v <= ymax); yGrid(ctx, X0, X1, ys, t, stepFmt(t)); }
+  for (let k = 0; k < nb; k++) {
+    const c0 = (k + .5) * o.bw, hot = o.obs != null && c0 >= o.obs - 1e-9;
+    bar(ctx, xs(k * o.bw) + .5, bw, ys(counts[k]), Y0, hot ? C('--accent') : C('--ink-3'));
+  }
+  xAxis(ctx, X0, X1, Y0, 0, o.hi);
+  if (cf) {
+    ctx.save(); ctx.strokeStyle = C('--one'); ctx.lineWidth = 2.5; ctx.beginPath();
+    for (let i = 0; i <= 400; i++) { const x = Math.max(1e-3, o.hi * i / 400), y = Math.max(Y1 - 4, ys(cf(x))); i ? ctx.lineTo(xs(x), y) : ctx.moveTo(xs(x), y); }
+    ctx.stroke(); ctx.restore();
+  }
+  if (!vals.length && o.empty) { ctx.fillStyle = C('--ink-3'); ctx.font = '13px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(o.empty, (X0 + X1) / 2, (Y0 + Y1) / 2); }
+  if (o.obs != null) {
+    const off = o.obs > o.hi, x = off ? X1 : xs(o.obs), right = off || x > (X0 + X1) * .6;
+    vline(ctx, x, Y1, Y0, C('--accent'), null, 2);
+    tag(ctx, (o.obsLabel || 'F') + ' ' + o.obs.toFixed(o.obs >= 100 ? 0 : 2) + (off ? ' →' : ''), right ? x - 4 : x + 5, Y1 + 2, C('--accent'), right ? 'right' : 'left');
+  }
+  return {ctx, w, h, xs, ys, X0, X1, Y0, Y1};
+}
+const countAtLeast = (vals, x) => vals.reduce((s, v) => s + (v >= x - 1e-9), 0);
+
+/* ---------- hero: six experiments, real or chance ---------- */
+(function(){
+  const box = $('#heroPanels'), hint = $('#heroHint'), LAB = ['A', 'B', 'C', 'D', 'E'];
+  let P = [], revealed = false, skipped = false;
+  function make(){
+    P = [];
+    for (let p = 0; p < 6; p++) {
+      const real = Math.random() < .5, off = shuffleInPlace([-1, -.5, 0, .5, 1]);
+      const groups = off.map(o => Array.from({length: 5}, () => 30 + 3 * ((real ? 1.2 * o : 0) + gauss())));
+      P.push({real, groups, guess: null, A: anova(groups)});
+    }
+    revealed = false; skipped = false;
+    box.innerHTML = P.map((q, i) => `<div class="panel" id="hp${i}"><canvas style="height:150px" role="img" aria-label="Experiment ${i + 1}: yields of five plots under each of five fertilizers"></canvas>` +
+      `<div class="pbtns"><span class="pnum">${i + 1}</span><button class="btn sm" data-p="${i}" data-v="1">Real</button><button class="btn sm" data-p="${i}" data-v="0">Chance</button></div><p class="pres" hidden></p></div>`).join('');
+    $('#heroGo').disabled = true; $('#heroGo').hidden = false; $('#heroSkip').hidden = false; $('#heroNew').hidden = true;
+    hint.textContent = 'Mark all six panels “real” or “chance”, then reveal.';
+    draw();
+  }
+  function draw(){
+    P.forEach((q, i) => {
+      const cv = $(`#hp${i} canvas`); if (!cv) return; const {ctx, w, h} = fit(cv);
+      strips(ctx, w, h, q.groups, {lo: 19, hi: 41, labels: LAB, left: 8, grid: false, color: revealed ? (q.real ? C('--accent') : C('--ink-3')) : C('--ink-2'), r: 2.6, spreadPx: 16, meanW: 2, grand: false});
+    });
+  }
+  function ready(){ $('#heroGo').disabled = !(skipped || P.every(q => q.guess != null)); }
+  box.addEventListener('click', e => {
+    const b = e.target.closest('button[data-p]'); if (!b || revealed) return;
+    const q = P[+b.dataset.p]; q.guess = b.dataset.v === '1';
+    $$(`#hp${b.dataset.p} .pbtns .btn`).forEach(x => x.classList.toggle('guess', x === b));
+    ready();
+  });
+  $('#heroSkip').addEventListener('click', () => { skipped = true; $('#heroSkip').hidden = true; ready(); });
+  $('#heroGo').addEventListener('click', () => {
+    revealed = true; let you = 0, guessed = 0, fTest = 0;
+    P.forEach((q, i) => {
+      const p = Fup(q.A.F, 4, 20), sig = p < .05, el = $('#hp' + i), res = el.querySelector('.pres');
+      if (sig === q.real) fTest++;
+      if (q.guess != null) { guessed++; if (q.guess === q.real) you++; }
+      el.classList.add(q.real ? 'is-real' : 'is-null');
+      el.querySelectorAll('.pbtns .btn').forEach(x => { x.disabled = true; if (x.classList.contains('guess')) x.classList.add(q.guess === q.real ? 'right' : 'wrong'); });
+      res.hidden = false;
+      res.innerHTML = `<b>${q.real ? 'Real' : 'Chance'}</b> · F = ${q.A.F.toFixed(2)}, ${pEq(p)}${sig === q.real ? '' : ' <span class="warn">F test fooled</span>'}`;
+    });
+    const nReal = P.filter(q => q.real).length;
+    hint.innerHTML = (guessed ? `You got <b>${you} of ${guessed}</b> right. ` : '') + `The F test (calling “real” when p < 0.05) got <b>${fTest} of 6</b>. ` +
+      `${nReal} of these experiments had real differences. Eyes find winners in pure noise, because five groups of five always differ a little, and one of them is always on top. ANOVA asks whether the averages differ <em>more</em> than that, ` + (fTest < 6 ? 'It isn’t perfect either: a modest real effect can hide in the noise, and 1 time in 20 noise passes for a finding.' : 'It got all six this time; with effects this size it still misses about 1 real difference in 8.');
+    $('#heroGo').hidden = true; $('#heroSkip').hidden = true; $('#heroNew').hidden = false;
+    draw();
+  });
+  $('#heroNew').addEventListener('click', make);
+  make(); redraws.push(draw);
+})();
+
+/* ---------- 1. ten t-tests on pure noise ---------- */
+(function(){
+  const LAB = ['A', 'B', 'C', 'D', 'E'];
+  let groups, pv, Fp, tally = {n: 0, any: 0, alarms: 0, F: 0}, timer = null;
+  function experiment(){
+    const g = Array.from({length: 5}, () => Array.from({length: 5}, () => 30 + 3 * gauss()));
+    const m = g.map(mean), ss = g.map((x, i) => sum(x.map(v => (v - m[i]) ** 2)));
+    const p = [];
+    for (let i = 0; i < 5; i++) for (let j = i + 1; j < 5; j++) {
+      const sp = Math.sqrt((ss[i] + ss[j]) / 8), t = (m[j] - m[i]) / (sp * Math.sqrt(.4));
+      p.push({i, j, p: tTwo(t, 8)});
+    }
+    return {g, p, Fp: Fup(anova(g).F, 4, 20)};
+  }
+  function record(e){ const a = e.p.filter(q => q.p < .05).length; tally.n++; tally.alarms += a; if (a) tally.any++; if (e.Fp < .05) tally.F++; }
+  function show(e){ groups = e.g; pv = e.p; Fp = e.Fp; }
+  function drawStrips(){
+    const {ctx, w, h} = fit($('#ttStrips'));
+    strips(ctx, w, h, groups, {lo: 18, hi: 42, labels: LAB.map(l => 'group ' + l), color: C('--ink-3'), grand: true, r: 3.5, spreadPx: 40});
+  }
+  function drawGrid(){
+    const {ctx, w, h} = fit($('#ttGrid'));
+    const cw = Math.min(110, (w - 40) / 4), ch = (h - 24) / 4, X0 = (w - cw * 4) / 2 + 12, Y0 = 4;
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    for (let c = 0; c < 4; c++) ctx.fillText(LAB[c], X0 + cw * (c + .5), Y0 + ch * 4 + 6);
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    for (let r = 0; r < 4; r++) ctx.fillText(LAB[r + 1], X0 - 8, Y0 + ch * (r + .5));
+    pv.forEach(q => {
+      const r = q.j - 1, c = q.i, x = X0 + c * cw + 2, y = Y0 + r * ch + 2, bad = q.p < .05;
+      ctx.fillStyle = bad ? C('--zero-soft') : C('--surface-2'); roundRect(ctx, x, y, cw - 4, ch - 4, 5); ctx.fill();
+      if (bad) { ctx.strokeStyle = C('--zero'); ctx.lineWidth = 1.5; ctx.stroke(); }
+      ctx.fillStyle = bad ? C('--zero') : C('--ink-2'); ctx.font = (bad ? '700 ' : '') + '12px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(pEq(q.p), x + (cw - 4) / 2, y + (ch - 4) / 2);
+    });
+  }
+  function read(){
+    const a = pv.filter(q => q.p < .05).length;
+    $('#ttRead').innerHTML = `this experiment: <b>${a} of 10</b> pairs “significant” · ANOVA: ${pEq(Fp)}${Fp < .05 ? ' <span class="warn">(false alarm)</span>' : ''}<br>` +
+      (tally.n ? `experiments with at least one false alarm among the 10 t-tests: <b>${comma(tally.any)} of ${comma(tally.n)}</b> (${pc(tally.any / tally.n)}) · ANOVA false alarms: <b>${comma(tally.F)}</b> (${pc(tally.F / tally.n)})` : '');
+  }
+  const pc = x => (100 * x).toFixed(1) + '%';
+  function all(){ drawStrips(); drawGrid(); read(); }
+  $('#ttNew').addEventListener('click', () => { const e = experiment(); record(e); show(e); all(); });
+  $('#ttMany').addEventListener('click', () => {
+    clearInterval(timer); let left = 1000;
+    const go = () => { const m = Math.min(left, RM ? 1000 : 40); for (let i = 0; i < m; i++) { const e = experiment(); record(e); if (i === m - 1) show(e); } left -= m; all(); if (left <= 0) { clearInterval(timer); timer = null; } };
+    if (RM) go(); else timer = setInterval(go, 25);
+  });
+  $('#ttReset').addEventListener('click', () => { clearInterval(timer); timer = null; tally = {n: 0, any: 0, alarms: 0, F: 0}; read(); });
+  show(experiment()); all(); redraws.push(() => { drawStrips(); drawGrid(); });
+})();
+
+/* ---------- 2. the group spreader ---------- */
+(function(){
+  const cv = $('#gsChart'), LAB = ['A', 'B', 'C', 'D', 'E'], LO = 15, HI = 45, NS = 2000;
+  let mu = [28, 31, 30, 33, 29], res, s = 3, curve = false, shuf = [], F = 1, drag = -1, geo = null, pending = false;
+  function newRes(){
+    res = Array.from({length: 5}, () => { const z = Array.from({length: 5}, gauss), m = mean(z); return z.map(v => v - m); });
+    const ssw = sum(res.map(g => sum(g.map(v => v * v)))), k = Math.sqrt(20 / ssw);
+    res = res.map(g => g.map(v => v * k));
+  }
+  const data = () => res.map((g, i) => g.map(v => mu[i] + s * v));
+  function compute(){
+    const d = data(), A = anova(d); F = A.F;
+    const flat = d.flat(), sizes = [5, 5, 5, 5, 5]; shuf = [];
+    for (let i = 0; i < NS; i++) shuf.push(fastF(shuffleInPlace(flat), sizes));
+    return A;
+  }
+  function drawChart(){
+    const {ctx, w, h} = fit(cv), d = data();
+    geo = strips(ctx, w, h, d, {lo: LO, hi: HI, labels: LAB.map(l => (w < 560 ? '' : 'fertilizer ') + l), color: C('--gold'), grand: true, means: false, r: 4, spreadPx: 44, nt: 4, fmt: v => v + ' kg'});
+    const half = Math.min(geo.cw * .38, 46);
+    mu.forEach((m, i) => {
+      const x = geo.xc(i), y = geo.ys(m);
+      ctx.strokeStyle = C('--accent'); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x + half + 6, geo.ys(geo.gm)); ctx.lineTo(x + half + 6, y); ctx.stroke();
+      ctx.fillStyle = C('--gold'); roundRect(ctx, x - half, y - 3, half * 2, 6, 3); ctx.fill();
+      ctx.fillStyle = C('--surface'); ctx.strokeStyle = C('--gold'); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x - half, y, 6, 0, TAU); ctx.fill(); ctx.stroke();
+    });
+  }
+  function drawBars(){
+    const {ctx, w, h} = fit($('#gsBars')), A = anova(data()), X0 = Math.min(150, w * .32), X1 = w - (w < 560 ? 90 : 120);
+    const m = Math.max(A.msb, A.msw, 1e-9), sc = v => (X1 - X0) * v / m;
+    [[A.msb, 'between groups', C('--accent')], [A.msw, 'within groups', C('--ink-3')]].forEach(([v, l, col], r) => {
+      const y = 10 + r * 34;
+      ctx.font = '12px ' + MONO; ctx.fillStyle = C('--ink-2'); ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText(l, X0 - 10, y + 10);
+      ctx.fillStyle = col; roundRect(ctx, X0, y, Math.max(2, sc(v)), 20, 4); ctx.fill();
+      ctx.fillStyle = C('--ink'); ctx.textAlign = 'left'; ctx.font = '600 12px ' + MONO; ctx.fillText(v.toFixed(1), X0 + Math.max(2, sc(v)) + 8, y + 10);
+    });
+    ctx.font = '700 15px ' + MONO; ctx.fillStyle = C('--ink'); ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillText('F = ' + (isFinite(A.F) ? A.F.toFixed(2) : '∞'), w - 6, h / 2);
+  }
+  function hiFor(){ return Math.max(6, Math.min(40, Math.ceil(F * 1.25))); }
+  function drawHist(){ const hi = hiFor(); statHist($('#gsHist'), shuf, {hi, bw: hi / 60, pdf: curve ? (x => fpdf(x, 4, 20)) : null, obs: Math.min(F, 1e6), obsLabel: 'your F'}); }
+  function read(){
+    const k = countAtLeast(shuf, F);
+    $('#gsRead').innerHTML = `between ÷ within = F = <b>${isFinite(F) ? F.toFixed(2) : '∞'}</b> · shuffles at least this large: <b>${comma(k)} of ${comma(shuf.length)}</b> (${pSim(k, shuf.length)})` +
+      (curve ? ` · F curve: p = <b>${pfmt(Fup(F, 4, 20))}</b>` : '');
+  }
+  function update(){ compute(); drawChart(); drawBars(); drawHist(); read(); }
+  function later(){ if (pending) return; pending = true; requestAnimationFrame(() => { pending = false; update(); }); }
+  function setS(){ s = (+$('#gsS').value + 4) / 8; $('#gsSOut').textContent = s.toFixed(1) + ' kg'; }
+  const valAt = e => { const r = cv.getBoundingClientRect(), y = e.clientY - r.top; return LO + (geo.Y0 - y) / (geo.Y0 - geo.Y1) * (HI - LO); };
+  cv.addEventListener('pointerdown', e => {
+    if (!geo) return; const r = cv.getBoundingClientRect(), x = e.clientX - r.left;
+    const i = Math.max(0, Math.min(4, Math.floor((x - geo.X0) / geo.cw)));
+    drag = i; cv.setPointerCapture(e.pointerId); mu[i] = Math.max(LO + 2, Math.min(HI - 2, valAt(e))); later(); e.preventDefault();
+  });
+  cv.addEventListener('pointermove', e => { if (drag < 0) return; mu[drag] = Math.max(LO + 2, Math.min(HI - 2, valAt(e))); later(); });
+  const end = () => { drag = -1; }; cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+  cv.tabIndex = 0;
+  cv.addEventListener('keydown', e => {
+    const k = e.key; if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(k)) return;
+    e.preventDefault(); cv._sel = cv._sel || 0;
+    if (k === 'ArrowLeft') cv._sel = (cv._sel + 4) % 5; else if (k === 'ArrowRight') cv._sel = (cv._sel + 1) % 5;
+    else mu[cv._sel] = Math.max(LO + 2, Math.min(HI - 2, mu[cv._sel] + (k === 'ArrowUp' ? .5 : -.5)));
+    later();
+  });
+  $('#gsS').addEventListener('input', () => { setS(); later(); });
+  $('#gsBunch').addEventListener('click', () => { mu = [30, 30, 30, 30, 30]; update(); });
+  $('#gsApart').addEventListener('click', () => { mu = [26, 30, 34, 28, 32]; update(); });
+  $('#gsNew').addEventListener('click', () => { newRes(); update(); });
+  $('#gsCurve').addEventListener('click', () => { curve = !curve; toggleBtn($('#gsCurve'), curve); $('#gsLegC').hidden = !curve; drawHist(); read(); });
+  newRes(); setS(); update();
+  redraws.push(() => { drawChart(); drawBars(); drawHist(); });
+})();
+
+/* ---------- PlantGrowth data (R datasets; Dobson 1983) ---------- */
+const PG = [
+  [4.17, 5.58, 5.18, 6.11, 4.50, 4.61, 5.17, 4.53, 5.33, 5.14],
+  [4.81, 4.17, 4.41, 3.59, 5.87, 3.83, 6.03, 4.89, 4.32, 4.69],
+  [6.31, 5.12, 5.54, 5.50, 5.37, 5.29, 4.92, 6.15, 5.80, 5.26]
+];
+const PGLAB = ['control', 'treatment 1', 'treatment 2'];
+
+/* ---------- 3. PlantGrowth: shuffle vs F ---------- */
+(function(){
+  const A = anova(PG), flat = PG.flat(), sizes = [10, 10, 10];
+  let shuf = [], curve = false, timer = null;
+  function drawStrips(){
+    const {ctx, w, h} = fit($('#pgStrips'));
+    const g = strips(ctx, w, h, PG, {lo: 3.4, hi: 6.5, labels: PGLAB, color: C('--accent'), grand: true, r: 4, spreadPx: 80, nt: 3});
+    ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--ink'); ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    A.means.forEach((m, i) => { const half = Math.min(g.cw * .36, 34); tag(ctx, m.toFixed(2), g.xc(i) + half + 4, g.ys(m) - 7, C('--ink'), 'left'); });
+  }
+  function drawHist(){ statHist($('#pgHist'), shuf, {hi: 8, bw: .16, pdf: curve ? (x => fpdf(x, 2, 27)) : null, obs: A.F, obsLabel: 'real F', empty: 'press Shuffle to build the chance world'}); }
+  function read(){
+    const k = countAtLeast(shuf, A.F);
+    $('#pgRead').innerHTML = `F = <b>${A.F.toFixed(2)}</b> with 2 and 27 degrees of freedom · shuffles at least this large: <b>${comma(k)} of ${comma(shuf.length)}</b>${shuf.length ? ` (${pSim(k, shuf.length)})` : ''}` +
+      (curve ? ` · F curve: p = <b>${Fup(A.F, 2, 27).toFixed(3)}</b>` : '');
+  }
+  $('#pgShuf').addEventListener('click', () => {
+    clearInterval(timer); const target = shuf.length + 2000, v = flat.slice();
+    const go = () => { const m = Math.min(target - shuf.length, RM ? 2000 : 100); for (let i = 0; i < m; i++) shuf.push(fastF(shuffleInPlace(v), sizes)); drawHist(); read(); if (shuf.length >= target) { clearInterval(timer); timer = null; } };
+    if (RM) go(); else timer = setInterval(go, 25);
+  });
+  $('#pgCurve').addEventListener('click', () => { curve = !curve; toggleBtn($('#pgCurve'), curve); $('#pgLegC').hidden = !curve; drawHist(); read(); });
+  $('#pgClear').addEventListener('click', () => { clearInterval(timer); timer = null; shuf = []; drawHist(); read(); });
+  drawStrips(); drawHist(); read(); redraws.push(() => { drawStrips(); drawHist(); });
+})();
+
+/* ---------- 4. the largest gap chance produces ---------- */
+(function(){
+  const means = PG.map(mean), flat = PG.flat();
+  const PAIRS = [{a: 1, b: 0, lab: 'treatment 1 vs control'}, {a: 2, b: 0, lab: 'treatment 2 vs control'}, {a: 2, b: 1, lab: 'treatment 2 vs treatment 1'}];
+  PAIRS.forEach(p => { p.gap = Math.abs(means[p.a] - means[p.b]); });
+  let vals = [], timer = null;
+  function largest(v){ const m = [0, 0, 0]; for (let i = 0; i < 30; i++) m[Math.floor(i / 10)] += v[i]; return (Math.max(...m) - Math.min(...m)) / 10; }
+  function draw(){
+    const F = statHist($('#lgHist'), vals, {hi: 1.2, bw: .025, empty: 'press Shuffle to see the largest gaps chance makes'});
+    const {ctx, xs, Y0, Y1} = F;
+    PAIRS.forEach((p, i) => {
+      vline(ctx, xs(p.gap), Y1, Y0, C('--accent'), null, 2);
+      const short = ['t1 vs ctrl', 't2 vs ctrl', 't2 vs t1'][i];
+      tag(ctx, short + ' ' + p.gap.toFixed(2), i === 0 ? xs(p.gap) - 5 : xs(p.gap) + 5, Y1 + 2 + i * 18, C('--accent'), i === 0 ? 'right' : 'left');
+    });
+  }
+  function read(){
+    $('#lgRead').innerHTML = vals.length ? PAIRS.map(p => { const k = countAtLeast(vals, p.gap); return `${p.lab}: gap ${p.gap.toFixed(2)} · shuffles whose largest gap is at least this: <b>${comma(k)} of ${comma(vals.length)}</b> (${pSim(k, vals.length)})`; }).join('<br>') : 'No shuffles yet.';
+  }
+  $('#lgShuf').addEventListener('click', () => {
+    clearInterval(timer); const target = vals.length + 2000, v = flat.slice();
+    const go = () => { const m = Math.min(target - vals.length, RM ? 2000 : 100); for (let i = 0; i < m; i++) vals.push(largest(shuffleInPlace(v))); draw(); read(); if (vals.length >= target) { clearInterval(timer); timer = null; } };
+    if (RM) go(); else timer = setInterval(go, 25);
+  });
+  $('#lgClear').addEventListener('click', () => { clearInterval(timer); timer = null; vals = []; draw(); read(); });
+  draw(); read(); redraws.push(draw);
+})();
+
+/* ---------- 6. quiz ---------- */
+(function(){
+  const Q = [
+    {s: 'Predict: five groups of pure noise, five plots each. You run all ten pairwise t-tests at the 5% level. How often is at least one “significant”?',
+     o: ['About 5% of the time', 'About 30% of the time'], a: 1,
+     e: 'About 29%. Ten tests give ten chances for a false alarm; ANOVA’s single test keeps it at 5%.'},
+    {s: 'An F of about 1 means…',
+     o: ['the group averages differ about as much as noise alone would make them', 'the groups are identical'], a: 0,
+     e: 'F compares between-group variance with within-group variance; around 1 is what chance produces.'},
+    {s: 'You keep the group averages fixed and squeeze the plots closer to their averages. F…',
+     o: ['goes up', 'stays the same', 'goes down'], a: 0,
+     e: 'Less noise within groups makes the same gaps between averages more convincing.'},
+    {s: 'Which reading is <em>wrong</em>?',
+     o: ['A significant F means every group differs from every other', 'A significant F means the averages are not all equal', 'A non-significant F doesn’t prove the groups are equal'], a: 0,
+     e: 'F only says at least one average differs. Which ones needs corrected pairwise comparisons.'},
+    {s: 'In PlantGrowth, treatment 2 vs control gives p = 0.047 alone but about 0.20 after Tukey’s correction. Why?',
+     o: ['It is one of three comparisons, chosen after seeing the data', 'Tukey’s method uses fewer plants'], a: 0,
+     e: 'The correction accounts for the chance that some pair among the three shows a gap this large by luck.'},
+    {s: 'With only two groups, how is ANOVA’s F related to the t statistic?',
+     o: ['F = t²', 'They are unrelated'], a: 0,
+     e: 'Treatment 2 vs treatment 1: t = 3.01, F = 9.06 = 3.01². Same test, same p.'},
+    {s: 'The smallest groups are also the noisiest. ANOVA’s false-alarm rate…',
+     o: ['rises well above 5%', 'drops below 5%'], a: 0,
+     e: 'In the simulation, 23% instead of 5%. Welch’s ANOVA allows each group its own spread.'}
+  ];
+  const box = $('#quiz'); let answered = 0, right = 0;
+  Q.forEach(qq => {
+    const d = document.createElement('div'); d.className = 'qitem';
+    d.innerHTML = `<p>${qq.s}</p><div class="qbtns">${qq.o.map((t, i) => `<button class="btn" data-i="${i}">${t}</button>`).join('')}</div><p class="qexp" hidden></p>`;
+    const exp = d.querySelector('.qexp');
+    d.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      const ok = +b.dataset.i === qq.a;
+      if (!d.dataset.done) { d.dataset.done = '1'; answered++; if (ok) right++; }
+      d.querySelectorAll('button').forEach(x => x.classList.remove('right', 'wrong'));
+      b.classList.add(ok ? 'right' : 'wrong');
+      exp.hidden = false; exp.innerHTML = `<b>${ok ? '✓ Right.' : '✗ Not quite.'}</b> ${qq.e}`;
+      $('#quizScore').textContent = `${answered} of ${Q.length} answered · ${right} right on the first try`;
+    }));
+    box.appendChild(d);
+  });
+})();
+})();
+</script>
+</body>
+</html>

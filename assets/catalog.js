@@ -162,7 +162,7 @@ window.EXPLAINERS = {
           "id": "learning-from-data",
           "title": "Learning from data",
           "blurb": "Could chance alone have done this? Starting from line-ups and coin streaks, the series builds the tools for answering that question: sampling, estimation, resampling, tests, intervals and power, ending with the 1954 polio vaccine trial.",
-          "topics": ["is-it-real", "sampling-distributions", "selection-bias", "estimation", "bootstrap", "permutation-tests", "p-values", "confidence-intervals", "errors", "power", "student-t", "chi-square-tests"]
+          "topics": ["is-it-real", "sampling-distributions", "selection-bias", "estimation", "bootstrap", "permutation-tests", "p-values", "confidence-intervals", "errors", "power", "student-t", "chi-square-tests", "anova"]
         }
       ],
       "topics": [
@@ -271,6 +271,15 @@ window.EXPLAINERS = {
           "path": "statistics/chi-square-tests.html",
           "summary": "Why a fair die rolled 60 times keeps every face between 8 and 12 only 1 time in 13: observed vs expected cell by cell, a fair-or-loaded die game, the button test as a table (χ² = z²), Mendel’s too-good peas, and when to trust the exact shuffle instead.",
           "tags": ["chi-square test", "goodness of fit", "contingency table", "Mendel", "Fisher's exact test"],
+          "preview": { "select": "#heroPlay", "click": ["#heroSkip", "#heroGo"] }
+        },
+        {
+          "id": "anova",
+          "title": "ANOVA",
+          "short": "ANOVA",
+          "path": "statistics/anova.html",
+          "summary": "Five fertilizers, five plots each: why ten t-tests on pure noise cry wolf 29% of the time, F as between-group over within-group spread with a drag-the-averages spreader, PlantGrowth checked against the shuffle, and which groups really differ.",
+          "tags": ["ANOVA", "F distribution", "multiple comparisons", "Tukey", "Fisher"],
           "preview": { "select": "#heroPlay", "click": ["#heroSkip", "#heroGo"] }
         }
       ]

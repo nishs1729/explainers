@@ -424,7 +424,7 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
     <div class="readout" id="quizScore" style="margin-top:10px" aria-live="polite"></div>
   </div>
 
-  <p>χ² compares counts across groups. Comparing averages across many groups at once needs a different yardstick, the spread between groups against the spread within them: the next page, <strong>ANOVA</strong> (coming soon).</p>
+  <p>χ² compares counts across groups. Comparing averages across many groups at once needs a different yardstick, the spread between groups against the spread within them: the next page, <a href="anova.html"><strong>ANOVA</strong></a>.</p>
 </section>
 </main>
 
@@ -639,6 +639,7 @@ function chiHist(cv, vals, o){
   return {ctx, xs, ys, X0, X1, Y0, Y1};
 }
 const simP = (k, n) => k === 0 ? `fewer than 1 in ${comma(n)}` : pfmt(k / n);
+const pSim = (k, n) => k === 0 ? `p < 1 in ${comma(n)}` : `p ≈ ${pfmt(k / n)}`;
 const countTail = (vals, obs, left) => vals.reduce((s, v) => s + (left ? v <= obs + 1e-9 : v >= obs - 1e-9), 0);
 
 /* ---------- hero: 100 sets of 60 rolls ---------- */
@@ -822,7 +823,7 @@ const HERO = {last: null, listeners: []};
     if (!n) { $('#mdRead').innerHTML = 'No rolls yet.'; return; }
     const k = countTail(fair, chi, false);
     $('#mdRead').innerHTML = `mystery die: χ² = <b>${chi.toFixed(2)}</b> on 5 degrees of freedom<br>` +
-      `fair dice at least this uneven: <b>${comma(k)} of ${comma(fair.length)}</b>` + (fair.length ? ` (p ≈ ${simP(k, fair.length)})` : '') +
+      `fair dice at least this uneven: <b>${comma(k)} of ${comma(fair.length)}</b>` + (fair.length ? ` (${pSim(k, fair.length)})` : '') +
       (curve ? ` · χ² curve: p = <b>${pfmt(chiUp(chi, 5))}</b>` : '');
   }
   function verdict(sayLoaded){
@@ -942,7 +943,7 @@ const HERO = {last: null, listeners: []};
     }
     const minE = Math.min(...S.cells.map(c => c.e));
     $('#ctRead').innerHTML = `χ² = <b>${S.chi.toFixed(2)}</b> on ${S.df} degree${S.df > 1 ? 's' : ''} of freedom${z}<br>` +
-      `shuffles at least this large: <b>${comma(k)} of ${comma(shuf.length)}</b>${shuf.length ? ` (p ≈ ${simP(k, shuf.length)})` : ''}` +
+      `shuffles at least this large: <b>${comma(k)} of ${comma(shuf.length)}</b>${shuf.length ? ` (${pSim(k, shuf.length)})` : ''}` +
       (curve ? ` · χ² curve: p = <b>${pfmt(chiUp(S.chi, S.df))}</b>` : '') +
       (minE < 5 ? `<br><span class="warn">smallest expected count ${minE.toFixed(1)}: below 5, so trust the shuffle over the curve</span>` : '');
   }

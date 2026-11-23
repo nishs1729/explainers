@@ -33,7 +33,7 @@ See [Statistics: how every page works](#statistics-conventions) first.
 - [x] [10. Power and sample size](https://nishs1729.github.io/explainers/statistics/power.html)
 - [x] [11. Student's t](https://nishs1729.github.io/explainers/statistics/student-t.html)
 - [x] [12. Chi-square tests](https://nishs1729.github.io/explainers/statistics/chi-square-tests.html)
-- [ ] [13. ANOVA](#anova)
+- [x] [13. ANOVA](https://nishs1729.github.io/explainers/statistics/anova.html)
 - [ ] [14. ⚠ The garden of forking paths](#forking-paths)
 - [ ] [15. 📖 The 1954 polio vaccine trial](#polio-trial)
 
@@ -517,6 +517,8 @@ Assumes the probability series, especially Normal (CLT, √n law) and Chi-square
 >   - Ten pairwise t-tests on pure noise: count the false alarms
 >
 > **Links:** builds on Student's t, Chi-square (F as a ratio of chi-squares), Shuffling to test. Leads to Forking paths.
+>
+> **Built:** the hero shows six experiments (five fertilizers × five plots, yields 30 ± 3 kg); each is real (means offset by ±0.6/±1.2 SD, F-test power ≈ 87%) or pure noise with probability ½, and the reader marks each real or chance before a reveal with F and p per panel and both scores. Section 1 runs ten pooled t-tests on five noise groups with a p-value triangle and a tally (any false alarm ≈ 29% vs ANOVA 5%; table for 3/5/7/10 groups: 12/29/45/63%, by simulation). Section 2 is the ★ group spreader: draggable gold group averages (also arrow keys), a within-spread slider (0.5–5.5 kg) using fixed residuals scaled so within variance = s², between/within bars, and 2,000 shuffles recomputed live with an F(4,20) overlay. Section 3 tells the Rothamsted story (Fisher 1919; Fisher & Mackenzie 1923; Statistical Methods for Research Workers 1925; Snedecor named F in 1934) and checks R's PlantGrowth (Dobson 1983; F = 4.85 on 2 and 27 df, p = 0.016; shuffle ≈ 1.65%) with the ANOVA table and F = t² (t = 3.01, F = 9.06). Section 4 compares the three pairs: separate t (0.25/0.047/0.008), Bonferroni (0.75/0.14/0.023), Tukey (0.39/0.20/0.012) and a largest-gap shuffle widget (≈ 0.48/0.26/0.012). Section 5 has simulated false-alarm rates with unequal spreads (5/10/23/0.3%), Welch's ANOVA, and four misreadings including Fisher's randomization and blocks.
 
 <a id="forking-paths"></a>
 ### **14. ⚠ The garden of forking paths**
