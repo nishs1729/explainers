@@ -162,7 +162,7 @@ window.EXPLAINERS = {
           "id": "learning-from-data",
           "title": "Learning from data",
           "blurb": "Could chance alone have done this? Starting from line-ups and coin streaks, the series builds the tools for answering that question: sampling, estimation, resampling, tests, intervals and power, ending with the 1954 polio vaccine trial.",
-          "topics": ["is-it-real", "sampling-distributions", "selection-bias", "estimation", "bootstrap", "permutation-tests", "p-values", "confidence-intervals", "errors"]
+          "topics": ["is-it-real", "sampling-distributions", "selection-bias", "estimation", "bootstrap", "permutation-tests", "p-values", "confidence-intervals", "errors", "power"]
         }
       ],
       "topics": [
@@ -245,6 +245,15 @@ window.EXPLAINERS = {
           "summary": "Play quality inspector for 50 batches, then see your false alarms and misses on the trade-off curve: moving the cutoff swaps one mistake for the other, and the costs decide where it belongs.",
           "tags": ["type I error", "type II error", "false alarm", "alpha", "decision threshold"],
           "preview": { "select": "#heroPlay", "click": ["#heroSkip"] }
+        },
+        {
+          "id": "power",
+          "title": "Power and Sample Size",
+          "short": "Power",
+          "path": "statistics/power.html",
+          "summary": "Why the button test found nothing: run 100 tests at 1,000 visitors per button and only about 27 catch a real lift. Trace power curves, plan a study, and watch underpowered winners exaggerate.",
+          "tags": ["power", "sample size", "type II error", "winner's curse", "type M error"],
+          "preview": { "select": "#heroPlay", "click": ["#heroSkip", "#heroGo"] }
         }
       ]
     }

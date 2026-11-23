@@ -30,7 +30,7 @@ See [Statistics: how every page works](#statistics-conventions) first.
 - [x] [7. p-values](https://nishs1729.github.io/explainers/statistics/p-values.html)
 - [x] [8. Confidence intervals](https://nishs1729.github.io/explainers/statistics/confidence-intervals.html)
 - [x] [9. Errors and decisions](https://nishs1729.github.io/explainers/statistics/errors.html)
-- [ ] [10. Power and sample size](#power)
+- [x] [10. Power and sample size](https://nishs1729.github.io/explainers/statistics/power.html)
 - [ ] [11. Student's t](#student-t)
 - [ ] [12. Chi-square tests](#chi-square-tests)
 - [ ] [13. ANOVA](#anova)
@@ -439,6 +439,8 @@ Assumes the probability series, especially Normal (CLT, √n law) and Chi-square
 > **Data:** button test.
 >
 > **Links:** builds on Errors and decisions, Confidence intervals. Gelman & Carlin (2014) on type M errors.
+>
+> **Built:** the hero asks for a guess of visitors per button (log slider 200–50,000) to catch 5% → 6.4% 8 times in 10, then fills two 10×10 grids of simulated pooled z-tests: 1,000 per button (~27 of 100 find it) and the reader's size; the answer is 4,300 (exact 4,304), with a "try 4,300" link. Section 1 shows the null and +1.4-point humps for the gap with the ±1.96 SE cutoffs and shaded power for 1,000 / 4,300 / 10,000 (27% / 80% / 99%; cutoff ±2.0 / ±1.0 points). Section 2 is the study planner: true rate 5.5–8%, n 100–50,000 (18 log steps), α 0.10/0.05/0.01; runs of 200 studies fill a 40×5 tile board and add gold dots to a log-n power curve, "trace the whole curve" sweeps all n, and the formula curve is a toggle. Section 3 plots the formula curves for the five lifts with 80% crossings and a table (80%: 31,200 / 8,200 / 4,300 / 2,200 / 1,100; 90%: 41,800 / 10,900 / 5,800 / 3,000 / 1,400), Lehr's 16σ²/Δ² (~4,400) and Hoenig & Heisey (2001) on observed power. Section 4 compares the real test's CI (−0.6 to +3.4) with a 4,300-per-button null result (±0.9) against a 1-point "worth having" line (Altman & Bland 1995). Section 5 is the winner's curse histogram for 250–10,000 per button (at 1,000: significant ones average +2.6, 1.9×; at 250: 3.3×, ~5% wrong sign), citing Gelman & Carlin (2014) and the Open Science Collaboration (2015: 97% vs 36% significant, effects about half).
 
 <a id="student-t"></a>
 ### **11. Student's t**
