@@ -32,7 +32,7 @@ See [Statistics: how every page works](#statistics-conventions) first.
 - [x] [9. Errors and decisions](https://nishs1729.github.io/explainers/statistics/errors.html)
 - [x] [10. Power and sample size](https://nishs1729.github.io/explainers/statistics/power.html)
 - [x] [11. Student's t](https://nishs1729.github.io/explainers/statistics/student-t.html)
-- [ ] [12. Chi-square tests](#chi-square-tests)
+- [x] [12. Chi-square tests](https://nishs1729.github.io/explainers/statistics/chi-square-tests.html)
 - [ ] [13. ANOVA](#anova)
 - [ ] [14. ⚠ The garden of forking paths](#forking-paths)
 - [ ] [15. 📖 The 1954 polio vaccine trial](#polio-trial)
@@ -493,6 +493,8 @@ Assumes the probability series, especially Normal (CLT, √n law) and Chi-square
 > **Data:** button test as a 2×2 table.
 >
 > **Links:** builds on Chi-square, Poisson (its goodness-of-fit section), Shuffling to test.
+>
+> **Built:** the hero frames Mendel and Fisher, then asks how often 60 rolls of a fair die keep every face between 8 and 12 (Most of the time / About half / About 1 in 4 / Less than 1 in 10; exact 7.8%, about 1 in 13) and rolls 100 sets into a grid of small bar charts, with the in-band sets in green (the busiest face reaches 15+ in 37%). Section 1 builds χ² cell by cell for six die counts with steppers and three views (gaps, which sum to 0; squared gaps; squared gaps ÷ expected), plus a 10-vs-1,000 table on why to divide. Section 2 is a fair-or-loaded mystery die game (loaded face at 22/25/30%; roll 10/60/600 up to 3,000; χ² against 2,000 fair dice with a 5-df curve toggle; score kept) and Bortkiewicz's horse kicks against the Poisson (classes 0/1/2/3+, χ² = 0.32 on 2 df, p = 0.85). Section 3 is the ★ editable count table (button test, 4,300 per button, 20 per button, optional third button) with expected counts, contribution bars, a live shuffle histogram and the χ² curve: χ² = 1.82 = z², curve p = 0.177, shuffle ≈ 0.21, explained by whole-number counts and Yates (1934, 0.210); 4,300 per button gives 7.79, p = 0.005. Section 4 tabulates Mendel's seven 3:1 experiments (total χ² = 2.14 on 7 df, fit this close 4.8%) with honest replays, and Fisher's 84 comparisons (χ² = 41.6056, exact left tail ≈ 3 in 100,000; Fisher printed 0.99993), citing Pires & Branco (2010) and Franklin et al. (2008). Section 5 compares every possible shuffle (Fisher's exact test) with the 1-df curve on a log scale: 20 per button 0 vs 4 → curve 3.5%, exact 10.6%; 50 per button 2 vs 8 → 4.6% vs 9.2%; plus counts not percentages, independence, huge samples and lost direction. The Titanic class-by-survival table was considered but dropped because its counts could not be verified from a source.
 
 <a id="anova"></a>
 ### **13. ANOVA**

@@ -162,7 +162,7 @@ window.EXPLAINERS = {
           "id": "learning-from-data",
           "title": "Learning from data",
           "blurb": "Could chance alone have done this? Starting from line-ups and coin streaks, the series builds the tools for answering that question: sampling, estimation, resampling, tests, intervals and power, ending with the 1954 polio vaccine trial.",
-          "topics": ["is-it-real", "sampling-distributions", "selection-bias", "estimation", "bootstrap", "permutation-tests", "p-values", "confidence-intervals", "errors", "power", "student-t"]
+          "topics": ["is-it-real", "sampling-distributions", "selection-bias", "estimation", "bootstrap", "permutation-tests", "p-values", "confidence-intervals", "errors", "power", "student-t", "chi-square-tests"]
         }
       ],
       "topics": [
@@ -262,6 +262,15 @@ window.EXPLAINERS = {
           "path": "statistics/student-t.html",
           "summary": "Why samples of 3 land beyond ±3 one time in ten when the bell curve says three in a thousand: a wobbly s, Gosset’s fix at Guinness, degrees of freedom, and the t-test checked against 1,024 sign flips.",
           "tags": ["t distribution", "t-test", "degrees of freedom", "Gosset", "small samples"],
+          "preview": { "select": "#heroPlay", "click": ["#heroSkip", "#heroGo"] }
+        },
+        {
+          "id": "chi-square-tests",
+          "title": "Chi-square tests",
+          "short": "Chi-square tests",
+          "path": "statistics/chi-square-tests.html",
+          "summary": "Why a fair die rolled 60 times keeps every face between 8 and 12 only 1 time in 13: observed vs expected cell by cell, a fair-or-loaded die game, the button test as a table (χ² = z²), Mendel’s too-good peas, and when to trust the exact shuffle instead.",
+          "tags": ["chi-square test", "goodness of fit", "contingency table", "Mendel", "Fisher's exact test"],
           "preview": { "select": "#heroPlay", "click": ["#heroSkip", "#heroGo"] }
         }
       ]

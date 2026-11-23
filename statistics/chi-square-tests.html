@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chi-square tests — a visual introduction</title>
+<style>
+:root{
+  --bg:#faf8f4; --surface:#ffffff; --surface-2:#f2efe8; --ink:#1c1c1e; --ink-2:#4c4e55; --ink-3:#8b8d93; --line:#e3dfd5;
+  --one:#16917c; --one-soft:rgba(22,145,124,.15);
+  --zero:#d9573a; --zero-soft:rgba(217,87,58,.15);
+  --accent:#3654c9; --accent-soft:rgba(54,84,201,.11);
+  --gold:#b98317; --gold-soft:rgba(185,131,23,.22);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+    --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+    --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+    --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+    --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+  --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+  --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+  --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+  --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.68 var(--sans);-webkit-font-smoothing:antialiased}
+main{max-width:820px;margin:0 auto;padding:0 20px 80px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;letter-spacing:-.01em}
+h1{font-size:clamp(2.2rem,6vw,3.4rem);margin:.2em 0 .3em}
+h2{font-size:clamp(1.6rem,4vw,2.1rem);margin:0 0 .5em}
+h3{font-size:1.2rem;margin:1.6em 0 .4em}
+p{margin:0 0 1em}
+a{color:var(--accent)}
+strong{font-weight:650}
+em.term{font-style:normal;font-weight:650;color:var(--accent)}
+.muted{color:var(--ink-2)}
+small,.small{font-size:14px}
+
+/* hero */
+.hero{text-align:center;padding:64px 0 24px}
+.kicker{text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--ink-3);margin:0}
+.lede{font-size:1.2rem;color:var(--ink-2);max-width:620px;margin:0 auto}
+.hero-play{max-width:640px;margin:30px auto 0;text-align:left}
+.hero-play .controls{justify-content:center}
+.hint{font-size:15px;color:var(--ink-2);min-height:3.2em;margin:10px 0 0;text-align:center}
+.ask{font-family:var(--serif);font-size:1.25rem;text-align:center;margin:0 0 12px}
+
+.toc{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;margin:28px 0 8px}
+.toc ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 20px;counter-reset:t}
+.toc li{counter-increment:t;font-size:15px}
+.toc li::before{content:counter(t,decimal-leading-zero);font-family:var(--mono);color:var(--ink-3);margin-right:10px;font-size:13px}
+.toc a{color:var(--ink);text-decoration:none}
+.toc a:hover{color:var(--accent)}
+
+section{padding-top:56px}
+.secnum{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.08em;margin-bottom:4px}
+
+.widget{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin:26px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.widget-title{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);margin:0 0 12px;font-weight:600}
+.controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:12px 0}
+.ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:15px}
+.ctrl output{font-family:var(--mono);font-size:14px;min-width:5.5em;color:var(--ink)}
+input[type=range]{accent-color:var(--accent);width:170px;max-width:100%}
+.btn{font:inherit;font-size:14px;line-height:1.2;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;transition:background .15s,transform .1s}
+.btn:hover{border-color:var(--ink-3)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn.guess{background:var(--gold-soft);border-color:var(--gold);color:var(--ink)}
+.btn.right{background:var(--one-soft);border-color:var(--one);color:var(--one)}
+.btn.wrong{background:var(--zero-soft);border-color:var(--zero);color:var(--zero)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:6px}
+.readout{font-family:var(--mono);font-size:14px;color:var(--ink-2);line-height:1.6}
+.readout b{color:var(--ink);font-weight:600}
+.readout .ok{color:var(--one);font-weight:600}
+.readout .warn{color:var(--zero);font-weight:600}
+.readout .gd{color:var(--gold);font-weight:600}
+.msg{font-size:15px;color:var(--ink-2);min-height:3.4em;margin:10px 0 0}
+.msg b{color:var(--ink)}
+canvas{display:block;width:100%}
+.cap{font-size:13px;color:var(--ink-3);margin:2px 0 6px}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:20px 0}
+.callout p:last-child{margin-bottom:0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin-top:8px}
+.legend > span{display:inline-block}
+.legend .sw{vertical-align:middle;margin:0 6px 2px 0}
+.sw{display:inline-block;width:16px;height:10px;border-radius:2px}
+.sw.dot{width:8px;height:8px;border-radius:50%}
+.sw.line{height:0;border-top:2px solid var(--ink)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+@media (max-width:640px){.pair{grid-template-columns:1fr}}
+.mcap{font-size:13px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+
+/* cast */
+.cast-q{font-family:var(--serif);font-size:1.08rem;margin:0 0 10px}
+.datarow{font-family:var(--mono);font-size:14px;color:var(--ink-2);margin:0 0 6px}
+.datarow b{color:var(--ink)}
+
+/* recipe */
+.facts{counter-reset:f;list-style:none;padding:0;margin:18px 0}
+.facts li{counter-increment:f;position:relative;padding:12px 0 12px 44px;border-bottom:1px solid var(--line)}
+.facts li::before{content:counter(f);position:absolute;left:0;top:12px;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:600 13px var(--mono)}
+.facts li strong{display:block}
+.table-wrap{overflow-x:auto}
+table.summary{border-collapse:collapse;width:100%;font-size:15px;margin:14px 0}
+table.summary td,table.summary th{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3)}
+@media (max-width:480px){table.summary td,table.summary th{padding:8px 5px}}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:18px 0}
+.card{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
+.card h4{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+.card p{font-size:15px;margin:0;color:var(--ink-2)}
+
+/* quiz */
+.quiz{display:grid;gap:10px}
+.qitem{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg)}
+.qitem p{margin:0 0 8px;font-size:16px}
+.qbtns{display:flex;flex-wrap:wrap;gap:8px}
+.qexp{font-size:15px;color:var(--ink-2);margin:10px 0 0!important}
+
+@media (max-width:480px){
+  main{padding:0 16px 80px}
+  .widget{padding:14px}
+  input[type=range]{width:150px}
+}
+/* page 12 */
+.linkbtn{all:unset;cursor:pointer;font-size:14px;color:var(--accent);text-decoration:underline}
+.linkbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.linkbtn[hidden]{display:none}
+.btn[hidden]{display:none}
+.legend > span[hidden]{display:none}
+table.summary.num{font-size:14px}
+table.summary.num td,table.summary.num th{text-align:right;white-space:nowrap}
+table.summary.num td:first-child,table.summary.num th:first-child{text-align:left;white-space:normal}
+.mono{font-family:var(--mono)}
+.btn.sm{padding:3px 0;min-width:30px;font-size:15px;line-height:1.2}
+.steps{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:6px;padding:0 10px 0 40px}
+@media (max-width:600px){.steps{grid-template-columns:repeat(3,1fr);padding:0;row-gap:10px}}
+.step{display:flex;flex-direction:column;align-items:center;gap:3px;font-family:var(--mono);font-size:12px;color:var(--ink-3)}
+.step b{font-size:15px;color:var(--ink)}
+.step .row{display:flex;gap:4px}
+.ctab{border-collapse:collapse;font-family:var(--mono);font-size:14px;width:100%;margin-top:6px}
+.ctab th,.ctab td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:right;vertical-align:top}
+.ctab th{font-size:12px;color:var(--ink-3);font-weight:600}
+.ctab th:first-child,.ctab td:first-child{text-align:left}
+.ctab input{width:6.2em;font:inherit;padding:3px 6px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);text-align:right}
+.ctab input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.ctab .ex{display:block;font-size:11px;color:var(--ink-3);margin-top:2px}
+.ctrl b.mono{display:inline-block;min-width:2.2em;text-align:center}
+</style>
+<script>try{var t=localStorage.getItem('xp-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/catalog.js" defer></script>
+<script src="../assets/site.js" defer></script>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <p class="kicker">A visual introduction</p>
+  <h1>Chi-square tests</h1>
+  <p class="lede">You expected so many of each kind and got something else. Is the difference real, or the ordinary unevenness of chance? Add up how far the counts you got are from the counts you expected, cell by cell, and compare the total with what chance alone produces. One recipe tests dice, theories and tables of counts.</p>
+  <div class="hero-play" id="heroPlay">
+    <p class="ask">Gregor Mendel’s pea counts fit his theory almost perfectly. In 1936 Ronald Fisher asked whether they fit <em>too</em> perfectly. To judge that, you first need to know how uneven honest counts are.</p>
+    <p class="hint" style="min-height:0;margin:0 0 10px">Roll a fair die 60 times. Each face should come up about 10 times. How often does <em>every</em> face land between 8 and 12?</p>
+    <div class="controls" id="heroPred">
+      <button class="btn" data-g="0">Most of the time</button>
+      <button class="btn" data-g="1">About half the time</button>
+      <button class="btn" data-g="2">About 1 in 4</button>
+      <button class="btn" data-g="3">Less than 1 in 10</button>
+    </div>
+    <canvas id="heroDie" style="height:170px" role="img" aria-label="Counts of each face in the current set of 60 rolls of a fair die, against the expected 10 and the band from 8 to 12"></canvas>
+    <canvas id="heroGrid" style="height:220px" role="img" aria-label="One hundred small bar charts, one per set of 60 rolls; sets where every face stayed between 8 and 12 are highlighted"></canvas>
+    <div class="legend" style="justify-content:center"><span><i class="sw" style="background:var(--one-soft);border:1px solid var(--one)"></i><span>every face 8–12</span></span><span><i class="sw" style="background:var(--ink-3)"></i><span>fair-die counts</span></span><span><i class="sw" style="background:var(--zero)"></i><span>outside 8–12</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>expected 10</span></span></div>
+    <div class="controls">
+      <button class="btn primary" id="heroGo" disabled>Roll 100 sets of 60</button>
+      <button class="linkbtn" id="heroSkip">skip the guess</button>
+    </div>
+    <p class="hint" id="heroHint" aria-live="polite">Make your guess, then roll.</p>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#build">Observed vs expected</a></li>
+    <li><a href="#fit">Goodness of fit</a></li>
+    <li><a href="#tables">Tables of counts</a></li>
+    <li><a href="#toogood">Too good to be true</a></li>
+    <li><a href="#breaks">When it breaks</a></li>
+    <li><a href="#uses">Where you will meet it</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<section id="build">
+  <div class="secnum">01</div>
+  <h2>Observed vs expected</h2>
+  <p>Fair dice are lumpier than intuition says, so “it looks uneven” is no evidence at all. What’s needed is one number that says <em>how</em> uneven a set of counts is, and a yardstick for how large that number gets by chance alone. Karl Pearson supplied both in 1900.</p>
+  <p>His number is built one cell at a time. For each face, take the gap between the count you got and the count you expected. Step through the three versions below and watch the total.</p>
+
+  <div class="widget">
+    <p class="widget-title">Built cell by cell</p>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="What to add up">
+        <button class="btn on" data-ms="0" aria-pressed="true">1. gaps</button>
+        <button class="btn" data-ms="1" aria-pressed="false">2. squared gaps</button>
+        <button class="btn" data-ms="2" aria-pressed="false">3. squared gaps ÷ expected</button>
+      </div>
+    </div>
+    <canvas id="bdChart" style="height:330px" role="img" aria-label="Top: the count of each face against the expected count. Bottom: each face's contribution and their total"></canvas>
+    <div class="steps" id="bdSteps"></div>
+    <div class="controls" style="margin-top:10px">
+      <div class="seg" role="group" aria-label="Load counts">
+        <button class="btn" data-bp="hero" disabled>Last set from the top</button>
+        <button class="btn" data-bp="even">10 each</button>
+        <button class="btn" data-bp="lop">Lopsided</button>
+        <button class="btn" data-bp="rand">Roll 60 fresh</button>
+      </div>
+    </div>
+    <div class="readout" id="bdRead" aria-live="polite"></div>
+  </div>
+
+  <p>The plain gaps always add up to zero: every extra six is a missing something else. Squaring stops the cancelling. The last step divides each square by the count expected in that cell, because a gap of 5 is huge when you expect 10 and nothing when you expect 1,000:</p>
+  <div class="table-wrap">
+    <table class="summary num">
+      <thead><tr><th>Expected</th><th>Observed</th><th>Gap</th><th>Gap²</th><th>Gap² ÷ expected</th></tr></thead>
+      <tbody>
+        <tr><td>10</td><td>15</td><td>5</td><td>25</td><td>2.5</td></tr>
+        <tr><td>1,000</td><td>1,005</td><td>5</td><td>25</td><td>0.025</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Counts wobble by about the square root of what you expect (the <a href="../probability/poisson.html">Poisson</a> rule), so dividing by the expected count puts every cell on the same footing. The sum is Pearson’s <em class="term">chi-square statistic</em>:</p>
+  <div class="callout"><p><strong>χ² = Σ (observed − expected)² ÷ expected</strong>, added over every cell. Zero means a perfect match; the bigger it is, the further the counts are from what you expected.</p></div>
+</section>
+
+<!-- 2 -->
+<section id="fit">
+  <div class="secnum">02</div>
+  <h2>Goodness of fit</h2>
+  <p>A χ² of 6 means nothing until you know what χ² fair dice produce. So build the world where chance alone is at work: roll a fair die the same number of times, again and again, compute χ² each time, and see where the real value lands. Then try it as a game. The page hides a die that is either fair or loaded on one face. Roll it as often as you like and decide.</p>
+
+  <div class="widget">
+    <p class="widget-title">Fair or loaded?</p>
+    <canvas id="mdCounts" style="height:150px" role="img" aria-label="Counts of each face of the mystery die so far, against the expected count for a fair die"></canvas>
+    <div class="controls">
+      <button class="btn" id="mdR10">Roll 10</button>
+      <button class="btn" id="mdR60">Roll 60</button>
+      <button class="btn" id="mdR600">Roll 600</button>
+      <span class="muted" style="font-size:14px">Your verdict:</span>
+      <button class="btn" id="mdFair" disabled>Fair</button>
+      <button class="btn" id="mdLoaded" disabled>Loaded</button>
+      <button class="btn primary" id="mdNew" hidden>New mystery die</button>
+    </div>
+    <div class="mcap" style="margin-top:10px">χ² from 2,000 fair dice rolled the same number of times</div>
+    <canvas id="mdHist" style="height:200px" role="img" aria-label="Histogram of chi-square values from 2,000 fair dice rolled as many times as the mystery die, with the mystery die's chi-square marked and optionally the chi-square curve with 5 degrees of freedom"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>fair dice</span></span><span><i class="sw" style="background:var(--accent)"></i><span>fair dice at least as uneven</span></span><span><i class="sw line" style="border-top:2px solid var(--accent)"></i><span>the mystery die</span></span><span id="mdLegC" hidden><i class="sw line" style="border-top:2.5px solid var(--one)"></i><span>χ² curve, 5 df</span></span></div>
+    <div class="controls"><button class="btn" id="mdCurve" aria-pressed="false">Overlay the χ² curve</button></div>
+    <div class="readout" id="mdRead" aria-live="polite"></div>
+    <p class="msg" id="mdMsg" aria-live="polite"></p>
+  </div>
+
+  <p>The grey histogram is the yardstick, and its shape barely depends on how many times you roll. That is what makes the shortcut possible. Pearson showed that when expected counts are not too small, χ² follows the <a href="../probability/chi-square.html">chi-square distribution</a>, the sum of squared bell-curve draws, with one <em class="term">degree of freedom</em> for every count that is free to vary. Six counts that must add up to the number of rolls leave five free, so a die is judged against the 5-df curve. Switch it on: it lies along the simulated histogram, and its tail beyond 11.07 holds 5%.</p>
+  <p>A loaded die is easy to catch with 600 rolls and almost impossible with 10. The test can only find what the data are able to show: the <a href="power.html">power</a> lesson again.</p>
+
+  <h3>Horse kicks and the Poisson</h3>
+  <p>The same recipe checks a whole theory. The <a href="../probability/poisson.html#data">Poisson page</a> showed Bortkiewicz’s 1898 count of Prussian cavalrymen killed by horse kicks: 10 army corps watched for 20 years, 200 corps-years, 122 deaths, an average of 0.61. If deaths strike at random, the Poisson formula says how many corps-years should have 0, 1, 2 or more deaths.</p>
+  <div class="widget">
+    <p class="widget-title">Deaths per corps-year against the Poisson</p>
+    <canvas id="hkChart" style="height:200px" role="img" aria-label="Corps-years with 0, 1, 2, and 3 or more horse-kick deaths, observed as bars and expected under the Poisson as dashed marks"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i><span>observed corps-years</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>expected if Poisson (average 0.61)</span></span></div>
+    <div class="table-wrap"><table class="summary num" id="hkTable"></table></div>
+    <div class="readout" id="hkRead"></div>
+  </div>
+  <p>Classes expecting fewer than 5 are merged (3 and 4 deaths become “3+”), leaving 4 cells. That is 3 free counts, minus one more because the average 0.61 was estimated from the same data, so the curve has 2 degrees of freedom. A χ² of 0.32 is right in the middle of what chance produces: the Poisson fits.</p>
+</section>
+
+<!-- 3 -->
+<section id="tables">
+  <div class="secnum">03</div>
+  <h2>Tables of counts</h2>
+  <p>The button test is a table of counts too. Each of 2,000 visitors saw one button and either clicked or didn’t. If clicking has nothing to do with the color, both buttons should get the overall click rate, 114 of 2,000 = 5.7%, so each button’s 1,000 visitors should produce 57 clicks and 943 non-clicks. Those are the expected counts, and the recipe is unchanged.</p>
+  <p>The world where nothing is going on is the shuffle from <a href="permutation-tests.html">Shuffling to Test</a>: keep the 114 clicks, deal them out to visitors at random, and recompute χ². Edit any count in the table, or add a button.</p>
+
+  <div class="widget">
+    <p class="widget-title">★ The count table</p>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Preset tables">
+        <button class="btn on" data-ct="0" aria-pressed="true">Button test</button>
+        <button class="btn" data-ct="1" aria-pressed="false">Same rates, 4,300 per button</button>
+        <button class="btn" data-ct="2" aria-pressed="false">Tiny: 20 per button</button>
+      </div>
+      <button class="btn" id="ctAdd">+ Add a button</button>
+    </div>
+    <div class="table-wrap"><table class="ctab" id="ctTable"></table></div>
+    <div class="mcap" style="margin-top:12px">Each cell’s (observed − expected)² ÷ expected</div>
+    <canvas id="ctCells" style="height:150px" role="img" aria-label="Each cell's contribution to chi-square as a bar, and their total"></canvas>
+    <div class="mcap" style="margin-top:8px">χ² from shuffled tables</div>
+    <canvas id="ctHist" style="height:220px" role="img" aria-label="Histogram of chi-square values from shuffled tables with the observed chi-square marked, and optionally the chi-square curve"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>shuffles</span></span><span><i class="sw" style="background:var(--accent)"></i><span>shuffles at least as large</span></span><span><i class="sw line" style="border-top:2px solid var(--accent)"></i><span>the real table</span></span><span id="ctLegC" hidden><i class="sw line" style="border-top:2.5px solid var(--one)"></i><span>χ² curve</span></span></div>
+    <div class="controls">
+      <button class="btn primary" id="ctShuf">Shuffle 1,000 times</button>
+      <button class="btn" id="ctCurve" aria-pressed="false">Overlay the χ² curve</button>
+      <button class="btn" id="ctClear">Clear</button>
+    </div>
+    <div class="readout" id="ctRead" aria-live="polite"></div>
+  </div>
+
+  <p>For the button test, χ² = 1.82, and about 21% of shuffles reach it. The 1-df curve gives p = 0.18, which is exactly the p of the two-proportion z-test on <a href="p-values.html">p-values</a>: for a table with two rows and two columns, <strong>χ² is z²</strong> (1.35² = 1.82), and the two tests are the same test. The shuffle’s slightly larger 0.21 comes from counts being whole numbers: the shuffle counts every table exactly as lopsided as the real one in full, and the smooth curve only half-counts that step. Yates’s 1934 “continuity correction” nudges the curve to match and gives 0.21 too.</p>
+  <p>With the same click rates and 4,300 visitors per button, χ² = 7.8 and p = 0.005. Nothing about the gap changed, only how much evidence there is. Add a third button and the curve has 2 degrees of freedom: in general a table with <em>r</em> rows and <em>c</em> columns has (<em>r</em> − 1)(<em>c</em> − 1), the number of cells you can fill freely once the row and column totals are fixed.</p>
+  <p>Note what χ² does not say: which button is better, or by how much. A big χ² only says the table is far from “no connection”. The contribution bars show where the gaps are; the size of the effect needs a <a href="confidence-intervals.html">confidence interval</a>.</p>
+</section>
+
+<!-- 4 -->
+<section id="toogood">
+  <div class="secnum">04</div>
+  <h2>Too good to be true</h2>
+  <p>Back to the hero’s question. In 1866 Mendel reported crossing peas and counting the offspring. His theory said that for each of seven traits, the dominant and recessive forms should appear in a 3 : 1 ratio. Here are his counts and how far each is from 3 : 1:</p>
+  <div class="table-wrap">
+    <table class="summary num">
+      <thead><tr><th>Trait</th><th>Dominant</th><th>Recessive</th><th>Ratio</th><th>χ²</th><th>Honest fit this close</th></tr></thead>
+      <tbody>
+        <tr><td>Seed shape</td><td>5,474</td><td>1,850</td><td>2.96</td><td>0.26</td><td>39%</td></tr>
+        <tr><td>Seed color</td><td>6,022</td><td>2,001</td><td>3.01</td><td>0.015</td><td>10%</td></tr>
+        <tr><td>Flower color</td><td>705</td><td>224</td><td>3.15</td><td>0.39</td><td>47%</td></tr>
+        <tr><td>Pod shape</td><td>882</td><td>299</td><td>2.95</td><td>0.06</td><td>20%</td></tr>
+        <tr><td>Pod color</td><td>428</td><td>152</td><td>2.82</td><td>0.45</td><td>50%</td></tr>
+        <tr><td>Flower position</td><td>651</td><td>207</td><td>3.14</td><td>0.35</td><td>45%</td></tr>
+        <tr><td>Stem length</td><td>787</td><td>277</td><td>2.84</td><td>0.61</td><td>56%</td></tr>
+        <tr><td><strong>All seven</strong></td><td></td><td></td><td></td><td><strong>2.14</strong></td><td><strong>4.8%</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>No single row is suspicious. But a χ² can be too <em>small</em>: honest counts wobble, and seven experiments in a row that all land this close to 3 : 1 happen only about 1 time in 20. Replay Mendel’s seven experiments with honest 3 : 1 chance and see how rarely the total is that small. Then switch to Fisher’s full analysis, which combined 84 comparisons from the whole paper.</p>
+
+  <div class="widget">
+    <p class="widget-title">Replaying Mendel honestly</p>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Which data">
+        <button class="btn on" data-mg="0" aria-pressed="true">Mendel’s 7 traits</button>
+        <button class="btn" data-mg="1" aria-pressed="false">Fisher’s 84 comparisons</button>
+      </div>
+    </div>
+    <canvas id="mgHist" style="height:220px" role="img" aria-label="Histogram of total chi-square from honest replays of Mendel's experiments, with Mendel's own total marked far in the left tail"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>honest replays</span></span><span><i class="sw" style="background:var(--accent)"></i><span>replays fitting at least as well</span></span><span><i class="sw line" style="border-top:2px solid var(--accent)"></i><span>Mendel’s total</span></span><span id="mgLegC" hidden><i class="sw line" style="border-top:2.5px solid var(--one)"></i><span>χ² curve</span></span></div>
+    <div class="controls">
+      <button class="btn primary" id="mgRun">Replay 1,000 times</button>
+      <button class="btn" id="mgCurve" aria-pressed="false">Overlay the χ² curve</button>
+      <button class="btn" id="mgClear">Clear</button>
+    </div>
+    <div class="readout" id="mgRead" aria-live="polite"></div>
+  </div>
+
+  <p>Fisher’s total for 84 comparisons was χ² = 41.6, where honest data average 84. A fit that good or better happens about 3 times in 100,000 (Fisher’s printed tables gave 7 in 100,000). This is a test in the <em>left</em> tail: instead of asking whether the data are too far from the theory, it asks whether they are too close.</p>
+  <p>Fisher concluded that the data had been adjusted, suggesting Mendel “was deceived by some assistant who knew too well what was expected”. The argument has run ever since (see Franklin and colleagues’ 2008 book <em>Ending the Mendel–Fisher Controversy</em>). Proposed explanations include stopping a count when the ratio looked right, discarding plants suspected of contamination, and repeating experiments and reporting the better one; Pires and Branco (2010) found that the last of these could produce the pattern. Few historians think Mendel simply invented numbers, and his theory was right. But the lesson stands: honest data are noisy, and data with too little noise are a warning sign of a human hand.</p>
+</section>
+
+<!-- 5 -->
+<section id="breaks">
+  <div class="secnum">05</div>
+  <h2>When it breaks</h2>
+  <p>The χ² curve is a smooth stand-in for a lumpy reality. With large expected counts the lumps are fine-grained and the curve is close. With tiny ones, the statistic can only take a handful of values, and the curve misjudges how often each one occurs. Below, the jagged line is the exact answer from every possible shuffle of the table, which is <strong>Fisher’s exact test</strong>; the smooth one is the curve.</p>
+
+  <div class="widget">
+    <p class="widget-title">Every possible shuffle vs the curve</p>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Table">
+        <button class="btn on" data-sm="0" aria-pressed="true">20 per button: 0 vs 4</button>
+        <button class="btn" data-sm="1" aria-pressed="false">50 per button: 2 vs 8</button>
+        <button class="btn" data-sm="2" aria-pressed="false">200 per button: 10 vs 20</button>
+        <button class="btn" data-sm="3" aria-pressed="false">1,000 per button: 50 vs 64</button>
+      </div>
+    </div>
+    <div class="controls">
+      <span class="ctrl">grey clicks <button class="btn sm" data-sk="0" data-d="-1" aria-label="fewer grey clicks">−</button> <b id="smA" class="mono"></b> <button class="btn sm" data-sk="0" data-d="1" aria-label="more grey clicks">+</button></span>
+      <span class="ctrl">orange clicks <button class="btn sm" data-sk="1" data-d="-1" aria-label="fewer orange clicks">−</button> <b id="smB" class="mono"></b> <button class="btn sm" data-sk="1" data-d="1" aria-label="more orange clicks">+</button></span>
+    </div>
+    <canvas id="smChart" style="height:240px" role="img" aria-label="Chance of a chi-square at least as large as each value, for every possible shuffle of the table as a step line and for the chi-square curve as a smooth line, on a log scale, with the observed value marked"></canvas>
+    <div class="legend"><span><i class="sw line" style="border-top:2.5px solid var(--ink-2)"></i><span>every possible shuffle (exact)</span></span><span><i class="sw line" style="border-top:2.5px solid var(--one)"></i><span>χ² curve, 1 df</span></span><span><i class="sw line" style="border-top:2px solid var(--accent)"></i><span>this table</span></span></div>
+    <div class="readout" id="smRead" aria-live="polite"></div>
+  </div>
+
+  <p>With 20 visitors per button and 0 against 4 clicks, the curve says p = 0.035, “significant”; every possible shuffle says 0.11. Only 4 clicks can be dealt out, so there are only three distinct χ² values, and the curve smears them into a smooth tail. By 1,000 per button the two lines run close together, and what is left is the whole-number gap from section 3 (0.18 against 0.21). The usual rule of thumb is to trust the curve when every expected count is at least 5; the 50-per-button table sits right at that line and the curve still halves the p-value. When counts are small, merge sparse categories (as with the horse kicks) or use the exact shuffle, which a computer does instantly.</p>
+  <ul class="facts">
+    <li><strong>Counts, not percentages.</strong> χ² must be computed on counts. The same percentages from 10 times as many people give 10 times the χ².</li>
+    <li><strong>One count per independent unit.</strong> If one visitor can click many times, or one patient contributes several measurements, the counts are not independent and χ² overstates the evidence.</li>
+    <li><strong>Huge samples find everything.</strong> With millions of rows, trivial differences give enormous χ². Look at the size of the gaps, not just p.</li>
+    <li><strong>Direction is lost.</strong> Squaring throws away the sign. χ² says the table departs from “no connection” but not how; read the cells.</li>
+  </ul>
+</section>
+
+<!-- 6 -->
+<section id="uses">
+  <div class="secnum">06</div>
+  <h2>Where you will meet it</h2>
+  <div class="cards">
+    <div class="card"><h4>Genetics</h4><p>Mendelian ratios, and whether a population’s genotype counts match the Hardy–Weinberg proportions, are classic goodness-of-fit tests.</p></div>
+    <div class="card"><h4>A/B tests on rates</h4><p>Clicks, sign-ups and conversions by variant form a table of counts; χ² with more than two variants tests them all at once.</p></div>
+    <div class="card"><h4>Surveys</h4><p>Cross-tabulations such as answer by age group or region are tested for any connection with χ².</p></div>
+    <div class="card"><h4>Fraud checks</h4><p>First digits of genuine financial figures follow Benford’s law; a χ² against those proportions flags books that don’t.</p></div>
+    <div class="card"><h4>Quality control</h4><p>Defects by shift, machine or supplier: are they spread as their share of production would predict?</p></div>
+    <div class="card"><h4>Checking a model</h4><p>Does a Poisson, a binomial or a fitted curve really describe the data? Bin it and compare counts, as with the horse kicks.</p></div>
+  </div>
+
+  <h3>Check yourself</h3>
+  <div class="widget">
+    <div class="quiz" id="quiz"></div>
+    <div class="readout" id="quizScore" style="margin-top:10px" aria-live="polite"></div>
+  </div>
+
+  <p>χ² compares counts across groups. Comparing averages across many groups at once needs a different yardstick, the spread between groups against the spread within them: the next page, <strong>ANOVA</strong> (coming soon).</p>
+</section>
+</main>
+
+<script>
+(function(){
+'use strict';
+/* ---------- helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const root = document.documentElement;
+const C = n => getComputedStyle(root).getPropertyValue(n).trim();
+const f2 = x => x.toFixed(2);
+const fmtN = x => Math.abs(x - Math.round(x)) < 1e-9 ? String(Math.round(x)) : String(+x.toFixed(2));
+const pct = x => (100 * x).toFixed(1) + '%';
+const MONO = 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
+const TAU = Math.PI * 2;
+const comma = n => n.toLocaleString('en-US');
+
+function fit(c){
+  const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+  if (c.width !== w*dpr || c.height !== h*dpr) { c.width = w*dpr; c.height = h*dpr; }
+  const ctx = c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  return {ctx, w, h};
+}
+const redraws = [];
+function redrawAll(){ redraws.forEach(f => f()); }
+let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(redrawAll, 80); });
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+if (mq.addEventListener) mq.addEventListener('change', redrawAll);
+new MutationObserver(redrawAll).observe(root, {attributes:true, attributeFilter:['data-theme']});
+
+function niceTicks(max, count){
+  const raw = max / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const step = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag;
+  const t = []; for (let v = 0; v <= max + 1e-9; v += step) t.push(v); return t;
+}
+function stepFmt(ticks){ const st = ticks.length > 1 ? ticks[1] - ticks[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9)); return v => v.toFixed(d); }
+function yGrid(ctx, X0, X1, ys, ticks, fmt){
+  ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ticks.forEach(v => {
+    const y = Math.round(ys(v)) + .5;
+    ctx.strokeStyle = C('--line'); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X0, y); ctx.lineTo(X1, y); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.fillText(fmt(v), X0 - 6, y);
+  });
+}
+function intStep(px, minPx){
+  for (const s of [1,2,5,10,20,25,50,100]) if (s * px >= minPx) return s;
+  return 100;
+}
+function roundRect(ctx, x, y, w, h, r){
+  r = Math.max(0, Math.min(r, w/2, Math.abs(h)/2));
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+function dot(ctx, x, y, r){ ctx.beginPath(); ctx.arc(x, y, Math.max(0.5, r), 0, TAU); ctx.fill(); }
+function vline(ctx, x, y0, y1, color, dash, lw){
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw || 1.5; if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(Math.round(x) + .5, y0); ctx.lineTo(Math.round(x) + .5, y1); ctx.stroke(); ctx.restore();
+}
+/* integer-valued bar charts: bars at k = lo..hi */
+function frame(ctx, w, h, o){
+  const X0 = o.left != null ? o.left : 40, X1 = w - 10, Y0 = h - 24, Y1 = o.top != null ? o.top : 12;
+  const span = o.hi - o.lo + 1, bw = (X1 - X0) / span;
+  const xc = k => X0 + bw * (k - o.lo + .5), ys = v => Y0 - (v / o.ymax) * (Y0 - Y1);
+  const t = niceTicks(o.ymax, 3).filter(v => v <= o.ymax * 1.0001); yGrid(ctx, X0, X1, ys, t, o.yfmt || stepFmt(t));
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  const st = o.step || intStep(bw, 24);
+  for (let k = Math.ceil(o.lo / st) * st; k <= o.hi; k += st) ctx.fillText(o.lab ? o.lab(k) : k, xc(k), Y0 + 6);
+  return {X0, X1, Y0, Y1, bw, xc, ys};
+}
+function drawBars(ctx, F, lo, hi, val, color, frac){
+  const bwid = Math.max(1, F.bw * (frac == null ? .8 : frac));
+  for (let k = lo; k <= hi; k++) {
+    const v = val(k); if (!(v > 0)) continue;
+    const y = F.ys(v), hh = F.Y0 - y; if (hh < 0.2) continue;
+    const x = F.xc(k) - bwid / 2;
+    ctx.fillStyle = typeof color === 'function' ? color(k) : color;
+    if (bwid >= 6 && hh >= 3) { roundRect(ctx, x, y, bwid, hh, Math.min(3, bwid / 4)); ctx.fill(); }
+    else ctx.fillRect(x, y, bwid, hh);
+  }
+}
+function emptyNote(ctx, w, h, text){
+  ctx.fillStyle = C('--ink-3'); ctx.font = '13px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(text, w / 2, h / 2 - 8);
+}
+
+/* randomness */
+let spare = null;
+function gauss(){
+  if (spare != null) { const s = spare; spare = null; return s; }
+  let u = 0, v = 0; while (u === 0) u = Math.random(); v = Math.random();
+  const r = Math.sqrt(-2 * Math.log(u)); spare = r * Math.sin(TAU * v); return r * Math.cos(TAU * v);
+}
+function shuffled(a){ const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; }
+function corr(x, y){
+  const n = x.length; let mx = 0, my = 0; for (let i = 0; i < n; i++) { mx += x[i]; my += y[i]; } mx /= n; my /= n;
+  let sxy = 0, sxx = 0, syy = 0; for (let i = 0; i < n; i++) { const a = x[i] - mx, b = y[i] - my; sxy += a * b; sxx += a * a; syy += b * b; }
+  return sxy / Math.sqrt(sxx * syy);
+}
+function binom(n, p){ let k = 0; for (let i = 0; i < n; i++) if (Math.random() < p) k++; return k; }
+function flips(n){ const a = new Array(n); for (let i = 0; i < n; i++) a[i] = Math.random() < .5 ? 1 : 0; return a; }
+function longestRun(a){
+  let best = 1, cur = 1, start = 0, bs = 0;
+  for (let i = 1; i < a.length; i++) { if (a[i] === a[i-1]) cur++; else { cur = 1; start = i; } if (cur > best) { best = cur; bs = start; } }
+  return {len: best, start: bs};
+}
+function switches(a){ let s = 0; for (let i = 1; i < a.length; i++) if (a[i] !== a[i-1]) s++; return s; }
+const RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+function ticksIn(lo, hi, count){
+  const raw = (hi - lo) / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const st = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag, t = [];
+  for (let v = Math.ceil(lo / st - 1e-9) * st; v <= hi + 1e-9; v += st) t.push(+v.toFixed(10));
+  return t;
+}
+function xAxis(ctx, X0, X1, Y0, lo, hi, fmt){
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  const t = ticksIn(lo, hi, Math.max(2, Math.floor((X1 - X0) / 60)));
+  const st = t.length > 1 ? t[1] - t[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9));
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  t.forEach(v => ctx.fillText(fmt ? fmt(v) : v.toFixed(d), X0 + (v - lo) / (hi - lo) * (X1 - X0), Y0 + 5));
+}
+function label(ctx, x, y, text, color, X0, X1){
+  ctx.font = '600 11px ' + MONO; ctx.fillStyle = color; ctx.textBaseline = 'top';
+  const right = x > (X0 + X1) / 2; ctx.textAlign = right ? 'right' : 'left';
+  ctx.fillText(text, x + (right ? -5 : 5), y);
+}
+
+function bar(ctx, x, w, y, Y0, color){
+  const hh = Y0 - y; if (!(hh > .2)) return;
+  ctx.fillStyle = color;
+  if (w >= 6 && hh >= 3) { roundRect(ctx, x, y, w, hh, Math.min(3, w / 4)); ctx.fill(); } else ctx.fillRect(x, y, w, hh);
+}
+
+/* ---------- shared: chi-square distribution ---------- */
+function gammaln(x){
+  const c = [76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155, .1208650973866179e-2, -.5395239384953e-5];
+  let y = x, t = x + 5.5; t -= (x + .5) * Math.log(t); let s = 1.000000000190015;
+  for (let j = 0; j < 6; j++) s += c[j] / ++y;
+  return -t + Math.log(2.5066282746310005 * s / x);
+}
+function gser(a, x){ let s = 1 / a, t = s, n = a; for (let i = 0; i < 1000; i++) { n++; t *= x / n; s += t; if (Math.abs(t) < Math.abs(s) * 1e-15) break; } return s * Math.exp(-x + a * Math.log(x) - gammaln(a)); }
+function gcf(a, x){
+  const FP = 1e-300; let b = x + 1 - a, c = 1 / FP, d = 1 / b, h = d;
+  for (let i = 1; i < 1000; i++) {
+    const an = -i * (i - a); b += 2; d = an * d + b; if (Math.abs(d) < FP) d = FP; c = b + an / c; if (Math.abs(c) < FP) c = FP;
+    d = 1 / d; const del = d * c; h *= del; if (Math.abs(del - 1) < 1e-15) break;
+  }
+  return Math.exp(-x + a * Math.log(x) - gammaln(a)) * h;
+}
+const gP = (a, x) => x <= 0 ? 0 : x < a + 1 ? gser(a, x) : 1 - gcf(a, x);
+const gQ = (a, x) => x <= 0 ? 1 : x < a + 1 ? 1 - gser(a, x) : gcf(a, x);
+const chiUp = (x, k) => gQ(k / 2, x / 2), chiLo = (x, k) => gP(k / 2, x / 2);
+function chipdf(x, k){ if (x <= 0) return k === 2 ? .5 : 0; return Math.exp((k / 2 - 1) * Math.log(x) - x / 2 - (k / 2) * Math.LN2 - gammaln(k / 2)); }
+const lchoose = (n, k) => gammaln(n + 1) - gammaln(k + 1) - gammaln(n - k + 1);
+const pc = (x, d) => (100 * x).toFixed(d == null ? 1 : d) + '%';
+function pfmt(p){
+  if (p >= .01) return (100 * p).toFixed(1) + '%';
+  if (p >= .0001) return (100 * p).toFixed(2) + '%';
+  if (p >= 1e-6) return (100 * p).toFixed(4) + '%';
+  return '< 0.0001%';
+}
+const signed = (v, d) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(d);
+const sum = a => a.reduce((s, v) => s + v, 0);
+function chiOf(obs, exp){ let x = 0; for (let i = 0; i < obs.length; i++) if (exp[i] > 0) x += (obs[i] - exp[i]) ** 2 / exp[i]; return x; }
+function pressSeg(sel, attr, v){ $$(sel).forEach(b => { const on = b.dataset[attr] === String(v); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }); }
+function dashH(ctx, x0, x1, y, color){ ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(x0, Math.round(y) + .5); ctx.lineTo(x1, Math.round(y) + .5); ctx.stroke(); ctx.restore(); }
+function tag(ctx, text, x, y, color, align){
+  ctx.font = '600 11px ' + MONO; const tw = ctx.measureText(text).width;
+  const x0 = align === 'right' ? x - tw - 4 : align === 'center' ? x - tw / 2 - 2 : x - 2;
+  ctx.fillStyle = C('--surface'); ctx.globalAlpha = .9; ctx.fillRect(x0, y - 1, tw + 6, 15); ctx.globalAlpha = 1;
+  ctx.fillStyle = color; ctx.textBaseline = 'top'; ctx.textAlign = 'left'; ctx.fillText(text, x0 + 2, y + 1);
+}
+
+/* histogram of chi-square values on [0,hi) with the observed value, its tail, and an optional curve */
+function chiHist(cv, vals, o){
+  const {ctx, w, h} = fit(cv), X0 = 40, X1 = w - 14, Y0 = h - 22, Y1 = 10;
+  const nb = Math.round(o.hi / o.bw), counts = new Array(nb).fill(0);
+  vals.forEach(v => { const k = Math.floor(v / o.bw); if (k >= 0 && k < nb) counts[k]++; });
+  const N = Math.max(1, vals.length), scale = N * o.bw;
+  let ymax = Math.max(...counts);
+  const cf = o.df ? (x => scale * chipdf(x, o.df)) : null;
+  if (cf) { let m = 0; for (let i = 1; i <= 200; i++) { const x = Math.max(o.bw, o.hi * i / 200); m = Math.max(m, cf(x)); } ymax = vals.length ? Math.max(ymax, Math.min(m, ymax * 1.6)) : m; }
+  if (!(ymax > 0)) ymax = 1;
+  ymax *= 1.1;
+  const xs = v => X0 + v / o.hi * (X1 - X0), ys = v => Y0 - v / ymax * (Y0 - Y1), bw = Math.max(1, (X1 - X0) / nb - 1);
+  const t = niceTicks(ymax, 3).filter(v => v <= ymax);
+  if (vals.length) yGrid(ctx, X0, X1, ys, t, stepFmt(t));
+  const inTail = c => o.obs == null ? false : o.tail === 'left' ? c <= o.obs + 1e-9 : c >= o.obs - 1e-9;
+  for (let k = 0; k < nb; k++) {
+    const c0 = (k + .5) * o.bw;
+    bar(ctx, xs(k * o.bw) + .5, bw, ys(counts[k]), Y0, inTail(c0) ? C('--accent') : C('--ink-3'));
+  }
+  xAxis(ctx, X0, X1, Y0, 0, o.hi);
+  if (cf) {
+    ctx.save(); ctx.strokeStyle = C('--one'); ctx.lineWidth = 2.5; ctx.beginPath(); let started = false;
+    for (let i = 0; i <= 400; i++) {
+      const x = Math.max(1e-3, o.hi * i / 400), y = Math.max(Y1 - 4, ys(cf(x)));
+      if (!started) { ctx.moveTo(xs(x), y); started = true; } else ctx.lineTo(xs(x), y);
+    }
+    ctx.stroke(); ctx.restore();
+  }
+  if (!vals.length && o.empty) { ctx.fillStyle = C('--ink-3'); ctx.font = '13px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(o.empty, (X0 + X1) / 2, (Y0 + Y1) / 2); }
+  if (o.obs != null) {
+    const off = o.obs > o.hi, x = off ? X1 : xs(o.obs);
+    vline(ctx, x, Y1, Y0, C('--accent'), null, 2);
+    const txt = (o.obsLabel || 'data') + ' ' + (o.obs >= 100 ? o.obs.toFixed(0) : o.obs >= 10 ? o.obs.toFixed(1) : o.obs.toFixed(2)) + (off ? ' →' : '');
+    tag(ctx, txt, off || x > (X0 + X1) * .6 ? x - 4 : x + 5, Y1 + 2, C('--accent'), off || x > (X0 + X1) * .6 ? 'right' : 'left');
+  }
+  return {ctx, xs, ys, X0, X1, Y0, Y1};
+}
+const simP = (k, n) => k === 0 ? `fewer than 1 in ${comma(n)}` : pfmt(k / n);
+const countTail = (vals, obs, left) => vals.reduce((s, v) => s + (left ? v <= obs + 1e-9 : v >= obs - 1e-9), 0);
+
+/* ---------- hero: 100 sets of 60 rolls ---------- */
+const HERO = {last: null, listeners: []};
+(function(){
+  const cvD = $('#heroDie'), cvG = $('#heroGrid'), hint = $('#heroHint');
+  let guess = null, sets = [], cur = [0, 0, 0, 0, 0, 0], curN = 0, timer = null, done = false, setNo = 0;
+  const inBand = c => c.every(v => v >= 8 && v <= 12);
+  const roll = () => Math.floor(Math.random() * 6);
+  function drawDie(){
+    const {ctx, w, h} = fit(cvD);
+    const F = frame(ctx, w, h, {lo: 1, hi: 6, ymax: 22, left: 34, lab: k => 'face ' + k});
+    ctx.fillStyle = C('--one-soft'); ctx.fillRect(F.X0, F.ys(12.5), F.X1 - F.X0, F.ys(7.5) - F.ys(12.5));
+    dashH(ctx, F.X0, F.X1, F.ys(10), C('--ink'));
+    const full = curN === 60;
+    drawBars(ctx, F, 1, 6, k => cur[k - 1], k => { const v = cur[k - 1]; return v > 12 || (full && v < 8) ? C('--zero') : full && inBand(cur) ? C('--one') : C('--ink-3'); }, .5);
+    ctx.font = '600 11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillStyle = C('--ink-2');
+    for (let k = 1; k <= 6; k++) if (curN) tag(ctx, String(cur[k - 1]), F.xc(k), F.ys(cur[k - 1]) - 17, C('--ink-2'), 'center');
+    ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO;
+    ctx.fillText(curN ? `set ${setNo} of 100 · ${curN} rolls` : 'the band 8–12 around the expected 10', F.X1, F.Y1 + 2);
+  }
+  function drawGrid(){
+    const wpx = cvG.getBoundingClientRect().width, cols = wpx < 560 ? 10 : 20, rows = 100 / cols, cellH = cols === 10 ? 34 : 44;
+    const want = rows * cellH + 2 + 'px'; if (cvG.style.height !== want) cvG.style.height = want;
+    const {ctx, w} = fit(cvG), cw = w / cols;
+    for (let i = 0; i < 100; i++) {
+      const cx = (i % cols) * cw, cy = Math.floor(i / cols) * cellH + 1, s = sets[i];
+      const x0 = cx + 2, x1 = cx + cw - 2, y0 = cy + 2, y1 = cy + cellH - 2;
+      if (s && inBand(s)) { ctx.fillStyle = C('--one-soft'); roundRect(ctx, x0, y0, x1 - x0, y1 - y0, 4); ctx.fill(); ctx.strokeStyle = C('--one'); ctx.lineWidth = 1; ctx.stroke(); }
+      else { ctx.strokeStyle = C('--line'); ctx.lineWidth = 1; roundRect(ctx, x0 + .5, y0 + .5, x1 - x0 - 1, y1 - y0 - 1, 4); ctx.stroke(); }
+      if (!s) continue;
+      const bx0 = x0 + 3, bww = (x1 - x0 - 6) / 6, ysc = v => y1 - 2 - v / 20 * (y1 - y0 - 4);
+      ctx.fillStyle = C('--line'); ctx.fillRect(bx0, Math.round(ysc(10)), x1 - x0 - 6, 1);
+      for (let k = 0; k < 6; k++) {
+        const v = Math.min(20, s[k]); ctx.fillStyle = s[k] < 8 || s[k] > 12 ? C('--zero') : inBand(s) ? C('--one') : C('--ink-3');
+        ctx.fillRect(bx0 + k * bww + bww * .15, ysc(v), Math.max(1, bww * .7), y1 - 2 - ysc(v));
+      }
+    }
+  }
+  function draw(){ drawDie(); drawGrid(); }
+  function message(){
+    const k = sets.filter(inBand).length, m = sets.filter(s => Math.max(...s) >= 15).length;
+    $$('#heroPred .btn').forEach(b => { b.classList.remove('right', 'wrong'); if (guess != null && +b.dataset.g === guess) b.classList.add(guess === 3 ? 'right' : 'wrong'); });
+    hint.innerHTML = `<b>${k} of 100</b> sets kept every face between 8 and 12. The exact chance is 7.8%, about <b>1 in 13</b>${guess === 3 ? ', as you guessed' : ''}. ` +
+      `In ${m} sets the busiest face came up 15 times or more (exact chance 37%). A fair die is lumpy, so unevenness you can see is no evidence on its own. ` +
+      `The page builds a yardstick for “too uneven” and, for Mendel, for “too even”: his counts look like the rare green sets, over and over.`;
+  }
+  function open(){ $('#heroGo').disabled = false; $('#heroSkip').hidden = true; }
+  $$('#heroPred .btn').forEach(b => b.addEventListener('click', () => { guess = +b.dataset.g; $$('#heroPred .btn').forEach(x => x.classList.toggle('guess', x === b)); open(); if (done) message(); }));
+  $('#heroSkip').addEventListener('click', open);
+  function pushSet(){ sets.push(cur.slice()); HERO.last = cur.slice(); }
+  $('#heroGo').addEventListener('click', () => {
+    clearInterval(timer); sets = []; cur = [0, 0, 0, 0, 0, 0]; curN = 0; setNo = 1; done = false; hint.textContent = 'Rolling…';
+    const finish = () => { done = true; draw(); message(); $('#heroGo').textContent = 'Roll 100 new sets'; HERO.listeners.forEach(f => f()); };
+    const full = () => { cur = [0, 0, 0, 0, 0, 0]; for (let i = 0; i < 60; i++) cur[roll()]++; curN = 60; };
+    if (RM) { for (let s = 0; s < 100; s++) { full(); pushSet(); setNo = s + 1; } return finish(); }
+    timer = setInterval(() => {
+      if (curN === 60) { if (sets.length >= 100) { clearInterval(timer); timer = null; return finish(); } cur = [0, 0, 0, 0, 0, 0]; curN = 0; setNo = sets.length + 1; }
+      if (sets.length < 3) { for (let i = 0; i < 3; i++) { cur[roll()]++; curN++; } }
+      else full();
+      if (curN === 60) pushSet();
+      draw();
+    }, 25);
+  });
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 1. built cell by cell ---------- */
+(function(){
+  const cv = $('#bdChart');
+  let counts = [5, 8, 9, 11, 12, 15], mode = 0;
+  const steps = $('#bdSteps');
+  steps.innerHTML = counts.map((c, i) => `<div class="step"><span>face ${i + 1}</span><b id="bdC${i}">${c}</b><div class="row"><button class="btn sm" data-f="${i}" data-d="-1" aria-label="one fewer ${i + 1}">−</button><button class="btn sm" data-f="${i}" data-d="1" aria-label="one more ${i + 1}">+</button></div></div>`).join('');
+  function vals(){
+    const N = sum(counts), E = N / 6;
+    return counts.map(o => mode === 0 ? o - E : mode === 1 ? (o - E) ** 2 : E > 0 ? (o - E) ** 2 / E : 0);
+  }
+  function draw(){
+    const {ctx, w, h} = fit(cv), N = sum(counts), E = N / 6, v = vals(), tot = sum(v);
+    const X0 = 40, X1 = w - 10, cw = (X1 - X0) / 7, xc = k => X0 + cw * (k + .5);
+    // top: counts vs expected
+    const T1 = 18, T0 = Math.round(h * .45), tmax = Math.max(4, ...counts, E) * 1.15;
+    const yt = x => T0 - x / tmax * (T0 - T1), tt = niceTicks(tmax, 3).filter(x => x <= tmax);
+    yGrid(ctx, X0, X0 + cw * 6, yt, tt, stepFmt(tt));
+    ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, T0 + .5); ctx.lineTo(X0 + cw * 6, T0 + .5); ctx.stroke();
+    const bwid = Math.min(46, cw * .5);
+    counts.forEach((o, k) => bar(ctx, xc(k) - bwid / 2, bwid, yt(o), T0, C('--accent')));
+    dashH(ctx, X0, X0 + cw * 6, yt(E), C('--ink'));
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-2'); ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillText('expected', X0 + cw * 6 + 4, yt(E) - 7); ctx.fillText(E.toFixed(E % 1 ? 1 : 0), X0 + cw * 6 + 4, yt(E) + 7);
+    counts.forEach((o, k) => {
+      const g = o - E; if (Math.abs(g) < 1e-9) return;
+      ctx.save(); ctx.strokeStyle = C('--ink'); ctx.lineWidth = 1.5; ctx.beginPath();
+      const xg = xc(k) + bwid / 2 + 5; ctx.moveTo(xg, yt(E)); ctx.lineTo(xg, yt(o)); ctx.moveTo(xg - 3, yt(o)); ctx.lineTo(xg + 3, yt(o)); ctx.stroke(); ctx.restore();
+    });
+    counts.forEach((o, k) => tag(ctx, String(o), xc(k), yt(o) - 17, C('--ink-2'), 'center'));
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textBaseline = 'top'; ctx.textAlign = 'center';
+    counts.forEach((o, k) => ctx.fillText('face ' + (k + 1), xc(k), T0 + 5));
+    // bottom: contributions
+    const B1 = Math.round(h * .45) + 50, B0 = h - 22, signedMode = mode === 0;
+    const vmax = Math.max(signedMode ? 1 : .5, ...v.map(Math.abs), Math.abs(tot)) * 1.2;
+    const base = signedMode ? (B0 + B1) / 2 : B0, half = signedMode ? (B0 - B1) / 2 : B0 - B1;
+    const yb = x => base - x / vmax * half;
+    ctx.font = '600 12px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+    ctx.fillText(['gap = observed − expected', 'gap²', 'gap² ÷ expected'][mode], X0, B1 - 12);
+    ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Math.round(base) + .5); ctx.lineTo(X1, Math.round(base) + .5); ctx.stroke();
+    ctx.strokeStyle = C('--line'); ctx.beginPath(); ctx.moveTo(X0 + cw * 6 + .5, B1 - 4); ctx.lineTo(X0 + cw * 6 + .5, B0); ctx.stroke();
+    const fmtv = x => mode === 0 ? signed(x, Math.abs(x) % 1 ? 1 : 0) : x.toFixed(mode === 1 && x % 1 === 0 ? 0 : 2);
+    const all = v.concat([tot]);
+    all.forEach((x, k) => {
+      const col = k === 6 ? C('--ink') : C('--accent');
+      const y = yb(x), top = Math.min(y, base), hh = Math.abs(y - base);
+      if (hh > .3) { ctx.fillStyle = col; ctx.fillRect(xc(k) - bwid / 2, top, bwid, hh); }
+      ctx.font = (k === 6 ? '700 ' : '600 ') + '11px ' + MONO; ctx.fillStyle = k === 6 ? C('--ink') : C('--ink-2'); ctx.textAlign = 'center';
+      if (x >= 0) { ctx.textBaseline = 'bottom'; ctx.fillText(fmtv(x), xc(k), Math.min(y, base) - 3); } else { ctx.textBaseline = 'top'; ctx.fillText(fmtv(x), xc(k), y + 3); }
+    });
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textBaseline = 'top'; ctx.textAlign = 'center';
+    ctx.fillText(mode === 2 ? 'χ²' : 'total', xc(6), B0 + 5);
+  }
+  function read(){
+    const N = sum(counts), E = N / 6, g = counts.map(o => o - E);
+    const sq = sum(g.map(x => x * x)), chi = E > 0 ? sq / E : 0;
+    $('#bdRead').innerHTML = `${N} rolls · expected ${E % 1 ? E.toFixed(2) : E} per face<br>` +
+      `sum of gaps = <b>0</b> · sum of squared gaps = <b>${sq % 1 ? sq.toFixed(2) : sq}</b> · ` + (mode === 2 ? `<b>χ² = ${chi.toFixed(2)}</b>` : 'χ²: see step 3');
+  }
+  function update(){ counts.forEach((c, i) => { $('#bdC' + i).textContent = c; }); draw(); read(); }
+  steps.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; const i = +b.dataset.f; counts[i] = Math.max(0, Math.min(99, counts[i] + +b.dataset.d)); if (sum(counts) === 0) counts[i] = 1; update(); });
+  $$('[data-ms]').forEach(b => b.addEventListener('click', () => { mode = +b.dataset.ms; pressSeg('[data-ms]', 'ms', mode); update(); }));
+  $$('[data-bp]').forEach(b => b.addEventListener('click', () => {
+    const p = b.dataset.bp;
+    if (p === 'hero' && HERO.last) counts = HERO.last.slice();
+    else if (p === 'even') counts = [10, 10, 10, 10, 10, 10];
+    else if (p === 'lop') counts = [4, 7, 9, 11, 13, 16];
+    else { counts = [0, 0, 0, 0, 0, 0]; for (let i = 0; i < 60; i++) counts[Math.floor(Math.random() * 6)]++; }
+    update();
+  }));
+  HERO.listeners.push(() => { $('[data-bp="hero"]').disabled = false; });
+  update(); redraws.push(draw);
+})();
+
+/* ---------- 2. fair or loaded ---------- */
+(function(){
+  const MAXN = 3000, NS = 2000;
+  let die, counts, n, chi, fair = [], fairN = -1, timer = null, curve = false, revealed = false, right = 0, played = 0, rollsUsed = 0;
+  function newDie(){
+    const loaded = Math.random() < .5, face = Math.floor(Math.random() * 6), wt = [.22, .25, .3][Math.floor(Math.random() * 3)];
+    const p = new Array(6).fill(loaded ? (1 - wt) / 5 : 1 / 6); if (loaded) p[face] = wt;
+    const cum = []; let s = 0; p.forEach(v => { s += v; cum.push(s); });
+    die = {loaded, face, wt, cum}; counts = [0, 0, 0, 0, 0, 0]; n = 0; chi = null; revealed = false; fair = []; fairN = -1; clearInterval(timer);
+    $('#mdMsg').innerHTML = ''; $('#mdNew').hidden = true; setBtns();
+  }
+  const rollOne = () => { const u = Math.random(); for (let k = 0; k < 5; k++) if (u < die.cum[k]) return k; return 5; };
+  function fairChi(N){ const c = [0, 0, 0, 0, 0, 0]; for (let i = 0; i < N; i++) c[Math.floor(Math.random() * 6)]++; const E = N / 6; let x = 0; for (const o of c) x += (o - E) ** 2 / E; return x; }
+  function setBtns(){
+    ['#mdR10', '#mdR60', '#mdR600'].forEach((s, i) => { $(s).disabled = revealed || n + [10, 60, 600][i] > MAXN; });
+    $('#mdFair').disabled = $('#mdLoaded').disabled = revealed || n === 0;
+  }
+  function buildFair(){
+    clearInterval(timer); fair = []; fairN = n;
+    if (RM) { while (fair.length < NS) fair.push(fairChi(n)); return drawHist(), read(); }
+    timer = setInterval(() => { for (let i = 0; i < 100; i++) fair.push(fairChi(fairN)); drawHist(); read(); if (fair.length >= NS) { clearInterval(timer); timer = null; } }, 25);
+  }
+  function roll(k){
+    if (revealed) return; k = Math.min(k, MAXN - n); for (let i = 0; i < k; i++) counts[rollOne()]++; n += k;
+    const E = n / 6; chi = chiOf(counts, counts.map(() => E)); setBtns(); drawCounts(); buildFair(); read();
+  }
+  function drawCounts(){
+    const {ctx, w, h} = fit($('#mdCounts')), E = n / 6;
+    const F = frame(ctx, w, h, {lo: 1, hi: 6, ymax: Math.max(4, ...counts, E) * 1.2, left: 40, lab: k => 'face ' + k});
+    drawBars(ctx, F, 1, 6, k => counts[k - 1], k => revealed && die.loaded && k - 1 === die.face ? C('--zero') : C('--accent'), .5);
+    if (n) dashH(ctx, F.X0, F.X1, F.ys(E), C('--ink'));
+    ctx.font = '600 11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillStyle = C('--ink-2');
+    for (let k = 1; k <= 6; k++) if (n) tag(ctx, String(counts[k - 1]), F.xc(k), F.ys(counts[k - 1]) - 17, C('--ink-2'), 'center');
+    if (!n) emptyNote(ctx, w, h, 'Roll the mystery die to start');
+    else { ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'right'; ctx.textBaseline = 'top'; ctx.fillText(`${comma(n)} rolls · expected ${E % 1 ? E.toFixed(1) : E} each`, F.X1, 0); }
+  }
+  function drawHist(){
+    chiHist($('#mdHist'), fair, {hi: 25, bw: .5, df: curve ? 5 : null, obs: n ? chi : null, obsLabel: 'mystery die', empty: 'fair dice appear here once you roll'});
+  }
+  function read(){
+    if (!n) { $('#mdRead').innerHTML = 'No rolls yet.'; return; }
+    const k = countTail(fair, chi, false);
+    $('#mdRead').innerHTML = `mystery die: χ² = <b>${chi.toFixed(2)}</b> on 5 degrees of freedom<br>` +
+      `fair dice at least this uneven: <b>${comma(k)} of ${comma(fair.length)}</b>` + (fair.length ? ` (p ≈ ${simP(k, fair.length)})` : '') +
+      (curve ? ` · χ² curve: p = <b>${pfmt(chiUp(chi, 5))}</b>` : '');
+  }
+  function verdict(sayLoaded){
+    if (revealed || !n) return; revealed = true; played++; rollsUsed += n;
+    const ok = sayLoaded === die.loaded; if (ok) right++;
+    const truth = die.loaded ? `It was loaded: face ${die.face + 1} came up with chance ${Math.round(die.wt * 100)}% instead of 16.7%.` : 'It was a fair die.';
+    $('#mdMsg').innerHTML = `<b>${ok ? '✓ Right.' : '✗ Not this time.'}</b> ${truth} ` +
+      `<br>Score: <b>${right} of ${played}</b> right, using ${comma(Math.round(rollsUsed / played))} rolls per die on average.`;
+    $('#mdNew').hidden = false; setBtns(); drawCounts();
+  }
+  $('#mdR10').addEventListener('click', () => roll(10));
+  $('#mdR60').addEventListener('click', () => roll(60));
+  $('#mdR600').addEventListener('click', () => roll(600));
+  $('#mdFair').addEventListener('click', () => verdict(false));
+  $('#mdLoaded').addEventListener('click', () => verdict(true));
+  $('#mdNew').addEventListener('click', () => { newDie(); drawCounts(); drawHist(); read(); });
+  $('#mdCurve').addEventListener('click', () => { curve = !curve; $('#mdCurve').setAttribute('aria-pressed', curve); $('#mdCurve').classList.toggle('on', curve); $('#mdLegC').hidden = !curve; drawHist(); read(); });
+  newDie(); drawCounts(); drawHist(); read();
+  redraws.push(() => { drawCounts(); drawHist(); });
+})();
+
+/* ---------- 2b. horse kicks ---------- */
+(function(){
+  const obs = [109, 65, 22, 4], n = 200, lam = 122 / 200;
+  const pk = [0, 1, 2].map(k => Math.exp(-lam) * lam ** k / [1, 1, 2][k]);
+  const exp = pk.map(p => n * p).concat([n * (1 - sum(pk))]);
+  const contrib = obs.map((o, i) => (o - exp[i]) ** 2 / exp[i]), chi = sum(contrib), p = chiUp(chi, 2);
+  const labs = ['0', '1', '2', '3+'];
+  function draw(){
+    const {ctx, w, h} = fit($('#hkChart'));
+    const F = frame(ctx, w, h, {lo: 0, hi: 3, ymax: 125, left: 40, lab: k => labs[k] + (k === 1 ? ' death' : ' deaths')});
+    drawBars(ctx, F, 0, 3, k => obs[k], C('--accent'), .5);
+    exp.forEach((e, k) => dashH(ctx, F.xc(k) - F.bw * .36, F.xc(k) + F.bw * .36, F.ys(e), C('--ink')));
+    ctx.font = '600 11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillStyle = C('--ink-2');
+    obs.forEach((o, k) => ctx.fillText(o, F.xc(k), Math.min(F.ys(o), F.ys(exp[k])) - 4));
+  }
+  $('#hkTable').innerHTML = `<thead><tr><th>Deaths in a corps-year</th>${labs.map(l => `<th>${l}</th>`).join('')}<th>Total</th></tr></thead><tbody>` +
+    `<tr><td>Observed</td>${obs.map(o => `<td>${o}</td>`).join('')}<td>200</td></tr>` +
+    `<tr><td>Expected (Poisson, 0.61)</td>${exp.map(e => `<td>${e.toFixed(1)}</td>`).join('')}<td>200</td></tr>` +
+    `<tr><td>(O − E)² ÷ E</td>${contrib.map(c => `<td>${c.toFixed(3)}</td>`).join('')}<td><b>${chi.toFixed(2)}</b></td></tr></tbody>`;
+  $('#hkRead').innerHTML = `χ² = <b>${chi.toFixed(2)}</b> on 2 degrees of freedom · p = <b>${p.toFixed(2)}</b> <span class="ok">a good fit</span>`;
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 3. the count table ---------- */
+(function(){
+  const PRE = [
+    [{name: 'Grey', n: 1000, k: 50}, {name: 'Orange', n: 1000, k: 64}],
+    [{name: 'Grey', n: 4300, k: 215}, {name: 'Orange', n: 4300, k: 275}],
+    [{name: 'Grey', n: 20, k: 0}, {name: 'Orange', n: 20, k: 4}]
+  ];
+  let rows = PRE[0].map(r => Object.assign({}, r)), shuf = [], timer = null, curve = false;
+  function stats(){
+    const N = sum(rows.map(r => r.n)), K = sum(rows.map(r => r.k));
+    const cells = []; rows.forEach(r => {
+      const e1 = r.n * K / N, e0 = r.n * (N - K) / N;
+      cells.push({lab: r.name + ' ✓', o: r.k, e: e1}, {lab: r.name + ' ✗', o: r.n - r.k, e: e0});
+    });
+    cells.forEach(c => { c.c = c.e > 0 ? (c.o - c.e) ** 2 / c.e : 0; });
+    const chi = sum(cells.map(c => c.c)), df = rows.length - 1;
+    return {N, K, cells, chi, df, ok: K > 0 && K < N};
+  }
+  function table(){
+    const S = stats();
+    let html = '<thead><tr><th>Button</th><th>Visitors</th><th>Clicked</th><th>Didn’t click</th><th>Click rate</th></tr></thead><tbody>';
+    rows.forEach((r, i) => {
+      const c1 = S.cells[2 * i], c0 = S.cells[2 * i + 1];
+      html += `<tr><td>${r.name}${i === 2 ? ' <button class="linkbtn" id="ctDel" aria-label="remove the third button">remove</button>' : ''}</td>` +
+        `<td><input type="number" min="1" max="100000" step="1" value="${r.n}" data-r="${i}" data-f="n" aria-label="${r.name} visitors"></td>` +
+        `<td><input type="number" min="0" max="100000" step="1" value="${r.k}" data-r="${i}" data-f="k" aria-label="${r.name} clicks"><span class="ex">expected ${c1.e.toFixed(1)}</span></td>` +
+        `<td>${comma(r.n - r.k)}<span class="ex">expected ${c0.e.toFixed(1)}</span></td><td>${r.n ? pc(r.k / r.n) : '–'}</td></tr>`;
+    });
+    html += `<tr><td><b>All</b></td><td>${comma(S.N)}</td><td>${comma(S.K)}</td><td>${comma(S.N - S.K)}</td><td>${S.N ? pc(S.K / S.N) : '–'}</td></tr></tbody>`;
+    $('#ctTable').innerHTML = html;
+    $('#ctAdd').disabled = rows.length >= 3;
+    const del = $('#ctDel'); if (del) del.addEventListener('click', () => { rows.pop(); changed(); });
+  }
+  function drawCells(){
+    const {ctx, w, h} = fit($('#ctCells')), S = stats();
+    const X0 = 40, X1 = w - 10, n = S.cells.length + 1, cw = (X1 - X0) / n, xc = k => X0 + cw * (k + .5);
+    const Y1 = 18, Y0 = h - 34, vmax = Math.max(.5, S.chi) * 1.15, ys = v => Y0 - v / vmax * (Y0 - Y1);
+    const t = niceTicks(vmax, 3).filter(v => v <= vmax); yGrid(ctx, X0, X1, ys, t, stepFmt(t));
+    ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+    const bwid = Math.min(40, cw * .55), vals = S.cells.map(c => c.c).concat([S.chi]);
+    vals.forEach((v, k) => {
+      bar(ctx, xc(k) - bwid / 2, bwid, ys(v), Y0, k === n - 1 ? C('--ink') : C('--accent'));
+      ctx.font = (k === n - 1 ? '700 ' : '600 ') + '11px ' + MONO; ctx.fillStyle = k === n - 1 ? C('--ink') : C('--ink-2'); ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      ctx.fillText(v.toFixed(v >= 10 ? 1 : 2), xc(k), ys(v) - 3);
+    });
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textBaseline = 'top';
+    S.cells.forEach((c, k) => { const [nm, mk] = c.lab.split(' '); ctx.fillText(cw < 60 ? nm.slice(0, 2) + mk : nm, xc(k), Y0 + 4); ctx.fillText(mk === '✓' ? 'clicked' : 'didn’t', xc(k), Y0 + 17); });
+    ctx.fillText('χ²', xc(n - 1), Y0 + 4);
+  }
+  function oneShuffle(S){
+    // deal the K clicks at random among the N visitors, keeping each button's visitor count
+    let left = rows.map(r => r.n), Nl = S.N; const got = rows.map(() => 0);
+    for (let j = 0; j < S.K; j++) {
+      let u = Math.random() * Nl, g = 0; while (g < rows.length - 1 && u >= left[g]) { u -= left[g]; g++; }
+      got[g]++; left[g]--; Nl--;
+    }
+    let x = 0; rows.forEach((r, i) => { const e1 = r.n * S.K / S.N, e0 = r.n - e1; x += (got[i] - e1) ** 2 / e1 + (r.n - got[i] - e0) ** 2 / e0; });
+    return x;
+  }
+  function hiFor(S){ return Math.max(8, Math.min(40, Math.ceil(S.chi * 1.5 / 2) * 2)); }
+  function drawHist(){
+    const S = stats(), hi = hiFor(S);
+    chiHist($('#ctHist'), shuf, {hi, bw: hi / 50, df: curve ? S.df : null, obs: S.ok ? S.chi : null, obsLabel: 'real table', empty: 'press Shuffle to build the chance world'});
+  }
+  function read(){
+    const S = stats();
+    if (!S.ok) { $('#ctRead').innerHTML = '<span class="warn">Need at least one click and one non-click to compare.</span>'; return; }
+    const k = countTail(shuf, S.chi, false);
+    let z = '';
+    if (rows.length === 2) {
+      const [a, b] = rows, p = S.K / S.N, se = Math.sqrt(p * (1 - p) * (1 / a.n + 1 / b.n)), zz = (b.k / b.n - a.k / a.n) / se;
+      z = ` · z-test: z = ${zz.toFixed(2)}, z² = <b>${(zz * zz).toFixed(2)}</b>`;
+    }
+    const minE = Math.min(...S.cells.map(c => c.e));
+    $('#ctRead').innerHTML = `χ² = <b>${S.chi.toFixed(2)}</b> on ${S.df} degree${S.df > 1 ? 's' : ''} of freedom${z}<br>` +
+      `shuffles at least this large: <b>${comma(k)} of ${comma(shuf.length)}</b>${shuf.length ? ` (p ≈ ${simP(k, shuf.length)})` : ''}` +
+      (curve ? ` · χ² curve: p = <b>${pfmt(chiUp(S.chi, S.df))}</b>` : '') +
+      (minE < 5 ? `<br><span class="warn">smallest expected count ${minE.toFixed(1)}: below 5, so trust the shuffle over the curve</span>` : '');
+  }
+  function all(){ drawCells(); drawHist(); read(); }
+  function changed(){ clearInterval(timer); timer = null; shuf = []; table(); all(); }
+  $('#ctTable').addEventListener('change', e => {
+    const inp = e.target.closest('input'); if (!inp) return;
+    const r = rows[+inp.dataset.r]; let v = Math.round(+inp.value); if (!isFinite(v)) v = 0;
+    if (inp.dataset.f === 'n') { r.n = Math.max(1, Math.min(100000, v)); r.k = Math.min(r.k, r.n); }
+    else r.k = Math.max(0, Math.min(r.n, v));
+    pressSeg('[data-ct]', 'ct', -1); changed();
+  });
+  $$('[data-ct]').forEach(b => b.addEventListener('click', () => { const i = +b.dataset.ct; rows = PRE[i].map(r => Object.assign({}, r)); pressSeg('[data-ct]', 'ct', i); changed(); }));
+  $('#ctAdd').addEventListener('click', () => { if (rows.length < 3) { const r0 = rows[0]; rows.push({name: 'Blue', n: r0.n, k: Math.round(r0.n * .057)}); pressSeg('[data-ct]', 'ct', -1); changed(); } });
+  $('#ctShuf').addEventListener('click', () => {
+    const S = stats(); if (!S.ok) return; clearInterval(timer);
+    const target = shuf.length + 1000, step = Math.max(10, Math.round(400000 / Math.max(1, S.K * rows.length)));
+    const go = () => { const m = Math.min(target - shuf.length, RM ? 1000 : step); for (let i = 0; i < m; i++) shuf.push(oneShuffle(S)); drawHist(); read(); if (shuf.length >= target) { clearInterval(timer); timer = null; } };
+    if (RM) go(); else timer = setInterval(go, 25);
+  });
+  $('#ctCurve').addEventListener('click', () => { curve = !curve; $('#ctCurve').setAttribute('aria-pressed', curve); $('#ctCurve').classList.toggle('on', curve); $('#ctLegC').hidden = !curve; drawHist(); read(); });
+  $('#ctClear').addEventListener('click', () => { clearInterval(timer); timer = null; shuf = []; drawHist(); read(); });
+  table(); all(); redraws.push(() => { drawCells(); drawHist(); });
+})();
+
+/* ---------- 4. replaying Mendel ---------- */
+(function(){
+  const M = [[5474, 1850], [6022, 2001], [705, 224], [882, 299], [428, 152], [651, 207], [787, 277]];
+  const OBS = [M.reduce((s, [a, b]) => { const n = a + b; return s + (a - .75 * n) ** 2 / (.1875 * n); }, 0), 41.6056];
+  const DF = [7, 84], HI = [24, 168], BW = [.5, 3];
+  let mode = 0, vals = [[], []], timer = null, curve = false;
+  function binom75(n){ let k = 0; for (let i = 0; i < n; i++) if (Math.random() < .75) k++; return k; }
+  function replay(){
+    if (mode === 0) { let x = 0; for (const [a, b] of M) { const n = a + b, k = binom75(n); x += (k - .75 * n) ** 2 / (.1875 * n); } return x; }
+    let x = 0; for (let i = 0; i < 84; i++) { const z = gauss(); x += z * z; } return x;
+  }
+  function draw(){ chiHist($('#mgHist'), vals[mode], {hi: HI[mode], bw: BW[mode], df: curve ? DF[mode] : null, obs: OBS[mode], obsLabel: mode ? 'Fisher’s total' : 'Mendel', tail: 'left', empty: 'press Replay to see honest totals'}); }
+  function read(){
+    const v = vals[mode], k = countTail(v, OBS[mode], true), avg = v.length ? sum(v) / v.length : null;
+    $('#mgRead').innerHTML = `${mode ? 'Fisher’s total over 84 comparisons' : 'Mendel’s total over 7 traits'}: χ² = <b>${OBS[mode].toFixed(mode ? 1 : 2)}</b> · honest data average ${DF[mode]}${avg != null ? ` (these replays: ${avg.toFixed(1)})` : ''}<br>` +
+      `honest replays fitting at least as well: <b>${comma(k)} of ${comma(v.length)}</b>${v.length ? ` (${simP(k, v.length)})` : ''}` +
+      (curve ? ` · χ² curve, left tail: <b>${pfmt(chiLo(OBS[mode], DF[mode]))}</b>` : '');
+  }
+  $$('[data-mg]').forEach(b => b.addEventListener('click', () => { clearInterval(timer); timer = null; mode = +b.dataset.mg; pressSeg('[data-mg]', 'mg', mode); draw(); read(); }));
+  $('#mgRun').addEventListener('click', () => {
+    clearInterval(timer); const m0 = mode, v = vals[m0], target = v.length + 1000;
+    const go = () => { const m = Math.min(target - v.length, RM ? 1000 : 50); for (let i = 0; i < m; i++) v.push(replay()); if (mode === m0) { draw(); read(); } if (v.length >= target) { clearInterval(timer); timer = null; } };
+    if (RM) go(); else timer = setInterval(go, 25);
+  });
+  $('#mgCurve').addEventListener('click', () => { curve = !curve; $('#mgCurve').setAttribute('aria-pressed', curve); $('#mgCurve').classList.toggle('on', curve); $('#mgLegC').hidden = !curve; draw(); read(); });
+  $('#mgClear').addEventListener('click', () => { clearInterval(timer); timer = null; vals[mode] = []; draw(); read(); });
+  draw(); read(); redraws.push(draw);
+})();
+
+/* ---------- 5. every possible shuffle vs the curve ---------- */
+(function(){
+  const PRE = [[20, 0, 4], [50, 2, 8], [200, 10, 20], [1000, 50, 64]];
+  let n = 20, a = 0, b = 4;
+  function chi2(x1, x2){
+    const K = x1 + x2, N = 2 * n; if (K === 0 || K === N) return 0;
+    const e1 = n * K / N, e0 = n - e1;
+    return (x1 - e1) ** 2 / e1 + (n - x1 - e0) ** 2 / e0 + (x2 - e1) ** 2 / e1 + (n - x2 - e0) ** 2 / e0;
+  }
+  function exact(){
+    // every way to deal K clicks among 2n visitors: hypergeometric over the grey count
+    const K = a + b, N = 2 * n, pts = [];
+    for (let k = Math.max(0, K - n); k <= Math.min(n, K); k++) pts.push({x: chi2(k, K - k), p: Math.exp(lchoose(n, k) + lchoose(n, K - k) - lchoose(N, K))});
+    return pts;
+  }
+  const surv = (pts, x) => pts.reduce((s, q) => s + (q.x >= x - 1e-9 ? q.p : 0), 0);
+  function draw(){
+    const {ctx, w, h} = fit($('#smChart')), X0 = 52, X1 = w - 14, Y0 = h - 24, Y1 = 12;
+    const obs = chi2(a, b), K = a + b, pts = K > 0 && K < 2 * n ? exact() : [];
+    const hi = Math.max(8, Math.ceil(obs * 1.4)), LMIN = -4;
+    const xs = v => X0 + v / hi * (X1 - X0), ys = p => Y0 - (Math.log10(Math.max(p, 1e-4)) - LMIN) / (0 - LMIN) * (Y0 - Y1);
+    ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    [[1, '100%'], [.1, '10%'], [.01, '1%'], [.001, '0.1%'], [.0001, '0.01%']].forEach(([p, l]) => {
+      const y = Math.round(ys(p)) + .5; ctx.strokeStyle = C('--line'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, y); ctx.lineTo(X1, y); ctx.stroke(); ctx.fillStyle = C('--ink-3'); ctx.fillText(l, X0 - 6, y);
+    });
+    const y05 = ys(.05); ctx.save(); ctx.setLineDash([2, 3]); ctx.strokeStyle = C('--ink-3'); ctx.beginPath(); ctx.moveTo(X0, y05); ctx.lineTo(X1, y05); ctx.stroke(); ctx.restore();
+    ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'left'; ctx.textBaseline = 'bottom'; ctx.fillText('5%', X1 - 22, y05 - 2);
+    xAxis(ctx, X0, X1, Y0, 0, hi);
+    // curve
+    ctx.save(); ctx.strokeStyle = C('--one'); ctx.lineWidth = 2.5; ctx.beginPath();
+    for (let i = 0; i <= 300; i++) { const x = hi * i / 300, y = ys(chiUp(x, 1)); i ? ctx.lineTo(xs(x), y) : ctx.moveTo(xs(x), y); }
+    ctx.stroke(); ctx.restore();
+    // exact step line
+    if (pts.length) {
+      const xsSorted = [...new Set(pts.map(q => +q.x.toFixed(9)))].sort((u, v) => u - v);
+      ctx.save(); ctx.strokeStyle = C('--ink-2'); ctx.lineWidth = 2.5; ctx.beginPath();
+      let prevY = ys(1); ctx.moveTo(xs(0), prevY);
+      xsSorted.forEach(x => { if (x <= 1e-9) return; if (x > hi) return; ctx.lineTo(xs(x), prevY); const yy = ys(surv(pts, x + 1e-7)); ctx.lineTo(xs(x), yy); prevY = yy; });
+      ctx.lineTo(X1, prevY); ctx.stroke(); ctx.restore();
+    }
+    if (pts.length) {
+      vline(ctx, xs(obs), Y1, Y0, C('--accent'), null, 2);
+      const pe = surv(pts, obs), pcv = chiUp(obs, 1);
+      ctx.fillStyle = C('--ink-2'); dot(ctx, xs(obs), ys(pe), 4.5); ctx.fillStyle = C('--one'); dot(ctx, xs(obs), ys(pcv), 4.5);
+      const right = xs(obs) > (X0 + X1) * .6, al = right ? 'right' : 'left', dx = right ? -8 : 8;
+      const lo = ys(pe) > ys(pcv);
+      tag(ctx, 'shuffle ' + pfmt(pe), xs(obs) + dx, ys(pe) + (lo ? 2 : -16), C('--ink-2'), al);
+      tag(ctx, 'curve ' + pfmt(pcv), xs(obs) + dx, ys(pcv) + (lo ? -16 : 2), C('--one'), al);
+    }
+  }
+  function read(){
+    $('#smA').textContent = a; $('#smB').textContent = b;
+    const K = a + b, obs = chi2(a, b);
+    if (K === 0 || K === 2 * n) { $('#smRead').innerHTML = '<span class="warn">Need at least one click and one non-click.</span>'; return; }
+    const pts = exact(), pe = surv(pts, obs), pcv = chiUp(obs, 1), distinct = new Set(pts.map(q => q.x.toFixed(6))).size;
+    $('#smRead').innerHTML = `${n} visitors per button · ${a} vs ${b} clicks · expected clicks per button ${(K / 2).toFixed(1)}${K / 2 < 5 ? ' <span class="warn">(below 5)</span>' : ''}<br>` +
+      `χ² = <b>${obs.toFixed(2)}</b> · curve: p = <b>${pfmt(pcv)}</b> · every possible shuffle: p = <b>${pfmt(pe)}</b> · ${distinct} possible χ² value${distinct > 1 ? 's' : ''}`;
+  }
+  function update(){ draw(); read(); }
+  $$('[data-sm]').forEach(bt => bt.addEventListener('click', () => { const i = +bt.dataset.sm; [n, a, b] = PRE[i]; pressSeg('[data-sm]', 'sm', i); update(); }));
+  $$('[data-sk]').forEach(bt => bt.addEventListener('click', () => {
+    const d = +bt.dataset.d; if (bt.dataset.sk === '0') a = Math.max(0, Math.min(n, a + d)); else b = Math.max(0, Math.min(n, b + d));
+    pressSeg('[data-sm]', 'sm', -1); update();
+  }));
+  update(); redraws.push(draw);
+})();
+
+/* ---------- 6. quiz ---------- */
+(function(){
+  const Q = [
+    {s: 'Predict: a fair die is rolled 60 times. How often does every face land between 8 and 12?',
+     o: ['Most of the time', 'Less than 1 time in 10'], a: 1,
+     e: 'About 7.8% of the time. Fair counts are lumpier than intuition expects, which is why a yardstick is needed.'},
+    {s: 'Why is each squared gap divided by the expected count?',
+     o: ['A gap of 5 matters more when you expect 10 than when you expect 1,000', 'So the gaps add up to zero'], a: 0,
+     e: 'Counts wobble by about the square root of what is expected, so dividing by the expected count puts every cell on the same scale.'},
+    {s: 'A die is rolled 600 times and compared with “fair”. How many degrees of freedom?',
+     o: ['6', '5', '599'], a: 1,
+     e: 'Six counts that must add up to 600 leave five free to vary.'},
+    {s: 'For the button test, χ² = 1.82 and the z-test gave z = 1.35. How are they related?',
+     o: ['χ² = z²: for a 2×2 table they are the same test', 'They are unrelated tests that happen to agree'], a: 0,
+     e: '1.35² = 1.82, and both give p = 0.18.'},
+    {s: 'Which reading is <em>wrong</em>?',
+     o: ['A large χ² says the counts are far from what was expected', 'A χ² close to zero is always good news for the theory', 'χ² must be computed on counts, not percentages'], a: 1,
+     e: 'Honest counts wobble. A fit that is too close, like Mendel’s, is itself suspicious: it suggests the data were selected or adjusted.'},
+    {s: 'A 2×2 table has expected counts of 1 and 2 in some cells. What should you do?',
+     o: ['Trust the χ² curve as usual', 'Use the exact shuffle (Fisher’s exact test) or merge sparse categories'], a: 1,
+     e: 'With tiny expected counts the statistic takes only a few values and the smooth curve can be badly off: 0.035 against an exact 0.11 in the example on this page.'},
+    {s: 'The same click rates with 4,300 visitors per button give χ² = 7.8 instead of 1.82. Why?',
+     o: ['The gap between the buttons got bigger', 'More data turns the same gap into stronger evidence'], a: 1,
+     e: 'The rates are unchanged; χ² grows with the number of counts, because the same percentages are much less likely to arise by chance in a larger sample.'}
+  ];
+  const box = $('#quiz'); let answered = 0, right = 0;
+  Q.forEach(qq => {
+    const d = document.createElement('div'); d.className = 'qitem';
+    d.innerHTML = `<p>${qq.s}</p><div class="qbtns">${qq.o.map((t, i) => `<button class="btn" data-i="${i}">${t}</button>`).join('')}</div><p class="qexp" hidden></p>`;
+    const exp = d.querySelector('.qexp');
+    d.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      const ok = +b.dataset.i === qq.a;
+      if (!d.dataset.done) { d.dataset.done = '1'; answered++; if (ok) right++; }
+      d.querySelectorAll('button').forEach(x => x.classList.remove('right', 'wrong'));
+      b.classList.add(ok ? 'right' : 'wrong');
+      exp.hidden = false; exp.innerHTML = `<b>${ok ? '✓ Right.' : '✗ Not quite.'}</b> ${qq.e}`;
+      $('#quizScore').textContent = `${answered} of ${Q.length} answered · ${right} right on the first try`;
+    }));
+    box.appendChild(d);
+  });
+})();
+})();
+</script>
+</body>
+</html>

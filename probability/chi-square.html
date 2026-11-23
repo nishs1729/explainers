@@ -312,7 +312,7 @@ table.summary td:not(:first-child),table.summary th:not(:first-child){text-align
     <div class="readout" id="svRead" style="margin-top:8px"></div>
   </div>
   <p>Since \(E[\chi^2_{n-1}] = n - 1\), the average of \(s^2\) is exactly \(\sigma^2\): dividing by \(n - 1\) rather than \(n\) makes \(s^2\) <em>unbiased</em>. Its square root is not. The square root bends large values down more than small ones, so \(E[s] = c_4\,\sigma\) with \(c_4 = \sqrt{\tfrac{2}{n-1}}\,\Gamma(\tfrac n2)/\Gamma(\tfrac{n-1}{2})\), which is below 1: about 0.80 for \(n = 2\), 0.94 for \(n = 5\) and 0.97 for \(n = 10\). Quality-control charts divide by \(c_4\) to correct for it.</p>
-  <p>The same fact gives exact confidence intervals for \(\sigma^2\), and sums of squared differences like this one are behind the chi-square tests that compare observed counts with expected ones (used in the <a href="poisson.html#data">Poisson tutorial</a>). Both belong to statistical inference, which is planned as a later series. Unlike the central limit theorem, the result here needs normal data: for heavy-tailed data the sample variance varies much more than \(\chi^2_{n-1}\) says.</p>
+  <p>The same fact gives exact confidence intervals for \(\sigma^2\), and sums of squared differences like this one are behind the <a href="../statistics/chi-square-tests.html">chi-square tests</a> that compare observed counts with expected ones (used in the <a href="poisson.html#data">Poisson tutorial</a>). Both belong to statistical inference, covered in the statistics series. Unlike the central limit theorem, the result here needs normal data: for heavy-tailed data the sample variance varies much more than \(\chi^2_{n-1}\) says.</p>
 </section>
 
 <!-- 7 -->
@@ -373,7 +373,7 @@ table.summary td:not(:first-child),table.summary th:not(:first-child){text-align
   <div class="secnum">08</div>
   <h2>Where you will meet it</h2>
   <div class="cards">
-    <div class="card"><h4>Statistical tests</h4><p>Pearson’s goodness-of-fit and contingency-table statistics, and likelihood-ratio tests in general, are referred to chi-square distributions. A later page on chi-square tests will cover them.</p></div>
+    <div class="card"><h4>Statistical tests</h4><p>Pearson’s goodness-of-fit and contingency-table statistics, and likelihood-ratio tests in general, are referred to chi-square distributions. The <a href="../statistics/chi-square-tests.html">Chi-square tests</a> page covers them.</p></div>
     <div class="card"><h4>Uncertainty of a spread</h4><p>Confidence intervals for a variance, and the limits of control charts for process variability, come straight from \((n-1)s^2/\sigma^2 \sim \chi^2_{n-1}\).</p></div>
     <div class="card"><h4>Navigation and targeting</h4><p>Position errors in two or three dimensions give Rayleigh and Maxwell miss distances, and the circular error probable is a chi-square quantile.</p></div>
     <div class="card"><h4>Physics</h4><p>Molecular speeds in a gas follow the Maxwell distribution, and the energy in a normal noise signal, a sum of squared amplitudes, is chi-square.</p></div>
