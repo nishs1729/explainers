@@ -272,7 +272,7 @@ window.EXPLAINERS = {
         },
         {
           "id": "chi-square-tests",
-          "title": "Chi-square tests",
+          "title": "Chi-Square Tests",
           "short": "Chi-square tests",
           "path": "statistics/chi-square-tests.html",
           "summary": "Why a fair die rolled 60 times keeps every face between 8 and 12 only 1 time in 13: observed vs expected cell by cell, a fair-or-loaded die game, the button test as a table (χ² = z²), Mendel’s too-good peas, and when to trust the exact shuffle instead.",
@@ -290,7 +290,7 @@ window.EXPLAINERS = {
         },
         {
           "id": "forking-paths",
-          "title": "The garden of forking paths",
+          "title": "The Garden of Forking Paths",
           "short": "Forking paths",
           "path": "statistics/forking-paths.html",
           "summary": "How a Beatles song “made” students younger at p = .040: 20 tests on noise, Bonferroni and false discovery rates, peeking until it works, and a p-hacking sandbox with 486 paths whose discoveries vanish on fresh data.",
@@ -299,7 +299,7 @@ window.EXPLAINERS = {
         },
         {
           "id": "polio-trial",
-          "title": "The 1954 polio vaccine trial",
+          "title": "The 1954 Polio Vaccine Trial",
           "short": "Polio trial",
           "path": "statistics/polio-trial.html",
           "summary": "A case study of the 1.8-million-child Salk vaccine trial: why vaccinating volunteers understated the effect (29 vs 42 cases prevented per 100,000), a trial simulator, the shuffle test, intervals and why rare outcomes need enormous trials.",

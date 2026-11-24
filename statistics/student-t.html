@@ -146,6 +146,7 @@ table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;co
 .legend > span[hidden]{display:none}
 table.summary.num{font-size:14px}
 table.summary.num td,table.summary.num th{text-align:right;white-space:nowrap}
+table.summary.num.wrap th{white-space:normal}
 table.summary.num td:first-child,table.summary.num th:first-child{text-align:left;white-space:normal}
 </style>
 <script>try{var t=localStorage.getItem('xp-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
@@ -162,7 +163,7 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
   <p class="lede">When the spread has to be estimated from the data as well, small samples produce extreme results far more often than the bell curve says. Student’s t is the corrected curve, and the shortcut behind the most-used test in science.</p>
   <div class="hero-play" id="heroPlay">
     <p class="ask">A Guinness brewer can only afford a handful of samples. How far can he trust the bell curve?</p>
-    <p class="hint" style="min-height:0;margin:0 0 10px">Take 3 measurements from a bell-shaped population, and measure how far their average is from the true mean in units of the sample’s <em>own</em> spread. The bell curve says a result beyond ±3 happens about 3 times in 1,000. With samples of 3, how often does it really happen?</p>
+    <p class="hint" style="min-height:0;margin:0 0 10px">Take 3 measurements from a bell-shaped population, and measure how far their average is from the true mean in units of its own estimated standard error, <em>s</em>/√3, worked out from the sample’s <em>own</em> spread. The bell curve says a result beyond ±3 happens about 3 times in 1,000. With samples of 3, how often does it really happen?</p>
     <div class="controls" id="heroPred">
       <button class="btn" data-g="0">Less often</button>
       <button class="btn" data-g="1">About 3 in 1,000</button>
@@ -196,20 +197,25 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
   <h2>The Guinness story</h2>
   <p>William Sealy Gosset joined the Guinness brewery in Dublin in 1899, fresh from studying chemistry and mathematics at Oxford. The brewery wanted to choose barley, hops and processes by experiment, and Gosset was handed the numbers. His problem was that experiments in a brewery are expensive: he often had only a few measurements to go on, sometimes as few as two or three.</p>
   <p>The statistics of the day, built by Karl Pearson and others for large biological surveys, treated the spread of the data as known. With hundreds of measurements that is harmless: the sample’s spread <em>s</em> is almost exactly the true spread σ. With 3 measurements it is not, and the standard formulas made Gosset’s small experiments look more conclusive than they were.</p>
-  <p>He worked out the right curve, checked it by simulation done by hand (writing the measurements of 3,000 criminals on cards, shuffling them, and dealing out 750 samples of 4), and published it in 1908 in Biometrika as “The probable error of a mean”. He signed it <strong>Student</strong> because Guinness did not let its staff publish work done for the firm. Among his examples was the sleep trial used throughout this series. Ronald Fisher later recast the result in the form used today, called it <em class="term">t</em>, and gave it its “degrees of freedom”.</p>
+  <p>He worked out the curve, partly by educated guesswork he could not fully prove, checked it by simulation done by hand (writing the measurements of 3,000 criminals on cards, shuffling them, and dealing out 750 samples of 4), and published it in 1908 in Biometrika as “The probable error of a mean”. Guinness, wary of giving away trade secrets, did not let its scientists publish under their own names, so he signed it <strong>Student</strong>. Among his examples was the sleep trial used throughout this series. Ronald Fisher later proved the result, recast it in the form used today, called it <em class="term">t</em>, and gave it its “degrees of freedom”.</p>
 </section>
 
 <!-- 2 -->
 <section id="wobbly">
   <div class="secnum">02</div>
   <h2>Dividing by a wobbly s</h2>
-  <p>On <a href="sampling-distributions.html">Sampling Distributions</a>, an average was standardized by subtracting the true mean and dividing by its standard error σ/√<em>n</em>. The result follows the bell curve exactly when the data are bell-shaped, whatever <em>n</em> is. But σ is almost never known. In practice you divide by <em>s</em>/√<em>n</em>, using the spread of the same small sample, and <em>s</em> wobbles too.</p>
-  <p>Below, each sample is <em>n</em> measurements from a population with true mean 100 and spread σ = 10. Each sample is standardized twice: once with the true σ, once with its own <em>s</em>.</p>
+  <p>On <a href="sampling-distributions.html">Sampling Distributions</a>, an average was standardized by subtracting the true mean and dividing by its standard error σ/√<em>n</em>. The result follows the <a href="../probability/normal.html">bell curve</a> exactly when the data are bell-shaped, whatever <em>n</em> is. But σ is almost never known. In practice you divide by <em>s</em>/√<em>n</em>, using the spread of the same small sample, and <em>s</em> wobbles too.</p>
+  <p>Below, each sample is <em>n</em> measurements from a population with true mean 100 and spread σ = 10, bell-shaped to start with. Each sample is standardized twice: once with the true σ, once with its own <em>s</em>.</p>
 
   <div class="widget">
-    <p class="widget-title">The standardizer</p>
+    <p class="widget-title">★ The standardizer</p>
     <div class="controls">
       <label class="ctrl">measurements per sample <input type="range" id="sdN" min="0" max="9" step="1" value="1"><output id="sdNOut"></output></label>
+      <span class="ctrl">population</span>
+      <div class="seg" role="group" aria-label="Population shape">
+        <button class="btn on" data-pop="norm" aria-pressed="true">bell-shaped</button>
+        <button class="btn" data-pop="skew" aria-pressed="false">skewed</button>
+      </div>
     </div>
     <canvas id="sdSample" style="height:110px" role="img" aria-label="The latest sample's measurements on a scale, with the true mean, the sample average, and bars showing the standard error from the true sigma and from the sample's own s"></canvas>
     <div class="readout" id="sdOne" aria-live="polite"></div>
@@ -217,12 +223,13 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
       <div><div class="mcap">Divided by the true <span style="text-transform:none">σ</span></div><canvas id="sdZ" style="height:200px" role="img" aria-label="Histogram of averages standardized with the true sigma, against the bell curve"></canvas><div class="readout" id="sdZRead"></div></div>
       <div><div class="mcap">Divided by the sample’s own <span style="text-transform:none"><em>s</em></span></div><canvas id="sdT" style="height:200px" role="img" aria-label="Histogram of averages standardized with the sample's own s, against the bell curve and optionally Student's t curve"></canvas><div class="readout" id="sdTRead"></div></div>
     </div>
-    <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>standardized averages</span></span><span><i class="sw" style="background:var(--zero)"></i><span>beyond ±2</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>bell curve</span></span><span><i class="sw line" style="border-top:2.5px solid var(--one)"></i><span>Student’s curve</span></span></div>
+    <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>standardized averages</span></span><span><i class="sw" style="background:var(--zero)"></i><span id="sdRedLab">beyond ±2</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>bell curve</span></span><span><i class="sw line" style="border-top:2.5px solid var(--one)"></i><span>Student’s curve</span></span></div>
     <div class="controls">
       <button class="btn primary" id="sdOneBtn">One sample</button>
       <button class="btn" id="sdRun">▶ Run</button>
       <button class="btn" id="sdMany">+2,000 samples</button>
       <button class="btn" id="sdCurve" aria-pressed="false">Show Student’s curve</button>
+      <button class="btn" id="sdMark" aria-pressed="false">Mark the small-s samples</button>
       <button class="btn" id="sdClear">Clear</button>
     </div>
     <div class="mcap" style="margin-top:12px">How wobbly <span style="text-transform:none"><em>s</em></span> is: each sample’s <span style="text-transform:none"><em>s</em></span> as a share of the true <span style="text-transform:none">σ</span></div>
@@ -230,8 +237,9 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
     <div class="readout" id="sdSRead"></div>
   </div>
 
-  <p>The left histogram fits the bell curve at every <em>n</em>. The right one has the same middle but much fatter tails, and the reason is in the bottom chart. With 3 measurements, <em>s</em> comes out below half of σ about 22% of the time, and whenever it does, dividing by it at least doubles the result. An ordinary average divided by an unluckily small <em>s</em> becomes an “extreme” result.</p>
-  <p>Student found the exact shape of that ratio: a bell-shaped numerator divided by an independently wobbling <em>s</em>, whose spread is described by the chi distribution on <a href="../probability/chi-square.html#chi">the Chi-square page</a>. Switch on Student’s curve to see it fit.</p>
+  <p>With the bell-shaped population, the left histogram fits the bell curve at every <em>n</em>. The right one has a lower middle and much fatter tails, and the reason is in the bottom chart. With 3 measurements, <em>s</em> comes out below half of σ about 22% of the time, and whenever it does, dividing by it at least doubles the result. Press <strong>Mark the small-s samples</strong> and those samples turn red in all three charts. On the left they are scattered through the middle; on the right they make up most of the tails, nearly two-thirds of the results beyond ±2 in a long run. An ordinary average divided by an unluckily small <em>s</em> becomes an “extreme” result.</p>
+  <p>Student worked out the shape of that ratio: a bell-shaped numerator divided by an independently wobbling <em>s</em>, whose spread is described by the chi distribution on <a href="../probability/chi-square.html#chi">the Chi-square page</a>. Fisher later supplied the full proof. Switch on Student’s curve to see it fit.</p>
+  <p>Now switch the population to <strong>skewed</strong>: a long tail to the right, still with mean 100 and σ = 10. Student’s curve no longer fits. With samples of 3, about 23% of the results land below −2 and only about 3% above +2, where the curve promises about 9% on each side. Most samples miss the long tail: their values bunch just below 100 with a small <em>s</em>, so they land far below −2. A sample that catches one big value gets a big average <em>and</em> a big <em>s</em>, so it is rarely extreme above. The lopsidedness is still visible at 30 measurements (about 7% below −2 against the curve’s 3%). Student’s curve is exact only for bell-shaped data. With small, skewed samples, use a shuffle or the <a href="bootstrap.html">bootstrap</a> instead.</p>
 </section>
 
 <!-- 3 -->
@@ -251,16 +259,40 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
   </div>
 
   <div class="table-wrap">
-    <table class="summary num">
-      <thead><tr><th>Measurements <em>n</em></th><th>2</th><th>3</th><th>5</th><th>10</th><th>20</th><th>30</th><th>∞</th></tr></thead>
+    <table class="summary num wrap">
+      <thead><tr><th>Measurements <em>n</em></th><th>Degrees of freedom</th><th>95% multiplier (instead of 1.96)</th><th>What “± 1.96 × s/√n” really covers</th></tr></thead>
       <tbody>
-        <tr><td>Degrees of freedom</td><td>1</td><td>2</td><td>4</td><td>9</td><td>19</td><td>29</td><td>∞</td></tr>
-        <tr><td>95% multiplier (instead of 1.96)</td><td>12.71</td><td>4.30</td><td>2.78</td><td>2.26</td><td>2.09</td><td>2.05</td><td>1.96</td></tr>
-        <tr><td>What “± 1.96 × s/√n” really covers</td><td>70%</td><td>81%</td><td>88%</td><td>92%</td><td>94%</td><td>94%</td><td>95%</td></tr>
+        <tr><td>2</td><td>1</td><td>12.71</td><td>70%</td></tr>
+        <tr><td>3</td><td>2</td><td>4.30</td><td>81%</td></tr>
+        <tr><td>5</td><td>4</td><td>2.78</td><td>88%</td></tr>
+        <tr><td>10</td><td>9</td><td>2.26</td><td>92%</td></tr>
+        <tr><td>20</td><td>19</td><td>2.09</td><td>94%</td></tr>
+        <tr><td>30</td><td>29</td><td>2.05</td><td>94%</td></tr>
+        <tr><td>∞</td><td>∞</td><td>1.96</td><td>95%</td></tr>
       </tbody>
     </table>
   </div>
   <p>With 3 measurements, an honest 95% interval needs 4.30 standard errors, not 1.96; the bell-curve version would catch the truth only 81% of the time. By 30 the difference is small, which is where the old rule “use the normal above 30” comes from.</p>
+  <p>Coverage is easier to believe when you count it. Each row below is one sample from the bell-shaped population, with two intervals around its average, the bell curve’s and Student’s, like the interval rain on <a href="confidence-intervals.html">Confidence Intervals</a>.</p>
+
+  <div class="widget">
+    <p class="widget-title">100 intervals, two multipliers</p>
+    <div class="controls">
+      <span class="ctrl">measurements per sample</span>
+      <div class="seg" role="group" aria-label="Measurements per sample">
+        <button class="btn on" data-cn="3" aria-pressed="true">3</button>
+        <button class="btn" data-cn="10" aria-pressed="false">10</button>
+        <button class="btn" data-cn="30" aria-pressed="false">30</button>
+      </div>
+      <button class="btn primary" id="ciGo">Draw 100 samples</button>
+    </div>
+    <div class="pair">
+      <div><div class="mcap" id="ciCapA">± 1.96 × <span style="text-transform:none">s/√n</span></div><canvas id="ciA" style="height:250px" role="img" aria-label="100 intervals using the bell curve's multiplier 1.96, with the true mean marked; misses highlighted"></canvas><div class="readout" id="ciReadA"></div></div>
+      <div><div class="mcap" id="ciCapB">± 4.30 × <span style="text-transform:none">s/√n</span> (Student)</div><canvas id="ciB" style="height:250px" role="img" aria-label="The same 100 samples with Student's multiplier, with the true mean marked; misses highlighted"></canvas><div class="readout" id="ciReadB"></div></div>
+    </div>
+    <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>interval catches the true mean</span></span><span><i class="sw" style="background:var(--zero)"></i><span>interval misses it</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>true mean 100</span></span></div>
+  </div>
+  <p>With 3 measurements, about 19 of every 100 bell-curve intervals miss, against about 5 of Student’s. The misses are mostly the samples whose <em>s</em> came out small: their intervals are short and confident, and wrong. At 30 measurements the two columns look almost the same.</p>
 </section>
 
 <!-- 4 -->
@@ -286,9 +318,12 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
       <button class="btn" id="shZ" aria-pressed="false">Overlay the bell curve</button>
     </div>
     <div class="readout" id="shRead" aria-live="polite"></div>
+    <div class="mcap" style="margin-top:12px">The tails up close: chance of a t at least this far out (log scale)</div>
+    <canvas id="shTail" style="height:230px" role="img" aria-label="On a log scale, the chance of a t statistic at least as far from zero as each value: the sign flips as a step line, Student's t with 9 degrees of freedom, and the bell curve, with the data's t marked"></canvas>
+    <div class="legend"><span><i class="sw line" style="border-top:2.5px solid var(--ink-2)"></i><span>sign flips (exact)</span></span><span><i class="sw line" style="border-top:2.5px solid var(--one)"></i><span>Student’s t, 9 df</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>bell curve</span></span><span><i class="sw line" style="border-top:2px solid var(--accent)"></i><span>the real data</span></span></div>
   </div>
 
-  <p>For the paired differences, the flips give p = 4 in 1,024 = 0.39%, and Student’s formula gives 0.28%: two routes to the same answer. The bell curve, used with <em>s</em>, would give 0.005%, claiming 80 times more certainty than 10 patients can provide. That is the mistake Student’s curve exists to prevent. For drug 1 alone, nothing is going on, and all three agree that chance explains it.</p>
+  <p>The lower chart shows the tails, where the answer lives. For the paired differences, the flips give p = 4 in 1,024 = 0.39%, and Student’s formula gives 0.28%: two routes to the same answer. The bell curve, used with <em>s</em>, would give 0.005% (see the <a href="p-values.html">p-values</a> page for what these numbers mean), claiming 80 times more certainty than 10 patients can provide. That is the mistake Student’s curve exists to prevent. For drug 1 alone, the data are consistent with chance alone, and all three agree on that. As on <a href="power.html">Power</a>, that is not evidence that drug 1 does nothing: its 95% t interval runs from −0.53 to +2.03 extra hours.</p>
   <p>This is the pattern for the rest of the series: every classical test is a formula that approximates a shuffle, and it can be checked against one.</p>
 </section>
 
@@ -304,11 +339,22 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
         <tr><td>Does one average differ from a fixed value?</td><td><strong>One-sample t-test</strong>, <em>n</em> − 1 df</td><td>Drug 1 vs no change: t = 1.33, p = 0.22</td></tr>
         <tr><td>Do paired measurements differ?</td><td><strong>Paired t-test</strong>: a one-sample test on the differences</td><td>Drug 2 − drug 1: t = 4.06, p = 0.003</td></tr>
         <tr><td>Do two separate groups differ?</td><td><strong>Two-sample t-test</strong>; Welch’s version doesn’t assume equal spreads</td><td>If the 20 nights had come from 20 different people: t = 1.86, p = 0.08</td></tr>
-        <tr><td>How big is an average, give or take?</td><td><strong>t interval</strong>: x̄ ± t* × s/√<em>n</em></td><td>1.58 ± 2.26 × 0.39 = 0.70 to 2.46 extra hours</td></tr>
+        <tr><td>How big is an average, give or take?</td><td><strong><a href="confidence-intervals.html">t interval</a></strong>: x̄ ± t* × s/√<em>n</em></td><td>1.58 ± 2.26 × 0.39 = 0.70 to 2.46 extra hours</td></tr>
       </tbody>
     </table>
   </div>
-  <p>The two-sample line is a warning. The same 20 numbers give p = 0.003 when analyzed as pairs and p = 0.08 when analyzed as two separate groups. Pairing matters because some patients sleep much more than others whichever drug they take; comparing each patient with themselves removes that variation. Choose the test that matches how the data were collected, never the one that gives the smaller p.</p>
+  <div class="widget">
+    <p class="widget-title">Ten patients, two drugs</p>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="How to look at the data">
+        <button class="btn on" data-sv="pairs" aria-pressed="true">As pairs</button>
+        <button class="btn" data-sv="groups" aria-pressed="false">As two separate groups</button>
+      </div>
+    </div>
+    <canvas id="slChart" style="height:260px" role="img" aria-label="Each patient's extra hours of sleep on drug 1 and on drug 2, joined by a line; or the same 20 numbers as two unconnected groups"></canvas>
+    <div class="readout" id="slRead" aria-live="polite"></div>
+  </div>
+  <p>The two-sample line is a warning. The same 20 numbers give p = 0.003 when analyzed as pairs and p = 0.08 when analyzed as two separate groups. Pairing matters because some patients sleep much more than others whichever drug they take: on drug 1 alone they range from −1.6 to +3.7 hours. Yet 9 of the 10 lines go up and none goes down. Comparing each patient with themselves removes the variation between patients; seen as two separate groups, the same 20 numbers overlap heavily. Choose the test that matches how the data were collected, never the one that gives the smaller p.</p>
   <h3>When to prefer the shuffle</h3>
   <ul>
     <li><strong>Small, skewed or outlier-prone data.</strong> The t curve assumes bell-shaped data. Thanks to the central limit theorem it is forgiving for averages of moderate samples, but with a handful of lopsided measurements a sign flip or permutation test is safer.</li>
@@ -527,6 +573,11 @@ function histPanel(cv, vals, o){
     const c0 = o.lo + (k + .5) * o.bw;
     bar(ctx, xs(o.lo + k * o.bw) + .5, bw, ys(counts[k]), Y0, o.color ? o.color(c0) : C('--ink-3'));
   }
+  if (o.sub) {
+    const sc = new Array(nb).fill(0);
+    o.sub.forEach(v => { if (v >= o.lo && v < o.hi) sc[Math.floor((v - o.lo) / o.bw)]++; });
+    for (let k = 0; k < nb; k++) bar(ctx, xs(o.lo + k * o.bw) + .5, bw, ys(sc[k]), Y0, o.subColor);
+  }
   xAxis(ctx, X0, X1, Y0, o.lo, o.hi, o.fmt);
   (o.curves || []).forEach(c => {
     ctx.save(); ctx.strokeStyle = c.col; ctx.lineWidth = c.lw || 2; if (c.dash) ctx.setLineDash(c.dash); ctx.beginPath();
@@ -556,11 +607,12 @@ function histPanel(cv, vals, o){
     ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
     if (!vals.length) ctx.fillText('the bell curve’s prediction for 2,000 samples', xs(0), Y1 + 4);
   }
+  const GL = ['less often than 3 in 1,000', 'about 3 in 1,000', 'about 1 in 100', 'about 1 in 10'];
   function message(){
     const k = vals.filter(v => Math.abs(v) > 3).length, share = k / N;
     $$('#heroPred .btn').forEach(b => { b.classList.remove('right', 'wrong'); if (guess != null && +b.dataset.g === guess) b.classList.add(guess === 3 ? 'right' : 'wrong'); });
-    hint.innerHTML = `<b>${k} of 2,000</b> samples (${pc(share)}) landed beyond ±3, about <b>1 in ${Math.round(1 / share)}</b>, where the bell curve promised 3 in 1,000: some ${Math.round(share / .0027)} times as often. ` +
-      (guess === 3 ? 'As you guessed. ' : guess != null ? '' : '') +
+    hint.innerHTML = (guess != null ? `You guessed <b>${GL[guess]}</b>${guess === 3 ? ', and you were right' : ''}. ` : '') +
+      `<b>${k} of 2,000</b> samples (${pc(share)}) landed beyond ±3, about <b>1 in ${Math.round(1 / share)}</b>, where the bell curve promised 3 in 1,000: some ${Math.round(share / .0027)} times as often. ` +
       'The culprit is the spread: with only 3 measurements, the sample’s own spread is often far too small, and dividing by it turns ordinary averages into “extreme” ones. The green curve is Student’s correction, which fits.';
     $('#heroLegT').hidden = false;
   }
@@ -579,10 +631,12 @@ function histPanel(cv, vals, o){
 /* ---------- 2. the standardizer ---------- */
 (function(){
   const NS = [2, 3, 4, 5, 6, 8, 10, 15, 20, 30], MU = 100, SG = 10, nIn = $('#sdN');
-  let zs = [], ts = [], ss = [], last = null, timer = null, showT = false;
+  let zs = [], ts = [], ss = [], last = null, timer = null, showT = false, mark = false, pop = 'norm';
   const n = () => NS[+nIn.value];
+  /* skewed: a shifted exponential with the same mean 100 and spread 10 */
+  const draw1 = () => pop === 'norm' ? MU + SG * gauss() : MU - SG - SG * Math.log(1 - Math.random());
   function sample(){
-    const k = n(), x = []; for (let i = 0; i < k; i++) x.push(MU + SG * gauss());
+    const k = n(), x = []; for (let i = 0; i < k; i++) x.push(draw1());
     const {m, s} = meanSd(x), z = (m - MU) / (SG / Math.sqrt(k)), t = (m - MU) / (s / Math.sqrt(k));
     zs.push(z); ts.push(t); ss.push(s / SG); last = {x, m, s, z, t};
   }
@@ -607,13 +661,19 @@ function histPanel(cv, vals, o){
     $('#sdOne').innerHTML = `latest sample: average <b>${last.m.toFixed(1)}</b>, own spread s = <b>${last.s.toFixed(1)}</b> (true σ = 10) → divided by σ: <b>${signed(last.z, 2)}</b> · divided by s: <b style="color:var(--accent)">${signed(last.t, 2)}</b>`;
   }
   function draw(){
-    const df = n() - 1, tail = c => Math.abs(c) > 2 ? C('--zero') : C('--ink-3');
+    const df = n() - 1, tail = c => !mark && Math.abs(c) > 2 ? C('--zero') : C('--ink-3');
     const bell = {f: npdf, col: C('--ink'), dash: [5, 4], lw: 2};
-    histPanel($('#sdZ'), zs, {lo: -6, hi: 6, bw: .25, curves: zs.length ? [bell] : [], color: tail, fmt: v => signed(v, 0)});
-    histPanel($('#sdT'), ts, {lo: -6, hi: 6, bw: .25, curves: ts.length ? (showT ? [bell, {f: x => tpdf(x, df), col: C('--one'), lw: 2.5}] : [bell]) : [], color: tail, fmt: v => signed(v, 0)});
+    const small = a => a.filter((v, i) => ss[i] < .5);
+    histPanel($('#sdZ'), zs, {lo: -6, hi: 6, bw: .25, curves: zs.length ? [bell] : [], color: tail, fmt: v => signed(v, 0), sub: mark ? small(zs) : null, subColor: C('--zero')});
+    histPanel($('#sdT'), ts, {lo: -6, hi: 6, bw: .25, curves: ts.length ? (showT ? [bell, {f: x => tpdf(x, df), col: C('--one'), lw: 2.5}] : [bell]) : [], color: tail, fmt: v => signed(v, 0), sub: mark ? small(ts) : null, subColor: C('--zero')});
     const share = a => a.length ? a.filter(v => Math.abs(v) > 2).length / a.length : 0;
+    const lo2 = a => a.length ? a.filter(v => v < -2).length / a.length : 0, hi2 = a => a.length ? a.filter(v => v > 2).length / a.length : 0;
+    const fromSmall = () => { let b = 0, bs = 0; ts.forEach((v, i) => { if (Math.abs(v) > 2) { b++; if (ss[i] < .5) bs++; } }); return b ? bs / b : 0; };
+    const sideT = pop === 'skew' ? ` (below −2: <b>${pc(lo2(ts))}</b>, above +2: <b>${pc(hi2(ts))}</b>)` : '';
     $('#sdZRead').innerHTML = zs.length ? `beyond ±2: <b>${pc(share(zs))}</b> · bell curve: 4.6%` : '';
-    $('#sdTRead').innerHTML = ts.length ? `beyond ±2: <b style="color:var(--zero)">${pc(share(ts))}</b> · bell curve: 4.6%` + (showT ? ` · Student: <b style="color:var(--one)">${pc(tTwo(2, df))}</b>` : '') : '';
+    $('#sdTRead').innerHTML = ts.length ? `beyond ±2: <b style="color:var(--zero)">${pc(share(ts))}</b>${sideT} · bell curve: 4.6%` + (showT ? ` · Student: <b style="color:var(--one)">${pc(tTwo(2, df))}</b>` + (pop === 'skew' ? ` (${pc(tTwo(2, df) / 2)} each side)` : '') : '') +
+      (mark ? `<br>from samples with s below σ/2: <b style="color:var(--zero)">${pc(fromSmall())}</b> of those beyond ±2` : '') : '';
+    $('#sdRedLab').textContent = mark ? 's below half of σ' : 'beyond ±2';
     const F = histPanel($('#sdS'), ss, {lo: 0, hi: 2.5, bw: .05, color: c => c < .5 ? C('--zero') : C('--ink-3'), fmt: v => v.toFixed(1) + 'σ'});
     vline(F.ctx, F.xs(1), F.Y1, F.Y0, C('--ink'), [5, 4], 1.4);
     const low = ss.length ? ss.filter(v => v < .5).length / ss.length : 0;
@@ -629,6 +689,8 @@ function histPanel(cv, vals, o){
   $('#sdRun').addEventListener('click', () => { if (timer) return stop(); $('#sdRun').textContent = '❚❚ Pause'; timer = setInterval(() => add(RM ? 20 : 5), RM ? 300 : 50); });
   $('#sdCurve').addEventListener('click', () => { showT = !showT; $('#sdCurve').classList.toggle('on', showT); $('#sdCurve').setAttribute('aria-pressed', showT); $('#sdCurve').textContent = showT ? 'Hide Student’s curve' : 'Show Student’s curve'; draw(); });
   $('#sdClear').addEventListener('click', reset);
+  $('#sdMark').addEventListener('click', () => { mark = !mark; $('#sdMark').classList.toggle('on', mark); $('#sdMark').setAttribute('aria-pressed', mark); $('#sdMark').textContent = mark ? 'Unmark the small-s samples' : 'Mark the small-s samples'; draw(); });
+  $$('[data-pop]').forEach(b => b.addEventListener('click', () => { pop = b.dataset.pop; $$('[data-pop]').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); }); reset(); }));
   draw(); redraws.push(draw);
 })();
 
@@ -656,6 +718,43 @@ function histPanel(cv, vals, o){
     $('#dfRead').innerHTML = `${dfTxt} · the middle 95% of t lies within <b style="color:var(--one)">±${q.toFixed(2)}</b> (bell curve: ±1.96) · share of t beyond ±1.96: <b>${pc(tTwo(1.96, df))}</b> (bell curve: 5.0%)`;
   }
   kIn.addEventListener('input', draw);
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 3b. 100 intervals, two multipliers ---------- */
+(function(){
+  const MU = 100, SG = 10;
+  let k = 3, rows = [], tot = [0, 0, 0];
+  function drawOne(cv, mult, idx){
+    const {ctx, w, h} = fit(cv), X0 = 10, X1 = w - 10, Y0 = h - 22, Y1 = 6, LO = 60, HI = 140;
+    const xs = v => X0 + (Math.max(LO, Math.min(HI, v)) - LO) / (HI - LO) * (X1 - X0);
+    xAxis(ctx, X0, X1, Y0, LO, HI);
+    if (!rows.length) { emptyNote(ctx, w, h, 'press Draw'); return 0; }
+    const rh = (Y0 - Y1 - 4) / rows.length; let miss = 0;
+    rows.forEach((r, i) => {
+      const half = mult * r.s / Math.sqrt(k), a = r.m - half, b = r.m + half, hit = a <= MU && MU <= b; if (!hit) miss++;
+      ctx.fillStyle = hit ? C('--ink-3') : C('--zero');
+      ctx.fillRect(xs(a), Y1 + i * rh, Math.max(1.5, xs(b) - xs(a)), Math.max(1, rh - .6));
+    });
+    vline(ctx, xs(MU), Y1 - 4, Y0, C('--ink'), [5, 4], 1.4);
+    return miss;
+  }
+  function draw(){
+    const q = tq975(k - 1);
+    $('#ciCapB').innerHTML = `± ${q.toFixed(2)} × <span style="text-transform:none">s/√n</span> (Student)`;
+    const mA = drawOne($('#ciA'), 1.959964, 0), mB = drawOne($('#ciB'), q, 1);
+    const all = (m, j) => tot[2] > 100 ? ` · all draws: ${comma(tot[j])} of ${comma(tot[2])} (${pc(tot[j] / tot[2])})` : '';
+    $('#ciReadA').innerHTML = rows.length ? `missed: <b style="color:var(--zero)">${mA} of 100</b>${all(mA, 0)}` : '';
+    $('#ciReadB').innerHTML = rows.length ? `missed: <b style="color:var(--zero)">${mB} of 100</b>${all(mB, 1)}` : '';
+  }
+  function go(){
+    rows = []; const q = tq975(k - 1);
+    for (let i = 0; i < 100; i++) { const x = []; for (let j = 0; j < k; j++) x.push(MU + SG * gauss()); rows.push(meanSd(x)); }
+    rows.forEach(r => { const d = Math.abs(r.m - MU) / (r.s / Math.sqrt(k)); if (d > 1.959964) tot[0]++; if (d > q) tot[1]++; }); tot[2] += 100;
+    $('#ciGo').textContent = 'Draw 100 more'; draw();
+  }
+  $('#ciGo').addEventListener('click', go);
+  $$('[data-cn]').forEach(b => b.addEventListener('click', () => { k = +b.dataset.cn; rows = []; tot = [0, 0, 0]; $('#ciGo').textContent = 'Draw 100 samples'; $$('[data-cn]').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); }); draw(); }));
   draw(); redraws.push(draw);
 })();
 
@@ -688,14 +787,80 @@ function histPanel(cv, vals, o){
     const right = xs(S.t) > (F.X0 + F.X1) * .7; ctx.textAlign = right ? 'right' : 'left';
     ctx.fillText('the data: t = ' + S.t.toFixed(2), xs(S.t) + (right ? -5 : 5), 0);
     $('#shData').innerHTML = `${S.name}: ${S.x.map(v => signed(v, 1)).join(', ')} · average <b>${S.m.toFixed(2)}</b> · s = <b>${S.s.toFixed(2)}</b> · t = <b>${S.t.toFixed(2)}</b>`;
+    drawTail(S);
     $('#shRead').innerHTML = `sign flips at least as extreme: <b>${S.ext} of 1,024</b> = <b style="color:var(--accent)">${pfmt(S.ext / 1024)}</b>` +
       (showT ? ` · Student’s t, 9 df: p = <b style="color:var(--one)">${pfmt(tTwo(S.t, 9))}</b>` : '') +
       (showZ ? ` · bell curve: p = <b>${pfmt(zTwo(S.t))}</b>` : '');
+  }
+  /* the tails on a log scale: P(|T| >= x) for the flips, t(9) and the bell curve */
+  function drawTail(S){
+    const {ctx, w, h} = fit($('#shTail')), X0 = 52, X1 = w - 14, Y0 = h - 24, Y1 = 10, HI = 6, LMIN = -5;
+    const xs = v => X0 + v / HI * (X1 - X0), ys = p => Y0 - (Math.log10(Math.max(p, Math.pow(10, LMIN))) - LMIN) / (0 - LMIN) * (Y0 - Y1);
+    ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    [[1, '100%'], [.1, '10%'], [.01, '1%'], [.001, '0.1%'], [.0001, '0.01%'], [.00001, '0.001%']].forEach(([p, l]) => {
+      const y = Math.round(ys(p)) + .5; ctx.strokeStyle = C('--line'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, y); ctx.lineTo(X1, y); ctx.stroke(); ctx.fillStyle = C('--ink-3'); ctx.fillText(l, X0 - 6, y);
+    });
+    xAxis(ctx, X0, X1, Y0, 0, HI);
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillText('|t| →', X1, Y0 - 2);
+    const curve = (f, col, dash, lw) => {
+      ctx.save(); ctx.strokeStyle = col; ctx.lineWidth = lw; if (dash) ctx.setLineDash(dash); ctx.beginPath();
+      for (let i = 0; i <= 300; i++) { const x = HI * i / 300, y = ys(f(x)); i ? ctx.lineTo(xs(x), y) : ctx.moveTo(xs(x), y); }
+      ctx.stroke(); ctx.restore();
+    };
+    curve(x => zTwo(x), C('--ink'), [5, 4], 2);
+    curve(x => tTwo(x, 9), C('--one'), null, 2.5);
+    /* exact step line from the 1,024 flips */
+    const abs = S.flips.map(Math.abs).sort((a, b) => a - b), N = abs.length;
+    ctx.save(); ctx.strokeStyle = C('--ink-2'); ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(xs(0), ys(1));
+    let prev = ys(1), i = 0;
+    while (i < N) {
+      const v = abs[i]; let j = i; while (j < N && abs[j] <= v + 1e-9) j++;
+      if (v > HI) break;
+      if (v > 1e-9) { ctx.lineTo(xs(v), prev); prev = ys((N - j) / N); ctx.lineTo(xs(v), prev); }
+      i = j;
+    }
+    ctx.lineTo(X1, prev); ctx.stroke(); ctx.restore();
+    const ob = Math.abs(S.t), pf = S.ext / 1024, pt = tTwo(ob, 9), pz = zTwo(ob);
+    vline(ctx, xs(ob), Y1, Y0, C('--accent'), null, 2);
+    const right = xs(ob) > (X0 + X1) * .6, al = right ? 'right' : 'left', dx = right ? -8 : 8;
+    [[pf, C('--ink-2'), 'flips ' + pfmt(pf)], [pt, C('--one'), 't ' + pfmt(pt)], [pz, C('--ink'), 'bell ' + pfmt(pz)]].forEach(([p, col, txt], j) => {
+      ctx.fillStyle = col; dot(ctx, xs(ob), ys(p), 4.5);
+      ctx.font = '600 11px ' + MONO; const tw = ctx.measureText(txt).width, tx = right ? xs(ob) + dx - tw : xs(ob) + dx;
+      const ty = ys(p) + (j === 0 ? -16 : j === 1 ? 2 : -6);
+      ctx.fillStyle = C('--surface'); ctx.fillRect(tx - 3, ty - 1, tw + 6, 15);
+      ctx.fillStyle = col; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(txt, tx, ty);
+    });
+    void al;
   }
   const tog = (id, get, set) => $(id).addEventListener('click', () => { set(!get()); $(id).classList.toggle('on', get()); $(id).setAttribute('aria-pressed', get()); draw(); });
   tog('#shT', () => showT, v => showT = v);
   tog('#shZ', () => showZ, v => showZ = v);
   $$('[data-ds]').forEach(b => b.addEventListener('click', () => { ds = +b.dataset.ds; $$('[data-ds]').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); }); draw(); }));
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 5. ten patients, two drugs ---------- */
+(function(){
+  const D1 = [0.7, -1.6, -0.2, -1.2, -0.1, 3.4, 3.7, 0.8, 0.0, 2.0], D2 = [1.9, 0.8, 1.1, 0.1, -0.1, 4.4, 5.5, 1.6, 4.6, 3.4];
+  let view = 'pairs';
+  function draw(){
+    const {ctx, w, h} = fit($('#slChart')), X0 = 44, X1 = w - 14, Y0 = h - 30, Y1 = 12, LO = -2, HI = 6;
+    const ys = v => Y0 - (v - LO) / (HI - LO) * (Y0 - Y1), xa = X0 + (X1 - X0) * .28, xb = X0 + (X1 - X0) * .72;
+    yGrid(ctx, X0, X1, ys, [-2, 0, 2, 4, 6], v => signed(v, 0) + ' h');
+    ctx.font = '600 12px ' + MONO; ctx.fillStyle = C('--ink-2'); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText('drug 1', xa, Y0 + 8); ctx.fillText('drug 2', xb, Y0 + 8);
+    if (view === 'pairs') {
+      D1.forEach((a, i) => { ctx.strokeStyle = C('--accent'); ctx.globalAlpha = .55; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(xa, ys(a)); ctx.lineTo(xb, ys(D2[i])); ctx.stroke(); ctx.globalAlpha = 1; });
+    } else {
+      [[D1, xa], [D2, xb]].forEach(([d, x]) => { const m = d.reduce((t, v) => t + v, 0) / d.length; ctx.strokeStyle = C('--ink'); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x - 30, ys(m)); ctx.lineTo(x + 30, ys(m)); ctx.stroke(); });
+    }
+    const jit = i => view === 'pairs' ? 0 : ((i * 7) % 10 - 4.5) * 3;
+    [[D1, xa], [D2, xb]].forEach(([d, x]) => d.forEach((v, i) => { ctx.fillStyle = C('--surface'); dot(ctx, x + jit(i), ys(v), 6); ctx.fillStyle = C('--accent'); dot(ctx, x + jit(i), ys(v), 4.5); }));
+    $('#slRead').innerHTML = view === 'pairs'
+      ? 'each line is one patient · differences, drug 2 − drug 1: average <b>+1.58 h</b>, spread s = 1.23 → paired t = <b>4.06</b>, p = <b>0.003</b>'
+      : 'two separate groups · averages <b>+0.75</b> and <b>+2.33 h</b>, spreads 1.79 and 2.00 → Welch t = <b>1.86</b>, p = <b>0.08</b>';
+  }
+  $$('[data-sv]').forEach(b => b.addEventListener('click', () => { view = b.dataset.sv; $$('[data-sv]').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); }); draw(); }));
   draw(); redraws.push(draw);
 })();
 

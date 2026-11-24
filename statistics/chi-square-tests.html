@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Chi-square tests — a visual introduction</title>
+<title>Chi-Square Tests — a visual introduction</title>
 <style>
 :root{
   --bg:#faf8f4; --surface:#ffffff; --surface-2:#f2efe8; --ink:#1c1c1e; --ink-2:#4c4e55; --ink-3:#8b8d93; --line:#e3dfd5;
@@ -163,6 +163,13 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
 .ctab input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .ctab .ex{display:block;font-size:11px;color:var(--ink-3);margin-top:2px}
 .ctrl b.mono{display:inline-block;min-width:2.2em;text-align:center}
+@media (max-width:560px){
+  .ctab{font-size:13px}
+  .ctab th,.ctab td{padding:5px 3px}
+  .ctab th{font-size:11px}
+  .ctab input{width:4.3em;padding:3px 4px}
+  .ctab .exw{display:none}
+}
 </style>
 <script>try{var t=localStorage.getItem('xp-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 <link rel="stylesheet" href="../assets/site.css">
@@ -174,7 +181,7 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
 
 <header class="hero">
   <p class="kicker">A visual introduction</p>
-  <h1>Chi-square tests</h1>
+  <h1>Chi-Square Tests</h1>
   <p class="lede">You expected so many of each kind and got something else. Is the difference real, or the ordinary unevenness of chance? Add up how far the counts you got are from the counts you expected, cell by cell, and compare the total with what chance alone produces. One recipe tests dice, theories and tables of counts.</p>
   <div class="hero-play" id="heroPlay">
     <p class="ask">Gregor Mendel’s pea counts fit his theory almost perfectly. In 1936 Ronald Fisher asked whether they fit <em>too</em> perfectly. To judge that, you first need to know how uneven honest counts are.</p>
@@ -186,7 +193,7 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
       <button class="btn" data-g="3">Less than 1 in 10</button>
     </div>
     <canvas id="heroDie" style="height:170px" role="img" aria-label="Counts of each face in the current set of 60 rolls of a fair die, against the expected 10 and the band from 8 to 12"></canvas>
-    <canvas id="heroGrid" style="height:220px" role="img" aria-label="One hundred small bar charts, one per set of 60 rolls; sets where every face stayed between 8 and 12 are highlighted"></canvas>
+    <canvas id="heroGrid" style="height:220px" role="img" aria-label="One hundred small bar charts, one per set of 60 rolls, each with its chi-square value underneath; sets where every face stayed between 8 and 12 are highlighted"></canvas>
     <div class="legend" style="justify-content:center"><span><i class="sw" style="background:var(--one-soft);border:1px solid var(--one)"></i><span>every face 8–12</span></span><span><i class="sw" style="background:var(--ink-3)"></i><span>fair-die counts</span></span><span><i class="sw" style="background:var(--zero)"></i><span>outside 8–12</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>expected 10</span></span></div>
     <div class="controls">
       <button class="btn primary" id="heroGo" disabled>Roll 100 sets of 60</button>
@@ -276,7 +283,7 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
     <p class="msg" id="mdMsg" aria-live="polite"></p>
   </div>
 
-  <p>The grey histogram is the yardstick, and its shape barely depends on how many times you roll. That is what makes the shortcut possible. Pearson showed that when expected counts are not too small, χ² follows the <a href="../probability/chi-square.html">chi-square distribution</a>, the sum of squared bell-curve draws, with one <em class="term">degree of freedom</em> for every count that is free to vary. Six counts that must add up to the number of rolls leave five free, so a die is judged against the 5-df curve. Switch it on: it lies along the simulated histogram, and its tail beyond 11.07 holds 5%.</p>
+  <p>The gray histogram is the yardstick, and its shape barely depends on how many times you roll. That is what makes the shortcut possible. Pearson showed that when expected counts are not too small, χ² follows the <a href="../probability/chi-square.html">chi-square distribution</a>, the sum of squared <a href="../probability/normal.html">bell-curve</a> draws, with one <em class="term">degree of freedom</em> for every count that is free to vary. Six counts that must add up to the number of rolls leave five free, so a die is judged against the 5-df curve. Switch it on: it lies along the simulated histogram, and its tail beyond 11.07 holds 5%.</p>
   <p>A loaded die is easy to catch with 600 rolls and almost impossible with 10. The test can only find what the data are able to show: the <a href="power.html">power</a> lesson again.</p>
 
   <h3>Horse kicks and the Poisson</h3>
@@ -288,7 +295,7 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
     <div class="table-wrap"><table class="summary num" id="hkTable"></table></div>
     <div class="readout" id="hkRead"></div>
   </div>
-  <p>Classes expecting fewer than 5 are merged (3 and 4 deaths become “3+”), leaving 4 cells. That is 3 free counts, minus one more because the average 0.61 was estimated from the same data, so the curve has 2 degrees of freedom. A χ² of 0.32 is right in the middle of what chance produces: the Poisson fits.</p>
+  <p>The rare classes are merged so that no class is tiny (3 and 4 deaths become “3+”, which expects 4.8), leaving 4 cells. That is 3 free counts, minus one more because the average 0.61 was estimated from the same data, so the curve has 2 degrees of freedom. That extra subtraction is Fisher’s: Pearson’s method, from his 1900 paper on, did not take a degree of freedom off for quantities estimated from the data, for fitted averages or for the row and column totals of a table, and Fisher corrected it in 1922–24. A χ² of 0.32 is right in the middle of what chance produces: the Poisson fits.</p>
 </section>
 
 <!-- 3 -->
@@ -300,10 +307,19 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
 
   <div class="widget">
     <p class="widget-title">★ The count table</p>
+    <div id="ctPred">
+      <p class="cast-q">Before you load the second table: same click rates (5.0% and 6.4%), but 4,300 visitors per button instead of 1,000. χ² is 1.82 now. It will be…</p>
+      <div class="controls">
+        <button class="btn" data-g="0">about the same</button>
+        <button class="btn" data-g="1">about 4 times bigger</button>
+        <button class="btn" data-g="2">about 18 times bigger</button>
+        <button class="linkbtn" id="ctSkip">skip the guess</button>
+      </div>
+    </div>
     <div class="controls">
       <div class="seg" role="group" aria-label="Preset tables">
         <button class="btn on" data-ct="0" aria-pressed="true">Button test</button>
-        <button class="btn" data-ct="1" aria-pressed="false">Same rates, 4,300 per button</button>
+        <button class="btn" data-ct="1" aria-pressed="false" disabled>Same rates, 4,300 per button</button>
         <button class="btn" data-ct="2" aria-pressed="false">Tiny: 20 per button</button>
       </div>
       <button class="btn" id="ctAdd">+ Add a button</button>
@@ -320,6 +336,7 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
       <button class="btn" id="ctClear">Clear</button>
     </div>
     <div class="readout" id="ctRead" aria-live="polite"></div>
+    <p class="msg" id="ctMsg" aria-live="polite"></p>
   </div>
 
   <p>For the button test, χ² = 1.82, and about 21% of shuffles reach it. The 1-df curve gives p = 0.18, which is exactly the p of the two-proportion z-test on <a href="p-values.html">p-values</a>: for a table with two rows and two columns, <strong>χ² is z²</strong> (1.35² = 1.82), and the two tests are the same test. The shuffle’s slightly larger 0.21 comes from counts being whole numbers: the shuffle counts every table exactly as lopsided as the real one in full, and the smooth curve only half-counts that step. Yates’s 1934 “continuity correction” nudges the curve to match and gives 0.21 too.</p>
@@ -347,7 +364,7 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
       </tbody>
     </table>
   </div>
-  <p>No single row is suspicious. But a χ² can be too <em>small</em>: honest counts wobble, and seven experiments in a row that all land this close to 3 : 1 happen only about 1 time in 20. Replay Mendel’s seven experiments with honest 3 : 1 chance and see how rarely the total is that small. Then switch to Fisher’s full analysis, which combined 84 comparisons from the whole paper.</p>
+  <p>No single row is suspicious. But a χ² can be too <em>small</em>: honest counts wobble, and seven experiments in a row that all land this close to 3 : 1 happen only about 1 time in 20. Replay Mendel’s seven experiments with honest 3 : 1 chance and see how rarely the total is that small. Then switch to Fisher’s full analysis, which combined 84 comparisons from the whole paper; the replays there are 84 honest yes-or-no experiments of Mendel’s own sizes, from 19 seeds to 8,023.</p>
 
   <div class="widget">
     <p class="widget-title">Replaying Mendel honestly</p>
@@ -357,7 +374,7 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
         <button class="btn" data-mg="1" aria-pressed="false">Fisher’s 84 comparisons</button>
       </div>
     </div>
-    <canvas id="mgHist" style="height:220px" role="img" aria-label="Histogram of total chi-square from honest replays of Mendel's experiments, with Mendel's own total marked far in the left tail"></canvas>
+    <canvas id="mgHist" style="height:220px" role="img" aria-label="Histogram of total chi-square from honest binomial replays of Mendel's experiments, with Mendel's own total marked far in the left tail"></canvas>
     <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>honest replays</span></span><span><i class="sw" style="background:var(--accent)"></i><span>replays fitting at least as well</span></span><span><i class="sw line" style="border-top:2px solid var(--accent)"></i><span>Mendel’s total</span></span><span id="mgLegC" hidden><i class="sw line" style="border-top:2.5px solid var(--one)"></i><span>χ² curve</span></span></div>
     <div class="controls">
       <button class="btn primary" id="mgRun">Replay 1,000 times</button>
@@ -367,15 +384,15 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
     <div class="readout" id="mgRead" aria-live="polite"></div>
   </div>
 
-  <p>Fisher’s total for 84 comparisons was χ² = 41.6, where honest data average 84. A fit that good or better happens about 3 times in 100,000 (Fisher’s printed tables gave 7 in 100,000). This is a test in the <em>left</em> tail: instead of asking whether the data are too far from the theory, it asks whether they are too close.</p>
-  <p>Fisher concluded that the data had been adjusted, suggesting Mendel “was deceived by some assistant who knew too well what was expected”. The argument has run ever since (see Franklin and colleagues’ 2008 book <em>Ending the Mendel–Fisher Controversy</em>). Proposed explanations include stopping a count when the ratio looked right, discarding plants suspected of contamination, and repeating experiments and reporting the better one; Pires and Branco (2010) found that the last of these could produce the pattern. Few historians think Mendel simply invented numbers, and his theory was right. But the lesson stands: honest data are noisy, and data with too little noise are a warning sign of a human hand.</p>
+  <p>Fisher’s total for 84 comparisons was χ² = 41.6, where honest data average 84. The widget splits Mendel’s data into 84 yes-or-no counts, as Edwards (1986) and Pires and Branco (2010) did, which gives 41.3. A fit that good or better happens only 2 or 3 times in 100,000, both in 2 million honest replays and on the χ² curve (Fisher’s printed tables gave 7 in 100,000). So 1,000 replays will almost never show one; you would need tens of thousands. This is a test in the <em>left</em> tail: instead of asking whether the data are too far from the theory, it asks whether they are too close.</p>
+  <p>Fisher concluded that the data had been adjusted, suggesting Mendel “was deceived by some assistant who knew too well what was expected”. The argument has run ever since (see Franklin and colleagues’ 2008 book <em>Ending the Mendel–Fisher Controversy</em>). Proposed explanations include stopping a count when the ratio looked right, discarding plants suspected of contamination, and repeating experiments and reporting the better one; Pires and Branco (2010) found that the last of these could produce the pattern. Fisher’s sharpest single point was about the 2 : 1 ratios. Mendel sorted plants into pure and hybrid by growing 10 seeds from each, and a hybrid shows no recessive among 10 seeds (3/4)¹⁰ = 5.6% of the time, so the honest expectation is about 1.7 : 1, yet his counts fit 2 : 1. Others have argued that his procedure may have differed from Fisher’s reading. Few historians think Mendel simply invented numbers, and his theory was right. But the lesson stands: honest data are noisy, and data with too little noise are a warning sign of a human hand.</p>
 </section>
 
 <!-- 5 -->
 <section id="breaks">
   <div class="secnum">05</div>
   <h2>When it breaks</h2>
-  <p>The χ² curve is a smooth stand-in for a lumpy reality. With large expected counts the lumps are fine-grained and the curve is close. With tiny ones, the statistic can only take a handful of values, and the curve misjudges how often each one occurs. Below, the jagged line is the exact answer from every possible shuffle of the table, which is <strong>Fisher’s exact test</strong>; the smooth one is the curve.</p>
+  <p>The χ² curve is a smooth stand-in for a lumpy reality. With large expected counts the lumps are fine-grained and the curve is close. With tiny ones, the statistic can only take a handful of values, and the curve misjudges how often each one occurs. Below, the jagged line is the exact answer from every possible shuffle of the table, which is <strong>Fisher’s exact test</strong>; the smooth one is the curve. (Fisher’s test ranks tables by how likely they are rather than by χ², but with equal-sized groups, as here, the two rankings agree.)</p>
 
   <div class="widget">
     <p class="widget-title">Every possible shuffle vs the curve</p>
@@ -388,7 +405,7 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
       </div>
     </div>
     <div class="controls">
-      <span class="ctrl">grey clicks <button class="btn sm" data-sk="0" data-d="-1" aria-label="fewer grey clicks">−</button> <b id="smA" class="mono"></b> <button class="btn sm" data-sk="0" data-d="1" aria-label="more grey clicks">+</button></span>
+      <span class="ctrl">gray clicks <button class="btn sm" data-sk="0" data-d="-1" aria-label="fewer gray clicks">−</button> <b id="smA" class="mono"></b> <button class="btn sm" data-sk="0" data-d="1" aria-label="more gray clicks">+</button></span>
       <span class="ctrl">orange clicks <button class="btn sm" data-sk="1" data-d="-1" aria-label="fewer orange clicks">−</button> <b id="smB" class="mono"></b> <button class="btn sm" data-sk="1" data-d="1" aria-label="more orange clicks">+</button></span>
     </div>
     <canvas id="smChart" style="height:240px" role="img" aria-label="Chance of a chi-square at least as large as each value, for every possible shuffle of the table as a step line and for the chi-square curve as a smooth line, on a log scale, with the observed value marked"></canvas>
@@ -415,7 +432,7 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
     <div class="card"><h4>Surveys</h4><p>Cross-tabulations such as answer by age group or region are tested for any connection with χ².</p></div>
     <div class="card"><h4>Fraud checks</h4><p>First digits of genuine financial figures follow Benford’s law; a χ² against those proportions flags books that don’t.</p></div>
     <div class="card"><h4>Quality control</h4><p>Defects by shift, machine or supplier: are they spread as their share of production would predict?</p></div>
-    <div class="card"><h4>Checking a model</h4><p>Does a Poisson, a binomial or a fitted curve really describe the data? Bin it and compare counts, as with the horse kicks.</p></div>
+    <div class="card"><h4>Checking a model</h4><p>Does a <a href="../probability/poisson.html">Poisson</a>, a <a href="../probability/binomial.html">binomial</a> or a fitted curve really describe the data? Bin it and compare counts, as with the horse kicks.</p></div>
   </div>
 
   <h3>Check yourself</h3>
@@ -604,8 +621,8 @@ function tag(ctx, text, x, y, color, align){
 /* histogram of chi-square values on [0,hi) with the observed value, its tail, and an optional curve */
 function chiHist(cv, vals, o){
   const {ctx, w, h} = fit(cv), X0 = 40, X1 = w - 14, Y0 = h - 22, Y1 = 10;
-  const nb = Math.round(o.hi / o.bw), counts = new Array(nb).fill(0);
-  vals.forEach(v => { const k = Math.floor(v / o.bw); if (k >= 0 && k < nb) counts[k]++; });
+  const B0 = o.x0 || 0, nb = Math.ceil((o.hi - B0) / o.bw - 1e-9), counts = new Array(nb).fill(0);
+  vals.forEach(v => { const k = Math.floor((v - B0) / o.bw); if (k >= 0 && k < nb) counts[k]++; });
   const N = Math.max(1, vals.length), scale = N * o.bw;
   let ymax = Math.max(...counts);
   const cf = o.df ? (x => scale * chipdf(x, o.df)) : null;
@@ -617,8 +634,8 @@ function chiHist(cv, vals, o){
   if (vals.length) yGrid(ctx, X0, X1, ys, t, stepFmt(t));
   const inTail = c => o.obs == null ? false : o.tail === 'left' ? c <= o.obs + 1e-9 : c >= o.obs - 1e-9;
   for (let k = 0; k < nb; k++) {
-    const c0 = (k + .5) * o.bw;
-    bar(ctx, xs(k * o.bw) + .5, bw, ys(counts[k]), Y0, inTail(c0) ? C('--accent') : C('--ink-3'));
+    const c0 = B0 + (k + .5) * o.bw, xl = Math.max(X0, xs(B0 + k * o.bw) + .5);
+    bar(ctx, xl, Math.min(bw, xs(B0 + (k + 1) * o.bw) - xl - .5), ys(counts[k]), Y0, inTail(c0) ? C('--accent') : C('--ink-3'));
   }
   xAxis(ctx, X0, X1, Y0, 0, o.hi);
   if (cf) {
@@ -662,12 +679,12 @@ const HERO = {last: null, listeners: []};
     ctx.fillText(curN ? `set ${setNo} of 100 · ${curN} rolls` : 'the band 8–12 around the expected 10', F.X1, F.Y1 + 2);
   }
   function drawGrid(){
-    const wpx = cvG.getBoundingClientRect().width, cols = wpx < 560 ? 10 : 20, rows = 100 / cols, cellH = cols === 10 ? 34 : 44;
+    const wpx = cvG.getBoundingClientRect().width, cols = wpx < 560 ? 10 : 20, rows = 100 / cols, cellH = (cols === 10 ? 34 : 44) + 13;
     const want = rows * cellH + 2 + 'px'; if (cvG.style.height !== want) cvG.style.height = want;
     const {ctx, w} = fit(cvG), cw = w / cols;
     for (let i = 0; i < 100; i++) {
       const cx = (i % cols) * cw, cy = Math.floor(i / cols) * cellH + 1, s = sets[i];
-      const x0 = cx + 2, x1 = cx + cw - 2, y0 = cy + 2, y1 = cy + cellH - 2;
+      const x0 = cx + 2, x1 = cx + cw - 2, y0 = cy + 2, y1 = cy + cellH - 15;
       if (s && inBand(s)) { ctx.fillStyle = C('--one-soft'); roundRect(ctx, x0, y0, x1 - x0, y1 - y0, 4); ctx.fill(); ctx.strokeStyle = C('--one'); ctx.lineWidth = 1; ctx.stroke(); }
       else { ctx.strokeStyle = C('--line'); ctx.lineWidth = 1; roundRect(ctx, x0 + .5, y0 + .5, x1 - x0 - 1, y1 - y0 - 1, 4); ctx.stroke(); }
       if (!s) continue;
@@ -677,15 +694,21 @@ const HERO = {last: null, listeners: []};
         const v = Math.min(20, s[k]); ctx.fillStyle = s[k] < 8 || s[k] > 12 ? C('--zero') : inBand(s) ? C('--one') : C('--ink-3');
         ctx.fillRect(bx0 + k * bww + bww * .15, ysc(v), Math.max(1, bww * .7), y1 - 2 - ysc(v));
       }
+      const chi = s.reduce((t, o) => t + (o - 10) ** 2 / 10, 0);
+      ctx.font = (inBand(s) ? '600 ' : '') + (cw < 40 ? '9px ' : '10px ') + MONO; ctx.fillStyle = inBand(s) ? C('--one') : C('--ink-3'); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.fillText(chi.toFixed(1), (x0 + x1) / 2, y1 + 1);
     }
   }
   function draw(){ drawDie(); drawGrid(); }
+  const GL = ['most of the time', 'about half the time', 'about 1 in 4', 'less than 1 in 10'];
   function message(){
     const k = sets.filter(inBand).length, m = sets.filter(s => Math.max(...s) >= 15).length;
     $$('#heroPred .btn').forEach(b => { b.classList.remove('right', 'wrong'); if (guess != null && +b.dataset.g === guess) b.classList.add(guess === 3 ? 'right' : 'wrong'); });
-    hint.innerHTML = `<b>${k} of 100</b> sets kept every face between 8 and 12. The exact chance is 7.8%, about <b>1 in 13</b>${guess === 3 ? ', as you guessed' : ''}. ` +
+    hint.innerHTML = (guess != null ? `You guessed <b>${GL[guess]}</b>${guess === 3 ? ', and you were right' : ''}. ` : '') +
+      `<b>${k} of 100</b> sets kept every face between 8 and 12. The exact chance is 7.8%, about <b>1 in 13</b>. ` +
       `In ${m} sets the busiest face came up 15 times or more (exact chance 37%). A fair die is lumpy, so unevenness you can see is no evidence on its own. ` +
-      `The page builds a yardstick for “too uneven” and, for Mendel, for “too even”: his counts look like the rare green sets, over and over.`;
+      `The number under each set is its χ², the yardstick this page builds: the green sets all score 2.4 or less, while nine honest sets in ten land between about 1 and 11. ` +
+      `Mendel’s counts raise the opposite worry: they are a little too close, experiment after experiment, and that adds up.`;
   }
   function open(){ $('#heroGo').disabled = false; $('#heroSkip').hidden = true; }
   $$('#heroPred .btn').forEach(b => b.addEventListener('click', () => { guess = +b.dataset.g; $$('#heroPred .btn').forEach(x => x.classList.toggle('guess', x === b)); open(); if (done) message(); }));
@@ -816,8 +839,17 @@ const HERO = {last: null, listeners: []};
     if (!n) emptyNote(ctx, w, h, 'Roll the mystery die to start');
     else { ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'right'; ctx.textBaseline = 'top'; ctx.fillText(`${comma(n)} rolls · expected ${E % 1 ? E.toFixed(1) : E} each`, F.X1, 0); }
   }
+  /* χ² for N rolls moves in steps of 12/N (60 rolls: 0.2), so use a bin width that is a whole number of steps,
+     centered on the possible values, or the histogram looks like a comb */
+  function bins(N){
+    if (!N) return {bw: .5, x0: 0};
+    const st = 12 / N; if (st < .05) return {bw: .5, x0: 0};
+    const bw = st * Math.ceil(.5 / st - 1e-9), off = (((6 - N) % st) + st) % st, a = off - st / 2;
+    return {bw, x0: a - bw * Math.ceil(a / bw)};
+  }
   function drawHist(){
-    chiHist($('#mdHist'), fair, {hi: 25, bw: .5, df: curve ? 5 : null, obs: n ? chi : null, obsLabel: 'mystery die', empty: 'fair dice appear here once you roll'});
+    const b = bins(fairN > 0 ? fairN : n);
+    chiHist($('#mdHist'), fair, {hi: 25, bw: b.bw, x0: b.x0, df: curve ? 5 : null, obs: n ? chi : null, obsLabel: 'mystery die', empty: 'fair dice appear here once you roll'});
   }
   function read(){
     if (!n) { $('#mdRead').innerHTML = 'No rolls yet.'; return; }
@@ -871,9 +903,9 @@ const HERO = {last: null, listeners: []};
 /* ---------- 3. the count table ---------- */
 (function(){
   const PRE = [
-    [{name: 'Grey', n: 1000, k: 50}, {name: 'Orange', n: 1000, k: 64}],
-    [{name: 'Grey', n: 4300, k: 215}, {name: 'Orange', n: 4300, k: 275}],
-    [{name: 'Grey', n: 20, k: 0}, {name: 'Orange', n: 20, k: 4}]
+    [{name: 'Gray', n: 1000, k: 50}, {name: 'Orange', n: 1000, k: 64}],
+    [{name: 'Gray', n: 4300, k: 215}, {name: 'Orange', n: 4300, k: 275}],
+    [{name: 'Gray', n: 20, k: 0}, {name: 'Orange', n: 20, k: 4}]
   ];
   let rows = PRE[0].map(r => Object.assign({}, r)), shuf = [], timer = null, curve = false;
   function stats(){
@@ -893,8 +925,8 @@ const HERO = {last: null, listeners: []};
       const c1 = S.cells[2 * i], c0 = S.cells[2 * i + 1];
       html += `<tr><td>${r.name}${i === 2 ? ' <button class="linkbtn" id="ctDel" aria-label="remove the third button">remove</button>' : ''}</td>` +
         `<td><input type="number" min="1" max="100000" step="1" value="${r.n}" data-r="${i}" data-f="n" aria-label="${r.name} visitors"></td>` +
-        `<td><input type="number" min="0" max="100000" step="1" value="${r.k}" data-r="${i}" data-f="k" aria-label="${r.name} clicks"><span class="ex">expected ${c1.e.toFixed(1)}</span></td>` +
-        `<td>${comma(r.n - r.k)}<span class="ex">expected ${c0.e.toFixed(1)}</span></td><td>${r.n ? pc(r.k / r.n) : '–'}</td></tr>`;
+        `<td><input type="number" min="0" max="100000" step="1" value="${r.k}" data-r="${i}" data-f="k" aria-label="${r.name} clicks"><span class="ex"><span class="exw">expected </span>(${c1.e.toFixed(1)})</span></td>` +
+        `<td>${comma(r.n - r.k)}<span class="ex"><span class="exw">expected </span>(${c0.e.toFixed(1)})</span></td><td>${r.n ? pc(r.k / r.n) : '–'}</td></tr>`;
     });
     html += `<tr><td><b>All</b></td><td>${comma(S.N)}</td><td>${comma(S.K)}</td><td>${comma(S.N - S.K)}</td><td>${S.N ? pc(S.K / S.N) : '–'}</td></tr></tbody>`;
     $('#ctTable').innerHTML = html;
@@ -966,31 +998,44 @@ const HERO = {last: null, listeners: []};
   });
   $('#ctCurve').addEventListener('click', () => { curve = !curve; $('#ctCurve').setAttribute('aria-pressed', curve); $('#ctCurve').classList.toggle('on', curve); $('#ctLegC').hidden = !curve; drawHist(); read(); });
   $('#ctClear').addEventListener('click', () => { clearInterval(timer); timer = null; shuf = []; drawHist(); read(); });
+  const GL = ['about the same', 'about 4 times bigger', 'about 18 times bigger'];
+  function openBig(){ $('[data-ct="1"]').disabled = false; $('#ctSkip').hidden = true; }
+  $$('#ctPred [data-g]').forEach(b => b.addEventListener('click', () => {
+    const g = +b.dataset.g; $$('#ctPred [data-g]').forEach(x => x.classList.toggle('guess', x === b)); openBig();
+    $('[data-ct="1"]').click();
+    const big = stats().chi;
+    $('#ctMsg').innerHTML = `You guessed <b>${GL[g]}</b>${g === 1 ? ', and you were right' : ''}. χ² went from 1.82 to <b>${big.toFixed(2)}</b>, ${(big / 1.82).toFixed(1)} times bigger: with the same percentages, χ² grows in step with the number of visitors (4,300 ÷ 1,000 = 4.3).`;
+  }));
+  $('#ctSkip').addEventListener('click', openBig);
   table(); all(); redraws.push(() => { drawCells(); drawHist(); });
 })();
 
 /* ---------- 4. replaying Mendel ---------- */
 (function(){
   const M = [[5474, 1850], [6022, 2001], [705, 224], [882, 299], [428, 152], [651, 207], [787, 277]];
-  const OBS = [M.reduce((s, [a, b]) => { const n = a + b; return s + (a - .75 * n) ** 2 / (.1875 * n); }, 0), 41.6056];
+  /* the 84 comparisons as yes-or-no counts (Edwards 1986; Pires & Branco 2010, Table 7): visitors n, successes, and
+     the expected share coded 3 = 3/4, 2 = 2/3, 1 = 1/2 */
+  const E84 = '7324,5474,3;8023,6022,3;929,705,3;1181,882,3;580,428,3;858,651,3;1064,787,3;57,45,3;35,27,3;31,24,3;29,19,3;43,32,3;32,26,3;112,88,3;32,22,3;34,28,3;32,25,3;36,25,3;39,32,3;19,14,3;97,70,3;37,24,3;26,20,3;45,32,3;53,44,3;64,50,3;62,44,3;556,423,3;423,315,3;133,101,3;639,480,3;480,367,3;159,122,3;175,127,3;70,52,3;78,60,3;44,30,3;76,60,3;37,26,3;79,55,3;43,33,3;37,30,3;565,372,2;519,353,2;100,64,2;100,71,2;100,60,2;100,67,2;100,72,2;100,65,2;301,198,2;102,67,2;96,68,2;198,138,2;103,65,2;367,245,2;113,76,2;122,79,2;245,175,2;122,78,2;127,78,2;52,38,2;60,45,2;30,22,2;60,40,2;26,17,2;55,36,2;33,25,2;30,20,2;90,43,1;43,20,1;47,25,1;110,57,1;57,31,1;53,27,1;87,44,1;44,25,1;43,22,1;98,49,1;49,24,1;49,22,1;166,87,1;87,47,1;79,38,1'.split(';').map(r => { const [n, k, c] = r.split(',').map(Number); return {n, k, p: [0, .5, 2 / 3, .75][c]}; });
+  const chi84 = rows => rows.reduce((t, e) => t + (e.k - e.n * e.p) ** 2 / (e.n * e.p * (1 - e.p)), 0);
+  const OBS = [M.reduce((s, [a, b]) => { const n = a + b; return s + (a - .75 * n) ** 2 / (.1875 * n); }, 0), chi84(E84)];
   const DF = [7, 84], HI = [24, 168], BW = [.5, 3];
   let mode = 0, vals = [[], []], timer = null, curve = false;
-  function binom75(n){ let k = 0; for (let i = 0; i < n; i++) if (Math.random() < .75) k++; return k; }
+  function binomP(n, p){ let k = 0; for (let i = 0; i < n; i++) if (Math.random() < p) k++; return k; }
   function replay(){
-    if (mode === 0) { let x = 0; for (const [a, b] of M) { const n = a + b, k = binom75(n); x += (k - .75 * n) ** 2 / (.1875 * n); } return x; }
-    let x = 0; for (let i = 0; i < 84; i++) { const z = gauss(); x += z * z; } return x;
+    if (mode === 0) { let x = 0; for (const [a, b] of M) { const n = a + b, k = binomP(n, .75); x += (k - .75 * n) ** 2 / (.1875 * n); } return x; }
+    let x = 0; for (const e of E84) { const k = binomP(e.n, e.p); x += (k - e.n * e.p) ** 2 / (e.n * e.p * (1 - e.p)); } return x;
   }
-  function draw(){ chiHist($('#mgHist'), vals[mode], {hi: HI[mode], bw: BW[mode], df: curve ? DF[mode] : null, obs: OBS[mode], obsLabel: mode ? 'Fisher’s total' : 'Mendel', tail: 'left', empty: 'press Replay to see honest totals'}); }
+  function draw(){ chiHist($('#mgHist'), vals[mode], {hi: HI[mode], bw: BW[mode], df: curve ? DF[mode] : null, obs: OBS[mode], obsLabel: mode ? '84 comparisons' : 'Mendel', tail: 'left', empty: 'press Replay to see honest totals'}); }
   function read(){
     const v = vals[mode], k = countTail(v, OBS[mode], true), avg = v.length ? sum(v) / v.length : null;
-    $('#mgRead').innerHTML = `${mode ? 'Fisher’s total over 84 comparisons' : 'Mendel’s total over 7 traits'}: χ² = <b>${OBS[mode].toFixed(mode ? 1 : 2)}</b> · honest data average ${DF[mode]}${avg != null ? ` (these replays: ${avg.toFixed(1)})` : ''}<br>` +
+    $('#mgRead').innerHTML = `${mode ? 'Mendel’s 84 comparisons (Fisher’s grouping gave 41.6)' : 'Mendel’s total over 7 traits'}: χ² = <b>${OBS[mode].toFixed(mode ? 1 : 2)}</b> · honest data average ${DF[mode]}${avg != null ? ` (these replays: ${avg.toFixed(1)})` : ''}<br>` +
       `honest replays fitting at least as well: <b>${comma(k)} of ${comma(v.length)}</b>${v.length ? ` (${simP(k, v.length)})` : ''}` +
       (curve ? ` · χ² curve, left tail: <b>${pfmt(chiLo(OBS[mode], DF[mode]))}</b>` : '');
   }
   $$('[data-mg]').forEach(b => b.addEventListener('click', () => { clearInterval(timer); timer = null; mode = +b.dataset.mg; pressSeg('[data-mg]', 'mg', mode); draw(); read(); }));
   $('#mgRun').addEventListener('click', () => {
     clearInterval(timer); const m0 = mode, v = vals[m0], target = v.length + 1000;
-    const go = () => { const m = Math.min(target - v.length, RM ? 1000 : 50); for (let i = 0; i < m; i++) v.push(replay()); if (mode === m0) { draw(); read(); } if (v.length >= target) { clearInterval(timer); timer = null; } };
+    const go = () => { const m = Math.min(target - v.length, RM ? 1000 : m0 ? 25 : 50); for (let i = 0; i < m; i++) v.push(replay()); if (mode === m0) { draw(); read(); } if (v.length >= target) { clearInterval(timer); timer = null; } };
     if (RM) go(); else timer = setInterval(go, 25);
   });
   $('#mgCurve').addEventListener('click', () => { curve = !curve; $('#mgCurve').setAttribute('aria-pressed', curve); $('#mgCurve').classList.toggle('on', curve); $('#mgLegC').hidden = !curve; draw(); read(); });
@@ -1008,7 +1053,7 @@ const HERO = {last: null, listeners: []};
     return (x1 - e1) ** 2 / e1 + (n - x1 - e0) ** 2 / e0 + (x2 - e1) ** 2 / e1 + (n - x2 - e0) ** 2 / e0;
   }
   function exact(){
-    // every way to deal K clicks among 2n visitors: hypergeometric over the grey count
+    // every way to deal K clicks among 2n visitors: hypergeometric over the gray count
     const K = a + b, N = 2 * n, pts = [];
     for (let k = Math.max(0, K - n); k <= Math.min(n, K); k++) pts.push({x: chi2(k, K - k), p: Math.exp(lchoose(n, k) + lchoose(n, K - k) - lchoose(N, K))});
     return pts;
@@ -1035,8 +1080,15 @@ const HERO = {last: null, listeners: []};
       const xsSorted = [...new Set(pts.map(q => +q.x.toFixed(9)))].sort((u, v) => u - v);
       ctx.save(); ctx.strokeStyle = C('--ink-2'); ctx.lineWidth = 2.5; ctx.beginPath();
       let prevY = ys(1); ctx.moveTo(xs(0), prevY);
-      xsSorted.forEach(x => { if (x <= 1e-9) return; if (x > hi) return; ctx.lineTo(xs(x), prevY); const yy = ys(surv(pts, x + 1e-7)); ctx.lineTo(xs(x), yy); prevY = yy; });
-      ctx.lineTo(X1, prevY); ctx.stroke(); ctx.restore();
+      let ended = false;
+      xsSorted.forEach(x => {
+        if (ended || x <= 1e-9 || x > hi) return;
+        ctx.lineTo(xs(x), prevY); const sv = surv(pts, x + 1e-7);
+        if (sv <= 0) { ended = true; return; }   /* nothing beyond the most extreme table: stop, don't drop to the floor */
+        const yy = ys(sv); ctx.lineTo(xs(x), yy); prevY = yy;
+      });
+      if (!ended) ctx.lineTo(X1, prevY);
+      ctx.stroke(); ctx.restore();
     }
     if (pts.length) {
       vline(ctx, xs(obs), Y1, Y0, C('--accent'), null, 2);
@@ -1079,7 +1131,7 @@ const HERO = {last: null, listeners: []};
      e: 'Six counts that must add up to 600 leave five free to vary.'},
     {s: 'For the button test, χ² = 1.82 and the z-test gave z = 1.35. How are they related?',
      o: ['χ² = z²: for a 2×2 table they are the same test', 'They are unrelated tests that happen to agree'], a: 0,
-     e: '1.35² = 1.82, and both give p = 0.18.'},
+     e: '1.35² = 1.82, and both give p = 0.18 by formula (0.21 by shuffling).'},
     {s: 'Which reading is <em>wrong</em>?',
      o: ['A large χ² says the counts are far from what was expected', 'A χ² close to zero is always good news for the theory', 'χ² must be computed on counts, not percentages'], a: 1,
      e: 'Honest counts wobble. A fit that is too close, like Mendel’s, is itself suspicious: it suggests the data were selected or adjusted.'},

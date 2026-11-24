@@ -164,12 +164,12 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
   <p class="lede">A study can only find what it is big enough to see. Too small, and a real effect usually slips past unnoticed; and on the rare occasions it is noticed, it looks bigger than it really is.</p>
   <div class="hero-play" id="heroPlay">
     <p class="ask">The button test found nothing. Does that mean the orange button doesn’t work?</p>
-    <p class="hint" style="min-height:0;margin:0 0 10px">Grey got 50 clicks from 1,000 visitors and orange 64 from 1,000: p ≈ 0.18, not significant. Suppose orange really does lift clicks from 5% to 6.4%. How many visitors per button would a test need to catch that lift 8 times out of 10?</p>
+    <p class="hint" style="min-height:0;margin:0 0 10px">Gray got 50 clicks from 1,000 visitors and orange 64 from 1,000: p ≈ 0.21 by shuffling (0.18 by formula), not significant. Suppose orange really does lift clicks from 5% to 6.4%. How many visitors per button would a test need to catch that lift 8 times out of 10?</p>
     <div class="controls" style="justify-content:center">
       <label class="ctrl">your guess <input type="range" id="heroN" min="0" max="1000" step="1" value="291" aria-label="Your guess of visitors per button"><output id="heroNOut" class="gd" style="min-width:8.5em"></output></label>
     </div>
-    <canvas id="heroGrid" style="height:250px" role="img" aria-label="Two grids of 100 simulated button tests, one at 1,000 visitors per button and one at your guessed size; each square shows whether that test detected the real lift"></canvas>
-    <div class="legend" style="justify-content:center"><span><i class="sw" style="background:var(--one)"></i><span>test found the lift (p &lt; 0.05)</span></span><span><i class="sw" style="background:var(--zero-soft);border:1px solid var(--zero)"></i><span>test missed it</span></span></div>
+    <canvas id="heroGrid" style="height:250px" role="img" aria-label="Three grids of 100 simulated button tests: 1,000 visitors per button when orange is no better than gray, 1,000 per button with the real lift, and your guessed size with the real lift; each square shows whether that test came out significant"></canvas>
+    <div class="legend" style="justify-content:center"><span><i class="sw" style="background:var(--one)"></i><span>found the real lift (p &lt; 0.05)</span></span><span><i class="sw" style="background:var(--zero-soft);border:1px solid var(--zero)"></i><span>missed it</span></span><span><i class="sw" style="background:var(--zero)"></i><span>false alarm: “significant” with no lift</span></span></div>
     <div class="controls">
       <button class="btn primary" id="heroGo" disabled>Run 100 tests at each size</button>
       <button class="linkbtn" id="heroSkip">skip the guess</button>
@@ -194,24 +194,32 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
 <section id="power">
   <div class="secnum">01</div>
   <h2>Power</h2>
-  <p>On <a href="errors.html">Errors and Decisions</a>, the inspector’s miss rate depended on how much the good and drifted humps overlapped. A test is the same. Below are the two worlds for the button test’s gap (orange minus grey): one where the buttons are equal, one where orange really lifts clicks by 1.4 points. A gap beyond the dashed lines counts as significant.</p>
+  <p>On <a href="errors.html">Errors and Decisions</a>, the inspector’s miss rate depended on how much the good and drifted humps overlapped. A test is the same. Below are the two worlds for the button test’s gap (orange minus gray): one where the buttons are equal, one where orange really lifts clicks by 1.4 points. A gap beyond the dashed lines counts as significant. Slide the number of visitors and watch the humps narrow.</p>
 
   <div class="widget">
     <p class="widget-title">Where the gap can land</p>
     <div class="controls">
-      <span class="ctrl">visitors per button</span>
-      <div class="seg" role="group" aria-label="Visitors per button">
+      <label class="ctrl">visitors per button <input type="range" id="pwN" min="0" max="1000" step="1" value="262" aria-label="Visitors per button"><output id="pwNOut"></output></label>
+      <div class="seg" role="group" aria-label="Jump to a size">
         <button class="btn on" data-pn="1000" aria-pressed="true">1,000</button>
         <button class="btn" data-pn="4300" aria-pressed="false">4,300</button>
         <button class="btn" data-pn="10000" aria-pressed="false">10,000</button>
       </div>
     </div>
+    <div class="controls">
+      <span class="ctrl">α</span>
+      <div class="seg" role="group" aria-label="Significance level">
+        <button class="btn" data-pa="0.1" aria-pressed="false">0.10</button>
+        <button class="btn on" data-pa="0.05" aria-pressed="true">0.05</button>
+        <button class="btn" data-pa="0.01" aria-pressed="false">0.01</button>
+      </div>
+    </div>
     <canvas id="pwChart" style="height:250px" role="img" aria-label="Two bell curves for the observed gap between the buttons: one centered on zero for equal buttons, one centered on 1.4 points for a real lift; the part of the real-lift curve beyond the significance cutoffs is shaded as the power"></canvas>
-    <div class="legend"><span><i class="sw" style="background:var(--ink-3);opacity:.5"></i><span>buttons equal</span></span><span><i class="sw" style="background:var(--accent)"></i><span>orange really +1.4 points: shaded part is detected</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>cutoffs for p &lt; 0.05</span></span></div>
+    <div class="legend"><span><i class="sw" style="background:var(--ink-3);opacity:.5"></i><span>buttons equal</span></span><span><i class="sw" style="background:var(--accent)"></i><span>orange really +1.4 points: shaded part is detected</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>cutoffs for p &lt; α</span></span></div>
     <div class="readout" id="pwRead" aria-live="polite"></div>
   </div>
 
-  <p>The chance that a test detects an effect that is really there is its <em class="term">power</em>. It is 1 − β, one minus the miss rate. With 1,000 visitors per button, a gap has to reach about 2 points to count as significant, more than the 1.4-point lift itself. The test succeeds only when chance happens to stretch the gap, which it does about 27% of the time. With 4,300 per button both humps narrow, the cutoff moves in to 1 point, and 80% of the real-lift hump lies beyond it.</p>
+  <p>The chance that a test detects an effect that is really there is its <em class="term">power</em>. It is 1 − β, one minus the miss rate. With 1,000 visitors per button, a gap has to reach about 2 points to count as significant, more than the 1.4-point lift itself. The test succeeds only when chance happens to stretch the gap, which it does about 27% of the time. With 4,300 per button both humps narrow, the cutoff moves in to 1 point, and 80% of the real-lift hump lies beyond it. A stricter α pushes the cutoffs back out and shrinks the shaded part again.</p>
   <p>So the button test was never likely to find this lift. Even if orange is truly better by 1.4 points, “not significant” was the expected outcome, about 3 times in 4.</p>
 </section>
 
@@ -222,9 +230,9 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
   <p>Power is set by three things you could see in the picture: how big the effect is (how far apart the humps sit), how much data there is (how narrow they are), and α (where the cutoff goes). Set the dials, then run 200 studies and count how many find the effect. Each run adds a point to the power curve below.</p>
 
   <div class="widget">
-    <p class="widget-title">Study planner</p>
+    <p class="widget-title">★ Study planner</p>
     <div class="controls">
-      <span class="ctrl">orange’s true rate (grey 5%)</span>
+      <span class="ctrl">orange’s true rate (gray 5%)</span>
       <div class="seg" role="group" aria-label="Orange's true click rate">
         <button class="btn" data-lift="0.055" aria-pressed="false">5.5%</button>
         <button class="btn" data-lift="0.06" aria-pressed="false">6%</button>
@@ -255,11 +263,11 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
   </div>
 
   <ul>
-    <li><strong>Effect size.</strong> Power climbs fast as the effect grows. A lift to 8% is found almost every time with 1,000 per button; a lift to 5.5% almost never.</li>
+    <li><strong>Effect size.</strong> Power climbs fast as the effect grows. A lift to 8% is found about 3 times in 4 with 1,000 per button (and 97 times in 100 with 2,000); a lift to 5.5% almost never.</li>
     <li><strong>Sample size.</strong> The humps narrow like 1/√<em>n</em>, the same square-root law as on <a href="confidence-intervals.html">Confidence Intervals</a>. Halve the effect you want to see and you need four times the visitors.</li>
-    <li><strong>α.</strong> A stricter cutoff, 0.01 instead of 0.05, means fewer false alarms and more misses: the trade from the last page. At the same size, power drops.</li>
+    <li><strong>α.</strong> A stricter cutoff, 0.01 instead of 0.05, means fewer false alarms and more misses: the trade from <a href="errors.html">Errors and Decisions</a>. At the same size, power drops.</li>
   </ul>
-  <p>The formula line is the shortcut: it is what the dots settle onto as you run more studies. It comes from the bell-curve approximation to the two humps, the same one behind the z-test on <a href="p-values.html">p-values</a>.</p>
+  <p>The formula line is the shortcut: it is what the dots settle onto as you run more studies. It comes from the <a href="../probability/normal.html">bell-curve</a> approximation to the two humps, the same one behind the z-test on <a href="p-values.html">p-values</a>.</p>
 </section>
 
 <!-- 3 -->
@@ -271,19 +279,23 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
   <div class="widget">
     <p class="widget-title">Power curves for the button test</p>
     <canvas id="plChart" style="height:260px" role="img" aria-label="Power against visitors per button on a log scale for five true lifts, with a dashed line at 80% power and the size where each curve crosses it marked"></canvas>
+    <p class="cap" style="margin-top:12px">Visitors per button needed for each target power:</p>
     <div class="table-wrap">
       <table class="summary num">
-        <thead><tr><th>Orange’s true rate (grey 5%)</th><th>5.5%</th><th>6%</th><th>6.4%</th><th>7%</th><th>8%</th></tr></thead>
+        <thead><tr><th>Orange’s true rate (gray 5%)</th><th>80% power</th><th>90% power</th></tr></thead>
         <tbody>
-          <tr><td>Visitors per button for 80% power</td><td>31,200</td><td>8,200</td><td>4,300</td><td>2,200</td><td>1,100</td></tr>
-          <tr><td>… for 90% power</td><td>41,800</td><td>10,900</td><td>5,800</td><td>3,000</td><td>1,400</td></tr>
+          <tr><td>5.5%</td><td>31,200</td><td>41,800</td></tr>
+          <tr><td>6%</td><td>8,200</td><td>10,900</td></tr>
+          <tr><td><strong>6.4%</strong> (the button test)</td><td><strong>4,300</strong></td><td><strong>5,800</strong></td></tr>
+          <tr><td>7%</td><td>2,200</td><td>3,000</td></tr>
+          <tr><td>8%</td><td>1,100</td><td>1,400</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
   <p>A handy rule of thumb (Lehr 1992): for 80% power at α = 0.05, each group needs about <strong>16 × variance ÷ effect²</strong>. For clicks the variance is about <em>p</em>(1 − <em>p</em>) = 0.057 × 0.943, and the effect is 0.014, which gives about 4,400 per button, close to the exact 4,300.</p>
-  <p>Two warnings. First, plan for the smallest effect that matters, not the one you hope for: optimism is the usual reason studies come out too small. Second, don’t compute power afterwards from the effect you happened to observe. That “observed power” is just the p-value in disguise and adds nothing (Hoenig and Heisey 2001). After the data are in, the confidence interval is the honest summary.</p>
+  <p>Two warnings. First, plan for the smallest effect that matters, not the one you hope for: optimism is the usual reason studies come out too small. Second, don’t compute power afterwards from the effect you happened to observe. That “observed power” is just the p-value in disguise: it is a fixed function of p. A result at exactly p = 0.05 always has observed power of about 50%, one at p = 0.01 about 73%, one at p = 0.5 about 10%, whatever the study. It repeats the p-value in other units and adds nothing (Hoenig and Heisey 2001). After the data are in, the <a href="confidence-intervals.html">confidence interval</a> is the honest summary.</p>
 </section>
 
 <!-- 4 -->
@@ -295,21 +307,34 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
 
   <div class="widget">
     <p class="widget-title">Two “not significant” results</p>
-    <canvas id="abChart" style="height:170px" role="img" aria-label="Two 95% confidence intervals for the gap: the real test from minus 0.6 to plus 3.4 points, and a test of 4,300 per button from minus 0.9 to plus 0.9 points, against lines at zero and at a 1-point lift worth having"></canvas>
-    <div class="legend"><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>no difference</span></span><span><i class="sw line" style="border-top:2px dashed var(--gold)"></i><span>smallest lift worth having (+1 point)</span></span></div>
+    <canvas id="abChart" style="height:170px;touch-action:none;cursor:ew-resize" role="img" aria-label="Two 95% confidence intervals for the gap: the real test from minus 0.6 to plus 3.4 points, and a test of 4,300 per button from minus 0.9 to plus 0.9 points, against a line at zero and a draggable line at the smallest lift worth having"></canvas>
+    <div class="legend"><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>no difference</span></span><span><i class="sw line" style="border-top:2px dashed var(--gold)"></i><span>smallest lift worth having (drag it)</span></span></div>
+    <div class="controls">
+      <label class="ctrl">smallest lift worth having <input type="range" id="abL" min="2" max="35" step="1" value="10" aria-label="Smallest lift worth having, in points"><output id="abLOut" class="gd"></output></label>
+    </div>
+    <div class="readout" id="abRead" aria-live="polite"></div>
   </div>
 
-  <p>Both include 0, so neither is significant. But the first also includes lifts of 2 or 3 points: it can’t tell a useless button from a very good one. The second rules out every lift worth having; that one really is evidence that orange doesn’t matter. A non-significant result from a small study says “we don’t know yet”. Only a study with enough power, or a narrow interval, can say “there’s nothing here worth having”.</p>
+  <p>Both include 0, so neither is significant. But the first also includes lifts of 2 or 3 points: it can’t tell a useless button from a very good one. At the 1-point line, the second rules out every lift worth having; that one really is evidence that orange doesn’t matter. Drag the line down to 0.9 points or below and even the big test can no longer rule it out: “worth having” has to be decided before the data, not after. A non-significant result from a small study says “we don’t know yet”. Only a study with enough power, or a narrow interval, can say “there’s nothing here worth having”.</p>
+  <p>Checking that the whole interval sits below the smallest effect worth having is the idea behind an <em class="term">equivalence test</em>. The standard version, two one-sided tests at α = 0.05, uses a 90% interval, a little narrower than the 95% ones drawn here.</p>
 </section>
 
 <!-- 5 -->
 <section id="curse">
   <div class="secnum">05</div>
   <h2>The winner’s curse</h2>
-  <p>Low power has a second, sneakier cost. Suppose the button test <em>had</em> come out significant. At 1,000 per button that only happens when chance stretched the gap past 2 points, so the tests that “succeed” are exactly the ones that overestimated. Run many tests and keep only the winners:</p>
+  <p>Low power has a second, sneakier cost. Suppose the button test <em>had</em> come out significant. At 1,000 per button that only happens when chance stretched the gap past 2 points, so the tests that “succeed” are exactly the ones that overestimated. Run many tests and keep only the winners. First, a guess:</p>
 
   <div class="widget">
     <p class="widget-title">Only the significant survive</p>
+    <p class="cast-q">At 1,000 per button, with a true lift of +1.4 points, what lift will the <em>significant</em> tests report on average?</p>
+    <div class="controls" id="wcPred">
+      <button class="btn" data-g="1.4">about +1.4, the truth</button>
+      <button class="btn" data-g="2">about +2</button>
+      <button class="btn" data-g="2.6">about +2.6</button>
+      <button class="btn" data-g="4">about +4</button>
+      <button class="linkbtn" id="wcSkip">skip the guess</button>
+    </div>
     <div class="controls">
       <span class="ctrl">visitors per button</span>
       <div class="seg" role="group" aria-label="Visitors per button">
@@ -323,13 +348,16 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
     <canvas id="wcChart" style="height:240px" role="img" aria-label="Histogram of the gaps found by many simulated button tests with a true lift of 1.4 points; significant tests highlighted, with the true lift and the average of the significant tests marked"></canvas>
     <div class="legend"><span><i class="sw" style="background:var(--accent)"></i><span>significant: these get reported</span></span><span><i class="sw" style="background:var(--ink-3)"></i><span>not significant: these get filed away</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>true lift +1.4</span></span><span><i class="sw line" style="border-top:2px solid var(--zero)"></i><span>average of the significant ones</span></span></div>
     <div class="controls">
-      <button class="btn primary" id="wcRun">Run 1,000 tests</button>
+      <button class="btn primary" id="wcRun" disabled>Run 1,000 tests</button>
       <button class="btn" id="wcClear">Clear</button>
     </div>
     <div class="readout" id="wcRead" aria-live="polite"></div>
+    <p class="msg" id="wcMsg" aria-live="polite">Make your guess, then run the tests.</p>
+    <div class="mcap" style="margin-top:8px">How much the significant tests exaggerate, by size</div>
+    <canvas id="wcEx" style="height:170px" role="img" aria-label="The average significant gap divided by the true lift, against visitors per button on a log scale: over 3 times at 250 per button, about 1.9 at 1,000, close to 1 by 10,000, with power marked along the curve"></canvas>
   </div>
 
-  <p>At 1,000 per button the significant tests report a lift of about 2.6 points on average, nearly twice the truth. At 250 per button they report more than three times the truth, and a few even get the direction wrong. At 4,300 or more, the winners are close to honest. Andrew Gelman and John Carlin (2014) call these <em class="term">type M</em> (magnitude) and <em class="term">type S</em> (sign) errors: in an underpowered study, a significant result is likely to be too big, and sometimes backwards.</p>
+  <p>At 1,000 per button the significant tests report a lift of about 2.65 points on average, nearly twice the truth. At 250 per button they report more than three times the truth, and a few even get the direction wrong. At 4,300 or more, the winners are close to honest. The lower chart shows the whole pattern: the exaggeration falls toward 1× as power rises toward 100%. Andrew Gelman and John Carlin (2014) call these <em class="term">type M</em> (magnitude) and <em class="term">type S</em> (sign) errors: in an underpowered study, a significant result is likely to be too big, and sometimes backwards.</p>
   <p>This is one reason exciting findings shrink when someone checks them. When the Open Science Collaboration (2015) repeated 100 published psychology studies, 97% of the originals had been significant but only 36% of the repeats were, and the repeats’ effects were on average about half as large. Whenever a small study reports a surprisingly large effect, expect the truth to be smaller.</p>
 </section>
 
@@ -339,7 +367,7 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
   <h2>Where you will meet it</h2>
   <div class="cards">
     <div class="card"><h4>Clinical trials</h4><p>A trial protocol has to state its power calculation up front: the effect worth detecting, α, and the target power, typically 80% or 90%. Ethics committees reject trials too small to answer their question.</p></div>
-    <div class="card"><h4>A/B testing</h4><p>Sample size calculators ask for the current rate and the smallest lift worth finding. Stopping the moment p dips below 0.05 breaks the plan, a trap for the page on forking paths.</p></div>
+    <div class="card"><h4>A/B testing</h4><p>Sample size calculators ask for the current rate and the smallest lift worth finding. Stopping the moment p dips below 0.05 breaks the plan, a trap for the page on <a href="forking-paths.html">forking paths</a>.</p></div>
     <div class="card"><h4>Replication</h4><p>A repeat of a study should be bigger than the original, because the original effect was probably inflated by the winner’s curse.</p></div>
     <div class="card"><h4>Neuroscience</h4><p>A 2013 survey (Button and colleagues) estimated the median power of neuroscience studies at about 21%, though it varies a lot between fields.</p></div>
     <div class="card"><h4>Safety and the environment</h4><p>“No significant increase in side effects” or “no significant decline in the species” from a small study is weak comfort: check the interval.</p></div>
@@ -519,7 +547,7 @@ const kfmt = v => v >= 1000 ? (v / 1000) + 'k' : String(v);
 const tickPts = v => signed(v, Number.isInteger(v) ? 0 : 1);
 function tag(ctx, text, x, y, align, color){
   const tw = ctx.measureText(text).width, x0 = align === 'right' ? x - tw : align === 'center' ? x - tw / 2 : x;
-  ctx.fillStyle = C('--surface'); ctx.fillRect(x0 - 3, y - 1, tw + 6, 14);
+  ctx.fillStyle = C('--surface'); ctx.fillRect(x0 - 3, y - 3, tw + 6, 18);
   ctx.fillStyle = color; ctx.textAlign = align; ctx.textBaseline = 'top'; ctx.fillText(text, x, y);
 }
 
@@ -528,28 +556,41 @@ function tag(ctx, text, x, y, align, color){
   const sl = $('#heroN'), cv = $('#heroGrid'), hint = $('#heroHint');
   const toN = t => { const v = 200 * Math.pow(250, t / 1000), m = Math.pow(10, Math.floor(Math.log10(v)) - 1); return Math.round(v / m) * m; };
   let nG = toN(+sl.value), guessed = false, res = null, shown = 0, timer = null, skipped = false;
+  /* three grids: no lift at 1,000; the real lift at 1,000; the real lift at the reader's size */
   function draw(){
-    const {ctx, w, h} = fit(cv), gap = Math.max(18, w * .06), side = Math.min((w - gap) / 2, h - 58), s = side / 10;
-    const x0 = (w - 2 * side - gap) / 2, y0 = 24;
-    const blocks = [{cap: '1,000 per button: the real test', col: C('--ink-2')}, {cap: skipped ? '4,300 per button' : 'your guess: ' + comma(nG) + ' per button', col: skipped ? C('--ink-2') : C('--gold')}];
+    const wpx = cv.getBoundingClientRect().width, gap0 = Math.max(14, wpx * .05), side0 = Math.min((wpx - 2 * gap0) / 3, 190);
+    const want = Math.round(36 + side0 + 28) + 'px'; if (cv.style.height !== want) cv.style.height = want;
+    const {ctx, w} = fit(cv), gap = Math.max(14, w * .05), side = Math.min((w - 2 * gap) / 3, 190), s = side / 10, wide = side > 140;
+    const x0 = (w - 3 * side - 2 * gap) / 2, y0 = 36;
+    const blocks = [
+      {l1: '1,000 per button', l2: 'orange = gray', col: C('--ink-2'), nul: true},
+      {l1: '1,000 per button', l2: 'real +1.4 lift', col: C('--ink-2')},
+      {l1: (skipped ? '4,300' : comma(nG)) + ' per button', l2: skipped ? 'real +1.4 lift' : 'your guess, +1.4', col: skipped ? C('--ink-2') : C('--gold')}
+    ];
     blocks.forEach((bk, j) => {
       const bx = x0 + j * (side + gap);
-      ctx.font = '600 11px ' + MONO; ctx.fillStyle = bk.col; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(bk.cap, bx + side / 2, 4);
+      ctx.font = '600 ' + (wide ? 11 : 10) + 'px ' + MONO; ctx.fillStyle = bk.col; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.fillText(bk.l1, bx + side / 2, 4); ctx.fillText(bk.l2, bx + side / 2, 18);
       let hits = 0;
       for (let k = 0; k < 100; k++) {
         const x = bx + (k % 10) * s + 1.5, y = y0 + Math.floor(k / 10) * s + 1.5, sz = s - 3;
         if (res && k < shown) {
           const hit = res[j][k]; if (hit) hits++;
+          if (bk.nul) { ctx.fillStyle = hit ? C('--zero') : C('--surface-2'); roundRect(ctx, x, y, sz, sz, 2); ctx.fill(); if (!hit) { ctx.strokeStyle = C('--line'); ctx.lineWidth = 1; ctx.stroke(); } continue; }
           ctx.fillStyle = hit ? C('--one') : C('--zero-soft'); roundRect(ctx, x, y, sz, sz, 2); ctx.fill();
           if (!hit) { ctx.strokeStyle = C('--zero'); ctx.lineWidth = 1; ctx.stroke(); }
         } else { ctx.fillStyle = C('--surface-2'); roundRect(ctx, x, y, sz, sz, 2); ctx.fill(); }
       }
-      if (res) { ctx.font = '12px ' + MONO; ctx.fillStyle = C('--ink'); ctx.textBaseline = 'top'; ctx.fillText(`${hits} of ${shown} found it`, bx + side / 2, y0 + side + 8); }
+      if (res) {
+        ctx.font = (wide ? 12 : 11) + 'px ' + MONO; ctx.fillStyle = C('--ink'); ctx.textBaseline = 'top';
+        const txt = bk.nul ? `${hits} false alarm${hits === 1 ? '' : 's'}` : wide ? `${hits} of ${shown} found it` : `${hits} found it`;
+        ctx.fillText(txt, bx + side / 2, y0 + side + 8);
+      }
     });
   }
   function message(){
-    const a = res[0].filter(Boolean).length, b = res[1].filter(Boolean).length;
-    let t = `At 1,000 per button, <b>${a} of 100</b> tests caught the real lift; the other ${100 - a} said “not significant”. The real button test was one of those, so finding nothing was the likely outcome even with a real lift. `;
+    const z = res[0].filter(Boolean).length, a = res[1].filter(Boolean).length, b = res[2].filter(Boolean).length;
+    let t = `With the real lift and 1,000 per button, <b>${a} of 100</b> tests caught it; the other ${100 - a} said “not significant”. The real button test was one of those, so finding nothing was the likely outcome even with a real lift. `;
     if (skipped) t += `At 4,300 per button, <b>${b} of 100</b> caught it: that is the size needed to catch this lift 8 times in 10.`;
     else {
       t += `At your ${comma(nG)} per button: <b>${b} of 100</b>. `;
@@ -557,6 +598,7 @@ function tag(ctx, text, x, y, align, color){
         : nG < 4300 ? 'It takes about <b>4,300 per button</b> to catch the lift 8 times in 10, more than four times the test that was run.'
         : 'That is more than enough: about <b>4,300 per button</b> already catches the lift 8 times in 10.';
     }
+    t += ` And if orange were no better than gray at all, <b>${z} of 100</b> tests would still have called it significant: false alarms, about 5 in 100 whatever the size.`;
     hint.innerHTML = t;
   }
   function reset(){ clearInterval(timer); timer = null; res = null; shown = 0; }
@@ -571,7 +613,7 @@ function tag(ctx, text, x, y, align, color){
   });
   $('#heroGo').addEventListener('click', () => {
     reset();
-    res = [1000, nG].map(n => Array.from({length: 100}, () => study(n, P2, 1.96).sig));
+    res = [[1000, P1], [1000, P2], [nG, P2]].map(([n, p2]) => Array.from({length: 100}, () => study(n, p2, 1.96).sig));
     $('#heroGo').textContent = 'Run 100 new tests at each size';
     hint.textContent = 'Testing…';
     const done = () => { message(); $('#heroTry').hidden = skipped || nG === 4300; };
@@ -584,11 +626,14 @@ function tag(ctx, text, x, y, align, color){
 
 /* ---------- 1. two humps for the gap ---------- */
 (function(){
-  const cv = $('#pwChart'), LO = -4, HI = 5;
-  let n = 1000;
+  const cv = $('#pwChart'), LO = -6, HI = 8, sl = $('#pwN');
+  /* log slider: 250 to 50,000 visitors per button, rounded to two significant figures */
+  const toN = t => { const v = 250 * Math.pow(200, t / 1000), m = Math.pow(10, Math.floor(Math.log10(v)) - 1); return Math.round(v / m) * m; };
+  const toT = v => Math.round(1000 * Math.log(v / 250) / Math.log(200));
+  let n = toN(+sl.value), a = '0.05';
   function draw(){
     const {ctx, w, h} = fit(cv), X0 = 14, X1 = w - 14, Y0 = h - 40, Y1 = 44;
-    const s0 = 100 * se0(n, P2), s1 = 100 * se1(n, P2), D = 100 * (P2 - P1), c = 1.96 * s0;
+    const s0 = 100 * se0(n, P2), s1 = 100 * se1(n, P2), D = 100 * (P2 - P1), z = ZA[a], c = z * s0;
     const xs = v => X0 + (v - LO) / (HI - LO) * (X1 - X0), ys = d => Y0 - d * (Y0 - Y1);
     const pdf = (v, m, s) => Math.exp(-.5 * ((v - m) / s) ** 2);
     const fillArea = (m, s, a, b, col, ga) => {
@@ -606,17 +651,22 @@ function tag(ctx, text, x, y, align, color){
     fillArea(D, s1, c, HI, C('--accent'), .45); fillArea(D, s1, LO, -c, C('--accent'), .45);
     stroke(0, s0, C('--ink-3')); stroke(D, s1, C('--accent'));
     xAxis(ctx, X0, X1, Y0, LO, HI, tickPts);
-    [-c, c].forEach(v => vline(ctx, xs(v), 16, Y0, C('--ink'), [5, 4], 1.4));
-    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-2'); ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText('gap, orange − grey (points) →', (X0 + X1) / 2, Y0 + 21);
+    [-c, c].forEach(v => { if (v > LO && v < HI) vline(ctx, xs(v), 16, Y0, C('--ink'), [5, 4], 1.4); });
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-2'); ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText('gap, orange − gray (points) →', (X0 + X1) / 2, Y0 + 21);
     ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink'); ctx.textBaseline = 'top';
-    ctx.textAlign = 'right'; ctx.fillText('significant ←', xs(-c) - 4, 2);
-    ctx.textAlign = 'left'; ctx.fillText('→ significant', xs(c) + 4, 2);
+    const tl = 'significant ←', tr = '→ significant', wl = ctx.measureText(tl).width, wr = ctx.measureText(tr).width;
+    ctx.textAlign = 'left'; ctx.fillText(tl, Math.max(X0, xs(-c) - 4 - wl), 2);
+    ctx.fillText(tr, Math.min(X1 - wr, xs(c) + 4), 2);
     tag(ctx, 'equal', xs(0) - 6, Y1 - 16, 'right', C('--ink-2'));
     tag(ctx, 'orange +1.4', xs(D) + 6, Y1 - 16, 'left', C('--accent'));
-    const pw = powerAt(n, P2, 1.96);
-    $('#pwRead').innerHTML = `${comma(n)} per button · significant only if the gap is beyond <b>±${c.toFixed(1)} points</b> · power <b>${pc(pw)}</b>: a real 1.4-point lift is found in about ${Math.round(100 * pw)} tests of 100 and missed in ${100 - Math.round(100 * pw)}`;
+    const pw = powerAt(n, P2, z), k = Math.round(100 * pw);
+    $('#pwNOut').textContent = comma(n);
+    $('#pwRead').innerHTML = `${comma(n)} per button · α = ${a === '0.1' ? '0.10' : a} · significant only if the gap is beyond <b>±${c.toFixed(1)} points</b> · power <b>${pc(pw)}</b>: a real 1.4-point lift is found in about ${k} tests of 100 and missed in ${100 - k}`;
   }
-  $$('[data-pn]').forEach(b => b.addEventListener('click', () => { n = +b.dataset.pn; $$('[data-pn]').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); }); draw(); }));
+  const pressN = () => $$('[data-pn]').forEach(x => { const on = +x.dataset.pn === n; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
+  sl.addEventListener('input', () => { n = toN(+sl.value); pressN(); draw(); });
+  $$('[data-pn]').forEach(b => b.addEventListener('click', () => { n = +b.dataset.pn; sl.value = toT(n); pressN(); draw(); }));
+  $$('[data-pa]').forEach(b => b.addEventListener('click', () => { a = b.dataset.pa; $$('[data-pa]').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); }); draw(); }));
   draw(); redraws.push(draw);
 })();
 
@@ -666,7 +716,7 @@ function powerCurve(F, p2, z, col, lw){
     if (!(runs[key()] || []).length && !formula) emptyNote(ctx, F.w, F.h - 30, 'run some studies to trace the curve');
   }
   function readout(){
-    let t = `orange <b>${pc(p2, 1)}</b> vs grey 5% · <b>${comma(n())}</b> per button · α = <b>${a === '0.1' ? '0.10' : a}</b>`;
+    let t = `orange <b>${pc(p2, 1)}</b> vs gray 5% · <b>${comma(n())}</b> per button · α = <b>${a === '0.1' ? '0.10' : a}</b>`;
     if (last && shown >= 200) t += `<br>last run (${comma(last.n)} per button): <b>${last.k} of 200</b> studies found the effect = <b>${pc(last.k / 200)}</b>`;
     if (formula) t += `<br>formula at ${comma(n())} per button: power <b style="color:var(--accent)">${pc(powerAt(n(), p2, ZA[a]))}</b>`;
     $('#dsRead').innerHTML = t;
@@ -684,7 +734,7 @@ function powerCurve(F, p2, z, col, lw){
   function sweep(){
     if (sweeping) return stop();
     stop(); sweeping = true; $('#dsSweep').textContent = '❚❚ Stop'; let i = 0;
-    const step = () => { if (i >= NS.length) return stop(); last = simulate(NS[i++]); shown = 200; record(last); draw(); };
+    const step = () => { if (i >= NS.length) return stop(); nIn.value = i; $('#dsNOut').textContent = comma(NS[i]); last = simulate(NS[i++]); shown = 200; record(last); draw(); };
     if (RM) { while (i < NS.length) step(); return; }
     step(); timer = setInterval(step, 140);
   }
@@ -709,9 +759,11 @@ function powerCurve(F, p2, z, col, lw){
       let lo = 2, hi = 2e5; while (hi - lo > 1) { const m = Math.floor((lo + hi) / 2); if (powerAt(m, p2, 1.96) >= .8) hi = m; else lo = m; }
       const col = p2 === P2 ? C('--accent') : C('--ink-2');
       ctx.fillStyle = C('--surface'); dot(ctx, xs(hi), ys(.8), 6); ctx.fillStyle = col; dot(ctx, xs(hi), ys(.8), 4.5);
-      let lo2 = 2, hi2 = 2e5; while (hi2 - lo2 > 1) { const m = Math.floor((lo2 + hi2) / 2); if (powerAt(m, p2, 1.96) >= .45) hi2 = m; else lo2 = m; }
-      ctx.font = (p2 === P2 ? '600 ' : '') + '11px ' + MONO; ctx.fillStyle = col; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-      ctx.fillText(pc(p2, 1).replace('.0%', '%'), xs(hi2) - 5, ys(.45));
+      /* alternate label heights so neighbouring curves' labels don't collide on narrow screens */
+      const lev = [.55, .3, .55, .3, .55][LIFTS.indexOf(p2)];
+      let lo2 = 2, hi2 = 2e5; while (hi2 - lo2 > 1) { const m = Math.floor((lo2 + hi2) / 2); if (powerAt(m, p2, 1.96) >= lev) hi2 = m; else lo2 = m; }
+      ctx.font = (p2 === P2 ? '600 ' : '') + (F.w < 500 ? '10px ' : '11px ') + MONO; ctx.fillStyle = col; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      ctx.fillText(pc(p2, 1).replace('.0%', '%'), xs(hi2) - 4, ys(lev));
     });
     ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
     ctx.fillText('80% power', F.X0 + 4, ys(.8) - 3);
@@ -721,26 +773,49 @@ function powerCurve(F, p2, z, col, lw){
 
 /* ---------- 4. two non-significant intervals ---------- */
 (function(){
-  const LO = -2, HI = 4;
+  const LO = -2, HI = 4, cv = $('#abChart'), sl = $('#abL');
   const sA = Math.sqrt(P1 * (1 - P1) / 1000 + P2 * (1 - P2) / 1000), sB = Math.sqrt(2 * P1 * (1 - P1) / 4300);
   const rows = [
-    {est: 1.4, m: 196 * sA, name: 'the real test, 1,000 per button'},
-    {est: 0, m: 196 * sB, name: 'a test of 4,300 per button that found no gap'}
+    {est: 1.4, m: 196 * sA, name: 'the real test, 1,000 per button', short: 'the real test'},
+    {est: 0, m: 196 * sB, name: 'a test of 4,300 per button that found no gap', short: 'the 4,300-per-button test'}
   ];
+  let L = +sl.value / 10, geo = null;
   function draw(){
-    const {ctx, w, h} = fit($('#abChart')), X0 = 14, X1 = w - 14, Y0 = h - 40, xs = v => X0 + (v - LO) / (HI - LO) * (X1 - X0);
+    const {ctx, w, h} = fit(cv), X0 = 14, X1 = w - 14, Y0 = h - 40, xs = v => X0 + (v - LO) / (HI - LO) * (X1 - X0);
+    geo = {X0, X1, xs};
     xAxis(ctx, X0, X1, Y0, LO, HI, tickPts);
-    vline(ctx, xs(0), 14, Y0, C('--ink'), [5, 4], 1.4); vline(ctx, xs(1), 14, Y0, C('--gold'), [5, 4], 1.6);
-    ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--gold'); ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText('worth having →', xs(1) + 5, 0);
-    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-2'); ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText('gap, orange − grey (points) →', (X0 + X1) / 2, Y0 + 21);
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-2'); ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText('gap, orange − gray (points) →', (X0 + X1) / 2, Y0 + 21);
     rows.forEach((r, i) => {
       const y = 46 + i * 50, a = r.est - r.m, b = r.est + r.m;
-      ctx.font = '11px ' + MONO; tag(ctx, `${r.name}: ${signed(a, 1)} to ${signed(b, 1)}`, X0, y - 23, 'left', C('--ink-2'));
       ctx.fillStyle = C('--accent'); roundRect(ctx, xs(a), y - 6, xs(b) - xs(a), 12, 5); ctx.fill();
       ctx.fillStyle = C('--surface'); dot(ctx, xs(r.est), y, 4.5);
     });
+    vline(ctx, xs(0), 14, Y0, C('--ink'), [5, 4], 1.4); vline(ctx, xs(L), 14, Y0, C('--gold'), [5, 4], 1.8);
+    ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--gold'); ctx.textBaseline = 'top';
+    const lab = 'worth having ' + signed(L, 1) + ' →', lw = ctx.measureText(lab).width;
+    ctx.textAlign = 'left'; ctx.fillText(lab, Math.min(X1 - lw, xs(L) + 5), 0);
+    /* labels last, on an opaque background, so the dashed lines never cross them */
+    rows.forEach((r, i) => {
+      const y = 46 + i * 50, a = r.est - r.m, b = r.est + r.m;
+      ctx.font = '11px ' + MONO; tag(ctx, `${w < 500 ? r.short : r.name}: ${signed(a, 1)} to ${signed(b, 1)}`, X0, y - 23, 'left', C('--ink-2'));
+    });
   }
-  draw(); redraws.push(draw);
+  function read(){
+    $('#abLOut').textContent = signed(L, 1) + ' points';
+    $('#abRead').innerHTML = rows.map(r => {
+      const b = r.est + r.m, out = b < L;
+      return `${r.short}: upper end ${signed(b, 1)} · ` + (out ? `<span class="ok">rules out every lift of ${signed(L, 1)} or more</span>` : `<span class="warn">can’t rule out a lift of ${signed(L, 1)}</span>`);
+    }).join('<br>');
+  }
+  function set(v){ L = Math.max(.2, Math.min(3.5, Math.round(v * 10) / 10)); sl.value = Math.round(L * 10); draw(); read(); }
+  sl.addEventListener('input', () => set(+sl.value / 10));
+  let drag = false;
+  const at = e => { const r = cv.getBoundingClientRect(); return LO + (e.clientX - r.left - geo.X0) / (geo.X1 - geo.X0) * (HI - LO); };
+  cv.addEventListener('pointerdown', e => { drag = true; cv.setPointerCapture(e.pointerId); set(at(e)); });
+  cv.addEventListener('pointermove', e => { if (drag) set(at(e)); });
+  cv.addEventListener('pointerup', () => { drag = false; });
+  cv.addEventListener('pointercancel', () => { drag = false; });
+  draw(); read(); redraws.push(draw);
 })();
 
 /* ---------- 5. the winner's curse ---------- */
@@ -770,7 +845,7 @@ function powerCurve(F, p2, z, col, lw){
     if (ns) {
       const avg = sum / ns;
       vline(ctx, xs(avg), 16, Y0, C('--zero'), null, 2.2);
-      ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--zero'); ctx.textAlign = 'left'; ctx.fillText('significant average ' + signed(avg, 1), xs(Math.max(avg, 1.4)) + 5, 2);
+      ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--zero'); ctx.textAlign = 'left'; ctx.fillText('significant average ' + signed(avg, 2), xs(Math.max(avg, 1.4)) + 5, 2);
     }
     if (!list.length) emptyNote(ctx, w, h, 'no tests yet');
     ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillText('gap found (points)', X1, Y0 - 2);
@@ -780,15 +855,61 @@ function powerCurve(F, p2, z, col, lw){
       : `${comma(n)} per button · power ${pc(powerAt(n, P2, 1.96))}`;
   }
   function stop(){ clearInterval(timer); timer = null; }
+  /* predict first: the guess is for 1,000 per button */
+  let guess = null;
+  const GL = {'1.4': 'about +1.4, the truth', '2': 'about +2', '2.6': 'about +2.6', '4': 'about +4'};
+  function message(){
+    const m = $('#wcMsg'), sig = list.filter(r => r.sig), avg = sig.length ? 100 * sig.reduce((t, r) => t + r.d, 0) / sig.length : null;
+    if (avg == null) { m.innerHTML = ''; return; }
+    if (n !== 1000) { m.innerHTML = guess != null ? `Your guess was for 1,000 per button (${GL[guess]}); switch back to 1,000 to check it. Here, at ${comma(n)} per button, the winners average <b>${signed(avg, 2)}</b>.` : ''; return; }
+    const say = `The significant tests averaged <b>${signed(avg, 2)} points</b>, ${(avg / 1.4).toFixed(1)}× the true +1.4.`;
+    if (guess == null) { m.innerHTML = say; return; }
+    m.innerHTML = `You guessed <b>${GL[guess]}</b>. ${say} ` + (guess === '2.6' ? '<span class="ok">Right:</span> only the overestimates clear the bar.'
+      : guess === '1.4' ? 'The truth is +1.4, but the tests that report it are the ones filed away as “not significant”.'
+      : guess === '2' ? 'About +2 is only the <em>least</em> a significant test can report at this size; the average survivor is further out.'
+      : 'Too far: +4 is out in the tail, but most survivors bunch just past the +2 cutoff.');
+  }
+  function openRun(){ $('#wcRun').disabled = false; $('#wcSkip').hidden = true; }
+  $$('#wcPred [data-g]').forEach(b => b.addEventListener('click', () => {
+    guess = b.dataset.g; $$('#wcPred [data-g]').forEach(x => x.classList.toggle('guess', x === b)); openRun(); message();
+  }));
+  $('#wcSkip').addEventListener('click', () => { openRun(); $('#wcMsg').textContent = ''; });
   $('#wcRun').addEventListener('click', () => {
     stop(); let left = 1000;
     const add = k => { for (let i = 0; i < k; i++) list.push(study(n, P2, 1.96)); left -= k; draw(); };
-    if (RM) return add(1000);
-    timer = setInterval(() => { add(50); if (left <= 0) stop(); }, 40);
+    if (RM) { add(1000); return message(); }
+    timer = setInterval(() => { add(50); if (left <= 0) { stop(); message(); } }, 40);
   });
-  $('#wcClear').addEventListener('click', () => { stop(); list = []; draw(); });
-  $$('[data-wn]').forEach(b => b.addEventListener('click', () => { stop(); n = +b.dataset.wn; list = []; $$('[data-wn]').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); }); draw(); }));
-  draw(); redraws.push(draw);
+  $('#wcClear').addEventListener('click', () => { stop(); list = []; draw(); message(); });
+  $$('[data-wn]').forEach(b => b.addEventListener('click', () => { stop(); n = +b.dataset.wn; list = []; $$('[data-wn]').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); }); draw(); drawEx(); message(); }));
+
+  /* exaggeration from the bell-curve approximation: average significant gap ÷ true gap */
+  const npdf = x => Math.exp(-.5 * x * x) / Math.sqrt(TAU);
+  function exag(m){
+    const D = P2 - P1, s0 = se0(m, P2), s1 = se1(m, P2), c = 1.96 * s0, a = (c - D) / s1, b = (-c - D) / s1;
+    const pw = (1 - Phi(a)) + Phi(b), mean = D * (1 - Phi(a)) + s1 * npdf(a) + D * Phi(b) - s1 * npdf(b);
+    return mean / pw / D;
+  }
+  function drawEx(){
+    const {ctx, w, h} = fit($('#wcEx')), X0 = 40, X1 = w - 14, Y0 = h - 40, Y1 = 14, L0 = 2, L1 = 4.7, YM = 4.5;
+    const xs = m => X0 + (Math.log10(m) - L0) / (L1 - L0) * (X1 - X0), ys = r => Y0 - (r - 1) / (YM - 1) * (Y0 - Y1);
+    yGrid(ctx, X0, X1, ys, [1, 2, 3, 4], v => v + '×');
+    ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ((X1 - X0) > 380 ? [100, 300, 1000, 3000, 10000, 30000] : [100, 1000, 10000]).forEach(v => ctx.fillText(kfmt(v), xs(v), Y0 + 5));
+    ctx.fillStyle = C('--ink-2'); ctx.fillText('visitors per button (log scale) →', (X0 + X1) / 2, Y0 + 21);
+    ctx.strokeStyle = C('--zero'); ctx.lineWidth = 2.2; ctx.beginPath();
+    for (let i = 0; i <= 200; i++) { const m = Math.pow(10, L0 + (L1 - L0) * i / 200), y = ys(Math.min(YM, exag(m))); i ? ctx.lineTo(xs(m), y) : ctx.moveTo(xs(m), y); }
+    ctx.stroke();
+    [250, 500, 1000, 4300, 10000].forEach(m => {
+      const r = exag(m), cur = m === n, x = xs(m), y = ys(r);
+      ctx.fillStyle = C('--surface'); dot(ctx, x, y, cur ? 7 : 5.5); ctx.fillStyle = cur ? C('--zero') : C('--ink-2'); dot(ctx, x, y, cur ? 5.5 : 4);
+      if (!cur && w < 500) return;
+      ctx.font = (cur ? '600 ' : '') + '11px ' + MONO; ctx.fillStyle = cur ? C('--zero') : C('--ink-2'); ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+      ctx.fillText(r.toFixed(r < 1.05 ? 2 : 1) + '×' + (cur ? ' · power ' + pc(powerAt(m, P2, 1.96)) : ''), x + 7, y - 3);
+    });
+  }
+  draw(); drawEx(); redraws.push(draw, drawEx);
 })();
 
 /* ---------- 6. quiz ---------- */
@@ -797,7 +918,7 @@ function powerCurve(F, p2, z, col, lw){
     {s: 'Predict: to detect a lift half as large with the same power, you need about…',
      o: ['twice the visitors', 'four times the visitors', 'eight times the visitors'], a: 1,
      e: 'The humps narrow like 1/√n, so halving the distance between them takes √n twice as big: four times the data.'},
-    {s: 'The button test (1,000 per button) gave p = 0.18. Its power to detect a 1.4-point lift was about 27%. What follows?',
+    {s: 'The button test (1,000 per button) gave p = 0.21 by shuffling (0.18 by formula). Its power to detect a 1.4-point lift was about 27%. What follows?',
      o: ['The orange button doesn’t work', 'The test was too small to tell; orange may or may not help'], a: 1,
      e: 'A test that misses a real lift 73% of the time can’t show the lift is absent. Its interval, −0.6 to +3.4 points, includes both no lift and a big one.'},
     {s: 'A study has 80% power for a given effect. Which reading is <em>wrong</em>?',
@@ -813,8 +934,8 @@ function powerCurve(F, p2, z, col, lw){
      o: ['The smallest effect worth detecting, decided in advance', 'The effect this study observed, after the fact'], a: 0,
      e: 'Power from the observed effect (“observed power”) is just the p-value in disguise. Plan for the effect that would matter.'},
     {s: 'Predict: at 1,000 per button with a true lift of 1.4 points, the tests that come out significant report a lift of, on average…',
-     o: ['about 1.4 points', 'about 2.6 points', 'about 0.7 points'], a: 1,
-     e: 'Only gaps beyond about 2 points are significant at this size, so the survivors average about 2.6 points, nearly twice the truth.'}
+     o: ['about 1.4 points', 'about 2.65 points', 'about 0.7 points'], a: 1,
+     e: 'Only gaps beyond about 2 points are significant at this size, so the survivors average about 2.65 points, nearly twice the truth.'}
   ];
   const box = $('#quiz'); let answered = 0, right = 0;
   Q.forEach(qq => {

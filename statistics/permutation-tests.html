@@ -213,21 +213,21 @@ canvas.clicky{cursor:pointer}
     <div class="readout" id="teaRead" aria-live="polite">Pick 4 cups.</div>
     <p class="mcap" style="margin-top:12px">All 70 ways to pick 4 cups, sorted by how many milk-first cups they catch</p>
     <canvas id="teaAll" style="height:330px" role="img" aria-label="All 70 ways to choose 4 of the 8 cups, each drawn as a strip of 8 cells, stacked into columns by how many milk-first cups the choice gets right: 1, 16, 36, 16 and 1 ways"></canvas>
-    <div class="legend"><span><i class="sw" style="background:var(--one)"></i><span>picked, milk first (right)</span></span><span><i class="sw" style="background:var(--zero)"></i><span>picked, tea first (wrong)</span></span><span><i class="sw" style="border:2px solid var(--gold);background:transparent"></i><span>your pick</span></span><span id="teaTally" class="muted"></span></div>
+    <div class="legend"><span><i class="sw" style="background:var(--one)"></i><span>picked, milk first (right)</span></span><span><i class="sw" style="background:var(--zero)"></i><span>picked, tea first (wrong)</span></span><span><i class="sw" style="border:2px solid var(--gold);background:transparent"></i><span>your pick</span></span><span id="teaThrKey" hidden><i class="sw" style="background:var(--gold-soft)"></i><span>scores that would convince you</span></span><span id="teaTally" class="muted"></span></div>
   </div>
 
-  <p>The 70 strips form a histogram made of every possible guess: 1 way to get none right, 16 ways to get 1, 36 ways to get 2, 16 to get 3, and 1 to get all 4. Getting 3 or more right happens 17 times in 70, about 1 in 4, which is far too often to convince anyone. Only a perfect score is rare enough. According to a colleague who was there, Muriel Bristol got all eight cups right; the story was retold in David Salsburg’s book <em>The Lady Tasting Tea</em> (2001).</p>
+  <p>The 70 strips form a histogram made of every possible guess: 1 way to get none right, 16 ways to get 1, 36 ways to get 2, 16 to get 3, and 1 to get all 4. Getting 3 or more right happens 17 times in 70, about 1 in 4, which is far too often to convince anyone. Only a perfect score is rare enough. Did she pass? According to H. Fairfield Smith, a colleague of Fisher’s, as David Salsburg tells it in <em>The Lady Tasting Tea</em> (2001), Muriel Bristol got all eight cups right. Fisher’s book itself doesn’t say.</p>
 </section>
 
 <!-- 2 -->
 <section id="shuffle">
   <div class="secnum">02</div>
   <h2>Shuffle the labels</h2>
-  <p>The tea test had only 70 possibilities, so Fisher could list them all. Most data have far too many, but the same idea works by random sampling. Take the button test from the <a href="is-it-real.html">first page</a>: 1,000 visitors saw the grey button and 50 clicked (5.0%); 1,000 saw the orange one and 64 clicked (6.4%). A gap of 1.4 points.</p>
-  <p>If the color makes no difference, each visitor would have clicked or not whichever button they saw. Then the labels “grey” and “orange” are arbitrary: deal the same 2,000 visitors, with their 114 clicks, into two new groups of 1,000 at random, and you get a gap that chance alone produced. Do that many times and you see how big chance’s gaps get.</p>
+  <p>On <a href="bootstrap.html">The Bootstrap</a> you resampled one group to see how much a number wobbles. Shuffling labels answers a different question: could the gap between two groups be chance alone? The tea test had only 70 possibilities, so Fisher could list them all. Most data have far too many, but the same idea works by random sampling. Take the button test from the <a href="is-it-real.html">first page</a>: 1,000 visitors saw the gray button and 50 clicked (5.0%); 1,000 saw the orange one and 64 clicked (6.4%). A gap of 1.4 points.</p>
+  <p>If the color makes no difference, each visitor would have clicked or not whichever button they saw. Then the labels “gray” and “orange” are arbitrary: deal the same 2,000 visitors, with their 114 clicks, into two new groups of 1,000 at random, and you get a gap that chance alone produced. Do that many times and you see how big chance’s gaps get.</p>
 
   <div class="widget">
-    <p class="widget-title">The shuffler</p>
+    <p class="widget-title">★ The shuffler</p>
     <p class="cast-q">Before shuffling: how often do you think a shuffle produces a gap of 1.4 points or more, either way?</p>
     <div class="controls" id="shPred">
       <button class="btn" data-g="0">Almost never (under 1%)</button>
@@ -286,7 +286,7 @@ canvas.clicky{cursor:pointer}
   <p>Three different problems, one recipe. The statistician Allen Downey summed it up as “there is only one test”:</p>
   <ol class="facts">
     <li><strong>Compute a number from the data</strong> that measures the effect you care about: cups right, a gap, an average gain.</li>
-    <li><strong>Build the world where nothing is going on</strong>, by shuffling whatever would be arbitrary in that world: cup choices, group labels, signs.</li>
+    <li><strong>Build the world where nothing is going on</strong> by shuffling whatever would be arbitrary in that world: cup choices, group labels, signs.</li>
     <li><strong>See where the real number lands</strong> among the shuffled ones. If it sits among them, chance is a fine explanation; if it is out beyond almost all of them, chance struggles.</li>
   </ol>
   <div class="table-wrap">
@@ -300,7 +300,7 @@ canvas.clicky{cursor:pointer}
       </tbody>
     </table>
   </div>
-  <p>The named tests later in this series, the <em>t</em>-test, the chi-square test, ANOVA, the test for a regression slope, all follow this recipe. They replace the shuffling with a formula for where the shuffled numbers would fall, which was essential before computers. Each of those pages will show its formula next to the shuffle it stands in for, and they will agree. The tea test itself survives under the name <em>Fisher’s exact test</em>.</p>
+  <p>The named tests later in this series, <a href="student-t.html">the <em>t</em>-test</a>, <a href="chi-square-tests.html">the chi-square test</a>, <a href="anova.html">ANOVA</a> and the test for a regression slope, all follow this recipe. They replace the shuffling with a formula for where the shuffled numbers would fall, which was essential before computers. Each of those pages will show its formula next to the shuffle it stands in for, and they will agree. The tea test itself survives under the name <em>Fisher’s exact test</em>, which returns on the <a href="chi-square-tests.html">chi-square page</a>.</p>
 </section>
 
 <!-- 5 -->
@@ -313,7 +313,7 @@ canvas.clicky{cursor:pointer}
     <div class="card"><h4>Genetics and brain imaging</h4><p>With thousands of genes or brain regions tested at once, shuffling the labels and rerunning the whole analysis shows how many “hits” chance alone produces.</p></div>
     <div class="card"><h4>Machine learning</h4><p><em>Permutation importance</em> shuffles one input column and measures how much a model’s accuracy drops. A feature whose shuffling costs nothing wasn’t helping.</p></div>
     <div class="card"><h4>Ecology and geography</h4><p>Are species that live close together more alike? Shuffling which location goes with which sample builds the world where geography doesn’t matter.</p></div>
-    <div class="card"><h4>Sports and streaks</h4><p>Shuffling the order of a player’s hits and misses shows how streaky a player with no “hot hand” would look, exactly like the coin streaks on the first page.</p></div>
+    <div class="card"><h4>Sports and streaks</h4><p>Shuffling the order of a player’s hits and misses shows how streaky a player with no “hot hand” would look, exactly like the coin streaks on the <a href="is-it-real.html">first page</a>.</p></div>
   </div>
 
   <h3>Check yourself</h3>
@@ -467,6 +467,8 @@ const pop = m => { let c = 0; while (m) { c += m & 1; m >>= 1; } return c; };
 const COMBOS = []; for (let m = 0; m < 256; m++) if (pop(m) === 4) COMBOS.push(m);   // the 70 ways
 const signed = (v, d) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(d);
 
+const THRESH = {k: null, redraw: null};   // the reader's "she must get at least k right", shared with the tea set
+
 /* ---------- hero: how many must she get right? ---------- */
 (function(){
   const hint = $('#heroHint');
@@ -481,8 +483,9 @@ const signed = (v, d) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixe
   }
   $$('#heroPred .btn').forEach(b => b.addEventListener('click', () => {
     k = +b.dataset.k; $$('#heroPred .btn').forEach(x => x.classList.toggle('guess', x === b));
+    THRESH.k = k; if (THRESH.redraw) THRESH.redraw();
     const n = TEA.slice(k).reduce((a, c) => a + c, 0);
-    hint.innerHTML = `Someone purely guessing reaches ${k === 4 ? 'a perfect score' : `at least ${k} right`} in <b>${n} of the 70</b> equally likely ways to pick 4 cups: <b>${(100 * n / 70).toFixed(1)}%</b>. ` +
+    hint.innerHTML = `You said she must get <b>${k === 4 ? 'all 4' : `at least ${k} of the 4`}</b>. Someone purely guessing reaches ${k === 4 ? 'a perfect score' : `at least ${k} right`} in <b>${n} of the 70</b> equally likely ways to pick 4 cups: <b>${(100 * n / 70).toFixed(1)}%</b>. ` +
       (k === 4 ? 'That was Fisher’s answer: only a perfect score is rare enough to be convincing.' : k === 3 ? 'About 1 in 4. A guesser would convince you far too often. Fisher demanded all 4.' : 'More often than not. A guesser would convince you most of the time. Fisher demanded all 4.');
     draw();
   }));
@@ -527,6 +530,17 @@ const signed = (v, d) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixe
     const colW = (w - 20) / 5, Y0 = h - 34, sh = Math.max(3, Math.min(7, (Y0 - 8) / 36 - 1.5)), gap = Math.max(1, Math.min(2, sh * .3)), cw = Math.min(11, (colW - 10) / 8);
     const cols = [[], [], [], [], []];
     COMBOS.forEach(m => cols[pop(m & truth)].push(m));
+    const k = THRESH.k;
+    $('#teaThrKey').hidden = k == null;
+    if (k != null) {   // the columns that would convince the reader
+      const x = 10 + k * colW + 3, n = TEA.slice(k).reduce((a, c) => a + c, 0);
+      ctx.fillStyle = C('--gold-soft'); ctx.fillRect(x, 4, w - 10 - x - 3, Y0 - 2);
+      const cx = (x + w - 13) / 2, mw = w - 13 - x - 6;   // centered in the shaded stretch, squeezed if it must
+      ctx.font = '600 12px ' + MONO; ctx.fillStyle = C('--gold'); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      const fit1 = (long, short) => ctx.measureText(long).width <= mw ? long : short;
+      ctx.fillText(fit1(`your bar: ${k === 4 ? 'all 4' : `${k}+ right`}`, k === 4 ? 'all 4' : `${k}+ right`), cx, 8, mw);
+      ctx.font = '11px ' + MONO; ctx.fillText(fit1(`a guesser passes ${n} of 70`, `${n} of 70`), cx, 24, mw);
+    }
     cols.forEach((list, c) => {
       const x0 = 10 + c * colW + (colW - 8 * cw) / 2;
       list.forEach((m, r) => {
@@ -552,7 +566,7 @@ const signed = (v, d) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixe
     if (!revealed) { truth = pour(); picks = pour(); revealed = true; tally[pop(picks & truth)]++; rounds++; }
     sync();
   });
-  truth = pour(); sync(); redraws.push(drawAll);
+  truth = pour(); sync(); redraws.push(drawAll); THRESH.redraw = drawAll;
 })();
 
 /* ---------- 2. the shuffler: the button test ---------- */
@@ -567,20 +581,22 @@ const signed = (v, d) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixe
   }
   function add(g){ gaps.push(g); if (Math.abs(g) >= OBS) beyond++; }
   function drawGrid(){
-    const {ctx, w, h} = fit($('#shGrid'));
-    const gap = 18, pw = (w - gap) / 2, top = 34, cs = Math.min(pw / 50, (h - top - 4) / 20), gw = cs * 50, gh = cs * 20;
-    ['A · grey button', 'B · orange button'].forEach((name, g) => {
-      const x0 = g * (pw + gap) + (pw - gw) / 2;
+    const cv = $('#shGrid'), stack = cv.getBoundingClientRect().width < 520;   // phones: one block above the other, so each can be full width
+    if (stack) cv.style.height = Math.round(2 * (34 + 20 * cv.getBoundingClientRect().width / 50) + 14) + 'px'; else cv.style.height = '190px';
+    const {ctx, w, h} = fit(cv);
+    const gap = 18, pw = stack ? w : (w - gap) / 2, top = 34, cs = stack ? w / 50 : Math.min(pw / 50, (h - top - 4) / 20), gw = cs * 50, gh = cs * 20;
+    ['A · gray button', 'B · orange button'].forEach((name, g) => {
+      const x0 = stack ? 0 : g * (pw + gap) + (pw - gw) / 2, y0 = stack ? g * (top + gh + 14) : 0;
       let clicks = 0; for (let i = 0; i < N; i++) clicks += view[g * N + i];
       ctx.font = '600 12px ' + MONO; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillStyle = C('--ink');
-      ctx.fillText(name, x0, 0);
+      ctx.fillText(name, x0, y0);
       ctx.font = '12px ' + MONO; ctx.fillStyle = isReal ? C('--accent') : C('--ink-2');
-      ctx.fillText(`${clicks} clicks · ${(clicks / 10).toFixed(1)}%`, x0, 16);
+      ctx.fillText(`${clicks} clicks · ${(clicks / 10).toFixed(1)}%${isReal ? '' : ' (latest shuffle)'}`, x0, y0 + 16);
       const on = isReal ? C('--accent') : C('--ink-2'), off = C('--line');
       for (let i = 0; i < N; i++) {
         const c = i % 50, r = Math.floor(i / 50);
         ctx.fillStyle = view[g * N + i] ? on : off;
-        ctx.fillRect(x0 + c * cs, top + r * cs, Math.max(1, cs - .8), Math.max(1, cs - .8));
+        ctx.fillRect(x0 + c * cs, y0 + top + r * cs, Math.max(1, cs - .8), Math.max(1, cs - .8));
       }
     });
   }
@@ -599,10 +615,11 @@ const signed = (v, d) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixe
     const n = gaps.length, out = $('#shRead');
     if (!n) { out.innerHTML = isReal ? `real labels: gap <b>+1.4 points</b> (64 − 50 clicks)` : ''; return; }
     const f = beyond / n, last = gaps[n - 1];
-    let t = `<b>${comma(n)}</b> shuffles · latest gap ${signed(last / 10, 1)} points · at least 1.4 either way: <b>${comma(beyond)}</b> = <b>${(100 * f).toFixed(1)}%</b>`;
+    let t = `<b>${comma(n)}</b> shuffle${n === 1 ? '' : 's'} · latest gap ${signed(last / 10, 1)} points · at least 1.4 either way: <b>${comma(beyond)}</b> = <b>${(100 * f).toFixed(1)}%</b>`;
     if (guess != null && n >= 300) {
       const ok = guess === 2;
-      t += `<br>${ok ? '<span class="ok">Your guess was right:</span>' : '<span class="warn">Not what you guessed:</span>'} chance alone makes a gap this big about 1 time in 5.`;
+      const said = $$('#shPred .btn')[guess].textContent.toLowerCase();
+      t += `<br>You guessed <b>${said}</b>. ${ok ? '<span class="ok">Right:</span>' : '<span class="warn">In fact</span>'} chance alone makes a gap this big ${(100 * f).toFixed(0)}% of the time here, about 1 time in 5.`;
       $$('#shPred .btn').forEach(b => { b.classList.remove('right', 'wrong'); if (+b.dataset.g === guess) b.classList.add(ok ? 'right' : 'wrong'); });
     }
     out.innerHTML = t;
@@ -611,12 +628,9 @@ const signed = (v, d) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixe
   function setOpen(){ open = true; $('#shOne').disabled = $('#shMany').disabled = false; $('#shSkip').hidden = true; drawHist(); }
   $$('#shPred .btn').forEach(b => b.addEventListener('click', () => { guess = +b.dataset.g; $$('#shPred .btn').forEach(x => x.classList.toggle('guess', x === b)); setOpen(); read(); }));
   $('#shSkip').addEventListener('click', setOpen);
-  $('#shOne').addEventListener('click', () => {
-    view = shuffleOnce(); isReal = false;
-    let b = 0; for (let i = N; i < 2 * N; i++) b += view[i];
-    add(b - (K - b)); drawAll();
-  });
-  $('#shMany').addEventListener('click', () => { for (let i = 0; i < 1000; i++) add(fastGap()); drawAll(); });
+  $('#shOne').addEventListener('click', () => { oneShuffle(); drawAll(); });
+  function oneShuffle(){ view = shuffleOnce(); isReal = false; let b = 0; for (let i = N; i < 2 * N; i++) b += view[i]; add(b - (K - b)); }
+  $('#shMany').addEventListener('click', () => { for (let i = 0; i < 999; i++) add(fastGap()); oneShuffle(); drawAll(); });
   $('#shReal').addEventListener('click', () => { view = real; isReal = true; drawAll(); });
   $('#shClear').addEventListener('click', () => { gaps = []; beyond = 0; view = real; isReal = true; $$('#shPred .btn').forEach(b => b.classList.remove('right', 'wrong')); drawAll(); });
   drawAll(); redraws.push(drawAll);
@@ -644,7 +658,7 @@ const signed = (v, d) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixe
       if (d) { roundRect(ctx, Math.min(mid, x), y - rh * .32, Math.abs(x - mid), rh * .64, 3); ctx.fill(); }
       else ctx.fillRect(mid - 1, y - rh * .32, 3, rh * .64);
       const t = signed(s * d, 1), tw = ctx.measureText(t).width, tx = s > 0 ? x + 5 : x - 5 - tw;
-      ctx.fillStyle = C('--surface'); ctx.fillRect(tx - 2, y - 7, tw + 4, 14);
+      ctx.fillStyle = C('--surface'); ctx.fillRect(tx - 4, y - 7, tw + 8, 14);
       ctx.fillStyle = C('--ink-2'); ctx.textAlign = 'left'; ctx.fillText(t, tx, y);
     });
     ctx.font = '600 12px ' + MONO; ctx.fillStyle = mask ? C('--ink') : C('--accent'); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
@@ -660,6 +674,14 @@ const signed = (v, d) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixe
     const xo = F.xc(OBS / 10);
     vline(ctx, xo, F.Y1, F.Y0, C('--accent'), null, 2); vline(ctx, F.xc(-OBS / 10), F.Y1, F.Y0, C('--accent'), [4, 3], 1.2);
     ctx.fillStyle = C('--accent'); ctx.font = '600 12px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'top'; ctx.fillText('real +1.58', xo - 5, F.Y1);
+    if (n) for (let k = LO; k <= HI; k++) {   // the extreme patterns are tiny bars: point them out
+      const c = cnt[k - LO]; if (!c || Math.abs(k * 10) < OBS - 5) continue;
+      const t = `${c} pattern${c === 1 ? '' : 's'}`; ctx.font = '600 11px ' + MONO; const tw = ctx.measureText(t).width;
+      const cx = Math.max(F.X0 + tw / 2 + 3, Math.min(F.X1 - tw / 2 - 3, F.xc(k))), y = F.Y0 - 44;
+      ctx.fillStyle = C('--surface'); ctx.fillRect(cx - tw / 2 - 3, y - 1, tw + 6, 14);
+      ctx.fillStyle = C('--accent'); ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(t, cx, y);
+      ctx.strokeStyle = C('--accent'); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(F.xc(k), y + 16); ctx.lineTo(F.xc(k), F.Y0 - 6); ctx.moveTo(F.xc(k) - 4, F.Y0 - 10); ctx.lineTo(F.xc(k), F.Y0 - 5); ctx.lineTo(F.xc(k) + 4, F.Y0 - 10); ctx.stroke();
+    }
     let up = 0, both = 0; tried.forEach(s => { if (s >= OBS) up++; if (Math.abs(s) >= OBS) both++; });
     $('#sfRead').innerHTML = n ? `<b>${comma(n)}</b> of 1,024 sign patterns tried · average ≥ 1.58: <b>${up}</b> · at least 1.58 from zero either way: <b>${both}</b>${n === 1024 ? ` = <b>${(100 * both / 1024).toFixed(1)}%</b>` : ''}${lastMask != null ? ` · current pattern: average ${signed(sumOf(mask) / 100, 2)} h` : ''}` : '';
   }

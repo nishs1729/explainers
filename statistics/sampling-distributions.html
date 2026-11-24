@@ -215,7 +215,7 @@ canvas.band{cursor:ew-resize;touch-action:pan-y}
   <h2>Many samples, one distribution</h2>
   <p>On the <a href="is-it-real.html">first page</a> the question was always: could chance alone have done this? To answer it you need to know how much a number computed from data moves around by chance. The polls above show it directly. Every pollster did the job properly, yet their answers spread over several points, just because each one happened to ask different people.</p>
   <p>The same is true of any number computed from a sample: an average, a median, a percentage, the largest value. Draw another sample and you get another number. Draw thousands of samples and the numbers pile up into a distribution, called the <em class="term">sampling distribution</em> of that statistic. It is the distribution of the answers you <em>could</em> have got.</p>
-  <p>The machine below draws samples from a population you choose. The top chart is the population, the middle row is the latest sample, and the bottom chart collects one number from every sample. To start, the population is Galton’s 481 sons from the first page, and each sample picks 25 of them at random.</p>
+  <p>The machine below draws samples from a population you choose. The top chart is the population, the middle row is the latest sample, and the bottom chart collects one number from every sample. To start, the population is Galton’s 481 sons from the first page, and each sample picks 25 of them at random. Each time you choose a new population or statistic, the machine asks for a fresh guess first.</p>
 
   <div class="widget">
     <p class="widget-title">The sample machine</p>
@@ -255,7 +255,7 @@ canvas.band{cursor:ew-resize;touch-action:pan-y}
   </div>
 
   <p>Most people’s first band is far too wide. They expect the averages to spread as much as the heights themselves do, from about 64 to 74 inches. In fact 95% of the averages of 25 sons land within about 1 inch of the population average. One son can easily be 5 inches above average; for 25 sons to average 5 inches above, nearly all of them would have to be tall at once, and that almost never happens. Highs and lows cancel.</p>
-  <p>Now switch to <strong>Waiting times</strong>, a population piled up near zero with a long tail to the right. At sample size 1 the bottom chart just copies that skewed shape. By 25 the averages make a fairly symmetric bell. That is the <a href="../probability/normal.html#clt">central limit theorem</a> from the Normal page, seen from the statistician’s side: whatever the population looks like, averages of reasonably large samples have a roughly normal sampling distribution. The <strong>Geyser</strong> population, with two humps, and one you draw yourself make the same point.</p>
+  <p>Now switch to <strong>Waiting times</strong>, a population piled up near zero with a long tail to the right (an <a href="../probability/exponential.html">exponential</a> distribution). At sample size 1 the bottom chart just copies that skewed shape. By 25 the averages make a fairly symmetric bell. That is the <a href="../probability/normal.html#clt">central limit theorem</a> from the Normal page, seen from the statistician’s side: whatever the population looks like, averages of reasonably large samples have a roughly normal sampling distribution. The <strong>Geyser</strong> population, with two humps, and one you draw yourself make the same point.</p>
   <div class="callout">
     <p><strong>Three distributions, not one.</strong> The <em>population</em> is everything you could sample. A <em>sample</em> is the handful you actually got. The <em>sampling distribution</em> is how a number computed from samples would vary over many repeats. In real life you see one sample and one number, never the other two charts. Statistics is the craft of working out the bottom chart without being able to draw it.</p>
   </div>
@@ -265,7 +265,7 @@ canvas.band{cursor:ew-resize;touch-action:pan-y}
 <section id="wobble">
   <div class="secnum">02</div>
   <h2>How much it wobbles</h2>
-  <p>The spread of a sampling distribution is so useful that it has its own name, the <em class="term">standard error</em>. It is simply the standard deviation of the numbers in the bottom chart: a typical distance between one sample’s answer and the truth.</p>
+  <p>The spread of a sampling distribution is so useful that it has its own name, the <em class="term">standard error</em>. It is simply the standard deviation of the numbers in the bottom chart: how far one sample’s answer typically lands from the average of all the answers. For the mean, that average is the truth itself, so the standard error is also the typical distance from the truth. That isn’t true of every statistic, as section 4 shows.</p>
   <p>For averages there is a formula. If the population has standard deviation σ, the average of <em>n</em> independent values has standard error</p>
   <p class="lh" style="text-align:center;font-size:1.3rem">standard error of the mean = σ / √n</p>
   <p>The <a href="../probability/normal.html#sqrtn">square-root law</a> on the Normal page explains why: variances add, so the sum of <em>n</em> values has a spread of σ√n, and dividing by <em>n</em> leaves σ/√n. Check it against brute force:</p>
@@ -291,7 +291,7 @@ canvas.band{cursor:ew-resize;touch-action:pan-y}
   <p>A poll is an average too: score each “yes” as 1 and each “no” as 0, and the share who said yes is the average of the scores. A yes/no population with share <em>p</em> has σ = √(p(1−p)), which is 0.5 for a near-even split. So a poll of 1,000 has a standard error of 0.5/√1000 ≈ 0.016, or 1.6 percentage points. About 95% of honest polls land within two standard errors, roughly 3 points, of the truth. That is the “margin of error” newspapers print, and it is why 52% and 49% can both come from good polls.</p>
   <p>Notice what is missing from the formula: the size of the population. A random sample of 1,000 is about as precise for a city of 100,000 as for a country of 300 million. What matters is how many people you ask and whether they were picked at random, not what fraction of the population they are. (When the sample is a large share of the population, say half of it, the standard error does shrink further. Real polls are nowhere near that.)</p>
   <div class="callout">
-    <p><strong>There is a catch.</strong> The formula needs σ, the spread of the whole population, which you usually don’t know. In practice you plug in the sample’s own standard deviation instead. For large samples that works fine. For small ones it understates the uncertainty a little, and fixing that is the job of <em>Student’s t</em>, later in the series.</p>
+    <p><strong>There is a catch.</strong> The formula needs σ, the spread of the whole population, which you usually don’t know. In practice you plug in the sample’s own standard deviation instead. For large samples that works fine. For small ones it understates the uncertainty a little, and fixing that is the job of <a href="student-t.html"><em>Student’s t</em></a>, later in the series.</p>
   </div>
 </section>
 
@@ -308,7 +308,7 @@ canvas.band{cursor:ew-resize;touch-action:pan-y}
         <button class="btn on" data-dvpop="heights" aria-pressed="true">Heights</button>
         <button class="btn" data-dvpop="wait" aria-pressed="false">Waiting times</button>
       </div>
-      <label class="ctrl">sample size <input type="range" id="dvN" min="0" max="7" step="1" value="3"><output id="dvNOut"></output></label>
+      <label class="ctrl">sample size <input type="range" id="dvN" min="0" max="6" step="1" value="3"><output id="dvNOut"></output></label>
       <button class="btn" id="dvNew">New sample</button>
     </div>
     <div class="pair">
@@ -319,7 +319,7 @@ canvas.band{cursor:ew-resize;touch-action:pan-y}
     <div class="readout" id="dvRead"></div>
   </div>
 
-  <p>Slide the sample size up. On the left, the sample fills in the population’s shape more and more faithfully, but it doesn’t get any narrower: sons vary by about 2.6 inches whether you measure 10 of them or 500. On the right, the averages squeeze in toward the true mean. A bigger sample tells you the <em>average</em> more precisely; it does not make <em>people</em> more alike.</p>
+  <p>Slide the sample size up. On the left, the sample fills in the population’s shape more and more faithfully, but it doesn’t get any narrower: sons vary by about 2.6 inches whether you measure 10 of them or 250. On the right, the averages squeeze in toward the true mean. A bigger sample tells you the <em>average</em> more precisely; it does not make <em>people</em> more alike.</p>
   <div class="callout">
     <p><strong>Error bars.</strong> Charts in papers and reports often show a bar around each average without saying which spread it is. An SD bar shows how much individuals vary and stays wide however much data there is. An SE bar shows how precisely the average is known and shrinks as data grows. With 100 people per group an SD bar is 10 times longer than an SE bar, so the same data can look either convincing or hopeless. Always check which one you are looking at.</p>
   </div>
@@ -351,11 +351,11 @@ canvas.band{cursor:ew-resize;touch-action:pan-y}
   </div>
 
   <ul>
-    <li><strong>The median</strong> wobbles more than the mean for bell-shaped data, about 25% more in large samples. For skewed data like the waiting times, small-sample medians also land a little off-center, above the population median on average. The median earns its keep with messy data, where a few wild values would drag the mean around.</li>
+    <li><strong>The median</strong> wobbles more than the mean for smooth bell-shaped data, about 25% more in large samples. Galton’s heights are less smooth than they look: most were written down to the whole inch, so the median keeps landing on the same few values and jumps between them. In the widget that makes it wobble anywhere from about 15% more than the mean (samples of 3) to about 45% more (samples of 50). For skewed data like the waiting times, small-sample medians also land a little off-center, above the population median on average. The median earns its keep with messy data, where a few wild values would drag the mean around.</li>
     <li><strong>The largest value</strong> is always at or below the population’s largest value, so on average it falls short. Its distribution is lopsided, with a long tail toward big values; the <a href="../probability/extreme-values.html">Extreme Values</a> page is about exactly this shape. For waiting times the population has no largest value at all, so the sample maximum keeps growing with the sample size.</li>
-    <li><strong>The standard deviation</strong> is skewed to the right for small samples and on average comes out a little below σ, even with the usual <em>n</em> − 1 divisor. Its shape is a stretched <a href="../probability/chi-square.html#variance">chi-square</a>, at least for normal data.</li>
+    <li><strong>The standard deviation</strong> is skewed to the right for small samples and on average comes out a little below σ, even with the usual <em>n</em> − 1 divisor. Its square, the sample variance, has the shape of a stretched <a href="../probability/chi-square.html#variance">chi-square</a>, at least for normal data.</li>
   </ul>
-  <p>So a sampling distribution can be lopsided, and it can be centered somewhere other than the truth. A statistic whose sampling distribution is off-center is called <em class="term">biased</em>. Whether that matters, and how to choose between a steady statistic and an unbiased one, is the subject of <em>What makes a good guess</em>. And for statistics with no handy formula, like the median, the <em>bootstrap</em> will estimate the sampling distribution from a single sample. Both pages are coming up in this series.</p>
+  <p>So a sampling distribution can be lopsided, and it can be centered somewhere other than the truth. A statistic whose sampling distribution is off-center is called <em class="term">biased</em>. Whether that matters, and how to choose between a steady statistic and an unbiased one, is the subject of <a href="estimation.html"><em>What makes a good guess</em></a>. And for statistics with no handy formula, like the median, <a href="bootstrap.html">the <em>bootstrap</em></a> will estimate the sampling distribution from a single sample. Both pages are coming up in this series.</p>
 </section>
 
 <!-- 5 -->
@@ -364,7 +364,7 @@ canvas.band{cursor:ew-resize;touch-action:pan-y}
   <h2>Where you will meet it</h2>
   <div class="cards">
     <div class="card"><h4>Opinion polls</h4><p>The “± 3 points” in a poll report is about two standard errors of a sample of roughly 1,000. It covers chance only: it says nothing about who refused to answer or how the question was worded.</p></div>
-    <div class="card"><h4>A/B tests</h4><p>The button test’s 5.0% and 6.4% are each one draw from a sampling distribution with a standard error of about 0.7 points, which is why their 1.4-point gap is unconvincing.</p></div>
+    <div class="card"><h4>A/B tests</h4><p>The button test’s 5.0% and 6.4% each wobble with a standard error of about 0.7 points. Their <em>gap</em> wobbles more, about √2 × 0.7 ≈ 1.0 point, because both rates move. So the 1.4-point gap is only about 1.35 standard errors, well inside the ±2 that chance alone produces 95% of the time.</p></div>
     <div class="card"><h4>Measuring things</h4><p>Labs repeat a measurement and report the average, because the average of 4 readings has half the random error of one. That is σ/√n at work.</p></div>
     <div class="card"><h4>Quality control</h4><p>Factories plot the average of small batches over time with limits at about 3 standard errors from the target. A point outside the limits is unlikely to be chance.</p></div>
     <div class="card"><h4>Clinical trials</h4><p>Trial sizes are planned from the standard error: how many patients are needed before the wobble in the average effect is smaller than the effect worth detecting.</p></div>
@@ -531,9 +531,9 @@ function drawOwn(){
 }
 const POPS = {
   heights: {name: 'Galton’s 481 sons (inches)', unit: ' in', xmin: 59, xmax: 81, binW: .5, draw: () => SONS_H[Math.floor(Math.random() * SONS_H.length)], finite: SONS_H},
-  wait: {name: 'Waiting time for the next customer (minutes), 8 on average', unit: ' min', xmin: 0, xmax: 50, draw: () => -8 * Math.log(1 - Math.random()), max: null},
-  geyser: {name: 'Gaps between geyser eruptions (minutes), two humps', unit: ' min', xmin: 30, xmax: 100, draw: () => Math.random() < .36 ? 54 + 6 * gauss() : 80 + 6 * gauss(), max: null},
-  flat: {name: 'Flat: any value from 0 to 100 equally likely', unit: '', xmin: 0, xmax: 100, draw: () => 100 * Math.random(), max: 100},
+  wait: {name: 'Waiting time for the next customer (minutes), 8 on average', unit: ' min', xmin: 0, xmax: 50, draw: () => -8 * Math.log(1 - Math.random()), max: null, exact: {mean: 8, sd: 8, median: 8 * Math.LN2}},
+  geyser: {name: 'Gaps between geyser eruptions (minutes), two humps', unit: ' min', xmin: 30, xmax: 100, draw: () => Math.random() < .36 ? 54 + 6 * gauss() : 80 + 6 * gauss(), max: null, exact: {mean: .36 * 54 + .64 * 80, sd: Math.sqrt(.36 * .64 * 26 * 26 + 36)}},
+  flat: {name: 'Flat: any value from 0 to 100 equally likely', unit: '', xmin: 0, xmax: 100, draw: () => 100 * Math.random(), max: 100, exact: {mean: 50, sd: 100 / Math.sqrt(12), median: 50}},
   own: {name: 'drawn by you (drag on the chart to reshape it)', unit: '', xmin: 0, xmax: 100, draw: drawOwn, own: true}
 };
 const truthCache = {};
@@ -552,7 +552,7 @@ function truth(key){
   else { a = new Float64Array(100000); for (let i = 0; i < a.length; i++) a[i] = P.draw(); }
   a.sort();
   let m = 0; a.forEach(v => m += v); m /= a.length; let v2 = 0; a.forEach(v => v2 += (v - m) ** 2);
-  return (truthCache[key] = {mean: m, sd: Math.sqrt(v2 / a.length), median: a[a.length >> 1], max: P.finite ? a[a.length - 1] : P.max, sorted: a});
+  return (truthCache[key] = Object.assign({mean: m, sd: Math.sqrt(v2 / a.length), median: a[a.length >> 1], max: P.finite ? a[a.length - 1] : P.max, sorted: a}, P.exact));   // exact values where they are known
 }
 function popBars(key, B){
   const P = POPS[key];
@@ -593,8 +593,13 @@ const fmt1 = (v, P) => v.toFixed(Math.abs(v) < 10 ? 2 : 1) + (P ? P.unit : '');
   }
   function drawStrip(){
     const {ctx, w, h} = fit($('#heroStrip'));
-    const X0 = 16, X1 = w - 16, Y0 = h - 22, Y1 = 8, lo = 44, hi = 58, xs = v => X0 + (v - lo) / (hi - lo) * (X1 - X0);
+    const X0 = 16, X1 = w - 16, Y0 = h - 22, Y1 = 32, lo = 44, hi = 58, xs = v => X0 + (v - lo) / (hi - lo) * (X1 - X0);
     xAxis(ctx, X0, X1, Y0, lo, hi, v => v + '%');
+    const nar = w < 520;
+    [[52, nar ? 'A 52%' : 'poll A: 52%'], [49, nar ? 'B 49%' : 'poll B: 49%']].forEach(([v, t]) => {   // the two polls from the question
+      vline(ctx, xs(v), 30, Y0, C('--ink-3'), null, 1);
+      ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--ink-2'); ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(t, xs(v), 1);
+    });
     const bin = .25, stacks = {}; let top = 1;
     const pos = polls.map(p => { const v = p * 100, b = Math.round(v / bin); stacks[b] = (stacks[b] || 0) + 1; top = Math.max(top, stacks[b]); return [b, stacks[b]]; });
     const r = Math.max(1.5, Math.min(4.5, (Y0 - Y1) / (2 * top + 1), (X1 - X0) / ((hi - lo) / bin) / 2.2));
@@ -604,15 +609,15 @@ const fmt1 = (v, P) => v.toFixed(Math.abs(v) < 10 ? 2 : 1) + (P ? P.unit : '');
       dot(ctx, xs(b * bin), Y0 - r - (k - 1) * 2 * r - 1, latest ? r + 1 : r);
     });
     if (revealed) {
-      vline(ctx, xs(YES / N * 100), Y1, Y0, C('--ink'), [4, 3], 1.5);
-      label(ctx, xs(YES / N * 100), Y1, 'true support 50.6%', C('--ink'), X0, X1);
+      vline(ctx, xs(YES / N * 100), 16, Y0, C('--ink'), [4, 3], 1.5);
+      label(ctx, xs(YES / N * 100), 17, 'truth 50.6%', C('--ink'), X0, X1);
     }
   }
   function message(){
     const n = polls.length, last = polls[n - 1], f = p => (p * 100).toFixed(1) + '%';
     if (revealed) {
       const near = polls.filter(p => Math.abs(p - YES / N) <= .03).length;
-      hint.innerHTML = `<b>True support is 50.6%.</b> ${n ? `${near} of your ${n} poll${n === 1 ? '' : 's'} landed within 3 points of it. ` : ''}Polls of 1,000 land within about 3 points of the truth 95% of the time, so 52% and 49% are both what honest polls produce. Neither pollster has to be wrong.`;
+      hint.innerHTML = `<b>True support is 50.6%.</b> ${n ? `${near} of your ${n} poll${n === 1 ? '' : 's'} landed within 3 points of it. ` : ''}Polls of 1,000 land within about 3 points of the truth 95% of the time, so 52% and 49% (the two thin lines) are both what honest polls produce. Neither pollster has to be wrong.`;
     } else if (n === 0) return;
     else if (n === 1) hint.innerHTML = `Your pollster asked the 1,000 bright squares: <b>${f(last)}</b> support the policy. Run another poll of the same country.`;
     else if (n < 10) { const lo = Math.min(...polls), hi = Math.max(...polls); hint.innerHTML = `Same country, same question, same size of poll, yet the results so far range from <b>${f(lo)}</b> to <b>${f(hi)}</b>. Keep going.`; }
@@ -705,12 +710,18 @@ const fmt1 = (v, P) => v.toFixed(Math.abs(v) < 10 ? 2 : 1) + (P ? P.unit : '');
         let verdict = '';
         if (N >= 200) verdict = k > .99 ? ' · <span class="warn">too wide</span>' : k < .88 ? ' · <span class="warn">too narrow</span>' : ' · <span class="ok">well judged</span>';
         parts.push(`your band ${fmt1(band[0], p)} – ${fmt1(band[1], p)} caught <span class="gd">${pct(k)}</span>${verdict}`);
+        if (N >= 200) {   // say the guess back next to the answer
+          const sv = Float64Array.from(vals).sort(), lo = quantile(sv, .025), hi = quantile(sv, .975), r = (band[1] - band[0]) / Math.max(1e-9, hi - lo);
+          const how = k > .99 && r > 1.25 ? `, so your band was about <b>${r.toFixed(1)}×</b> as wide as it needed to be` : k < .88 && r < .8 ? `, so your band was about <b>${(1 / r).toFixed(1)}×</b> too narrow` : k < .88 ? ', so your band was about the right width but in the wrong place' : '';
+          parts.push(`the middle 95% of the ${STATS[stat].many} actually ran from <b>${fmt1(lo, p)}</b> to <b>${fmt1(hi, p)}</b>${how}`);
+        }
       }
     } else parts.push(band ? 'Guess locked in. Draw samples and see how many land inside it.' : guessed ? 'Draw some samples.' : `Before drawing: drag across the bottom chart to mark where you think 95% of the ${STATS[stat].many} of ${n()} will land.`);
     $('#smRead').innerHTML = parts.join('<br>');
   }
   function draw(){ drawPop(); drawSamp(); drawHist(); readout(); }
   function unlock(){ guessed = true; ['#smOne', '#smRun', '#smMany'].forEach(s => $(s).disabled = false); $('#smSkip').hidden = true; }
+  function relock(){ stop(); guessed = false; ['#smOne', '#smRun', '#smMany'].forEach(s => $(s).disabled = true); $('#smSkip').hidden = false; }   // a new population or statistic asks for a new guess
   function stop(){ running = false; clearTimeout(timer); $('#smRun').textContent = '▶ Keep drawing'; }
   function tick(){ if (!running) return; one(); draw(); timer = setTimeout(tick, RM ? 200 : 70); }
 
@@ -739,8 +750,8 @@ const fmt1 = (v, P) => v.toFixed(Math.abs(v) < 10 ? 2 : 1) + (P ? P.unit : '');
   pc.addEventListener('pointerup', endPaint); pc.addEventListener('pointercancel', endPaint);
 
   function seg(attr, cb){ $$(`[data-${attr}]`).forEach(b => b.addEventListener('click', () => { $$(`[data-${attr}]`).forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); }); cb(b.dataset[attr]); })); }
-  seg('pop', v => { pop = v; reset(); pc.classList.toggle('paint', !!P().own); $('#smPopCap').textContent = 'Population: ' + P().name; draw(); });
-  seg('stat', v => { stat = v; if (stat === 'sd' && ni === 0) { ni = 1; $('#smN').value = 1; $('#smNOut').textContent = n(); } reset(); $('#smHistCap').textContent = `The ${STATS[stat].label} of each sample`; draw(); });
+  seg('pop', v => { pop = v; relock(); reset(); pc.classList.toggle('paint', !!P().own); $('#smPopCap').textContent = 'Population: ' + P().name; draw(); });
+  seg('stat', v => { stat = v; if (stat === 'sd' && ni === 0) { ni = 1; $('#smN').value = 1; $('#smNOut').textContent = n(); } relock(); reset(); $('#smHistCap').textContent = `The ${STATS[stat].label} of each sample`; draw(); });
   $('#smN').addEventListener('input', e => { ni = +e.target.value; if (stat === 'sd' && ni === 0) { ni = 1; e.target.value = 1; } $('#smNOut').textContent = n(); reset(); draw(); });
   $('#smOne').addEventListener('click', () => { one(); draw(); });
   $('#smMany').addEventListener('click', () => { for (let i = 0; i < 1000; i++) one(); draw(); });
@@ -795,7 +806,7 @@ const fmt1 = (v, P) => v.toFixed(Math.abs(v) < 10 ? 2 : 1) + (P ? P.unit : '');
 
 /* ---------- 3. data vs averages ---------- */
 (function(){
-  const NS = [2, 5, 10, 25, 50, 100, 250, 500], K = 2000;
+  const NS = [2, 5, 10, 25, 50, 100, 250], K = 2000;
   let pop = 'heights', ni = 3, sample = [], means = [];
   const n = () => NS[ni];
   function newSample(){ sample = Array.from({length: n()}, POPS[pop].draw); }
@@ -850,12 +861,14 @@ const fmt1 = (v, P) => v.toFixed(Math.abs(v) < 10 ? 2 : 1) + (P ? P.unit : '');
     ctx.fillStyle = C('--ink-3'); c.forEach((x, k) => { if (x) { const hh = (Y0 - Y1) * x / mx; ctx.fillRect(X0 + k * pw + .4, Y0 - hh, pw - .8, hh); } });
     if (tv != null) vline(ctx, xs(tv), Y1, Y0, C('--accent'), [4, 3], 1.8);
     xAxis(ctx, X0, X1, Y0, lo, hi);
-    const avg = meanOf(arr);
-    $(id + 'R').innerHTML = `average <b>${fmt1(avg, P)}</b> · ` + (tv != null ? `population ${fmt1(tv, P)}` : 'population: no largest value') + ` · spread ${fmt1(sdOf(Array.from(arr)), P)}`;
+    const avg = meanOf(arr), sp = sdOf(Array.from(arr));
+    $(id + 'R').innerHTML = `average <b>${fmt1(avg, P)}</b> · ` + (tv != null ? `population ${fmt1(tv, P)}` : 'population: no largest value') + ` · spread ${fmt1(sp, P)}`;
+    return sp;
   }
   function draw(){
     if (!S) return; const t = truth(pop);
-    mini('#fsMean', 'mean', t.mean); mini('#fsMedian', 'median', t.median); mini('#fsMax', 'max', t.max); mini('#fsSD', 'sd', t.sd);
+    const sm = mini('#fsMean', 'mean', t.mean), sd = mini('#fsMedian', 'median', t.median); mini('#fsMax', 'max', t.max); mini('#fsSD', 'sd', t.sd);
+    $('#fsMedianR').innerHTML += ` · <b>${(sd / sm).toFixed(2)}×</b> the mean’s spread`;
   }
   $$('[data-fspop]').forEach(b => b.addEventListener('click', () => {
     pop = b.dataset.fspop; $$('[data-fspop]').forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
@@ -887,9 +900,9 @@ const fmt1 = (v, P) => v.toFixed(Math.abs(v) < 10 ? 2 : 1) + (P ? P.unit : '');
     {s: 'On average, the largest value in a sample of 10 sons is…',
      o: ['equal to the tallest son in the population', 'below the tallest son in the population'], a: 1,
      e: 'A sample maximum can never exceed the population maximum, and usually falls short of it, so its sampling distribution sits below the true value. A statistic like that is called biased.'},
-    {s: 'A report shows an average with an error bar. Which reading is safe?',
-     o: ['The bar shows how much individuals vary', 'It depends: check whether the bar is an SD or an SE'], a: 1,
-     e: 'An SD bar describes individuals and doesn’t shrink with more data; an SE bar describes the precision of the average and does. With 100 per group they differ by a factor of 10.'}
+    {s: 'A report shows each group’s average with a short error bar. Which of these readings is <em>wrong</em>?',
+     o: ['If it is an SE bar, the averages are known precisely', 'If it is an SD bar, individuals vary only a little', 'A short bar means the people in each group are alike'], a: 2,
+     e: 'A short bar may be an SE bar from a big sample, with individuals as varied as ever: with 100 per group an SD bar is 10 times longer than the SE bar. The other two readings are right, which is why you have to check which spread the bar shows.'}
   ];
   const box = $('#quiz'); let answered = 0, right = 0;
   Q.forEach(q => {

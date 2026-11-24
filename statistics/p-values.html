@@ -229,7 +229,7 @@ canvas.band{cursor:ew-resize;touch-action:pan-y}
     <div class="readout" id="pmRead" aria-live="polite"></div>
   </div>
 
-  <p>The real gap gives p = 0.21: chance alone produces a gap this big, in one direction or the other, about 21% of the time. Drag the line out to 3 points and the shaded area all but vanishes. A small p-value means the data sit far out in a tail of the chance world; a large one means they sit in its crowded middle. (A common formula for comparing two percentages gives 0.18 for the button test. It approximates the shuffle, and the two tell the same story.)</p>
+  <p>The real gap gives p = 0.21 by shuffling: chance alone produces a gap this big, in one direction or the other, about 21% of the time. Drag the line out to 3 points and the shaded area all but vanishes. A small p-value means the data sit far out in a tail of the chance world; a large one means they sit in its crowded middle. (The usual formula for comparing two percentages gives 0.18 for the button test. It approximates the shuffle, and the two tell the same story, so this series writes “0.21 by shuffling (0.18 by formula)”.)</p>
   <p>Whether to count both tails is decided before seeing the data. If any difference would have been interesting, count both; that is the usual choice, and it doubles a one-sided p-value.</p>
   <p>By a convention going back to Ronald Fisher in the 1920s, p below 0.05 is called <em class="term">statistically significant</em>. Fisher meant it as a rough signal that a result was worth a closer look, not as a verdict.</p>
 </section>
@@ -250,7 +250,40 @@ canvas.band{cursor:ew-resize;touch-action:pan-y}
     <div class="readout" id="mcRead" aria-live="polite"></div>
   </div>
 
-  <p>The central mistake flips the question around. The p-value is the chance of data like this <em>given</em> that chance alone is at work. The probability that chance alone is at work, <em>given</em> data like this, is a different number. It depends on something the p-value knows nothing about: how plausible the drug was before the trial. For example, if only 1 in 10 drugs tested actually works, and trials catch 80% of the ones that do, then about 36% of drugs that reach p &lt; 0.05 are duds. Working that out properly is the job of <em>Bayes’ theorem</em>, later in the series.</p>
+  <p>The central mistake flips the question around. The p-value is the chance of data like this <em>given</em> that chance alone is at work. The probability that chance alone is at work, <em>given</em> data like this, is a different number. It depends on something the p-value knows nothing about: how plausible the drug was before the trial.</p>
+
+  <h3 id="duds">How many discoveries are duds?</h3>
+  <p>Picture 1,000 drugs, each tested in one trial. Only 1 in 10 of them actually works, and a trial catches a drug that works (p &lt; 0.05) 80% of the time; that catch rate is the trial’s <em class="term">power</em>, which section 4 comes back to. The other 900 drugs do nothing, yet 1 trial in 20 of them comes out “significant” anyway.</p>
+
+  <div class="widget">
+    <p class="widget-title">1,000 drugs, one trial each</p>
+    <p class="cast-q">Of the drugs whose trial reaches p &lt; 0.05, what share do nothing at all?</p>
+    <div class="seg" id="ddPred" role="group" aria-label="Your guess">
+      <button class="btn" data-g="0">almost none</button>
+      <button class="btn" data-g="5">about 5%</button>
+      <button class="btn" data-g="33">about 1 in 3</button>
+      <button class="btn" data-g="67">about 2 in 3</button>
+    </div>
+    <div class="controls">
+      <label class="ctrl">drugs that work <input type="range" id="ddF" min="0" max="5" step="1" value="3"><output id="ddFOut"></output></label>
+      <label class="ctrl">power <input type="range" id="ddP" min="0" max="3" step="1" value="2"><output id="ddPOut"></output></label>
+    </div>
+    <canvas id="ddChart" style="height:300px" role="img" aria-label="1,000 squares, one per drug, with the drugs that work in the top rows; after the trials, significant results light up green for drugs that work and red for duds"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--ink-2)"></i><span>works</span></span><span><i class="sw" style="background:var(--line)"></i><span>does nothing</span></span><span><i class="sw" style="background:var(--one)"></i><span>significant, and works</span></span><span><i class="sw" style="background:var(--zero)"></i><span>significant, but a dud</span></span></div>
+    <div class="controls">
+      <button class="btn primary" id="ddGo" disabled>Run the 1,000 trials</button>
+      <button class="btn" id="ddMore" hidden>+1,000 more drugs</button>
+      <button class="linkbtn" id="ddSkip">skip the guess</button>
+      <div class="seg" role="group" aria-label="Which results count">
+        <button class="btn on" data-band="0" aria-pressed="true">every p &lt; 0.05</button>
+        <button class="btn" data-band="1" aria-pressed="false">only p near 0.03</button>
+      </div>
+    </div>
+    <div class="readout" id="ddRead" aria-live="polite"></div>
+    <p class="msg" id="ddMsg" aria-live="polite">Make your guess, then run the trials.</p>
+  </div>
+
+  <p>With 1 in 10 drugs working and 80% power, about 80 real drugs and about 45 duds reach p &lt; 0.05, so about 45 of 125, or 36%, of the “discoveries” are duds, even though every one of them passed the 5% test. Make working drugs rarer and the duds take over; at 1 in 100, about 86% of the significant results are duds. A p-value right at 0.03 is weaker evidence still: switch to “only p near 0.03” (trials landing between 0.02 and 0.04) and about 2 in 3 of them are duds (only a few dozen trials land there in each run, so add a few thousand more drugs to watch the share settle), because a drug that works usually produces a smaller p than that. So “p = 0.03, a 97% chance the drug works” can be wrong by a long way. Working out the real chance properly is the job of <em>Bayes’ theorem</em>, later in the series.</p>
   <div class="callout">
     <p><strong>The statisticians’ own warning.</strong> In 2016 the American Statistical Association published a statement on p-values (Wasserstein and Lazar 2016), its first on a specific statistical practice. Among its principles: p-values do not measure the probability that the studied hypothesis is true, or the probability that the data were produced by random chance alone; a p-value does not measure the size of an effect or the importance of a result; and decisions should not be based only on whether a p-value passes a specific threshold.</p>
   </div>
@@ -263,7 +296,7 @@ canvas.band{cursor:ew-resize;touch-action:pan-y}
   <p>The opening experiment is the key to everything else on this page, so here it is with dials. Each experiment compares two groups of patients; the dial sets how much the treatment truly helps, measured in standard deviations of the outcome. Every experiment’s p-value drops into the histogram.</p>
 
   <div class="widget">
-    <p class="widget-title">The p-value rain</p>
+    <p class="widget-title">★ The p-value rain</p>
     <div class="controls">
       <label class="ctrl">true effect <input type="range" id="rnD" min="0" max="20" step="1" value="0"><output id="rnDOut"></output></label>
       <label class="ctrl">patients per group <input type="range" id="rnN" min="0" max="5" step="1" value="2"><output id="rnNOut"></output></label>
@@ -275,11 +308,17 @@ canvas.band{cursor:ew-resize;touch-action:pan-y}
       <button class="btn" id="rnMany">+1,000 experiments</button>
       <button class="btn" id="rnClear">Clear</button>
     </div>
+    <div class="controls">
+      <span class="ctrl">try</span>
+      <button class="btn" data-pre="0,2">no effect</button>
+      <button class="btn" data-pre="4,2">0.2 SD, 50 per group</button>
+      <button class="btn" data-pre="4,5">0.2 SD, 500 per group</button>
+    </div>
     <div class="readout" id="rnRead" aria-live="polite"></div>
   </div>
 
-  <p>With the effect at zero, the histogram is flat. Any p-value between 0 and 1 is as likely as any other, so 5% of experiments land below 0.05, 10% below 0.10, and so on. That isn’t a coincidence; it is what a p-value means. “p = 0.03” says the data are as extreme as the most extreme 3% of chance worlds, and when chance is all there is, 3% of experiments are exactly that extreme.</p>
-  <p>So when a drug does nothing, 1 trial in 20 still comes out “significant”. Run 20 useless trials, or test 20 useless drugs, or look at 20 outcomes in one trial, and you should expect one success that means nothing. That is the engine behind the <em>garden of forking paths</em>, later in the series.</p>
+  <p>With the effect at zero, the histogram is flat. Any p-value between 0 and 1 is as likely as any other, so 5% of experiments land below 0.05, 10% below 0.10, and so on. That isn’t a coincidence; it is what a p-value means. (Exactly flat for a smooth measurement like this one. A shuffle test like section 1’s can only produce a limited set of gaps, so its p-values come in small steps and are only roughly flat.) “p = 0.03” says the data are as extreme as the most extreme 3% of chance worlds, and when chance is all there is, 3% of experiments are exactly that extreme.</p>
+  <p>So when a drug does nothing, 1 trial in 20 still comes out “significant”. Run 20 useless trials, or test 20 useless drugs, or look at 20 outcomes in one trial, and you should expect one success that means nothing. That is the engine behind the <a href="forking-paths.html">garden of forking paths</a>, later in the series.</p>
 </section>
 
 <!-- 4 -->
@@ -287,8 +326,8 @@ canvas.band{cursor:ew-resize;touch-action:pan-y}
   <div class="secnum">04</div>
   <h2>With a real effect, p piles up near 0</h2>
   <p>Now turn the effect up in the rain above. As soon as the treatment truly helps, small p-values become more common than large ones, and the histogram tilts toward 0. The bigger the effect, the steeper the pile. More patients per group do the same thing for a given effect: a bigger sample makes a real effect harder for chance to hide.</p>
-  <p>The share of experiments that land below 0.05 when there <em>is</em> an effect is called the <em class="term">power</em> of the experiment. With a modest effect of 0.2 standard deviations, 50 patients per group catch it only about 17% of the time; 500 per group catch it about 89% of the time. Most of the time, a small study of a small effect comes back “not significant”, not because the effect isn’t there but because the study couldn’t see it. Planning for that is the subject of <em>Power and sample size</em>.</p>
-  <p>Notice what never happens: even with a large effect, some experiments still land well above 0.05. One non-significant result is not evidence that nothing is going on. The button test’s p = 0.21 doesn’t show that orange is no better. It shows that 1,000 visitors per button couldn’t tell.</p>
+  <p>The share of experiments that land below 0.05 when there <em>is</em> an effect is the experiment’s power, the catch rate from the 1,000 drugs. With a modest effect of 0.2 standard deviations, 50 patients per group catch it only about 17% of the time; 500 per group catch it about 89% of the time. The buttons under the rain run both. Most of the time, a small study of a small effect comes back “not significant”, not because the effect isn’t there but because the study couldn’t see it. Planning for that is the subject of <a href="power.html">Power and Sample Size</a>.</p>
+  <p>Notice how often a real effect goes unseen: with a modest effect or a small study, many experiments still land above 0.05. One non-significant result is not evidence that nothing is going on. The button test’s p = 0.21 (0.18 by formula) doesn’t show that orange is no better. It shows that 1,000 visitors per button couldn’t tell.</p>
 </section>
 
 <!-- 5 -->
@@ -307,7 +346,7 @@ canvas.band{cursor:ew-resize;touch-action:pan-y}
   </div>
 
   <p>The difference never changes; it is 0.1 points all the way along. Only the sample size grows. At a few thousand visitors per button the gap is invisible; at a million it is “significant” at p ≈ 0.001; at ten million it is around 10<sup>−24</sup>, a decimal point followed by 23 zeros. The p-value measures how sure you can be that the difference isn’t zero, which depends as much on the sample size as on the difference. Whether 0.1 points is worth anything is a separate question the p-value can’t answer.</p>
-  <p>That is why a careful report gives the size of the effect with an interval around it, not just a p-value. The next page, <em>Confidence intervals</em>, is about exactly that.</p>
+  <p>That is why a careful report gives the size of the effect with an interval around it, not just a p-value. The next page, <a href="confidence-intervals.html">Confidence Intervals</a>, is about exactly that.</p>
 </section>
 
 <!-- 6 -->
@@ -555,7 +594,7 @@ function makeRain(cv, getD, getN, onUpdate){
     const ok = guess === 2;
     $$('#heroPred .shape').forEach(b => { b.classList.remove('right', 'wrong'); if (+b.dataset.s === guess) b.classList.add(ok ? 'right' : 'wrong'); });
     hint.innerHTML = (guess == null ? '' : ok ? '<b>Right: flat.</b> ' : '<b>It comes out flat.</b> ') +
-      `When the drug does nothing, every p-value from 0 to 1 is equally likely: ${low} of these 1,000 trials landed below 0.05, about 5%, and ${le03} came in at 0.03 or below. So p = 0.03 is something about 3% of trials of a useless drug produce. Whether <em>this</em> drug works also depends on how many of the drugs being tested work at all, which the p-value can’t know. So no: p = 0.03 does not mean a 97% chance.`;
+      `When the drug does nothing, every p-value from 0 to 1 is equally likely: ${low} of these 1,000 trials landed below 0.05, about 5%, and ${le03} came in at 0.03 or below. So p = 0.03 is something about 3% of trials of a useless drug produce. Whether <em>this</em> drug works also depends on how many of the drugs being tested work at all, which the p-value can’t know (<a href="#duds">see it with 1,000 drugs</a>). So no: p = 0.03 does not mean a 97% chance.`;
   }
   function open(){ $('#heroGo').disabled = false; $('#heroSkip').hidden = true; }
   $$('#heroPred .shape').forEach(b => b.addEventListener('click', () => { guess = +b.dataset.s; $$('#heroPred .shape').forEach(x => x.classList.toggle('guess', x === b)); open(); if (done) message(rain.R); }));
@@ -611,8 +650,8 @@ function makeRain(cv, getD, getN, onUpdate){
      e: 'Wrong. The p-value says nothing about size: a huge trial can give p = 0.03 for a trivial effect, and a tiny trial can miss a big one.'},
     {t: 'If the trial were repeated, it would come out significant again 97% of the time.', ok: false,
      e: 'Wrong. Even if the true effect were exactly what this trial measured, a repeat would reach p &lt; 0.05 only about 58% of the time.'},
-    {t: 'Chance alone is an unlikely explanation for a difference this big, though not an impossible one.', ok: true,
-     e: 'Right. About 1 trial in 33 of a useless drug does at least this well: unusual, not unheard of.'}
+    {t: 'If chance alone were at work, a difference this big would be unusual (about 1 in 33), though not impossible.', ok: true,
+     e: 'Right. About 1 trial in 33 of a useless drug does at least this well: unusual, not unheard of. Notice the “if”: this is not a claim that chance is unlikely to be the explanation. That would be the probability of chance <em>given</em> the data, which the 1,000 drugs below show can be much higher.'}
   ];
   const box = $('#mcList'), flags = new Array(CL.length).fill(false);
   let checked = false;
@@ -639,11 +678,92 @@ function makeRain(cv, getD, getN, onUpdate){
   sync();
 })();
 
+/* ---------- 2b. 1,000 drugs: how many discoveries are duds? ---------- */
+(function(){
+  const FS = [.01, .02, .05, .1, .2, .5], PW = [.2, .5, .8, .95], ZP = [-.8416, 0, .8416, 1.6449];   // z for each power
+  const N = 1000, Z05 = 1.959964, Z04 = 2.053749, Z02 = 2.326348;   // two-sided p = 0.05, 0.04, 0.02
+  const cv = $('#ddChart'), fIn = $('#ddF'), pIn = $('#ddP'), OPTS = [0, 5, 33, 67], WORD = {0: 'almost none', 5: 'about 5%', 33: 'about 1 in 3', 67: 'about 2 in 3'};
+  let guess = null, res = null, shown = 0, timer = null, band = 0;
+  let acc = {drugs: 0, c: [[0, 0], [0, 0]]};   // running totals across runs at the same settings: [works, dud] for p < 0.05 and for the 0.02–0.04 band
+  const Phi = z => .5 * erfc(-z / Math.SQRT2);
+  const f = () => FS[+fIn.value], pw = () => PW[+pIn.value], delta = () => Z05 + ZP[+pIn.value];
+  const nWork = () => Math.round(N * f());
+  const inBand = p => p >= .02 && p <= .04;
+  function longRun(b = band){   // exact long-run share of duds among the results that count
+    const d = delta(), two = (a, c) => (Phi(c - d) - Phi(a - d)) + (Phi(-a - d) - Phi(-c - d));
+    const dud = b ? .02 : .05, real = b ? two(Z04, Z02) : Phi(d - Z05) + Phi(-d - Z05);
+    return (1 - f()) * dud / ((1 - f()) * dud + f() * real);
+  }
+  function draw(){
+    const w = cv.getBoundingClientRect().width, cols = w >= 600 ? 50 : 40, rows = N / cols, gap = cols === 50 ? 2 : 1.5;
+    const cell = (w - gap * (cols - 1)) / cols, H = Math.ceil(rows * cell + (rows - 1) * gap);
+    if (Math.abs(cv.getBoundingClientRect().height - H) > 1) cv.style.height = H + 'px';
+    const {ctx} = fit(cv), k = nWork();
+    for (let i = 0; i < N; i++) {
+      const x = (i % cols) * (cell + gap), y = Math.floor(i / cols) * (cell + gap), works = i < k;
+      let col = works ? C('--ink-2') : C('--line'), a = 1;
+      if (res && i < shown) {
+        const p = res[i], counts = band ? inBand(p) : p < .05;
+        if (counts) col = works ? C('--one') : C('--zero');
+        else if (band && p < .05) { col = works ? C('--one') : C('--zero'); a = .25; }
+        else if (works) a = .45;
+      }
+      ctx.globalAlpha = a; ctx.fillStyle = col;
+      if (cell >= 6) { roundRect(ctx, x, y, cell, cell, Math.min(2.5, cell / 4)); ctx.fill(); } else ctx.fillRect(x, y, cell, cell);
+    }
+    ctx.globalAlpha = 1;
+    readout();
+  }
+  function readout(){
+    $('#ddFOut').textContent = `${nWork()} of 1,000`; $('#ddPOut').textContent = Math.round(100 * pw()) + '%';
+    if (!res || shown < N) { $('#ddRead').innerHTML = res ? 'running the trials…' : `${nWork()} drugs work, ${comma(N - nWork())} do nothing`; return; }
+    const k = nWork(); let tp = 0, fp = 0;
+    res.forEach((p, i) => { if (band ? inBand(p) : p < .05) { if (i < k) tp++; else fp++; } });
+    const tot = tp + fp, what = band ? 'landed between 0.02 and 0.04' : 'reached p &lt; 0.05';
+    const [at, af] = acc.c[band], an = at + af;
+    $('#ddRead').innerHTML = `${acc.drugs > N ? 'this run: ' : ''}<b>${tot}</b> trials ${what}: <b>${tp}</b> drugs that work and <span class="warn">${fp}</span> duds` +
+      (tot ? ` → <b>${Math.round(100 * fp / tot)}%</b> of them are duds` : '') +
+      (acc.drugs > N ? `<br>all ${comma(acc.drugs)} drugs so far: ${comma(an)} trials, ${comma(af)} duds → <b>${an ? Math.round(100 * af / an) : 0}%</b>` : '') +
+      ` · in the long run: <b>${Math.round(100 * longRun())}%</b>`;
+  }
+  function message(){
+    const lr = 100 * longRun(0), near = OPTS.reduce((a, o) => Math.abs(o - lr) < Math.abs(a - lr) ? o : a, OPTS[0]);
+    $$('#ddPred .btn').forEach(b => { b.classList.remove('right', 'wrong'); if (+b.dataset.g === guess) b.classList.add(guess === near ? 'right' : 'wrong'); });
+    const setting = `With ${nWork()} working drugs in 1,000 and ${Math.round(100 * pw())}% power`;
+    $('#ddMsg').innerHTML = (guess == null ? '' : `You guessed <b>${WORD[guess]}</b>. `) +
+      `${setting}, the long-run share of duds among the p &lt; 0.05 results is <b>${Math.round(lr)}%</b>${guess == null ? '' : guess === near ? ', so you were right' : `, ${WORD[near]}`}. ` +
+      (band ? `Counting only p-values between 0.02 and 0.04 raises it to <b>${Math.round(100 * longRun(1))}%</b>, because a drug that works usually gives a smaller p than that.`
+            : 'Every one of those duds passed the 5% test: the 5% is the rate among duds, not the share of duds among the discoveries.');
+  }
+  function run(keep){
+    clearInterval(timer); const d = delta(), k = nWork();
+    if (!keep) acc = {drugs: 0, c: [[0, 0], [0, 0]]};
+    res = Array.from({length: N}, (_, i) => pTwo((i < k ? d : 0) + gauss()));
+    acc.drugs += N; res.forEach((p, i) => { const w = i < k ? 0 : 1; if (p < .05) acc.c[0][w]++; if (inBand(p)) acc.c[1][w]++; });
+    $('#ddGo').textContent = 'Run 1,000 new trials'; $('#ddMore').hidden = false;
+    const finish = () => { clearInterval(timer); timer = null; shown = N; draw(); message(); };
+    if (RM) return finish();
+    shown = 0; timer = setInterval(() => { shown = Math.min(N, shown + 25); if (shown >= N) finish(); else draw(); }, 30);
+  }
+  function openUp(){ $('#ddGo').disabled = false; $('#ddSkip').hidden = true; }
+  $$('#ddPred .btn').forEach(b => b.addEventListener('click', () => { guess = +b.dataset.g; $$('#ddPred .btn').forEach(x => x.classList.toggle('guess', x === b)); openUp(); if (res && shown >= N) message(); }));
+  $('#ddSkip').addEventListener('click', openUp);
+  $('#ddGo').addEventListener('click', () => run(false));
+  $('#ddMore').addEventListener('click', () => run(true));
+  const changed = () => { if (res) run(false); else draw(); };
+  fIn.addEventListener('input', changed); pIn.addEventListener('input', changed);
+  $$('[data-band]').forEach(b => b.addEventListener('click', () => {
+    band = +b.dataset.band; $$('[data-band]').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); });
+    draw(); if (res && shown >= N) message();
+  }));
+  draw(); redraws.push(draw);
+})();
+
 /* ---------- 3–4. the p-value rain with dials ---------- */
 (function(){
   const NS = [10, 20, 50, 100, 200, 500], dIn = $('#rnD'), nIn = $('#rnN');
   const d = () => +dIn.value / 20, n = () => NS[+nIn.value];
-  const size = v => v === 0 ? 'none' : v < .2 ? 'tiny' : v < .4 ? 'small' : v < .7 ? 'medium' : 'large';
+  const size = v => v === 0 ? 'none' : v < .2 ? 'tiny' : v < .5 ? 'small' : v < .8 ? 'medium' : 'large';   // Cohen: 0.2 small, 0.5 medium, 0.8 large
   const rain = makeRain($('#rnChart'), d, n, R => {
     $('#rnRead').innerHTML = R.total ? `<b>${comma(R.total)}</b> experiments · p &lt; 0.05 in <b>${comma(R.sig)}</b> = <b>${(100 * R.sig / R.total).toFixed(1)}%</b>${d() === 0 ? ' · with no effect, this hovers around 5%' : ''}` : '';
   });
@@ -653,6 +773,9 @@ function makeRain(cv, getD, getN, onUpdate){
   $('#rnRun').addEventListener('click', () => { const on = !rain.R.running; rain.run(on); $('#rnRun').textContent = on ? '❚❚ Pause' : '▶ Run'; });
   $('#rnMany').addEventListener('click', () => rain.instant(1000));
   $('#rnClear').addEventListener('click', () => rain.clear());
+  $$('[data-pre]').forEach(b => b.addEventListener('click', () => {
+    const [dv, nv] = b.dataset.pre.split(',').map(Number); dIn.value = dv; nIn.value = nv; reset(); rain.rain(1000, 500);
+  }));
   outs(); rain.draw(); redraws.push(rain.draw);
 })();
 
@@ -674,10 +797,22 @@ function makeRain(cv, getD, getN, onUpdate){
     ctx.save(); ctx.strokeStyle = C('--accent'); ctx.setLineDash([5, 4]); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(X0, y05); ctx.lineTo(X1, y05); ctx.stroke(); ctx.restore();
     ctx.fillStyle = C('--accent'); ctx.font = '600 11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillText('p = 0.05', X1, y05 - 3);
     ctx.strokeStyle = C('--ink-2'); ctx.lineWidth = 2; ctx.beginPath();
-    for (let i = 0; i <= 200; i++) { const l = 3 + 5 * i / 200, y = ys(lp(Math.pow(10, l))); i ? ctx.lineTo(xs(l), y) : ctx.moveTo(xs(l), y); }
+    let exit = null;
+    for (let i = 0; i <= 400; i++) {
+      const l = 3 + 5 * i / 400, v = lp(Math.pow(10, l));
+      if (v < LMIN) { exit = xs(l); ctx.lineTo(exit, Y0); break; }
+      i ? ctx.lineTo(xs(l), ys(v)) : ctx.moveTo(xs(l), ys(v));
+    }
     ctx.stroke();
-    const n = nOf(+nIn.value), l = Math.log10(n), p = pTwo(zOf(n));
-    ctx.fillStyle = p < .05 ? C('--accent') : C('--ink'); dot(ctx, xs(l), ys(lp(n)), 6);
+    if (exit != null) {   // the curve keeps falling below 10^-12: say so instead of drawing a false floor
+      ctx.fillStyle = C('--ink-2'); ctx.font = '11px ' + MONO; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+      const t = 'keeps falling, off the chart ↓';
+      ctx.fillText(exit + 6 + ctx.measureText(t).width <= X1 ? t : '↓', exit + 6, Y0 - 4);
+    }
+    const n = nOf(+nIn.value), l = Math.log10(n), p = pTwo(zOf(n)), off = lp(n) < LMIN;
+    ctx.fillStyle = p < .05 ? C('--accent') : C('--ink');
+    if (off) { const x = xs(l); ctx.beginPath(); ctx.moveTo(x - 6, Y0 - 9); ctx.lineTo(x + 6, Y0 - 9); ctx.lineTo(x, Y0 + 1); ctx.closePath(); ctx.fill(); }
+    else dot(ctx, xs(l), ys(lp(n)), 6);
     $('#tyNOut').textContent = comma(n);
     $('#tyRead').innerHTML = `true gap <b>0.1 points</b> (5.0% against 5.1%) · ${comma(n)} visitors per button · typical p ≈ <b>${p < 1e-300 ? '0.000…' : fmtP(p)}</b> · ${p < .05 ? '<span class="ok">“statistically significant”</span>' : 'not significant'}`;
   }
@@ -695,9 +830,9 @@ function makeRain(cv, getD, getN, onUpdate){
      o: ['If the drug did nothing, results this extreme would appear about 3% of the time', 'There is a 3% chance the drug does nothing'], a: 0,
      e: 'The p-value is computed assuming the drug does nothing. It can’t also be the probability of that assumption.'},
     {s: 'The button test gives p ≈ 0.2. Which reading is <em>wrong</em>?',
-     o: ['Orange is no better than grey', 'This data can’t tell whether orange is better', 'Chance alone makes gaps like this about 1 time in 5'], a: 0,
+     o: ['Orange is no better than gray', 'This data can’t tell whether orange is better', 'Chance alone makes gaps like this about 1 time in 5'], a: 0,
      e: 'A large p-value means the data are compatible with no difference, not that there is none. Absence of evidence isn’t evidence of absence.'},
-    {s: 'A study of 2 million people finds p = 0.0001 for a difference of 0.1 points. The effect is…',
+    {s: 'A study of 2 million people, a million in each group, finds p = 0.001 for a difference of 0.1 points. The effect is…',
      o: ['large, since p is tiny', 'not necessarily important: p doesn’t measure size'], a: 1,
      e: 'With enough data, any nonzero difference gets a tiny p-value. Whether 0.1 points matters is a separate question.'},
     {s: 'What happens to the p-value histogram as the true effect grows?',

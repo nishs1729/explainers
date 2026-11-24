@@ -147,8 +147,23 @@ canvas.band{cursor:ew-resize;touch-action:pan-y}
 table.summary.num{font-size:14px}
 table.summary.num td,table.summary.num th{text-align:right;white-space:nowrap}
 table.summary.num td:first-child,table.summary.num th:first-child{text-align:left;white-space:normal}
+table.summary.num .narrow{display:none;text-transform:none;font-style:italic}
+@media (max-width:520px){table.summary.num .wide{display:none}table.summary.num .narrow{display:inline}table.summary.num td,table.summary.num th{padding:8px 3px;font-size:13px}}
 .ok{color:var(--one);font-weight:600}
 .warn{color:var(--zero);font-weight:600}
+canvas.pick{cursor:pointer}
+.claims{display:grid;gap:8px}
+.claim{font:inherit;text-align:left;cursor:pointer;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);padding:10px 12px;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:start}
+.claim:hover{border-color:var(--ink-3)}
+.claim:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.claim .mark{font:600 12px var(--mono);color:var(--ink-3);min-width:7.5em;padding-top:2px}
+.claim .ct{font-size:15px}
+.claim .ce{grid-column:2;font-size:14px;color:var(--ink-2)}
+.claim.flag{border-color:var(--zero)}
+.claim.flag .mark{color:var(--zero)}
+.claim.good{background:var(--one-soft);border-color:var(--one)}
+.claim.bad{background:var(--zero-soft);border-color:var(--zero)}
+@media (max-width:480px){.claim{grid-template-columns:1fr}.claim .ce{grid-column:1}}
 </style>
 <script>try{var t=localStorage.getItem('xp-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 <link rel="stylesheet" href="../assets/site.css">
@@ -164,7 +179,7 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
   <p class="lede">An estimate with a range around it: how big the effect might be, and how sure you can be. “95% confident” is a promise about the method that made the range: used again and again, it catches the truth 95% of the time.</p>
   <div class="hero-play" id="heroPlay">
     <p class="ask">A poll of 1,000 voters says 52% ± 3%. What exactly does the ± promise?</p>
-    <p class="hint" style="min-height:0;margin:0 0 10px">Suppose 100 pollsters each poll 1,000 voters from the same country and each reports their result ± 3%. Of those 100 ranges, how many miss the true level of support?</p>
+    <p class="hint" style="min-height:0;margin:0 0 10px">Recall from <a href="sampling-distributions.html">Sampling Distributions</a>: 95% of honest polls of 1,000 land within about 3 points of the truth (3.1, to be exact). Now suppose 100 pollsters each poll 1,000 voters from the same country and each reports their result ± 3.1 points. Of those 100 ranges, how many miss the true level of support?</p>
     <div class="controls" id="heroPred">
       <button class="btn" data-g="0">None of them</button>
       <button class="btn" data-g="5">About 5</button>
@@ -203,11 +218,11 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
   <div class="widget">
     <p class="widget-title">The flip: from wobble to interval</p>
     <canvas id="flChart" class="band" style="height:220px" role="img" aria-label="The bell-shaped spread of poll results around the true support with its middle 95% shaded, a draggable poll result, and the interval of plus or minus 3.1 points drawn around it"></canvas>
-    <div class="legend"><span><i class="sw" style="background:var(--accent-soft);border:1px solid var(--accent)"></i><span>middle 95% of polls</span></span><span><i class="sw dot" style="background:var(--gold)"></i><span>your poll (drag it)</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>true support</span></span></div>
+    <div class="legend"><span><i class="sw" style="background:var(--surface-2);border:1px solid var(--ink-3)"></i><span>middle 95% of polls</span></span><span><i class="sw dot" style="background:var(--gold)"></i><span>your poll (drag it)</span></span><span><i class="sw" style="background:var(--ink-2)"></i><span>its interval reaches the truth</span></span><span><i class="sw" style="background:var(--zero)"></i><span>misses</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>true support</span></span></div>
     <div class="readout" id="flRead" aria-live="polite"></div>
   </div>
 
-  <p>That is the whole recipe for a <em class="term">confidence interval</em>: estimate ± 1.96 standard errors. In practice the standard error itself is estimated from the sample, as √(p̂(1 − p̂)/n) for a percentage, or <em>s</em>/√<em>n</em> for an average, and for statistics with no formula the <a href="bootstrap.html">bootstrap</a> provides it.</p>
+  <p>That is the whole recipe for a <em class="term">confidence interval</em>: estimate ± 1.96 standard errors. In practice the standard error itself is estimated from the sample, as √(p̂(1 − p̂)/n) for a percentage, or <em>s</em>/√<em>n</em> for an average, and for statistics with no formula the <a href="bootstrap.html">bootstrap</a> provides it. The bootstrap page’s range of about 1.0 to 1.9 hours for the sleep trial’s median was a confidence interval too, made from the middle 95% of resamples instead of ± 1.96 standard errors (with only ten patients it runs a little narrow).</p>
 </section>
 
 <!-- 2 -->
@@ -217,7 +232,7 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
   <p>The 95% is a property of the recipe, so the way to see it is to use the recipe many times. Each bar below is one poll’s interval; the newest appears at the top. The truth never moves; the intervals do.</p>
 
   <div class="widget">
-    <p class="widget-title">The interval rain</p>
+    <p class="widget-title">★ The interval rain</p>
     <div class="controls">
       <div class="seg" role="group" aria-label="Confidence level">
         <button class="btn" data-lvl="0" aria-pressed="false">80%</button>
@@ -234,11 +249,13 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
       <button class="btn" id="irRun">▶ Run</button>
       <button class="btn" id="irMany">+1,000 polls</button>
       <button class="btn" id="irClear">Clear</button>
+      <button class="btn" id="irHide">Hide the truth</button>
     </div>
     <div class="readout" id="irRead" aria-live="polite"></div>
+    <p class="msg" id="irMsg" aria-live="polite" hidden></p>
   </div>
 
-  <p>Over many polls, the share of intervals that catch the truth, the <em class="term">coverage</em>, settles at the advertised level: about 95 in 100 for a 95% interval. Any single interval either contains the truth or it doesn’t, and in real life you never find out which. The 95% is your confidence in the method, not a probability attached to one particular range.</p>
+  <p>Over many polls, the share of intervals that catch the truth, the <em class="term">coverage</em>, settles at the advertised level: about 95 in 100 for a 95% interval. Any single interval either contains the truth or it doesn’t, and in real life you never find out which. Try <strong>Hide the truth</strong>: it deals 40 fresh polls with the truth line removed, and you tap the ones you think missed. The 95% is your confidence in the method, not a probability attached to one particular range.</p>
   <p>With very small polls the simple recipe falls a little short of its promise: at 25 people per poll, its 95% intervals catch the truth about 93% of the time. Section 5 shows why, and what to do about it.</p>
 </section>
 
@@ -251,42 +268,56 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
     <li><strong>Confidence level.</strong> To catch the truth more often, cast a wider net: 99% intervals use 2.58 standard errors instead of 1.96. To be right 100% of the time you would need an interval from 0% to 100%, which tells you nothing. There is always a trade between confidence and precision.</li>
     <li><strong>Sample size.</strong> The standard error shrinks like 1/√<em>n</em>, so to halve the width you need four times the people. That square-root law is why national polls rarely go much beyond a few thousand people: each extra point of precision costs more than the last.</li>
   </ul>
+  <p class="cap">Margin of error in percentage points, for a result near 50%.</p>
   <div class="table-wrap">
     <table class="summary num">
-      <thead><tr><th>People in the poll</th><th>100</th><th>400</th><th>1,000</th><th>4,000</th><th>10,000</th></tr></thead>
+      <thead><tr><th><span class="wide">People in the poll</span><span class="narrow">n</span></th><th>100</th><th>400</th><th>1,000</th><th>4,000</th><th>10,000</th></tr></thead>
       <tbody>
-        <tr><td>95% margin of error (near 50%)</td><td>± 9.8</td><td>± 4.9</td><td>± 3.1</td><td>± 1.5</td><td>± 1.0</td></tr>
-        <tr><td>99% margin of error</td><td>± 12.9</td><td>± 6.4</td><td>± 4.1</td><td>± 2.0</td><td>± 1.3</td></tr>
+        <tr><td>95%<span class="wide"> margin of error</span></td><td>± 9.8</td><td>± 4.9</td><td>± 3.1</td><td>± 1.5</td><td>± 1.0</td></tr>
+        <tr><td>99%<span class="wide"> margin of error</span></td><td>± 12.9</td><td>± 6.4</td><td>± 4.1</td><td>± 2.0</td><td>± 1.3</td></tr>
       </tbody>
     </table>
   </div>
-  <p>As on Sampling Distributions, the size of the population doesn’t appear anywhere: 1,000 people give ± 3.1 points whether the country has a million voters or a hundred million.</p>
+  <p>As on <a href="sampling-distributions.html">Sampling Distributions</a>, the size of the population doesn’t appear anywhere: 1,000 people give ± 3.1 points whether the country has a million voters or a hundred million.</p>
 </section>
 
 <!-- 4 -->
 <section id="tests">
   <div class="secnum">04</div>
   <h2>Intervals and tests are the same thing</h2>
-  <p>Back to the button test: 50 clicks from 1,000 visitors on grey, 64 from 1,000 on orange. The gap is 1.4 points, and its 95% confidence interval runs from about −0.6 to +3.4 points. The interval contains 0, so “no difference” is among the plausible values, and that is exactly the same conclusion as the p-value of about 0.18 on the <a href="p-values.html">previous page</a>. Move orange’s click count and watch the two agree:</p>
+  <p>Back to the button test: 50 clicks from 1,000 visitors on gray, 64 from 1,000 on orange. The gap is 1.4 points, and its 95% confidence interval runs from about −0.6 to +3.4 points. The interval contains 0, so “no difference” is among the plausible values, and that is exactly the same conclusion as the p-value on the <a href="p-values.html">previous page</a>: 0.21 by shuffling (0.18 by formula, the version this page uses, since the interval comes from the same formula).</p>
+  <p>The top of the chart below goes further. Pick <em>any</em> hypothesized gap h, not just 0, and test “the true gap is h”: the curve shows that test’s p-value for every h. First, a prediction.</p>
 
   <div class="widget">
     <p class="widget-title">One result, two readings</p>
+    <p class="cast-q">Gray stays at 50 clicks. How many clicks must orange get before 0 drops out of the 95% interval?</p>
     <div class="controls">
-      <label class="ctrl">orange’s clicks (of 1,000) <input type="range" id="dlB" min="40" max="100" step="1" value="64"><output id="dlBOut"></output></label>
+      <div class="seg" id="dlPred" role="group" aria-label="Your guess">
+        <button class="btn" data-g="66">66</button>
+        <button class="btn" data-g="71">71</button>
+        <button class="btn" data-g="80">80</button>
+        <button class="btn" data-g="100">100</button>
+      </div>
+      <button class="linkbtn" id="dlSkip">skip the guess</button>
     </div>
-    <canvas id="dlChart" style="height:120px" role="img" aria-label="The gap between orange and grey with its 95% confidence interval, against a line at zero"></canvas>
+    <div class="controls">
+      <label class="ctrl">orange’s clicks (of 1,000) <input type="range" id="dlB" min="40" max="100" step="1" value="64" disabled><output id="dlBOut"></output></label>
+    </div>
+    <canvas id="dlChart" class="band" style="height:230px" role="img" aria-label="Top: the p-value of the test that the true gap equals h, for every h, with a line at 0.05. Bottom: the gap between orange and gray with its 95% confidence interval. A draggable gold line marks h."></canvas>
+    <div class="legend"><span><i class="sw line" style="border-top:2px solid var(--ink-2)"></i><span>p-value for “true gap = h” (square-root scale)</span></span><span><i class="sw" style="background:var(--accent)"></i><span>95% interval for the gap</span></span><span><i class="sw line" style="border-top:2.5px solid var(--gold)"></i><span>h (drag it)</span></span></div>
     <div class="readout" id="dlRead" aria-live="polite"></div>
+    <p class="msg" id="dlMsg" aria-live="polite">Make your guess to unlock the slider.</p>
   </div>
 
-  <p>Every value inside a 95% interval is one a test at the 0.05 level would not reject; every value outside it is one the test would. When 0 drops out of the interval, p drops below 0.05 at the same moment. (Both here use the same standard error; other formulas can disagree in the third decimal place.)</p>
-  <p>The interval says more than the test, though. “p = 0.18” says only that the data can’t rule out no difference. “−0.6 to +3.4 points” says that too, and adds that orange could plausibly be better by as much as 3.4 points: worth testing again with more visitors. That is why careful reports give intervals, not just p-values.</p>
+  <p>Drag the gold line and watch the curve: wherever h is inside the interval, the test of “true gap = h” gives p above 0.05; at the interval’s two ends it is exactly 0.05; outside, it is below. A 95% interval is simply the set of values a 0.05-level test would not reject. So when 0 drops out of the interval, p for “no difference” drops below 0.05 at the same moment. (Both here use the same standard error; other formulas can disagree in the third decimal place.)</p>
+  <p>The interval says more than the test, though. “p = 0.21” says only that the data can’t rule out no difference. “−0.6 to +3.4 points” says that too, and adds that orange could plausibly be better by as much as 3.4 points: worth testing again with more visitors. That is why careful reports give intervals, not just p-values.</p>
 </section>
 
 <!-- 5 -->
 <section id="fails">
   <div class="secnum">05</div>
   <h2>When the simple interval fails</h2>
-  <p>“Estimate ± 1.96 standard errors” leans on the bell shape, and for percentages near 0% or 100% in small samples the bell is a poor fit. The <a href="../probability/binomial.html#infer">Binomial page</a> met the problem from the other side. Here is the coverage, worked out exactly, of the simple interval and of a better one, the <em class="term">Wilson interval</em>, for every true percentage:</p>
+  <p>“Estimate ± 1.96 standard errors” leans on the bell shape, and for percentages near 0% or 100% in small samples the bell is a poor fit. The <a href="../probability/binomial.html#infer">Binomial page</a> met the problem from the other side. Here is the coverage, worked out exactly, of the simple interval (the <em>Wald interval</em>, as the Binomial page calls it) and of a better one, the <em class="term">Wilson interval</em>, for every true percentage:</p>
 
   <div class="widget">
     <p class="widget-title">Does “95%” really mean 95%?</p>
@@ -306,19 +337,15 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
 <section id="misread">
   <div class="secnum">06</div>
   <h2>Misreadings</h2>
-  <p>A poll reports 52%, with a 95% confidence interval of 49% to 55%. Which of these readings hold up?</p>
-  <div class="table-wrap">
-    <table class="summary">
-      <thead><tr><th>Reading</th><th>Verdict</th></tr></thead>
-      <tbody>
-        <tr><td>“The method behind this range catches the true support in 95% of polls.”</td><td><span class="ok">Right.</span> That is the definition.</td></tr>
-        <tr><td>“Support between 49% and 55% fits these data; values far outside it don’t.”</td><td><span class="ok">Right.</span> A fair everyday summary.</td></tr>
-        <tr><td>“There is a 95% probability the true support is between 49% and 55%.”</td><td><span class="warn">Not quite.</span> In this framework the truth is fixed and this range either contains it or not. A statement of that form needs a prior and Bayes’ theorem: see <em>Credible intervals</em>, later in the series. (With lots of data and no strong prior, the numbers often come out similar.)</td></tr>
-        <tr><td>“95% of voters have a view between 49% and 55%.”</td><td><span class="warn">Wrong.</span> The interval is about the uncertainty in one number, the overall percentage, not about the spread of individuals.</td></tr>
-        <tr><td>“A repeat poll will land inside 49% to 55% 95% of the time.”</td><td><span class="warn">Wrong.</span> The repeat wobbles too. Only about 83% of repeat estimates land inside the original 95% interval.</td></tr>
-        <tr><td>“The truth is more likely to be near 52% than near 49%.”</td><td><span class="warn">Careful.</span> Values near the middle fit the data better, but the confidence interval itself only marks a range, not a probability for each value inside it.</td></tr>
-      </tbody>
-    </table>
+  <p>A poll reports 52%, with a 95% confidence interval of 49% to 55%. Here are six readings of it. Tap the ones you think are wrong, then check.</p>
+  <div class="widget">
+    <p class="widget-title">The misreading checker</p>
+    <div class="claims" id="mcList"></div>
+    <div class="controls">
+      <button class="btn primary" id="mcCheck">Check my answers</button>
+      <button class="btn" id="mcReset">Start again</button>
+    </div>
+    <div class="readout" id="mcRead" aria-live="polite"></div>
   </div>
 </section>
 
@@ -490,22 +517,32 @@ function erfc(x){
 }
 const pTwo = z => Math.min(1, erfc(Math.abs(z) / Math.SQRT2));
 const signed = (v, d) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(d);
+const fmtEnd = v => signed(v, Math.abs(v) < .05 ? 2 : 1);   // interval ends in points: 2 decimals when the end is next to 0
+function boxedText(ctx, text, x, y, color, font){   // text on a surface-colored box, so lines behind it don't cross it
+  ctx.font = font || '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const tw = ctx.measureText(text).width;
+  ctx.fillStyle = C('--surface'); ctx.fillRect(x - tw / 2 - 4, y - 8, tw + 8, 16);
+  ctx.fillStyle = color; ctx.fillText(text, x, y);
+}
 function pollInterval(n, z){ const k = binom(n, TRUE_P), ph = k / n, m = z * Math.sqrt(ph * (1 - ph) / n); return {est: ph, lo: ph - m, hi: ph + m, hit: ph - m <= TRUE_P && TRUE_P <= ph + m}; }
 
-/* intervals stacked top (newest) to bottom against the truth */
-function drawIntervals(cv, list, lo, hi, maxRows, fmtTick){
+/* intervals stacked top (newest) to bottom against the truth.
+   o.hide: truth hidden, no hit/miss colors; o.marks: list indices the reader marked (gold); o.plain: no "newest" highlight */
+function drawIntervals(cv, list, lo, hi, maxRows, fmtTick, o = {}){
   const {ctx, w, h} = fit(cv), X0 = 16, X1 = w - 16, Y0 = h - 22, Y1 = 6, xs = v => X0 + (v - lo) / (hi - lo) * (X1 - X0);
   xAxis(ctx, X0, X1, Y0, lo * 100, hi * 100, fmtTick || (v => v + '%'));
   const rows = Math.min(maxRows, list.length), rh = (Y0 - Y1 - 4) / maxRows, bh = Math.max(1.2, rh * .62);
+  cv._rows = {Y1, rh, rows};
   for (let r = 0; r < rows; r++) {
-    const iv = list[list.length - 1 - r], y = Y1 + r * rh + (rh - bh) / 2;
+    const k = list.length - 1 - r, iv = list[k], y = Y1 + r * rh + (rh - bh) / 2, marked = o.marks && o.marks.has(k);
     const a = xs(Math.max(lo, iv.lo)), b = xs(Math.min(hi, iv.hi));
-    ctx.fillStyle = r === 0 ? C('--accent') : iv.hit ? C('--ink-3') : C('--zero');
+    ctx.fillStyle = o.hide ? (marked ? C('--gold') : C('--ink-3')) : (r === 0 && !o.plain) ? C('--accent') : iv.hit ? C('--ink-3') : C('--zero');
     ctx.fillRect(a, y, Math.max(1, b - a), bh);
     if (rh >= 4) { ctx.fillStyle = C('--surface'); ctx.fillRect(xs(iv.est) - 1, y, 2, bh); }
+    if (marked && !o.hide) { ctx.strokeStyle = C('--gold'); ctx.lineWidth = 2; ctx.strokeRect(a - 2, y - 2, Math.max(1, b - a) + 4, bh + 4); }
   }
-  vline(ctx, xs(TRUE_P), Y1, Y0, C('--ink'), [5, 4], 1.5);
-  if (!list.length) emptyNote(ctx, w, h, 'no polls yet');
+  if (!o.hide) vline(ctx, xs(TRUE_P), Y1, Y0, C('--ink'), [5, 4], 1.5);
+  if (!list.length) boxedText(ctx, 'no polls yet', w / 2, (Y0 + Y1) / 2, C('--ink-3'), '13px ' + MONO);
 }
 
 /* ---------- hero: 100 polls, 100 intervals ---------- */
@@ -539,25 +576,25 @@ function drawIntervals(cv, list, lo, hi, maxRows, fmtTick){
   function draw(){
     const {ctx, w, h} = fit(cv), {X0, X1} = geo(), xs = v => X0 + (v - LO) / (HI - LO) * (X1 - X0), Yb = h - 86, Y1 = 22;
     const pdf = v => Math.exp(-.5 * ((v - TRUE_P) / SE) ** 2), ys = d => Yb - d * (Yb - Y1);
-    ctx.fillStyle = C('--accent-soft'); ctx.beginPath(); ctx.moveTo(xs(TRUE_P - M), Yb);
+    // the chance world: where polls land (muted, per the color rules), middle 95% shaded
+    ctx.save(); ctx.globalAlpha = .22; ctx.fillStyle = C('--ink-3'); ctx.beginPath(); ctx.moveTo(xs(TRUE_P - M), Yb);
     for (let i = 0; i <= 80; i++) { const v = TRUE_P - M + 2 * M * i / 80; ctx.lineTo(xs(v), ys(pdf(v))); }
-    ctx.lineTo(xs(TRUE_P + M), Yb); ctx.closePath(); ctx.fill();
-    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2; ctx.beginPath();
+    ctx.lineTo(xs(TRUE_P + M), Yb); ctx.closePath(); ctx.fill(); ctx.restore();
+    ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 2; ctx.beginPath();
     for (let i = 0; i <= 200; i++) { const v = LO + (HI - LO) * i / 200; i ? ctx.lineTo(xs(v), ys(pdf(v))) : ctx.moveTo(xs(v), ys(pdf(v))); }
     ctx.stroke();
-    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--accent'); ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
-    ctx.fillText('where 95% of polls land', xs(TRUE_P) - 8, ys(.3));
+    ctx.font = '10px ' + MONO; ctx.fillStyle = C('--ink-2'); ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+    ctx.fillText('middle 95%', xs(TRUE_P) - 5, Yb - 4);
     ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Yb + .5); ctx.lineTo(X1, Yb + .5); ctx.stroke();
     vline(ctx, xs(TRUE_P), 4, h - 22, C('--ink'), [5, 4], 1.5);
     ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--ink'); ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText('truth 50.6%', xs(TRUE_P) + 5, 2);
-    const inside = Math.abs(poll - TRUE_P) <= M, col = inside ? C('--one') : C('--zero');
+    const inside = Math.abs(poll - TRUE_P) <= M, col = inside ? C('--ink-2') : C('--zero');
     ctx.fillStyle = C('--gold'); dot(ctx, xs(poll), Yb, 7);
     const yi = Yb + 36; ctx.fillStyle = col; roundRect(ctx, xs(poll - M), yi - 5, xs(poll + M) - xs(poll - M), 10, 4); ctx.fill();
     ctx.fillStyle = C('--gold'); dot(ctx, xs(poll), yi, 5);
-    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-2'); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-    ctx.fillText('your poll ± 3.1', xs(poll), yi + 9);
+    boxedText(ctx, 'your poll ± 3.1', Math.max(X0 + 50, Math.min(X1 - 50, xs(poll))), yi + 17, C('--ink-2'));
     xAxis(ctx, X0, X1, h - 20, LO * 100, HI * 100, v => v + '%');
-    $('#flRead').innerHTML = `poll <b>${(100 * poll).toFixed(1)}%</b> → interval ${(100 * (poll - M)).toFixed(1)}% to ${(100 * (poll + M)).toFixed(1)}% · ${inside ? '<span class="ok">reaches the truth</span>: the poll landed inside the shaded middle 95%' : '<span class="warn">misses the truth</span>: the poll landed out in the 5% of tails'}`;
+    $('#flRead').innerHTML = `poll <b>${(100 * poll).toFixed(1)}%</b> → interval ${(100 * (poll - M)).toFixed(1)}% to ${(100 * (poll + M)).toFixed(1)}% · ${inside ? '<b>reaches the truth</b>: the poll landed inside the shaded middle 95%' : '<span class="warn">misses the truth</span>: the poll landed out in the 5% of tails'}`;
   }
   const toV = e => { const r = cv.getBoundingClientRect(), {X0, X1} = geo(); return Math.max(LO, Math.min(HI, LO + (e.clientX - r.left - X0) / (X1 - X0) * (HI - LO))); };
   cv.addEventListener('pointerdown', e => { drag = true; poll = toV(e); try { cv.setPointerCapture(e.pointerId); } catch (_) {} draw(); });
@@ -566,20 +603,54 @@ function drawIntervals(cv, list, lo, hi, maxRows, fmtTick){
   draw(); redraws.push(draw);
 })();
 
-/* ---------- 2–3. the interval rain with dials ---------- */
+/* ---------- 2–3. the interval rain with dials, and the hide-the-truth game ---------- */
 (function(){
-  const NS = [25, 100, 400, 1600, 6400], nIn = $('#irN'), LO = .2, HI = .8;
-  let lvl = 2, list = [], total = 0, hits = 0, timer = null;
+  const NS = [25, 100, 400, 1600, 6400], nIn = $('#irN'), LO = .2, HI = .8, cv = $('#irChart'), HIDE_N = 40;
+  let lvl = 2, list = [], total = 0, hits = 0, timer = null, hide = null, marks = new Set();   // hide: null | 'marking' | 'revealed'
   const n = () => NS[+nIn.value];
   function add(k){ for (let i = 0; i < k; i++) { const iv = pollInterval(n(), ZS[lvl]); total++; if (iv.hit) hits++; list.push(iv); } if (list.length > 400) list = list.slice(-120); draw(); }
   function draw(){
-    drawIntervals($('#irChart'), list, LO, HI, 60);
+    drawIntervals(cv, list, LO, HI, hide ? HIDE_N : 60, null, {hide: hide === 'marking', marks: hide ? marks : null, plain: !!hide});
     const m = 100 * ZS[lvl] * Math.sqrt(TRUE_P * (1 - TRUE_P) / n());
     $('#irRead').innerHTML = `${LV[lvl]}% intervals from polls of ${comma(n())} · each about <b>± ${m.toFixed(1)} points</b> wide` +
-      (total ? `<br><b>${comma(total)}</b> polls · caught the truth <b>${comma(hits)}</b> · coverage <b>${(100 * hits / total).toFixed(1)}%</b> (promised ${LV[lvl]}%)` : '');
+      (hide ? `<br>${HIDE_N} fresh polls · truth ${hide === 'marking' ? 'hidden' : 'revealed'} · you marked <b>${marks.size}</b>` :
+       total ? `<br><b>${comma(total)}</b> polls · caught the truth <b>${comma(hits)}</b> · coverage <b>${(100 * hits / total).toFixed(1)}%</b> (promised ${LV[lvl]}%)` : '');
   }
   function stop(){ clearInterval(timer); timer = null; $('#irRun').textContent = '▶ Run'; }
-  function reset(){ stop(); list = []; total = hits = 0; $('#irNOut').textContent = comma(n()); draw(); }
+  function setHide(mode){
+    hide = mode; cv.classList.toggle('pick', mode === 'marking');
+    // on narrow screens give each of the 40 rows about 14 px, so they can be tapped
+    cv.style.height = mode && cv.getBoundingClientRect().width < 600 ? (HIDE_N * 14 + 36) + 'px' : '320px';
+    ['#irOne', '#irRun', '#irMany', '#irClear'].forEach(id => { $(id).disabled = !!mode; });
+    $('#irHide').textContent = mode === 'marking' ? 'Reveal the truth' : mode === 'revealed' ? 'Back to the rain' : 'Hide the truth';
+    $('#irHide').classList.toggle('primary', mode === 'marking');
+    $('#irMsg').hidden = !mode;
+  }
+  function reset(){ stop(); setHide(null); list = []; total = hits = 0; marks = new Set(); $('#irNOut').textContent = comma(n()); draw(); }
+  function reveal(){
+    const miss = new Set(); list.forEach((iv, k) => { if (!iv.hit) miss.add(k); });
+    let caught = 0; marks.forEach(k => { if (miss.has(k)) caught++; });
+    const m = marks.size;
+    $('#irMsg').innerHTML = `You marked <b>${m}</b> interval${m === 1 ? '' : 's'} as misses. <b>${miss.size}</b> of the ${HIDE_N} actually missed` +
+      (miss.size ? ` (in red); you caught <b>${caught}</b> of them` : '') + (m ? `, and ${m - caught} of your ${m} marks (gold outlines) caught the truth after all` : '') + '. ' +
+      'If you picked the bars farthest from the crowd, you probably did well: the other polls give away roughly where the truth is. A real pollster has one bar and no crowd, and one bar on its own carries no hint that it is a miss.';
+    setHide('revealed'); draw();
+  }
+  cv.addEventListener('click', e => {
+    if (hide !== 'marking') return;
+    const g = cv._rows, r = Math.floor((e.clientY - cv.getBoundingClientRect().top - g.Y1) / g.rh);
+    if (r < 0 || r >= g.rows) return;
+    const k = list.length - 1 - r; marks.has(k) ? marks.delete(k) : marks.add(k); draw();
+  });
+  $('#irHide').addEventListener('click', () => {
+    if (hide === 'marking') return reveal();
+    if (hide === 'revealed') return reset();
+    stop(); list = []; marks = new Set();
+    for (let i = 0; i < HIDE_N; i++) list.push(pollInterval(n(), ZS[lvl]));
+    setHide('marking');
+    $('#irMsg').innerHTML = `${HIDE_N} fresh ${LV[lvl]}% intervals, with the truth line removed. Tap the ones you think missed (tap again to unmark), then reveal.`;
+    draw();
+  });
   $$('[data-lvl]').forEach(b => b.addEventListener('click', () => { lvl = +b.dataset.lvl; $$('[data-lvl]').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); }); reset(); }));
   nIn.addEventListener('input', reset);
   $('#irOne').addEventListener('click', () => add(1));
@@ -589,22 +660,63 @@ function drawIntervals(cv, list, lo, hi, maxRows, fmtTick){
   reset(); redraws.push(draw);
 })();
 
-/* ---------- 4. intervals and tests ---------- */
+/* ---------- 4. intervals and tests: the p-value for every hypothesized gap ---------- */
 (function(){
-  const bIn = $('#dlB'), NA = 1000, NB = 1000, KA = 50, LO = -4, HI = 6;
-  function draw(){
-    const kb = +bIn.value, pa = KA / NA, pb = kb / NB, d = pb - pa, se = Math.sqrt(pa * (1 - pa) / NA + pb * (1 - pb) / NB);
-    const a = d - 1.96 * se, b = d + 1.96 * se, p = pTwo(d / se), excl = a > 0 || b < 0;
-    const {ctx, w, h} = fit($('#dlChart')), X0 = 16, X1 = w - 16, Y0 = h - 22, xs = v => X0 + (v - LO) / (HI - LO) * (X1 - X0), y = 46;
-    xAxis(ctx, X0, X1, Y0, LO, HI, v => signed(v, 0) + ' pts');
-    vline(ctx, xs(0), 4, Y0, C('--ink'), [5, 4], 1.5);
-    ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--ink'); ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText('no difference', xs(0) + 5, 2);
-    ctx.fillStyle = C('--accent'); roundRect(ctx, xs(Math.max(LO, 100 * a)), y - 6, xs(Math.min(HI, 100 * b)) - xs(Math.max(LO, 100 * a)), 12, 5); ctx.fill();
-    ctx.fillStyle = C('--surface'); dot(ctx, xs(100 * d), y, 4.5);
-    $('#dlBOut').textContent = kb;
-    $('#dlRead').innerHTML = `orange ${kb} vs grey 50 clicks · gap <b>${signed(100 * d, 1)} points</b> · 95% interval <b>${signed(100 * a, 1)} to ${signed(100 * b, 1)}</b> → ${excl ? '<span class="ok">excludes 0</span>' : 'includes 0'} · p = <b>${p < .001 ? '&lt; 0.001' : p.toFixed(3)}</b> → ${p < .05 ? '<span class="ok">below 0.05</span>' : 'not below 0.05'}`;
+  const bIn = $('#dlB'), cv = $('#dlChart'), NA = 1000, NB = 1000, KA = 50, LO = -4, HI = 6, ANSWER = 71;
+  let h = 0, drag = false, guess = null, anim = null;
+  const geo = () => { const w = cv.getBoundingClientRect().width; return {X0: 34, X1: w - 26}; };
+  function stats(){
+    const kb = +bIn.value, pa = KA / NA, pb = kb / NB, d = 100 * (pb - pa), se = 100 * Math.sqrt(pa * (1 - pa) / NA + pb * (1 - pb) / NB);
+    return {kb, d, se, a: d - 1.96 * se, b: d + 1.96 * se};
   }
-  bIn.addEventListener('input', draw);
+  function draw(){
+    const {kb, d, se, a, b} = stats(), p0 = pTwo(d / se), ph = pTwo((d - h) / se), excl = a > 0 || b < 0;
+    const {ctx, w, h: H} = fit(cv), {X0, X1} = geo(), xs = v => X0 + (v - LO) / (HI - LO) * (X1 - X0);
+    const Y0 = H - 22, yb = Y0 - 26, P0 = yb - 26, P1 = 18, ys = p => P0 - Math.sqrt(p) * (P0 - P1);   // square-root scale, so 0.05 isn't squashed onto 0
+    yGrid(ctx, X0, X1, ys, [0, .25, 1], v => v === 0 ? '0' : v === 1 ? '1' : '0.25');
+    ctx.save(); ctx.strokeStyle = C('--ink-3'); ctx.setLineDash([4, 3]); ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(X0, ys(.05)); ctx.lineTo(X1, ys(.05)); ctx.stroke(); ctx.restore();
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillText('p = 0.05', X1, ys(.05) - 2);
+    // interval ends, carried up to where the curve crosses 0.05
+    [a, b].forEach(v => { if (v > LO && v < HI) vline(ctx, xs(v), ys(.05), yb, C('--accent'), [2, 3], 1); });
+    ctx.strokeStyle = C('--ink-2'); ctx.lineWidth = 2; ctx.beginPath();
+    for (let i = 0; i <= 300; i++) { const v = LO + (HI - LO) * i / 300, y = ys(pTwo((d - v) / se)); i ? ctx.lineTo(xs(v), y) : ctx.moveTo(xs(v), y); }
+    ctx.stroke();
+    xAxis(ctx, X0, X1, Y0, LO, HI, v => signed(v, 0) + ' pts');
+    vline(ctx, xs(0), P1, Y0, C('--ink'), [5, 4], 1.2);
+    ctx.fillStyle = C('--accent'); roundRect(ctx, xs(Math.max(LO, a)), yb - 6, xs(Math.min(HI, b)) - xs(Math.max(LO, a)), 12, 5); ctx.fill();
+    ctx.fillStyle = C('--surface'); dot(ctx, xs(d), yb, 4.5);
+    vline(ctx, xs(h), 4, Y0, C('--gold'), null, 2.5);
+    ctx.fillStyle = C('--surface'); dot(ctx, xs(h), ys(ph), 6); ctx.fillStyle = C('--gold'); dot(ctx, xs(h), ys(ph), 4.5);
+    label(ctx, xs(h), 2, `h = ${signed(h, 1) || '0'} · p = ${ph < .001 ? '< 0.001' : ph.toFixed(3)}`, C('--gold'), X0, X1);
+    $('#dlBOut').textContent = kb;
+    const inside = h >= a && h <= b;
+    $('#dlRead').innerHTML = `orange ${kb} vs gray 50 clicks · gap <b>${signed(d, 1)} points</b> · 95% interval <b>${fmtEnd(a)} to ${fmtEnd(b)}</b> → ${excl ? '<span class="ok">excludes 0</span>' : 'includes 0'} · p for no difference = <b>${p0 < .001 ? '&lt; 0.001' : p0.toFixed(3)}</b> → ${p0 < .05 ? '<span class="ok">below 0.05</span>' : 'not below 0.05'}` +
+      `<br><span class="gd">testing “true gap = ${signed(h, 1) || '0'}”</span>: p = <b>${ph < .001 ? '&lt; 0.001' : ph.toFixed(3)}</b> · h is <b>${inside ? 'inside' : 'outside'}</b> the interval, so the test ${inside ? 'does not reject it' : 'rejects it'}`;
+  }
+  function message(){
+    const kb = ANSWER, pa = .05, pb = kb / 1000, d = 100 * (pb - pa), se = 100 * Math.sqrt(pa * (1 - pa) / 1000 + pb * (1 - pb) / 1000);
+    $$('#dlPred .btn').forEach(b => { b.classList.remove('right', 'wrong'); if (+b.dataset.g === guess) b.classList.add(guess === ANSWER ? 'right' : 'wrong'); });
+    $('#dlMsg').innerHTML = (guess == null ? '' : `You guessed <b>${guess}</b>. `) + `The answer is <b>${ANSWER}</b>${guess == null ? '' : guess === ANSWER ? ', so you were right' : ''}: ` +
+      `a gap of ${d.toFixed(1)} points, an interval from ${fmtEnd(d - 1.96 * se)} to ${fmtEnd(d + 1.96 * se)}, just clear of 0, and p = ${pTwo(d / se).toFixed(3)}, just under 0.05. ` +
+      `At 70 clicks 0 is still inside and p = ${(() => { const q = .07, s2 = Math.sqrt(.05 * .95 / 1000 + q * (1 - q) / 1000); return pTwo((q - .05) / s2).toFixed(3); })()}. The interval and the test change their verdict at the same click, because they are the same calculation. Now the slider is yours.`;
+  }
+  function openUp(){ bIn.disabled = false; $('#dlSkip').hidden = true; }
+  function walkTo(target){
+    clearInterval(anim); openUp(); h = 0;
+    const step = () => { const v = +bIn.value; if (v === target) { clearInterval(anim); anim = null; message(); return; } bIn.value = v + Math.sign(target - v); draw(); };
+    if (RM) { bIn.value = target; draw(); message(); return; }
+    anim = setInterval(step, 90);
+  }
+  $$('#dlPred .btn').forEach(b => b.addEventListener('click', () => {
+    guess = +b.dataset.g; $$('#dlPred .btn').forEach(x => x.classList.toggle('guess', x === b));
+    walkTo(ANSWER);
+  }));
+  $('#dlSkip').addEventListener('click', () => walkTo(ANSWER));
+  const toH = e => { const r = cv.getBoundingClientRect(), {X0, X1} = geo(); return Math.round(10 * Math.max(LO, Math.min(HI, LO + (e.clientX - r.left - X0) / (X1 - X0) * (HI - LO)))) / 10; };
+  cv.addEventListener('pointerdown', e => { drag = true; h = toH(e); try { cv.setPointerCapture(e.pointerId); } catch (_) {} draw(); });
+  cv.addEventListener('pointermove', e => { if (drag) { h = toH(e); draw(); } });
+  cv.addEventListener('pointerup', () => drag = false); cv.addEventListener('pointercancel', () => drag = false);
+  bIn.addEventListener('input', () => { clearInterval(anim); anim = null; draw(); });
   draw(); redraws.push(draw);
 })();
 
@@ -649,6 +761,48 @@ function drawIntervals(cv, list, lo, hi, maxRows, fmtTick){
   draw(); redraws.push(draw);
 })();
 
+/* ---------- 6. the misreading checker ---------- */
+(function(){
+  const CL = [
+    {t: 'The method behind this range catches the true support in 95% of polls.', ok: true,
+     e: 'Right. That is the definition: the 95% belongs to the recipe, used poll after poll.'},
+    {t: 'There is a 95% probability that the true support is between 49% and 55%.', ok: false,
+     e: 'Wrong, though it is the most common reading. In this framework the truth is fixed and this range either contains it or not. A statement of that form needs a prior and Bayes’ theorem: see <em>Credible intervals</em>, later in the series. (With lots of data and no strong prior, the numbers often come out similar.)'},
+    {t: '95% of voters have a view between 49% and 55%.', ok: false,
+     e: 'Wrong. The interval is about the uncertainty in one number, the overall percentage, not about the spread of individuals.'},
+    {t: 'Support anywhere between 49% and 55% fits these data; values far outside it don’t.', ok: true,
+     e: 'Right. A fair everyday summary. Values near the middle fit a little better than those at the edges, but the interval itself only marks a range, not a probability for each value inside it.'},
+    {t: 'A repeat poll will land inside 49% to 55% 95% of the time.', ok: false,
+     e: 'Wrong. The repeat wobbles too, so the gap between two polls wobbles about 1.4 times as much as one poll. Only about 83% of repeat estimates land inside the original 95% interval.'},
+    {t: 'The interval proves that support is above 49%.', ok: false,
+     e: 'Wrong. About 1 interval in 20 misses the truth, and nothing inside this one says it isn’t one of those. Values just outside the range fit the data less well; they are not ruled out.'}
+  ];
+  const box = $('#mcList'), flags = new Array(CL.length).fill(false), ORD = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth'];
+  let checked = false;
+  CL.forEach((c, i) => {
+    const b = document.createElement('button'); b.className = 'claim'; b.setAttribute('aria-pressed', 'false');
+    b.innerHTML = `<span class="mark" aria-hidden="true"></span><span class="ct">“${c.t}”</span><span class="ce" hidden></span>`;
+    b.addEventListener('click', () => { if (checked) return; flags[i] = !flags[i]; sync(); });
+    box.appendChild(b);
+  });
+  function sync(){
+    const items = $$('.claim', box); let right = 0;
+    items.forEach((b, i) => {
+      const correct = flags[i] === !CL[i].ok; if (correct) right++;
+      b.classList.toggle('flag', flags[i]); b.setAttribute('aria-pressed', flags[i]);
+      b.querySelector('.mark').textContent = checked ? `you: ${flags[i] ? 'wrong' : 'right'}` : flags[i] ? '✗ wrong' : 'tap if wrong';
+      b.classList.toggle('good', checked && correct); b.classList.toggle('bad', checked && !correct);
+      const ce = b.querySelector('.ce'); ce.hidden = !checked; ce.innerHTML = CL[i].e;
+    });
+    const ok = CL.map((c, i) => c.ok ? ORD[i] : null).filter(Boolean);
+    $('#mcRead').innerHTML = checked ? `You judged <b>${right} of ${CL.length}</b> readings correctly. Only the ${ok.join(' and ')} are right.` : `${flags.filter(Boolean).length} marked as wrong`;
+    $('#mcCheck').disabled = checked;
+  }
+  $('#mcCheck').addEventListener('click', () => { checked = true; sync(); });
+  $('#mcReset').addEventListener('click', () => { checked = false; flags.fill(false); sync(); });
+  sync();
+})();
+
 /* ---------- 7. quiz ---------- */
 (function(){
   const Q = [
@@ -663,7 +817,7 @@ function drawIntervals(cv, list, lo, hi, maxRows, fmtTick){
      e: 'The interval is about the uncertainty in one number, the overall percentage. It says nothing about how individual voters are spread.'},
     {s: 'The button test’s 95% interval for the gap is −0.6 to +3.4 points. Is the gap significant at the 0.05 level?',
      o: ['Yes', 'No, because the interval includes 0'], a: 1,
-     e: 'A 95% interval contains exactly the values a 0.05-level test wouldn’t reject. Zero is inside, so the test can’t reject “no difference”: p ≈ 0.18.'},
+     e: 'A 95% interval contains exactly the values a 0.05-level test wouldn’t reject. Zero is inside, so the test can’t reject “no difference”: p = 0.21 by shuffling (0.18 by formula).'},
     {s: 'Compared with a 95% interval from the same data, a 99% interval is…',
      o: ['narrower', 'wider'], a: 1,
      e: 'To catch the truth more often you need a wider net: 2.58 standard errors instead of 1.96.'},

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>The 1954 polio vaccine trial — a case study</title>
+<title>The 1954 Polio Vaccine Trial — a case study</title>
 <style>
 :root{
   --bg:#faf8f4; --surface:#ffffff; --surface-2:#f2efe8; --ink:#1c1c1e; --ink-2:#4c4e55; --ink-3:#8b8d93; --line:#e3dfd5;
@@ -160,8 +160,8 @@ table.summary td:first-child a{white-space:nowrap}
 
 <header class="hero">
   <p class="kicker">A case study</p>
-  <h1>The 1954 polio vaccine trial</h1>
-  <p class="lede">In 1954 about 1.8 million American schoolchildren took part in the biggest public-health experiment ever run, to find out whether Jonas Salk’s polio vaccine worked. Everything in this series so far was needed to get the answer right.</p>
+  <h1>The 1954 Polio Vaccine Trial</h1>
+  <p class="lede">In 1954 about 1.8 million American schoolchildren, and some 70,000 more in Canada and Finland, took part in what the statistician Paul Meier called “the biggest public health experiment ever”, to find out whether Jonas Salk’s polio vaccine worked. Everything in this series so far was needed to get the answer right.</p>
   <div class="hero-play" id="heroPlay">
     <p class="ask">Polio struck only a few dozen children per 100,000 in a year. How do you tell if a vaccine works?</p>
     <p class="hint" style="min-height:0;margin:0 0 10px">The trial ran two designs side by side. In some areas, second-graders whose parents agreed got the vaccine, and first- and third-graders were watched for comparison. In others, children whose parents agreed got either the vaccine or an injection of salt water, chosen at random, with nobody told which. Which design showed the bigger effect of the vaccine?</p>
@@ -216,7 +216,7 @@ table.summary td:first-child a{white-space:nowrap}
   <div class="secnum">02</div>
   <h2>Two designs, side by side</h2>
   <p>The Foundation’s first plan was the <strong>observed-control</strong> design: offer the vaccine to second-graders and compare them with the first and third grades, who got nothing. It was simple and needed no fake injections. Critics pointed to two flaws. Doctors diagnosing a borderline case would know whether the child had been vaccinated. And only children whose parents volunteered got the vaccine, while the comparison grades included everyone. Volunteers, Paul Meier noted in his account of the trial, tend to be better educated and better off, and polio hit the better-off harder.</p>
-  <p>So about half the areas used the <strong>randomized, double-blind</strong> design instead: among children whose parents consented, a random half got the vaccine and the rest got salt water from identical-looking vials, and neither the families nor the diagnosing doctors knew which. Below is a model of the hidden problem, not the real data. Families are better-off or less well-off; the better-off are more likely to consent and more likely to catch polio. Choose how strongly consent follows income and how well the vaccine really works, and run both designs.</p>
+  <p>Each state’s health officer chose the design, and in 91 of the 217 U.S. areas they chose the <strong>randomized, double-blind</strong> one: among children whose parents consented, a random half got the vaccine and the rest got salt water<sup><a href="#placebo-note">*</a></sup> from identical-looking vials, and neither the families nor the diagnosing doctors knew which. Below is a model of the hidden problem, not the real data. Families are better-off or less well-off; the better-off are more likely to consent and more likely to catch polio. Choose how strongly consent follows income and how well the vaccine really works, and run both designs.</p>
 
   <div class="widget">
     <p class="widget-title">★ The trial simulator (a model)</p>
@@ -237,20 +237,39 @@ table.summary td:first-child a{white-space:nowrap}
         <button class="btn" data-ve="90" aria-pressed="false">90%</button>
       </div>
     </div>
+    <div class="controls">
+      <span class="ctrl">diagnosis</span>
+      <div class="seg" role="group" aria-label="Whether the diagnosing doctors know who was vaccinated">
+        <button class="btn on" data-bl="0" aria-pressed="true">blind</button>
+        <button class="btn" data-bl="1" aria-pressed="false">doctors know who was vaccinated</button>
+      </div>
+    </div>
+    <p class="cap" id="simBlCap" hidden>In this model, a doctor who knows calls half the borderline cases (1 in 5 real cases) in vaccinated children something else, and calls half the polio-like illnesses in unvaccinated children (10 per 100,000) polio.</p>
+    <div id="simPredBox">
+      <p class="cast-q" style="margin-top:12px">Before you run it: with consent following income strongly and a vaccine that really prevents 60%, where will the volunteer design’s estimates land?</p>
+      <div class="controls" id="simPred">
+        <button class="btn" data-sp="0">On the truth</button>
+        <button class="btn" data-sp="-1">Below it: the vaccine looks weaker</button>
+        <button class="btn" data-sp="1">Above it: the vaccine looks stronger</button>
+        <button class="linkbtn" id="simSkip">skip the guess</button>
+      </div>
+    </div>
     <canvas id="simChart" style="height:260px" role="img" aria-label="Cases per 100,000 in each group of the two simulated designs, with the apparent effect of the vaccine in each"></canvas>
     <div class="mcap" style="margin-top:6px">Apparent effect in repeated trials: cases prevented per 100,000</div>
-    <canvas id="simStrip" style="height:150px" role="img" aria-label="The apparent percentage of cases prevented in many simulated trials of each design, against the true value"></canvas>
+    <canvas id="simStrip" style="height:150px" role="img" aria-label="The apparent cases prevented per 100,000 in many simulated trials of each design, against the true value"></canvas>
     <div class="legend"><span><i class="sw dot" style="background:var(--accent)"></i><span>randomized trials</span></span><span><i class="sw dot" style="background:var(--ink-3)"></i><span>volunteer-design trials</span></span><span><i class="sw line" style="border-top:2px solid var(--gold)"></i><span>the truth you set</span></span></div>
     <div class="controls">
-      <button class="btn primary" id="simRun">Run both trials</button>
-      <button class="btn" id="simMany">Run 100 of each</button>
+      <button class="btn primary" id="simMany" disabled>Run 100 trials of each design</button>
+      <button class="btn" id="simRun" disabled>Run one more of each</button>
       <button class="btn" id="simClear">Clear</button>
     </div>
     <div class="readout" id="simRead" aria-live="polite"></div>
+    <p class="msg" id="simMsg" aria-live="polite"></p>
   </div>
 
-  <p>When consent doesn’t depend on income, both designs land on the truth. When it does, the volunteer design compares higher-risk volunteers with a mixed comparison group, and its estimate shrinks. If the vaccine did nothing at all, the volunteers would get <em>more</em> polio than the comparison grades, and the vaccine would look harmful. The randomized design is right in every setting, because the coin decides who gets the vaccine, so the two groups match in income and in everything else, measured or not. This is the selection problem from <a href="selection-bias.html">Who’s missing?</a>, and randomization is its cure.</p>
-  <p>The real results show the same signature. Children whose parents refused had lower rates than the salt-water group in both designs (46 and 44 per 100,000, against 71 for salt water), because refusing families were on average less well-off. And the observed-control design understated the vaccine’s effect: 29 cases prevented per 100,000 against 42.</p>
+  <p>When consent doesn’t depend on income, both designs land on the truth (with blind diagnosis). When it does, the volunteer design compares higher-risk volunteers with a mixed comparison group, and its estimate shrinks. If the vaccine did nothing at all, the volunteers would get <em>more</em> polio than the comparison grades, and the vaccine would look harmful. The randomized design is right in every setting, because the coin decides who gets the vaccine, so the two groups match in income and in everything else, measured or not. This is the selection problem from <a href="selection-bias.html">Who’s missing?</a>, and randomization is its cure.</p>
+  <p>Randomization fixes who gets the vaccine, not who judges the cases. Switch diagnosis to <em>doctors know</em>: now even the randomized design overstates the vaccine, by about 8 cases per 100,000 in this model. In the volunteer design, at these settings, the two biases pull opposite ways and roughly cancel, which is luck that nobody could have counted on. In the real observed-control areas the doctors could know, because only the vaccinated grade-2 volunteers had been injected. That is why the randomized areas were double-blind as well.</p>
+  <p>The real results show the same signature. Within each design, children whose parents refused had lower rates than the children they were compared with: 46 per 100,000 against 71 for salt water in the randomized areas, and 44 against 54 for grades 1 and 3 in the observed-control areas, because refusing families were on average less well-off. And the observed-control design understated the vaccine’s effect: 29 cases prevented per 100,000 against 42.</p>
   <div class="table-wrap">
     <table class="summary num">
       <thead><tr><th>Group (all polio cases)</th><th>Children</th><th>Cases</th><th>Per 100,000</th></tr></thead>
@@ -266,7 +285,8 @@ table.summary td:first-child a{white-space:nowrap}
       </tbody>
     </table>
   </div>
-  <p class="small muted">From Francis et al. (1955) as summarized in Meier’s Table 1, which also lists paralytic cases and children who received incomplete courses.</p>
+  <p class="small muted">U.S. areas, from Francis et al. (1955) as summarized in Table 1 of Paul Meier’s “The Biggest Public Health Experiment Ever: The 1954 Field Trial of the Salk Poliomyelitis Vaccine”, which also lists paralytic cases and children who received incomplete courses. The areas and the Canadian and Finnish children are from Thomas Dublin’s account of the field operations (<em>JAMA</em>, 1955): 46 areas in Alberta, Manitoba and Nova Scotia and two small areas in Finland, all using placebo controls.</p>
+  <p class="small muted" id="placebo-note">* The placebo. Meier, like most retellings, calls it a simple salt solution, and this page keeps “salt water” for short. Dublin’s account calls it “solution 199”: a synthetic tissue-culture medium of the kind the vaccine virus was grown in, with no virus in it. Either way it looked like the vaccine and could not cause polio.</p>
 </section>
 
 <!-- 3 -->
@@ -283,6 +303,7 @@ table.summary td:first-child a{white-space:nowrap}
         <button class="btn" data-sc="1" aria-pressed="false">Paralytic only (33 vs 115)</button>
       </div>
     </div>
+    <div class="mcap">Cases landing in the vaccine group, shuffle by shuffle</div>
     <canvas id="shChart" style="height:220px" role="img" aria-label="Histogram of the number of cases falling in the vaccine group when the cases are dealt out at random, with the real number marked far to the left"></canvas>
     <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>shuffles</span></span><span><i class="sw line" style="border-top:2px solid var(--accent)"></i><span>the real trial</span></span></div>
     <div class="controls">
@@ -302,10 +323,10 @@ table.summary td:first-child a{white-space:nowrap}
 
   <div class="widget">
     <p class="widget-title">Cases prevented per 100,000, with 95% intervals</p>
-    <canvas id="ciChart" style="height:230px" role="img" aria-label="Estimates and 95% intervals for cases prevented per 100,000 children in the randomized and observed-control designs, for all polio and for paralytic polio"></canvas>
+    <canvas id="ciChart" style="height:244px" role="img" aria-label="Estimates and 95% intervals for cases prevented per 100,000 children in the randomized and observed-control designs, for all polio and for paralytic polio"></canvas>
     <div class="legend"><span><i class="sw dot" style="background:var(--accent)"></i><span>randomized design</span></span><span><i class="sw dot" style="background:var(--ink-3)"></i><span>observed-control design</span></span></div>
   </div>
-  <p>The observed-control design gives an interval just as narrow, 20 to 37, and it doesn’t reach the randomized estimate of 42. An interval measures how much an estimate wobbles from chance. It says nothing about bias: a biased design gives a precise answer to the wrong question. Only the design can fix that.</p>
+  <p>The observed-control design gives an even narrower interval, 20 to 37, because its groups are bigger, and it doesn’t reach the randomized estimate of 42. An interval measures how much an estimate wobbles from chance. It says nothing about bias: a biased design gives a precise answer to the wrong question. Only the design can fix that.</p>
 </section>
 
 <!-- 5 -->
@@ -320,6 +341,7 @@ table.summary td:first-child a{white-space:nowrap}
       <label class="ctrl">children per group <input type="range" id="szN" min="0" max="20" step="1" value="6"><output id="szNOut"></output></label>
     </div>
     <canvas id="szChart" style="height:220px" role="img" aria-label="Power to detect a halving of polio as a function of children per group, on a log scale, with the chosen size marked"></canvas>
+    <div class="legend"><span><i class="sw line" style="border-top:2px dotted var(--ink-3)"></i><span>1954: the real trial, about 200,000 per group</span></span></div>
     <div class="mcap" style="margin-top:8px">100 simulated trials of this size (green = effect detected)</div>
     <canvas id="szTiles" style="height:70px" role="img" aria-label="One hundred simulated trials as tiles, green where the trial found the effect"></canvas>
     <div class="controls"><button class="btn primary" id="szRun">Run 100 trials</button></div>
@@ -341,7 +363,7 @@ table.summary td:first-child a{white-space:nowrap}
         <tr><td><a href="permutation-tests.html">Shuffling to test</a></td><td>Random assignment is what makes the shuffle a fair picture of “no effect”.</td></tr>
         <tr><td><a href="p-values.html">p-values</a></td><td>57 vs 142 cases: about 2 in a billion if the vaccine did nothing.</td></tr>
         <tr><td><a href="confidence-intervals.html">Confidence intervals</a></td><td>42 cases prevented per 100,000, give or take 14; precision is not the same as freedom from bias.</td></tr>
-        <tr><td><a href="errors.html">Errors and decisions</a></td><td>A false “works” would have vaccinated millions with a useless product; a false “doesn’t” would have abandoned a good one.</td></tr>
+        <tr><td><a href="errors.html">Errors and decisions</a></td><td>A false “works” would have vaccinated millions with a useless product; a false “doesn’t” would have abandoned a good one. Acting on a right answer still carries risk: within weeks, about 120,000 doses from Cutter Laboratories turned out to contain live virus. Vaccinated children and their contacts caught polio from it: about 200 were left paralyzed (164 severely) and 10 died. The lots were withdrawn on April 27, 1955 (the Cutter incident; P. Offit, <i>The Cutter Incident</i>, 2005).</td></tr>
         <tr><td><a href="power.html">Power</a></td><td>A rare outcome needs enormous groups; tens of thousands per group would have risked missing the effect.</td></tr>
         <tr><td><a href="forking-paths.html">Forking paths</a></td><td>The outcome, the diagnosis rules and the analysis were fixed in advance, and diagnosis was blind.</td></tr>
       </tbody>
@@ -573,7 +595,7 @@ const OBS = {vac: {n: 221998, x: 56, par: 38}, con: {n: 725173, x: 391, par: 330
   function message(){
     $$('#heroPred .btn').forEach(b => { b.classList.remove('right', 'wrong'); if (guess != null && +b.dataset.g === guess) b.classList.add(guess === 0 ? 'right' : 'wrong'); });
     hint.innerHTML = `The randomized design showed <b>42 fewer cases per 100,000</b>; the volunteer design only <b>29 fewer</b>${guess === 0 ? ', as you guessed' : ''}. ` +
-      `The clue is the grey bars: children whose parents refused got polio <em>less</em> often than the salt-water group. Consenting families were on average better off, and polio struck the better-off harder. ` +
+      `The clue is the gray bars. In each design, children whose parents refused got polio <em>less</em> often than the children they were compared with: 46 per 100,000 against 71 for salt water in the randomized areas, and 44 against 54 for grades 1 and 3 in the volunteer areas. Consenting families were on average better off, and polio struck the better-off harder. ` +
       `The volunteer design compared those higher-risk volunteers with whole grades of children, and the vaccine looked weaker than it was. Randomizing among volunteers compared like with like.`;
   }
   function open(){ $('#heroGo').disabled = false; $('#heroSkip').hidden = true; }
@@ -611,16 +633,17 @@ const OBS = {vac: {n: 221998, x: 56, par: 38}, con: {n: 725173, x: 391, par: 330
 /* ---------- 2. the trial simulator (a model) ---------- */
 (function(){
   const N = 1000000, RISK = {B: 85, L: 35}, CONSENT = [{B: .55, L: .55}, {B: .75, L: .35}, {B: .9, L: .2}];
-  let cg = 1, ve = 60, last = null, runs = [];
+  let cg = 1, ve = 60, bl = 0, last = null, runs = [], guess = null, asked = false;
+  const SHRINK = .9, EXTRA = 10 * .5;   // unblinded: 1 in 5 vaccinated cases borderline, half dismissed; 10 per 100,000 polio-like illnesses, half called polio
   const truth = () => { const c = CONSENT[cg]; return ve / 100 * (c.B * RISK.B + c.L * RISK.L) / (c.B + c.L); };
   function trial(){
     const c = CONSENT[cg], e = ve / 100, out = {};
-    const cases = (n, r) => poisson(n * r / 1e5);
+    const cases = (n, r, vac) => poisson(n * (bl ? (vac ? r * SHRINK : r + EXTRA) : r) / 1e5);
     // randomized: consenters split in half; refusers observed
     let rv = {n: 0, x: 0}, rp = {n: 0, x: 0}, rr = {n: 0, x: 0};
     ['B', 'L'].forEach(k => {
       const pop = N / 2, con = pop * c[k], half = con / 2, ref = pop - con;
-      rv.n += half; rv.x += cases(half, RISK[k] * (1 - e));
+      rv.n += half; rv.x += cases(half, RISK[k] * (1 - e), true);
       rp.n += half; rp.x += cases(half, RISK[k]);
       rr.n += ref; rr.x += cases(ref, RISK[k]);
     });
@@ -628,7 +651,7 @@ const OBS = {vac: {n: 221998, x: 56, par: 38}, con: {n: 725173, x: 391, par: 330
     let ov = {n: 0, x: 0}, oc = {n: 0, x: 0}, orf = {n: 0, x: 0};
     ['B', 'L'].forEach(k => {
       const pop = N / 2, g2 = pop / 3, con = g2 * c[k], ref = g2 - con, ctl = pop * 2 / 3;
-      ov.n += con; ov.x += cases(con, RISK[k] * (1 - e));
+      ov.n += con; ov.x += cases(con, RISK[k] * (1 - e), true);
       orf.n += ref; orf.x += cases(ref, RISK[k]);
       oc.n += ctl; oc.x += cases(ctl, RISK[k]);
     });
@@ -637,7 +660,7 @@ const OBS = {vac: {n: 221998, x: 56, par: 38}, con: {n: 725173, x: 391, par: 330
   }
   function drawBars(){
     const cv = $('#simChart'); setH(cv, 260, 450); const {ctx, w, h} = fit(cv);
-    if (!last) { emptyNote(ctx, w, h, 'press “Run both trials”'); return; }
+    if (!last) { emptyNote(ctx, w, h, 'make your guess, then run the trials'); return; }
     const two = w >= 560, pw = two ? w / 2 : w, ph = two ? h : h / 2, T = last;
     const ymax = Math.max(80, ...[T.rv, T.rp, T.rr, T.ov, T.oc, T.orf].map(g => g.x / g.n * 1e5)) * 1.12;
     const A = ratePanel(ctx, 0, 0, pw - (two ? 8 : 0), ph, 'Randomized', [
@@ -672,12 +695,29 @@ const OBS = {vac: {n: 221998, x: 56, par: 38}, con: {n: 725173, x: 391, par: 330
     $('#simRead').innerHTML = `cases prevented per 100,000 in this run: randomized <b>${f(last.effR)}</b> (${pc(last.pctR)} of cases) · volunteer design <b>${f(last.effO)}</b> (${pc(last.pctO)}) · truth <b>${truth().toFixed(0)}</b> (${ve}%)` +
       (runs.length > 1 ? `<br>average over ${runs.length} runs: randomized ${f(mean('effR'))}, volunteers ${f(mean('effO'))}` : '');
   }
-  function all(){ drawBars(); drawStrip(); read(); }
+  function verdict(){
+    if (!runs.length) { $('#simMsg').innerHTML = ''; return; }
+    const m = runs.reduce((s, t) => s + t.effO, 0) / runs.length, mr = runs.reduce((s, t) => s + t.effR, 0) / runs.length, T = truth();
+    const rel = Math.abs(m - T) < 3 ? 0 : m < T ? -1 : 1, word = ['below it: the vaccine looks weaker', 'close to it', 'above it: the vaccine looks stronger'][rel + 1];
+    let html = `Over ${runs.length} trials the volunteer design averaged <b>${Math.round(m)}</b> cases prevented per 100,000 against a truth of <b>${Math.round(T)}</b>, ${word}; the randomized design averaged <b>${Math.round(mr)}</b>.`;
+    if (asked) {
+      html = (guess != null ? `You guessed “${['below it', 'on the truth', 'above it'][guess + 1]}”${guess === rel ? ', and that is right.' : '.'} ` : '') + html; asked = false;
+      $$('#simPred .btn').forEach(b => { b.classList.remove('right', 'wrong'); if (guess != null && +b.dataset.sp === guess) b.classList.add(guess === rel ? 'right' : 'wrong'); });
+    }
+    $('#simMsg').innerHTML = html;
+  }
+  function all(){ drawBars(); drawStrip(); read(); verdict(); }
+  const many = () => { for (let i = 0; i < 100; i++) { last = trial(); runs.push(last); } };
+  function open(){ $('#simSkip').hidden = true; $('#simMany').disabled = false; $('#simRun').disabled = false; asked = true; }
+  $$('#simPred .btn').forEach(b => b.addEventListener('click', () => { if (!asked && !$('#simMany').disabled) return; guess = +b.dataset.sp; $$('#simPred .btn').forEach(x => x.classList.toggle('guess', x === b)); open(); }));
+  $('#simSkip').addEventListener('click', () => { guess = null; open(); });
   $('#simRun').addEventListener('click', () => { last = trial(); runs.push(last); all(); });
-  $('#simMany').addEventListener('click', () => { for (let i = 0; i < 100; i++) { last = trial(); runs.push(last); } all(); });
+  $('#simMany').addEventListener('click', () => { many(); all(); });
   $('#simClear').addEventListener('click', () => { runs = []; last = null; all(); });
-  $$('[data-cg]').forEach(b => b.addEventListener('click', () => { cg = +b.dataset.cg; pressSeg('[data-cg]', 'cg', cg); runs = []; last = trial(); runs.push(last); all(); }));
-  $$('[data-ve]').forEach(b => b.addEventListener('click', () => { ve = +b.dataset.ve; pressSeg('[data-ve]', 've', ve); runs = []; last = trial(); runs.push(last); all(); }));
+  const rerun = () => { runs = []; if ($('#simMany').disabled) { last = null; all(); return; } many(); all(); };
+  $$('[data-cg]').forEach(b => b.addEventListener('click', () => { cg = +b.dataset.cg; pressSeg('[data-cg]', 'cg', cg); rerun(); }));
+  $$('[data-ve]').forEach(b => b.addEventListener('click', () => { ve = +b.dataset.ve; pressSeg('[data-ve]', 've', ve); rerun(); }));
+  $$('[data-bl]').forEach(b => b.addEventListener('click', () => { bl = +b.dataset.bl; pressSeg('[data-bl]', 'bl', bl); $('#simBlCap').hidden = !bl; rerun(); }));
   all(); redraws.push(() => { drawBars(); drawStrip(); });
 })();
 
@@ -699,7 +739,6 @@ const OBS = {vac: {n: 221998, x: 56, par: 38}, con: {n: 725173, x: 391, par: 330
     vline(ctx, F.xc(S.a), F.Y1, F.Y0, C('--accent'), null, 2);
     tag(ctx, `real trial: ${S.a} of ${K} cases in the vaccine group`, F.xc(S.a) + 6, F.Y1 + 2, C('--accent'), 'left');
     if (!vals.length) { ctx.fillStyle = C('--ink-3'); ctx.font = '13px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('press Shuffle to deal the cases at random', F.xc(mid), (F.Y0 + F.Y1) / 2 + 10); }
-    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'right'; ctx.textBaseline = 'top'; ctx.fillText('cases landing in the vaccine group', F.X1, F.Y1 + 22);
   }
   function read(){
     const S = spec(), K = S.a + S.b, n = vals.length, k = vals.filter(v => v <= S.a).length;
@@ -728,10 +767,10 @@ const OBS = {vac: {n: 221998, x: 56, par: 38}, con: {n: 725173, x: 391, par: 330
     {lab: 'Observed-control · paralytic', ...diffCI(OBS.vac.par, OBS.vac.n, OBS.con.par, OBS.con.n), col: '--ink-3'}
   ];
   function draw(){
-    const {ctx, w, h} = fit($('#ciChart')), narrow = w < 560, X0 = narrow ? 12 : 220, X1 = w - 16, Y0 = h - 24, LO = 0, HI = 70;
+    const {ctx, w, h} = fit($('#ciChart')), narrow = w < 560, X0 = narrow ? 12 : 220, X1 = w - 16, Y0 = h - 38, LO = 0, HI = 70;
     const xs = v => X0 + (v - LO) / (HI - LO) * (X1 - X0), rh = (Y0 - 8) / rows.length;
     xAxis(ctx, X0, X1, Y0, LO, HI);
-    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillText('cases prevented per 100,000', X1, Y0 - 3);
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillText('cases prevented per 100,000', X1, h - 1);
     vline(ctx, xs(rows[0].d), 4, Y0, C('--accent'), [3, 4], 1);
     rows.forEach((r, i) => {
       const y = 8 + rh * (i + .5) + (narrow ? 6 : 0), col = C(r.col);
@@ -766,8 +805,8 @@ const OBS = {vac: {n: 221998, x: 56, par: 38}, con: {n: 725173, x: 391, par: 330
     const N = n(), pw = power(N);
     vline(ctx, xs(N), Y1, Y0, C('--gold'), null, 2); ctx.fillStyle = C('--gold'); dot(ctx, xs(N), ys(pw), 6);
     tag(ctx, `${N.toLocaleString('en-US')} per group: ${pc(pw)}`, xs(N) + (xs(N) > (X0 + X1) * .6 ? -8 : 8), ys(pw) + (pw > .5 ? 6 : -20), C('--ink'), xs(N) > (X0 + X1) * .6 ? 'right' : 'left');
-    tag(ctx, 'about 200,000 per group in 1954', xs(200000) - 4, Y0 - 40, C('--ink-3'), 'right');
-    vline(ctx, xs(200000), Y0 - 26, Y0, C('--ink-3'), [2, 3], 1);
+    vline(ctx, xs(200000), Y0 - 30, Y0, C('--ink-3'), [2, 3], 1.2);
+    tag(ctx, '1954', xs(200000) + 4, Y0 - 30, C('--ink-3'), 'left');
   }
   function drawTiles(){
     const {ctx, w, h} = fit($('#szTiles')), per = 50, tw = w / per, th = h / 2;

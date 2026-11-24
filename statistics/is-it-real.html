@@ -199,6 +199,7 @@ table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;co
   <p>The plots at the top come from a notebook Francis Galton filled in the 1880s: the heights of 205 couples and their 934 grown-up children. One plot shows 30 real sons against their parents’ height. The other 19 use the <em>same</em> 30 sons, shuffled among the families at random. Shuffling keeps every height but breaks any link between parent and son, so whatever pattern a shuffled plot shows, chance drew it.</p>
   <p>That is a <em class="term">line-up</em>, the same idea as a police line-up: hide the suspect among innocent look-alikes and see if a witness can pick it out. If you could find the real plot, the link between parents’ and sons’ heights is strong enough to stand out from chance. If you couldn’t, then 30 families aren’t enough to show it, however convincing the real plot looks on its own.</p>
   <p>Now try it with a pattern whose strength you control. In each round one plot has a real effect built in and the other 19 are shuffles of it. Turn the signal down and see where your eye gives up.</p>
+  <p>The slider also shows each strength as a <em class="term">correlation</em>: a number from −1 to 1 that says how closely the points follow a straight line. 0 means no link at all, 1 a perfect upward line, −1 a perfect downward one. Galton’s families at the top have a correlation of about 0.48 (it varies from one set of 30 to the next), close to the “Moderate” setting.</p>
 
   <div class="widget">
     <p class="widget-title">Find the real one</p>
@@ -253,7 +254,7 @@ table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;co
     <div class="readout" id="cnRead" style="margin-top:8px">Pick a guess to start flipping.</div>
   </div>
 
-  <p>A fair coin gives exactly 10 heads in 20 less than 1 time in 5. About 96% of runs land anywhere from 6 to 14, so “14 heads out of 20” sounds like a lopsided coin but is well within what chance does. Streaks are bigger than most people expect too: about 3 runs in 4 contain a streak of 4 or more, and almost half contain one of 5 or more.</p>
+  <p>A fair coin gives exactly 10 heads in 20 less than 1 time in 5 (the <a href="../probability/binomial.html">Binomial</a> page works these chances out exactly). About 96% of runs land anywhere from 6 to 14, the shaded band, so “14 heads out of 20” sounds like a lopsided coin but is well within what chance does. Streaks are bigger than most people expect too: about 3 runs in 4 contain a streak of 4 or more, and almost half contain one of 5 or more.</p>
   <p>People who invent “random” sequences know streaks exist but don’t believe they are this long, so they switch sides too often. Try it.</p>
 
   <div class="widget">
@@ -271,9 +272,9 @@ table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;co
     <p class="msg" id="fkMsg" aria-live="polite"></p>
   </div>
 
-  <p>A real coin switches sides on about half of its flips: about 9 or 10 times in 20 flips, and between 5 and 14 times in 95% of runs. Invented sequences often switch 13 or more times with no streak longer than 3, which a real coin does in only about 1 run in 15. Teachers use this as a party trick: half the class flips a real coin, half invents results, and the teacher sorts the papers by looking for long streaks.</p>
+  <p>A real coin switches sides on about half of its flips: about 9 or 10 times in 20 flips, and between 6 and 13 times in about 94% of runs. Invented sequences often switch 13 or more times with no streak longer than 3, which a real coin does in only about 1 run in 15. Teachers use this as a party trick: half the class flips a real coin, half invents results, and the teacher sorts the papers by looking for long streaks.</p>
   <div class="callout">
-    <p><strong>The lesson for patterns.</strong> Our eyes expect randomness to look evenly mixed. Real randomness is lumpier: runs, clusters and gaps are normal. So the gut test “that can’t be chance” is badly calibrated. To judge a pattern you have to compare it with what chance actually produces, by simulating chance, not by imagining it.</p>
+    <p><strong>The lesson for patterns.</strong> Our eyes expect randomness to look evenly mixed. Real randomness is lumpier: runs, clusters and gaps are normal. (Raindrops on paving stones show the same clumping in space, on the <a href="../probability/poisson.html">Poisson</a> page.) So the gut test “that can’t be chance” is badly calibrated. To judge a pattern you have to compare it with what chance actually produces, by simulating chance, not by imagining it.</p>
   </div>
 </section>
 
@@ -287,9 +288,13 @@ table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;co
   <div class="widget">
     <p class="cast-q">A website tests its gray “Sign up” button against a new orange one. Is orange really better?</p>
     <p class="datarow">gray (A): <b>50</b> of 1,000 visitors clicked = <b>5.0%</b> · orange (B): <b>64</b> of 1,000 = <b>6.4%</b></p>
+    <p style="margin:10px 0 8px">Suppose the two buttons were identical. With 1,000 visitors each, how often would one of them still come out ahead by 1.4 points or more?</p>
+    <div class="seg" role="group" aria-label="Your guess" id="btGuess">
+      <button class="btn" data-g="100">1 in 100</button><button class="btn" data-g="20">1 in 20</button><button class="btn" data-g="5">1 in 5</button><button class="btn" data-g="2">1 in 2</button>
+    </div>
     <div class="controls">
-      <button class="btn" id="btOne">Run 1 test with identical buttons</button>
-      <button class="btn primary" id="btMany">Run 1,000</button>
+      <button class="btn" id="btOne" disabled>Run 1 test with identical buttons</button>
+      <button class="btn primary" id="btMany" disabled>Run 1,000</button>
       <button class="btn" id="btClear">Clear</button>
     </div>
     <canvas id="btHist" style="height:190px" role="img" aria-label="Histogram of the gap in click rate between two identical buttons, over many simulated tests, with the real gap of 1.4 points marked"></canvas>
@@ -305,27 +310,37 @@ table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;co
       <div><p class="mcap">Extra hours of sleep, per patient</p><canvas id="slPairs" style="height:220px" role="img" aria-label="Ten patients, each a line from their extra sleep on drug 1 to their extra sleep on drug 2"></canvas></div>
       <div><p class="mcap">Average gain, drug 2 minus drug 1</p><canvas id="slHist" style="height:220px" role="img" aria-label="Histogram of the average gain under random relabeling of the two drugs, with the real average of 1.58 hours marked"></canvas></div>
     </div>
+    <p style="margin:10px 0 8px">If the drugs were the same, each patient’s two labels could be swapped. There are 1,024 ways to swap them. How many give an average gain as big as the real 1.58 hours, in either direction?</p>
+    <div class="seg" role="group" aria-label="Your guess" id="slGuess">
+      <button class="btn" data-g="300">hundreds</button><button class="btn" data-g="50">about 50</button><button class="btn" data-g="4">just a handful</button>
+    </div>
     <div class="controls">
-      <button class="btn" id="slOne">Swap labels at random</button>
-      <button class="btn primary" id="slAll">All 1,024 relabelings</button>
+      <button class="btn" id="slOne" disabled>Swap labels at random</button>
+      <button class="btn primary" id="slAll" disabled>All 1,024 relabelings</button>
       <button class="btn" id="slReset">Real data</button>
     </div>
     <div class="readout" id="slRead"></div>
   </div>
-  <p>These are real numbers, from a 1905 study by Arthur Cushny and Arthur Peebles, and they became famous three years later when William Gosset, writing as “Student”, used them to show off his new method for small samples. Every patient slept at least as well on drug 2 as on drug 1, and on average 1.58 hours better.</p>
+  <p>These are real numbers, from a 1905 study by Arthur Cushny and Arthur Peebles, and they became famous three years later when William Gosset, writing as “Student”, used them to show off his new method for small samples, now called <a href="student-t.html">Student’s t</a>. Every patient slept at least as well on drug 2 as on drug 1, and on average 1.58 hours better.</p>
   <p>If the two drugs were really the same, the labels “drug 1” and “drug 2” would be arbitrary for each patient, and swapping them would change nothing real. With 10 patients there are exactly 2<sup>10</sup> = 1,024 ways to swap. Only 4 of them give an average gain as large as 1.58 hours in either direction. Chance alone almost never does this.</p>
 
   <h3>Parents and children</h3>
   <div class="widget">
     <p class="cast-q">Tall parents tend to have tall children. How strong is the link?</p>
-    <canvas id="htScat" style="height:280px" role="img" aria-label="Scatterplot of 481 sons' heights against their parents' average height"></canvas>
+    <canvas id="htScat" style="height:280px" role="img" aria-label="Scatterplot of 481 sons' heights against their parents' average height; while shuffled, the real data's line stays as a faint guide"></canvas>
+    <p class="cap">The strength of the link is the correlation from the line-up game: 0 for no tilt, 1 for a perfect upward line. Galton’s 481 sons give 0.48.</p>
+    <p style="margin:10px 0 8px">Shuffle the sons among the families 1,000 times. How often will a shuffle’s correlation reach 0.48?</p>
+    <div class="seg" role="group" aria-label="Your guess" id="htGuess">
+      <button class="btn" data-g="5">about 1 in 5</button><button class="btn" data-g="100">about 1 in 100</button><button class="btn" data-g="0">never, or almost never</button>
+    </div>
     <p class="mcap" style="margin-top:12px">Correlation in each shuffle</p>
     <canvas id="htHist" style="height:170px" role="img" aria-label="Histogram of the correlation between parents' and sons' heights after shuffling the sons among families, with the real correlation of 0.48 marked"></canvas>
     <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>correlation after shuffling sons among families</span></span><span><i class="sw line" style="border-top-color:var(--accent)"></i><span>real correlation: 0.48</span></span></div>
     <div class="controls">
-      <button class="btn" id="htShuf">Shuffle sons among families</button>
-      <button class="btn primary" id="htMany">1,000 shuffles</button>
-      <button class="btn" id="htReal">Real data</button>
+      <button class="btn" id="htShuf" disabled>Shuffle sons among families</button>
+      <button class="btn primary" id="htMany" disabled>1,000 shuffles</button>
+      <button class="btn" id="htReal">Show the real data</button>
+      <button class="btn" id="htClear">Clear</button>
     </div>
     <div class="readout" id="htRead"></div>
   </div>
@@ -353,9 +368,9 @@ table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;co
       </tbody>
     </table>
   </div>
-  <p>That is the core of statistical inference, and the rest of this series builds on it. The famous tests with their tables and formulas (t-tests, chi-square tests, analysis of variance) are fast shortcuts for step 2, invented when building thousands of chance worlds by hand was impossible. A computer can do it directly, so this series will usually simulate first and bring the shortcut in afterwards.</p>
+  <p>That is the core of statistical inference, and the rest of this series builds on it. The famous tests with their tables and formulas (<a href="student-t.html">t-tests</a>, <a href="chi-square-tests.html">chi-square tests</a>, <a href="anova.html">analysis of variance</a>) are fast shortcuts for step 2, invented when building thousands of chance worlds by hand was impossible. A computer can do it directly, so this series will usually simulate first and bring the shortcut in afterwards.</p>
   <div class="callout">
-    <p><strong>Ruling out chance is not the end.</strong> If the sleep data are not chance, something real is going on, but what? Maybe drug 2 works better. Maybe patients always got drug 2 second, after they had adjusted to the ward. Chance is only the first suspect. Later pages deal with the others: biased samples, hidden third variables, and the many ways an analyst can fool themselves.</p>
+    <p><strong>Ruling out chance is not the end.</strong> If the sleep data are not chance, something real is going on, but what? Maybe drug 2 works better. Maybe patients always got drug 2 second, after they had adjusted to the ward. Chance is only the first suspect. Later pages deal with the others: <a href="selection-bias.html">biased samples</a>, hidden third variables, and <a href="forking-paths.html">the many ways an analyst can fool themselves</a>.</p>
   </div>
   <p>The series has three parts. <strong>Learning from data</strong> asks how much an estimate wobbles, how to test and how to measure uncertainty, all by simulation first. <strong>Bayesian inference</strong> turns the question round, from “how surprising is this data?” to “what should I now believe?”. <strong>Relationships and regression</strong> asks how one quantity moves with another, and when that movement is real.</p>
 </section>
@@ -369,7 +384,7 @@ table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;co
     <div class="card"><h4>The hot hand</h4><p>Basketball fans see shooters “on fire”. A 1985 study found streaks no longer than chance makes; a 2018 reanalysis found a subtle flaw in that method and some evidence for a modest hot hand. Even experts needed careful comparisons with chance to settle it.</p></div>
     <div class="card"><h4>Star fund managers</h4><p>Give 1,000 managers coins instead of skill, and about 31 will beat the market five years running. A winning streak alone can’t tell skill from luck.</p></div>
     <div class="card"><h4>A/B tests</h4><p>Websites compare versions of a page all the time. Most small differences between versions are chance, which is why the button test needs far more than 2,000 visitors.</p></div>
-    <div class="card"><h4>Stock charts</h4><p>Random walks draw “head and shoulders”, “support levels” and trends that look tradeable. Shown a real chart among simulated ones, most people can’t pick the real one out.</p></div>
+    <div class="card"><h4>Stock charts</h4><p>Random walks draw “head and shoulders”, “support levels” and trends that look tradeable. Telling a real chart from a shuffled one is much harder than it looks: in an online game by Hasanhodzic, Lo and Viola (2010), players saw a real price chart beside a shuffled copy and were told after every guess whether they were right. With that practice they picked the real one about 72% of the time: better than the 50% of guessing, but still wrong more than 1 time in 4.</p></div>
     <div class="card"><h4>Checking models</h4><p>Statisticians use line-ups to check their own work: hide the real residual plot among plots simulated from the model. If it stands out, the model is missing something.</p></div>
   </div>
 
@@ -380,7 +395,7 @@ table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;co
   </div>
 
   <p>Every pattern in this page came with a question: how much does a number computed from data move around by chance? That wobble has a shape and a size, and it is the subject of the next page, <a href="sampling-distributions.html">Sampling Distributions</a>.</p>
-  <p class="muted small">Data: Galton’s family heights as transcribed by J. A. Hanley (<em>The American Statistician</em>, 2004), via the GaltonFamilies dataset; sleep data from Cushny &amp; Peebles (1905) as used by Student (<em>Biometrika</em>, 1908). Line-ups: Buja et al. (2009), Wickham et al. (2010).</p>
+  <p class="muted small">Data: Galton’s family heights as transcribed by J. A. Hanley (<em>The American Statistician</em>, 2004), via the GaltonFamilies dataset; sleep data from Cushny &amp; Peebles (1905) as used by Student (<em>Biometrika</em>, 1908). Line-ups: Buja et al. (2009), Wickham et al. (2010). Real vs shuffled price charts: Hasanhodzic, Lo &amp; Viola, “Is it real, or is it randomized?: A financial Turing test” (2010).</p>
 </section>
 
 </main>
@@ -649,11 +664,13 @@ function makePanels(kind, lvl){
   $$('[data-kind]').forEach(b => b.addEventListener('click', () => {
     kind = b.dataset.kind;
     $$('[data-kind]').forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
-    deal();
+    out.textContent = lvlText(); deal();
   }));
   const out = $('#luLvlOut');
-  $('#luLvl').addEventListener('input', e => { lvl = +e.target.value; out.textContent = LEVELS[lvl]; deal(); });
-  out.textContent = LEVELS[lvl];
+  /* the signal as a correlation; for two equal groups a gap of d spreads is a correlation of d / √(d² + 4) */
+  const lvlText = () => { const r = kind === 'groups' ? DIFF[lvl] / Math.sqrt(DIFF[lvl] ** 2 + 4) : RHO[lvl]; return `${LEVELS[lvl]} · correlation ${r ? f2(r) : '0'}`; };
+  $('#luLvl').addEventListener('input', e => { lvl = +e.target.value; out.textContent = lvlText(); deal(); });
+  out.textContent = lvlText();
   $('#luNew').addEventListener('click', deal);
   deal(); readout(); drawRec(); redraws.push(drawRec);
 })();
@@ -683,7 +700,14 @@ function makePanels(kind, lvl){
   function drawHists(){
     let a = fit($('#cnHeads'));
     if (!total) emptyNote(a.ctx, a.w, a.h, '—');
-    else { const F = frame(a.ctx, a.w, a.h, {lo: 0, hi: 20, ymax: Math.max(...heads) / total * 1.15, yfmt: v => Math.round(v * 100) + '%'}); drawBars(a.ctx, F, 0, 20, k => heads[k] / total, C('--ink-3')); }
+    else {
+      const F = frame(a.ctx, a.w, a.h, {lo: 0, hi: 20, ymax: Math.max(...heads) / total * 1.15, yfmt: v => Math.round(v * 100) + '%', top: 22});
+      const x0 = F.xc(6) - F.bw / 2, x1 = F.xc(14) + F.bw / 2, mid = heads.slice(6, 15).reduce((p, v) => p + v, 0) / total;   // shade 6-14 heads
+      a.ctx.fillStyle = C('--surface-2'); a.ctx.fillRect(x0, F.Y1 - 10, x1 - x0, F.Y0 - F.Y1 + 10);
+      a.ctx.fillStyle = C('--ink-2'); a.ctx.font = '600 11px ' + MONO; a.ctx.textAlign = 'center'; a.ctx.textBaseline = 'top';
+      a.ctx.fillText(`6–14 heads: ${pct(mid)}`, (x0 + x1) / 2, 1);
+      drawBars(a.ctx, F, 0, 20, k => heads[k] / total, C('--ink-3'));
+    }
     a = fit($('#cnLong'));
     if (!total) { emptyNote(a.ctx, a.w, a.h, '—'); return; }
     const ym = Math.max(...longest) / total * 1.15, F = frame(a.ctx, a.w, a.h, {lo: 1, hi: 10, ymax: ym, yfmt: v => Math.round(v * 100) + '%', lab: k => k === 10 ? '10+' : k});
@@ -779,10 +803,22 @@ function makePanels(kind, lvl){
     vline(ctx, F.xc(-OBS), F.Y1, F.Y0, C('--accent'), [4, 3], 1.2);
     ctx.fillStyle = C('--accent'); ctx.font = '600 12px ' + MONO; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
     ctx.fillText('real +1.4', F.xc(OBS) + 5, F.Y1);
-    $('#btRead').innerHTML = total
+    let s = total
       ? `chance worlds <b>${comma(total)}</b>${total === 1 || last != null && total < 30 ? ` · last gap ${last > 0 ? '+' : ''}${fmtN(last / 10)} points` : ''} · gap of 1.4+ points either way: <b>${comma(beyond)}</b> = <b>${pct(beyond / total)}</b>`
-      : 'Each simulated test sends 1,000 visitors to each of two identical buttons (both 5.7%) and records the gap. The horizontal axis is in percentage points.';
+      : guess == null ? 'Make a guess to unlock the chance worlds.' : 'Each simulated test sends 1,000 visitors to each of two identical buttons (both 5.7%) and records the gap. The horizontal axis is in percentage points.';
+    if (guess != null && total >= 500 && beyond) {
+      const share = beyond / total, opts = [100, 20, 5, 2];
+      let near = opts[0]; opts.forEach(o => { if (Math.abs(Math.log(o * share)) < Math.abs(Math.log(near * share))) near = o; });
+      const verdict = near === guess ? '<span class="ok">spot on</span>' : guess > near ? 'chance does it <b>more often</b> than you guessed' : 'chance does it <b>less often</b> than you guessed';
+      s += `<br>you guessed <span class="gd">1 in ${guess}</span> · the chance worlds say about <b>1 in ${near}</b> (${pct(share)}): ${verdict}`;
+    }
+    $('#btRead').innerHTML = s;
   }
+  let guess = null;
+  $$('#btGuess [data-g]').forEach(b => b.addEventListener('click', () => {
+    guess = +b.dataset.g; $$('#btGuess [data-g]').forEach(x => x.classList.toggle('guess', x === b));
+    $('#btOne').disabled = false; $('#btMany').disabled = false; draw();
+  }));
   $('#btOne').addEventListener('click', () => run(1));
   $('#btMany').addEventListener('click', () => run(1000));
   $('#btClear').addEventListener('click', () => { cnt.fill(0); total = beyond = 0; last = null; draw(); });
@@ -834,8 +870,16 @@ function makePanels(kind, lvl){
     let s = `real average gain <b>1.58 hours</b> · all 10 patients did at least as well on drug 2`;
     if (swap) { const g = DIFF.reduce((a, d, i) => a + swap[i] * d, 0) / 100; s = `this relabeling: average gain <b>${g >= 0 ? '+' : ''}${f2(g)} h</b>`; }
     if (total) s += `<br>relabelings <b>${comma(total)}</b> · as big as 1.58 h either way: <b>${beyond}</b> = <b>${pct(beyond / total)}</b>`;
+    if (guess == null) s += '<br>Make a guess to unlock the relabelings.';
+    else if (all) s += `<br>you guessed <span class="gd">${GW[guess]}</span> · the answer is <b>${beyond} of 1,024</b>: ` + (guess === 4 ? '<span class="ok">right</span>' : 'far fewer than you guessed; chance almost never does this');
     $('#slRead').innerHTML = s;
   }
+  const GW = {300: 'hundreds', 50: 'about 50', 4: 'just a handful'};
+  let guess = null;
+  $$('#slGuess [data-g]').forEach(b => b.addEventListener('click', () => {
+    guess = +b.dataset.g; $$('#slGuess [data-g]').forEach(x => x.classList.toggle('guess', x === b));
+    $('#slOne').disabled = false; $('#slAll').disabled = false; readout();
+  }));
   function draw(){ drawPairs(); drawHist(); readout(); }
   $('#slOne').addEventListener('click', one);
   $('#slAll').addEventListener('click', every);
@@ -868,11 +912,21 @@ function makePanels(kind, lvl){
     const r = w < 500 ? 2 : 2.6;
     for (let i = 0; i < X.length; i++) dot(ctx, xs(X[i] + ((i * 7919) % 11 - 5) * .012), ys(y[i]), r);
     ctx.globalAlpha = 1;
-    // least-squares line for the plotted cloud
-    const n = X.length, mx = X.reduce((a, b) => a + b) / n, my = y.reduce((a, b) => a + b) / n;
-    let sxy = 0, sxx = 0; for (let i = 0; i < n; i++) { sxy += (X[i] - mx) * (y[i] - my); sxx += (X[i] - mx) ** 2; }
-    const b = sxy / sxx; ctx.strokeStyle = shuf ? C('--ink-2') : C('--accent'); ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(xs(64), ys(my + b * (64 - mx))); ctx.lineTo(xs(75.5), ys(my + b * (75.5 - mx))); ctx.stroke();
+    // least-squares line for a cloud
+    const fitLine = yy => {
+      const n = X.length, mx = X.reduce((a, b) => a + b) / n, my = yy.reduce((a, b) => a + b) / n;
+      let sxy = 0, sxx = 0; for (let i = 0; i < n; i++) { sxy += (X[i] - mx) * (yy[i] - my); sxx += (X[i] - mx) ** 2; }
+      const b = sxy / sxx; return v => my + b * (v - mx);
+    };
+    if (shuf) {   // the real data's line stays as a faint guide
+      const L = fitLine(Y);
+      ctx.save(); ctx.strokeStyle = C('--accent'); ctx.globalAlpha = .45; ctx.lineWidth = 2; ctx.setLineDash([6, 4]);
+      ctx.beginPath(); ctx.moveTo(xs(64), ys(L(64))); ctx.lineTo(xs(75.5), ys(L(75.5))); ctx.stroke(); ctx.restore();
+      ctx.fillStyle = C('--accent'); ctx.font = '600 11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+      ctx.fillText('real data’s line', xs(75.5), ys(L(75.5)) - 6);
+    }
+    const L = fitLine(y); ctx.strokeStyle = shuf ? C('--ink-2') : C('--accent'); ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(xs(64), ys(L(64))); ctx.lineTo(xs(75.5), ys(L(75.5))); ctx.stroke();
   }
   function drawHist(){
     const {ctx, w, h} = fit($('#htHist'));
@@ -889,12 +943,21 @@ function makePanels(kind, lvl){
   function readout(){
     let s = shuf && lastR != null ? `this shuffle: correlation <b>${f2(Math.abs(lastR) < .005 ? 0 : lastR)}</b> (real data: ${f2(R)})` : `real data: <b>${X.length}</b> sons · correlation <b>${f2(R)}</b>`;
     if (total) s += `<br>shuffles <b>${comma(total)}</b> · largest either way <b>${f2(maxR)}</b> · as big as ${f2(R)}: <b>${beyond ? comma(beyond) : 'none'}</b>`;
+    if (guess == null) s += '<br>Make a guess to unlock the shuffles.';
+    else if (total >= 1000) s += `<br>you guessed <span class="gd">${GW[guess]}</span> · ${beyond ? `${comma(beyond)} of ${comma(total)} shuffles reached ${f2(R)}` : `none of ${comma(total)} shuffles came close`}: ` + (guess === 0 ? '<span class="ok">right</span>' : 'with 481 families, chance can’t draw a tilt this strong');
     $('#htRead').innerHTML = s;
   }
+  const GW = {5: 'about 1 in 5', 100: 'about 1 in 100', 0: 'never, or almost never'};
+  let guess = null;
+  $$('#htGuess [data-g]').forEach(b => b.addEventListener('click', () => {
+    guess = +b.dataset.g; $$('#htGuess [data-g]').forEach(x => x.classList.toggle('guess', x === b));
+    $('#htShuf').disabled = false; $('#htMany').disabled = false; readout();
+  }));
   function draw(){ drawScat(); drawHist(); readout(); }
   $('#htShuf').addEventListener('click', () => { y = shuffled(Y); shuf = true; add(y); draw(); });
   $('#htMany').addEventListener('click', () => { for (let k = 0; k < 1000; k++) { y = shuffled(Y); add(y); } shuf = true; draw(); });
-  $('#htReal').addEventListener('click', () => { y = Y; shuf = false; hist.fill(0); total = beyond = maxR = 0; lastR = null; draw(); });
+  $('#htReal').addEventListener('click', () => { y = Y; shuf = false; draw(); });
+  $('#htClear').addEventListener('click', () => { y = Y; shuf = false; hist.fill(0); total = beyond = maxR = 0; lastR = null; draw(); });
   draw(); redraws.push(draw);
 })();
 
@@ -906,10 +969,10 @@ function makePanels(kind, lvl){
      e: 'About 46% of runs of 20 flips contain a streak of 5 or more, and about 77% contain one of 4 or more. Real randomness is streakier than intuition says.'},
     {s: 'You pick the real plot out of a line-up of 20. How likely is that by luck alone, if the real plot had no effect?',
      o: ['1 in 20 (5%)', '1 in 2 (50%)', 'Impossible to say'], a: 0,
-     e: 'With no effect, all 20 plots are chance and each is equally likely to be picked: 1 in 20. That 5% is the same number behind the usual “p < 0.05” rule, which a later page explains.'},
-    {s: 'The orange button got 6.4% clicks against gray’s 5.0%. Which statement is right?',
-     o: ['Orange is better: its rate is higher', 'Two identical buttons give a gap this big about 1 time in 5, so this test can’t tell'], a: 1,
-     e: 'A higher rate in one test is not enough. With 1,000 visitors each, chance alone produces a gap of 1.4 points or more about 19% of the time. Orange might be better, but this data can’t show it.'},
+     e: 'With no effect, all 20 plots are chance and each is equally likely to be picked: 1 in 20. That 5% is the same number behind the usual “p < 0.05” rule, which the <a href="p-values.html">p-values</a> page explains.'},
+    {s: 'The orange button got 6.4% clicks against gray’s 5.0%. Which of these readings is <em>wrong</em>?',
+     o: ['Two identical buttons would give a gap this big about 1 time in 5', 'Orange may well be better, but this test can’t tell', 'The test shows orange is better: its rate is higher'], a: 2,
+     e: 'A higher rate in one test is not enough. With 1,000 visitors each, chance alone produces a gap of 1.4 points or more about 19% of the time. Orange might be better, but this data can’t show it. The other two readings are both right.'},
     {s: 'One town out of 3,000 has three times the national cancer rate. What does that show?',
      o: ['There must be a local cause', 'Not much on its own: among 3,000 towns, some will be extreme by chance'], a: 1,
      e: 'Picking the most extreme town after looking at all of them guarantees an impressive number. The fair test asks whether there are more extreme towns than chance would produce, or whether the same town stays high in new data.'},

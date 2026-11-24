@@ -147,6 +147,9 @@ table.summary.num td:first-child,table.summary.num th:first-child{text-align:lef
 .linkbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .linkbtn[hidden]{display:none}
 canvas.band{cursor:ew-resize;touch-action:pan-y}
+input.num{font:15px var(--mono);width:5.2em;padding:6px 8px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+input.num:focus{outline:2px solid var(--accent);outline-offset:1px}
+.typein{justify-content:center;font-size:14px;color:var(--ink-2)}
 .legend > span[hidden]{display:none}
 .tokens{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin:6px 0 2px}
 @media (max-width:520px){.tokens{grid-template-columns:repeat(5,1fr)}}
@@ -190,6 +193,11 @@ canvas.band{cursor:ew-resize;touch-action:pan-y}
       <button class="btn" id="heroClear">Clear</button>
       <button class="linkbtn" id="heroSkip">skip the guess</button>
     </div>
+    <div class="controls typein">
+      <label class="ctrl">or type it: from <input type="number" id="heroLo" class="num" min="-0.5" max="5" step="0.1" inputmode="decimal"></label>
+      <label class="ctrl">to <input type="number" id="heroHi" class="num" min="-0.5" max="5" step="0.1" inputmode="decimal"> hours</label>
+      <button class="btn" id="heroSet">Set range</button>
+    </div>
     <p class="hint" id="heroHint" aria-live="polite">Drag across the line to mark the range where you think the true median could plausibly be, if you could test every patient there is. Make it wide enough that you’d be 95% sure.</p>
   </div>
 </header>
@@ -209,7 +217,7 @@ canvas.band{cursor:ew-resize;touch-action:pan-y}
 <section id="pretend">
   <div class="secnum">01</div>
   <h2>Pretend your sample is the population</h2>
-  <p>On <a href="sampling-distributions.html">Sampling Distributions</a> the answer to “how much does this number wobble?” was easy: draw thousands of samples from the population, compute the number for each, and look at the spread. In real life that is impossible. You have one sample, and the population is exactly what you don’t know.</p>
+  <p>On <a href="estimation.html">What Makes a Good Guess</a>, every recipe was judged in a tank factory where the answer was known. On <a href="sampling-distributions.html">Sampling Distributions</a> the answer to “how much does this number wobble?” was easy: draw thousands of samples from the population, compute the number for each, and look at the spread. In real life that is impossible. You have one sample, and the population is exactly what you don’t know.</p>
   <p>The bootstrap’s trick is to use the best picture of the population you have, which is the sample itself. Imagine your 10 patients copied a million times over into a stand-in population, then draw new samples of 10 from that. Each new sample is called a <em class="term">resample</em>.</p>
 
   <div class="worlds" role="img" aria-label="Two parallel diagrams. Real world: population, then many samples, then the sampling distribution. Bootstrap world: your sample, then many resamples, then the bootstrap distribution.">
@@ -245,7 +253,7 @@ canvas.band{cursor:ew-resize;touch-action:pan-y}
   <p>Drawing from a population copied a million times is the same as drawing from your sample <em>with replacement</em>: pick a patient at random, note their value, put them back, and pick again, 10 times. Some patients get picked twice or more, and some not at all. That is the point: each resample is a slightly different mix of your data, the way a fresh sample would be a different mix of the population. (Without replacement, every resample would be the same 10 patients in a new order, with the same median.)</p>
 
   <div class="widget">
-    <p class="widget-title">The resampler</p>
+    <p class="widget-title">★ The resampler</p>
     <div class="controls">
       <div class="seg" role="group" aria-label="Statistic">
         <button class="btn on" data-bs="median" aria-pressed="true">Median</button>
@@ -287,7 +295,8 @@ canvas.band{cursor:ew-resize;touch-action:pan-y}
   <div class="callout">
     <p><strong>What the bootstrap can’t do.</strong> It doesn’t make your estimate more accurate, and it doesn’t create information. The resample medians center on <em>your sample’s</em> median, not on the truth. All the bootstrap tells you is how far off your estimate is likely to be. If the sample is biased, as on <a href="selection-bias.html">Who’s Missing?</a>, the bootstrap will measure the wobble around the wrong answer, confidently.</p>
   </div>
-  <p>The percentile interval is the simplest of several bootstrap intervals; better-behaved versions exist, and intervals in general get their own page, <em>Confidence intervals</em>, later in the series.</p>
+  <p>With only 10 values the percentile interval also runs a little narrow. In simulations with samples of 10 from bell-shaped and skewed populations, its middle 95% catches the true median about 93% of the time, not 95%. A rule that assumes nothing about the population, from the 2nd-smallest to the 2nd-largest of the 10 values, gives <strong>0.8 to 2.4 hours</strong> and is guaranteed to catch the true median 97.9% of the time. So a range wider than the bootstrap’s isn’t automatically too cautious.</p>
+  <p>The percentile interval is the simplest of several bootstrap intervals; better-behaved versions exist, and intervals in general get their own page, <a href="confidence-intervals.html">Confidence Intervals</a>, later in the series.</p>
 </section>
 
 <!-- 4 -->
@@ -342,19 +351,24 @@ canvas.band{cursor:ew-resize;touch-action:pan-y}
     <p class="mcap" id="cpTrueCap">The truth: 2,000 fresh samples from the population</p>
     <canvas id="cpTrue" style="height:120px" role="img" aria-label="The real sampling distribution of the statistic"></canvas>
     <p class="mcap" style="margin-top:6px">Your one sample</p>
-    <canvas id="cpSamp" style="height:40px" role="img" aria-label="The values in your one sample"></canvas>
+    <canvas id="cpSamp" style="height:58px" role="img" aria-label="The values in your one sample, on a wider scale than the charts above and below, with the stretch those charts show shaded"></canvas>
     <p class="mcap" style="margin-top:6px">The bootstrap: 2,000 resamples of your one sample</p>
     <canvas id="cpBoot" style="height:120px" role="img" aria-label="The bootstrap distribution of the statistic"></canvas>
     <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>fresh samples</span></span><span><i class="sw" style="background:var(--accent)"></i><span>resamples</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>population value</span></span><span><i class="sw line" style="border-top:2px solid var(--ink)"></i><span>your sample’s value</span></span></div>
-    <div class="controls"><button class="btn primary" id="cpNew">Draw a new sample</button></div>
+    <div class="controls"><button class="btn primary" id="cpNew">Draw a new sample</button><button class="btn" id="cpFifty">Draw 50 samples</button></div>
     <div class="readout" id="cpRead" aria-live="polite"></div>
+    <div id="cpManyBox" hidden>
+      <p class="mcap" style="margin-top:12px">50 samples: the bootstrap’s spread ÷ the true spread, one dot per sample</p>
+      <canvas id="cpMany" style="height:84px" role="img" aria-label="For 50 separate samples, the ratio of the bootstrap's spread to the true spread, on a logarithmic scale, with the zone within 25% of the truth shaded"></canvas>
+      <div class="readout" id="cpManyRead" aria-live="polite"></div>
+    </div>
   </div>
 
   <ul>
-    <li><strong>It works</strong> for the mean of 20 values from a bell curve. Draw several samples: the bootstrap’s spread usually lands within about 20% of the true one, sometimes above and sometimes below, because it can only be as good as the spread of the sample it starts from. Medians and skewed populations behave similarly once samples are moderately large.</li>
-    <li><strong>Tiny samples:</strong> with 3 values there are only 10 different resamples, so the bootstrap distribution is a handful of spikes. Its answer swings wildly from one sample to the next, anywhere from a third of the true spread to nearly double. Three values are a poor picture of any population, and the bootstrap can’t know what it hasn’t seen.</li>
-    <li><strong>The largest value:</strong> a resample can never exceed your sample’s largest value, and with 20 values about 64% of resamples contain it, so the bootstrap distribution is one tall spike. The real sampling distribution looks nothing like it. Extremes are the bootstrap’s classic failure.</li>
-    <li><strong>Heavy tails:</strong> when rare, enormous values drive the mean, as with the <a href="../probability/power-laws.html#averages">power laws</a>, most samples don’t contain one. The bootstrap only reshuffles what the sample has, so it misses the wild values that make the real mean so unstable. For this population it typically reports less than a fifth of the true spread.</li>
+    <li><strong>It works</strong> for the mean of 20 values from a bell curve. Draw several samples: the bootstrap’s spread usually lands within about 20% of the true one, sometimes above and sometimes below, because it can only be as good as the spread of the sample it starts from. Press <em>Draw 50 samples</em> and most of the 50 dots land in the shaded zone, within 25% of the truth. Medians and skewed populations behave similarly once samples are moderately large.</li>
+    <li><strong>Tiny samples:</strong> with 3 values there are only 10 different resamples, and since the median of three values is always one of the three, only 3 different resample medians: the bootstrap distribution is three spikes. Its answer swings wildly from one sample to the next, anywhere from a quarter of the true spread to nearly double; of 50 samples, usually fewer than half land within 25% of the truth. Three values are a poor picture of any population, and the bootstrap can’t know what it hasn’t seen.</li>
+    <li><strong>The largest value:</strong> a resample can never exceed your sample’s largest value, and with 20 values about 64% of resamples contain it, so the bootstrap distribution is one tall spike. Its spread can even look about right; the failure is where it sits. Its middle 95% always stops at or below your sample’s largest value, which is below the true maximum of 100, so it never contains the truth: draw 50 samples and it catches 100 in none of them. Extremes are the bootstrap’s classic failure.</li>
+    <li><strong>Heavy tails:</strong> when rare, enormous values drive the mean, as with the <a href="../probability/power-laws.html#averages">power laws</a>, most samples don’t contain one. The bootstrap only reshuffles what the sample has, so it misses the wild values that make the real mean so unstable. One lucky sample that does hold a giant value can look fine, so draw 50: the typical ratio comes out under a quarter of the true spread, and only a handful of the 50, often none, land within 25% of it.</li>
   </ul>
 </section>
 
@@ -544,42 +558,73 @@ const bandChanged = () => bandListeners.forEach(f => f());
 
 /* ---------- hero: how sure can you be about the median? ---------- */
 (function(){
-  const cv = $('#heroLine'), hint = $('#heroHint'), intro = hint.innerHTML, LO = -.5, HI = 5;
+  const cv = $('#heroLine'), hint = $('#heroHint'), intro = hint.innerHTML, LO = -.3, BRK = 3, HI = 5, F = .84, GAP = 12;
+  const inLo = $('#heroLo'), inHi = $('#heroHi');
   let drag = null, meds = null;
   const geo = () => { const w = cv.getBoundingClientRect().width; return {X0: 16, X1: w - 16}; };
-  const toVal = e => { const r = cv.getBoundingClientRect(), {X0, X1} = geo(); return Math.max(LO, Math.min(HI, LO + (e.clientX - r.left - X0) / (X1 - X0) * (HI - LO))); };
+  // a broken axis: −0.3 to 3 hours gets most of the width, and 3 to 5 is squeezed into the rest, so the one patient at 4.6 doesn't shrink everything else
+  function scale(X0, X1){
+    const W = X1 - X0, xb = X0 + F * W, U = F * W / (BRK - LO), V = (W * (1 - F) - GAP) / (HI - BRK);
+    return {U, xb, xs: v => v <= BRK ? X0 + (v - LO) * U : xb + GAP + (Math.min(v, HI) - BRK) * V,
+      inv: x => x <= xb + GAP / 2 ? LO + (x - X0) / U : BRK + Math.max(0, x - xb - GAP) / V};
+  }
+  const toVal = e => { const r = cv.getBoundingClientRect(), {X0, X1} = geo(); return Math.max(LO, Math.min(HI, scale(X0, X1).inv(e.clientX - r.left))); };
+  function tag(ctx, text, x, y, color, align){   // a label on a background, so lines don't run through it
+    ctx.font = '600 11px ' + MONO; ctx.textBaseline = 'top'; ctx.textAlign = align;
+    const tw = ctx.measureText(text).width, left = align === 'center' ? x - tw / 2 : align === 'right' ? x - tw : x;
+    ctx.fillStyle = C('--surface'); ctx.fillRect(left - 3, y - 1, tw + 6, 14);
+    ctx.fillStyle = color; ctx.fillText(text, x, y);
+  }
   function draw(){
-    const {ctx, w, h} = fit(cv), {X0, X1} = geo(), Y0 = h - 22, xs = v => X0 + (v - LO) / (HI - LO) * (X1 - X0);
-    if (BAND.v) { const a = xs(BAND.v[0]), b = xs(BAND.v[1]); ctx.fillStyle = C('--gold-soft'); ctx.fillRect(a, 4, b - a, Y0 - 4); ctx.strokeStyle = C('--gold'); ctx.lineWidth = 1.5; ctx.strokeRect(a + .5, 4.5, b - a - 1, Y0 - 5); }
-    xAxis(ctx, X0, X1, Y0, LO, HI, v => v + ' h');
+    const {ctx, w, h} = fit(cv), {X0, X1} = geo(), Y0 = h - 22, S = scale(X0, X1), xs = S.xs;
+    if (BAND.v) { const a = xs(BAND.v[0]), b = xs(BAND.v[1]); ctx.fillStyle = C('--gold-soft'); ctx.fillRect(a, 18, b - a, Y0 - 18); ctx.strokeStyle = C('--gold'); ctx.lineWidth = 1.5; ctx.strokeRect(a + .5, 18.5, b - a - 1, Y0 - 19); }
+    // axis with a break mark at 3 hours
+    ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(S.xb + 2, Y0 + .5); ctx.moveTo(S.xb + GAP - 2, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+    ctx.beginPath(); [S.xb + 2, S.xb + GAP - 2].forEach(x => { ctx.moveTo(x - 3, Y0 + 5); ctx.lineTo(x + 3, Y0 - 4); }); ctx.stroke();
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    const step = S.U * .5 >= 34 ? .5 : 1;
+    for (let v = 0; v < BRK - 1e-9; v += step) ctx.fillText(fmtH(v), xs(v), Y0 + 5);   // no label at the break itself
+    ctx.fillText('5 h', xs(5), Y0 + 5); if (xs(5) - xs(4) > 36) ctx.fillText('4 h', xs(4), Y0 + 5);
     if (meds) {
-      hist(ctx, meds, LO, HI, 110, X0, X1, Y0 - 50, 26, C('--ink-3'));
+      const c = {}; meds.forEach(v => { const k = Math.round(v * 20); c[k] = (c[k] || 0) + 1; });
+      const top = Math.max(...Object.values(c)), bw = Math.max(2, .05 * S.U * .8), Yb = Y0 - 52, Yt = 34;
+      Object.keys(c).forEach(k => { const v = k / 20, y = Yb - c[k] / top * (Yb - Yt); bar(ctx, xs(v) - bw / 2, bw, y, Yb, C('--ink-3')); });
       const s = sortedCopy(meds), a = q(s, .025), b = q(s, .975);
-      [a, b].forEach(v => vline(ctx, xs(v), 16, Y0, C('--ink'), [5, 4], 1.5));
-      ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--ink'); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-      ctx.fillText(`middle 95%: ${a.toFixed(2)} – ${b.toFixed(2)}`, (xs(a) + xs(b)) / 2, 2);
+      [a, b].forEach(v => vline(ctx, xs(v), 18, Y0, C('--ink'), [5, 4], 1.5));
+      tag(ctx, `middle 95%: ${a.toFixed(2)} – ${b.toFixed(2)}`, Math.max(X0 + 80, Math.min(X1 - 80, (xs(a) + xs(b)) / 2)), 1, C('--ink'), 'center');
     }
     const seen = {};
     SLEEP.forEach(v => { const k = Math.round(v * 10); seen[k] = (seen[k] || 0) + 1; ctx.fillStyle = C('--accent'); dot(ctx, xs(v), Y0 - 8 - (seen[k] - 1) * 12, 5.5); });
     vline(ctx, xs(1.3), Y0 - 46, Y0, C('--accent'), null, 2);
-    ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--accent'); ctx.textAlign = 'left'; ctx.textBaseline = 'bottom'; ctx.fillText('median 1.3', xs(1.3) + 6, Y0 - 34);
+    tag(ctx, 'median 1.3', xs(1.3) - 6, Y0 - 48, C('--accent'), 'right');
     if (!BAND.v && !meds && !BAND.skipped) { ctx.fillStyle = C('--ink-3'); ctx.font = '13px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('drag across here to mark your range', (X0 + X1) / 2, (Y0 - 40) / 2 + 8, X1 - X0 - 10); }
   }
+  const fmtH = v => (Math.abs(v - Math.round(v)) < 1e-9 ? String(Math.round(v)) : v.toFixed(1)) + ' h';
   function message(){
     if (!meds) { hint.innerHTML = BAND.v ? `Your range: <b>${BAND.v[0].toFixed(1)} to ${BAND.v[1].toFixed(1)} hours</b>, ${(BAND.v[1] - BAND.v[0]).toFixed(1)} wide. Now let 2,000 resamples of the same 10 patients have their say.` : BAND.skipped ? 'Now let 2,000 resamples of the 10 patients have their say.' : intro; return; }
     const s = sortedCopy(meds), a = q(s, .025), b = q(s, .975), bw = b - a;
     let t = `The middle 95% of the resample medians runs from <b>${a.toFixed(2)}</b> to <b>${b.toFixed(2)}</b> hours, ${bw.toFixed(2)} wide. `;
     if (BAND.v) {
       const yw = BAND.v[1] - BAND.v[0], r = yw / bw;
-      t += `Your range was ${yw.toFixed(1)} wide: ${r > 1.5 ? 'much wider than' : r > 1.15 ? 'a little wider than' : r < .67 ? 'much narrower than' : r < .87 ? 'a little narrower than' : 'about as wide as'} the bootstrap’s. `;
+      t += `Your range, ${BAND.v[0].toFixed(1)} to ${BAND.v[1].toFixed(1)}, was ${yw.toFixed(1)} wide: ${r > 1.5 ? 'much wider than' : r > 1.15 ? 'a little wider than' : r < .67 ? 'much narrower than' : r < .87 ? 'a little narrower than' : 'about as wide as'} the bootstrap’s. `;
     }
     hint.innerHTML = t + 'How 2,000 resamples of just 10 numbers can tell you this is what the rest of the page is about.';
   }
-  function sync(){ $('#heroGo').disabled = !(BAND.v || BAND.skipped); $('#heroSkip').hidden = !!(BAND.v || BAND.skipped); draw(); message(); }
+  function fill(){ inLo.value = BAND.v ? BAND.v[0].toFixed(1) : ''; inHi.value = BAND.v ? BAND.v[1].toFixed(1) : ''; }
+  function sync(){ $('#heroGo').disabled = !(BAND.v || BAND.skipped); $('#heroSkip').hidden = !!(BAND.v || BAND.skipped); if (drag == null) fill(); draw(); message(); }
+  function typed(){
+    const a = parseFloat(inLo.value), b = parseFloat(inHi.value);
+    if (!isFinite(a) || !isFinite(b)) { hint.innerHTML = 'Type both ends of your range, in hours.'; return; }
+    const lo = Math.max(LO, Math.min(a, b)), hi = Math.min(HI, Math.max(a, b));
+    if (hi - lo < .05) { hint.innerHTML = 'Make the range a little wider than a single point.'; return; }
+    BAND.v = [lo, hi]; meds = null; bandChanged();
+  }
   cv.addEventListener('pointerdown', e => { drag = toVal(e); BAND.v = [drag, drag]; meds = null; try { cv.setPointerCapture(e.pointerId); } catch (_) {} draw(); });
   cv.addEventListener('pointermove', e => { if (drag == null) return; const v = toVal(e); BAND.v = [Math.min(drag, v), Math.max(drag, v)]; draw(); });
   const end = () => { if (drag == null) return; drag = null; if (BAND.v[1] - BAND.v[0] < .05) BAND.v = null; bandChanged(); };
   cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+  $('#heroSet').addEventListener('click', typed);
+  [inLo, inHi].forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') typed(); }));
   $('#heroSkip').addEventListener('click', () => { BAND.skipped = true; bandChanged(); });
   $('#heroGo').addEventListener('click', () => { meds = boot(SLEEP, median, 2000); sync(); });
   $('#heroClear').addEventListener('click', () => { BAND.v = null; BAND.skipped = false; meds = null; bandChanged(); });
@@ -676,7 +721,10 @@ const bandChanged = () => bandListeners.forEach(f => f());
   function upd(){
     if (BAND.v) {
       const w = BAND.v[1] - BAND.v[0];
-      el.innerHTML = `<b>Your opening guess</b> was ${BAND.v[0].toFixed(1)} to ${BAND.v[1].toFixed(1)} hours, ${w.toFixed(1)} wide. The bootstrap’s answer, about 1.0 to 1.9, is 0.9 wide. ${w > 1.35 ? 'You were more cautious than the data require.' : w < .6 ? 'You were more confident than the data allow: ten patients can’t pin the median down that tightly.' : 'That is close to what the data support.'}`;
+      el.innerHTML = `<b>Your opening guess</b> was ${BAND.v[0].toFixed(1)} to ${BAND.v[1].toFixed(1)} hours, ${w.toFixed(1)} wide. The bootstrap’s answer, about 1.0 to 1.9, is 0.9 wide. ` +
+        (w > 1.35 ? 'Your range is wider than the bootstrap’s, and that isn’t necessarily wrong: with only 10 values the bootstrap’s range runs a little narrow (see below).'
+          : w < .6 ? 'You were more confident than the data allow: ten patients can’t pin the median down that tightly.'
+          : 'That is close to what the bootstrap says.');
     } else if (BAND.skipped) el.innerHTML = 'You skipped the opening guess. The bootstrap’s answer is about 1.0 to 1.9 hours, a range 0.9 hours wide, from just ten patients.';
     else el.innerHTML = 'Draw a range in the opening chart, or skip the guess, and this paragraph will compare it with the bootstrap’s answer.';
   }
@@ -719,11 +767,38 @@ const bandChanged = () => bandListeners.forEach(f => f());
     heavy: {draw: () => Math.pow(1 - Math.random(), -1 / 1.5), val: {mean: 3, median: Math.pow(2, 1 / 1.5), max: null}}
   };
   const PRE = [{pop: 'bell', stat: 'mean', ni: 3}, {pop: 'bell', stat: 'median', ni: 0}, {pop: 'flat', stat: 'max', ni: 3}, {pop: 'heavy', stat: 'mean', ni: 3}];
+  const PLURAL = {mean: 'means', median: 'medians', max: 'largest values'};
   const nIn = $('#cpN');
-  let pop = 'bell', stat = 'mean', tru = null, sample = null, bs = null;
+  let pop = 'bell', stat = 'mean', tru = null, sample = null, bs = null, many = null;
   const draws = k => { const a = new Array(k); for (let i = 0; i < k; i++) a[i] = POP[pop].draw(); return a; };
+  const okRatio = r => r > .75 && r < 1.33;
+  const inside = (s, v) => q(s, .025) <= v && v <= q(s, .975);   // does the middle 95% of resamples contain v?
+  const fmtV = (v, dp) => Math.abs(v - Math.round(v)) < 1e-9 ? String(Math.round(v)) : v.toFixed(dp);
   function truth(){ const n = NS[+nIn.value]; tru = new Float64Array(R); for (let r = 0; r < R; r++) tru[r] = STAT[stat](draws(n)); }
   function fresh(){ sample = draws(NS[+nIn.value]); bs = boot(sample, STAT[stat], R); }
+  function runMany(){
+    const n = NS[+nIn.value], f = STAT[stat], T = sdOf(tru), pv = POP[pop].val[stat], r = [];
+    let caught = 0;
+    for (let k = 0; k < 50; k++) { const b = boot(draws(n), f, R); r.push(sdOf(b) / T); if (pv != null && inside(sortedCopy(b), pv)) caught++; }
+    many = {r, caught, pv};
+  }
+  function drawMany(){
+    $('#cpManyBox').hidden = !many; if (!many) return;
+    const {ctx, w, h} = fit($('#cpMany')), X0 = 14, X1 = w - 14, Y0 = h - 20, LO = Math.log(.05), HI = Math.log(5);
+    const xs = r => X0 + (Math.log(Math.max(.05, Math.min(5, r))) - LO) / (HI - LO) * (X1 - X0);
+    ctx.fillStyle = C('--one-soft'); ctx.fillRect(xs(.75), 2, xs(1.33) - xs(.75), Y0 - 2);
+    ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    [.1, .25, .5, 1, 2, 4].forEach(v => ctx.fillText(String(v), xs(v), Y0 + 5));
+    vline(ctx, xs(1), 2, Y0, C('--ink'), [4, 3], 1.5);
+    const key = r => Math.round(xs(r) / 8), cnt = {}; many.r.forEach(r => cnt[key(r)] = (cnt[key(r)] || 0) + 1);
+    const dy = Math.min(7, (Y0 - 10) / Math.max(1, Math.max(...Object.values(cnt)) - 1)), seen = {};   // stack dots that land close together, squeezing tall stacks to fit
+    many.r.forEach(r => { const k = key(r); seen[k] = (seen[k] || 0) + 1; ctx.fillStyle = okRatio(r) ? C('--accent') : C('--zero'); ctx.globalAlpha = .85; dot(ctx, xs(r), Y0 - 5 - (seen[k] - 1) * dy, 3.5); });
+    ctx.globalAlpha = 1;
+    const sr = many.r.slice().sort((a, b) => a - b), mid = (sr[24] + sr[25]) / 2, good = many.r.filter(okRatio).length;
+    $('#cpManyRead').innerHTML = `typical ratio <b>${mid.toFixed(2)}</b> (1 would be right) · within 25% of the true spread: <b>${good} of 50</b>` +
+      (many.pv != null ? ` · the bootstrap’s middle 95% contained the true value in <b>${many.caught} of 50</b>` : '');
+  }
   function draw(){
     const st = sortedCopy(tru), sb = sortedCopy(bs), pv = POP[pop].val[stat], sv = STAT[stat](sample);
     let lo = Math.min(q(st, .005), q(sb, .005), sv), hi = Math.max(q(st, .995), q(sb, .995), sv);
@@ -735,18 +810,31 @@ const bandChanged = () => bandListeners.forEach(f => f());
       xAxis(ctx, X0, X1, Y0, lo, hi);
       if (line != null) vline(ctx, xs(line), 2, Y0, lc, dash, 2);
     });
-    const {ctx, w, h} = fit($('#cpSamp')), X0 = 14, X1 = w - 14, smin = Math.min(...sample), smax = Math.max(...sample), sp = (smax - smin) || 1;
-    const xs = v => X0 + (v - smin + sp * .05) / (sp * 1.1) * (X1 - X0);
-    ctx.strokeStyle = C('--line'); ctx.beginPath(); ctx.moveTo(X0, h / 2 + .5); ctx.lineTo(X1, h / 2 + .5); ctx.stroke();
-    ctx.fillStyle = C('--accent'); ctx.globalAlpha = .75; sample.forEach(v => dot(ctx, xs(v), h / 2, 4)); ctx.globalAlpha = 1;
-    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textBaseline = 'top';
-    ctx.textAlign = 'left'; ctx.fillText(smin.toFixed(1), X0, h / 2 + 7); ctx.textAlign = 'right'; ctx.fillText(smax.toFixed(1), X1, h / 2 + 7);
-    const T = sdOf(tru), Bs = sdOf(bs), r = Bs / T, judge = stat !== 'max' && NS[+nIn.value] > 3, cls = !judge ? '' : r > .75 && r < 1.33 ? 'ok' : 'warn';
+    // the sample spreads far wider than any statistic of it, so it gets its own scale; the shaded stretch is what the charts above and below show
+    {
+      const {ctx, w, h} = fit($('#cpSamp')), X0 = 14, X1 = w - 14, Y0 = h - 20;
+      let a = Math.min(lo, ...sample), b = Math.max(hi, ...sample); const sp = (b - a) || 1; a -= sp * .03; b += sp * .03;
+      const xs = v => X0 + (v - a) / (b - a) * (X1 - X0);
+      ctx.fillStyle = C('--accent-soft'); ctx.fillRect(xs(lo), 2, Math.max(2, xs(hi) - xs(lo)), Y0 - 2);
+      xAxis(ctx, X0, X1, Y0, a, b);
+      ctx.fillStyle = C('--accent'); ctx.globalAlpha = .75; sample.forEach(v => dot(ctx, xs(v), Y0 - 9, 4)); ctx.globalAlpha = 1;
+      ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textBaseline = 'top';
+      const right = xs(lo) - X0 > X1 - xs(hi), tx = right ? xs(lo) - 6 : xs(hi) + 6;
+      ctx.textAlign = right ? 'right' : 'left'; ctx.fillText('shaded: zoomed in above and below', tx, 2);
+    }
+    const T = sdOf(tru), Bs = sdOf(bs), r = Bs / T, judge = stat !== 'max' && NS[+nIn.value] > 3, cls = !judge ? '' : okRatio(r) ? 'ok' : 'warn';
+    const dp = hi - lo < 10 ? 2 : 1;
     let t = `true spread (SE) <b>${T.toFixed(2)}</b> · bootstrap <b>${Bs.toFixed(2)}</b> · ratio <b class="${cls}">${r.toFixed(2)}</b>`;
-    if (stat === 'max') t += ` · <b>${Math.round(100 * bs.filter(v => v === smax).length / R)}%</b> of resamples equal your sample’s largest value`;
-    const distinct = new Set(bs).size; if (distinct < 40) t += ` · only <b>${distinct}</b> different resample values`;
-    if (pop === 'heavy' && stat === 'mean') t += ' · in theory the true spread is infinite';
+    if (stat === 'max') { const smax = Math.max(...sample); t += ` · <b>${Math.round(100 * bs.filter(v => v === smax).length / R)}%</b> of resamples equal your sample’s largest value`; }
+    const distinct = new Set(bs).size; if (distinct < 40) t += ` · only <b>${distinct}</b> different resample ${PLURAL[stat]}`;
+    if (pv != null) {
+      const yes = inside(sb, pv);
+      t += `<br>middle 95% of resamples: ${q(sb, .025).toFixed(dp)} to ${q(sb, .975).toFixed(dp)} · contains the true ${fmtV(pv, dp)}? <b class="${yes ? 'ok' : 'warn'}">${yes ? 'yes' : 'no'}</b>` +
+        (stat === 'max' ? ', and it never can: no resample goes past your sample’s largest value' : '');
+    }
+    if (pop === 'heavy' && stat === 'mean') t += '<br>in theory the true spread is infinite, so even the top chart’s value is shaky';
     $('#cpRead').innerHTML = t;
+    drawMany();
   }
   function sync(){
     $$('[data-cpop]').forEach(b => { const on = b.dataset.cpop === pop; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
@@ -754,12 +842,13 @@ const bandChanged = () => bandListeners.forEach(f => f());
     $('#cpNOut').textContent = NS[+nIn.value];
   }
   function setPre(i){ $$('[data-cpre]').forEach(b => { const on = +b.dataset.cpre === i; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }); }
-  function all(){ sync(); truth(); fresh(); draw(); }
+  function all(){ sync(); truth(); fresh(); many = null; draw(); }
   $$('[data-cpre]').forEach(b => b.addEventListener('click', () => { const p = PRE[+b.dataset.cpre]; pop = p.pop; stat = p.stat; nIn.value = p.ni; setPre(+b.dataset.cpre); all(); }));
   $$('[data-cpop]').forEach(b => b.addEventListener('click', () => { pop = b.dataset.cpop; setPre(-1); all(); }));
   $$('[data-cstat]').forEach(b => b.addEventListener('click', () => { stat = b.dataset.cstat; setPre(-1); all(); }));
   nIn.addEventListener('input', () => { setPre(-1); all(); });
   $('#cpNew').addEventListener('click', () => { fresh(); draw(); });
+  $('#cpFifty').addEventListener('click', () => { runMany(); draw(); });
   all(); redraws.push(draw);
 })();
 

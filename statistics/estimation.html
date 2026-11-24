@@ -143,6 +143,13 @@ table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;co
 table.summary.num{font-size:13px;margin:8px 0 0}
 table.summary.num td,table.summary.num th{padding:5px 8px;text-align:right;white-space:nowrap}
 table.summary.num td:first-child,table.summary.num th:first-child{text-align:left}
+table.summary.num th .sm{display:none}
+@media (max-width:520px){
+  table.summary.num th .lg{display:none}
+  table.summary.num th .sm{display:inline}
+  table.summary.num th{letter-spacing:.02em}
+  table.summary.num td,table.summary.num th{padding:5px 4px}
+}
 table.summary.num th{font-size:11px;white-space:normal}
 .linkbtn{all:unset;cursor:pointer;font-size:14px;color:var(--accent);text-decoration:underline}
 .linkbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -158,6 +165,7 @@ input.num:focus{outline:2px solid var(--accent);outline-offset:1px}
 .mini{border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--bg)}
 .mini .readout{font-size:13px;margin-top:4px}
 canvas.drag{cursor:grab;touch-action:pan-y}
+.callout-lite{border:1px dashed var(--gold);background:var(--gold-soft);border-radius:10px;padding:10px 14px}
 </style>
 <script>try{var t=localStorage.getItem('xp-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 <link rel="stylesheet" href="../assets/site.css">
@@ -201,13 +209,13 @@ canvas.drag{cursor:grab;touch-action:pan-y}
   <p>A recipe that turns a sample into a guess about something you can’t see directly is called an <em class="term">estimator</em>, and its answer is an <em>estimate</em>. Here are three recipes for the tank count, each with a sensible reason behind it:</p>
   <ul>
     <li><strong>Largest:</strong> the biggest serial number seen. There are at least that many tanks. For the hook: <strong>60</strong>.</li>
-    <li><strong>Twice the average:</strong> the captured numbers should be spread evenly between 1 and the total, so their average should land about halfway. Double it and subtract 1: 2 × 40.25 − 1 = <strong>79.5</strong>.</li>
-    <li><strong>Largest + average gap:</strong> four captured numbers leave gaps below 60 that average 60 ÷ 4 = 15 numbers wide. The stretch above the largest is probably about as wide as a typical gap, so add it: 60 + 15 − 1 = <strong>74</strong>.</li>
+    <li><strong>Twice the average:</strong> the captured numbers should be spread evenly between 1 and the total, so their average should land about halfway. The average of 1, 2, …, up to the total is (total + 1) ÷ 2, so double it and subtract 1: 2 × 40.25 − 1 = <strong>79.5</strong>.</li>
+    <li><strong>Largest + average gap:</strong> below 60 there are 56 numbers nobody captured, in 4 gaps (1–18, 20–39, 41 and 43–59) that average 56 ÷ 4 = 14 numbers wide. The stretch above the largest is probably about as wide as a typical gap, so add it: 60 + 14 = <strong>74</strong>. (As a formula: largest + largest ÷ <em>k</em> − 1, where <em>k</em> is the number captured.)</li>
   </ul>
   <p>Your own guess is a recipe too. If you said 90 when the largest number was 60, your rule is “largest × 1.5”. One capture can’t show which recipe is best, because any recipe can get lucky once. So build a tank factory where you know the true count, capture tanks from it again and again, and watch where each recipe’s guesses land.</p>
 
   <div class="widget">
-    <p class="widget-title">The tank factory</p>
+    <p class="widget-title">★ The tank factory</p>
     <div class="controls">
       <label class="ctrl">tanks built <input type="range" id="tfN" min="20" max="500" step="10" value="100"><output id="tfNOut"></output></label>
       <label class="ctrl">tanks captured <input type="range" id="tfK" min="0" max="8" step="1" value="2"><output id="tfKOut"></output></label>
@@ -216,7 +224,7 @@ canvas.drag{cursor:grab;touch-action:pan-y}
     <canvas id="tfLine" style="height:56px" role="img" aria-label="The serial numbers 1 to N, with the captured tanks marked"></canvas>
     <p class="mcap" style="margin-top:8px">Each recipe’s guesses, one dart per capture</p>
     <canvas id="tfLanes" style="height:250px" role="img" aria-label="One row per recipe: a histogram of its guesses over all captures, with the true number of tanks as a dashed line and the latest guess as a dart"></canvas>
-    <div class="legend"><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>true number of tanks</span></span><span><span class="muted">▼ latest guess · ▲ average guess</span></span></div>
+    <div class="legend"><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>true number of tanks</span></span><span><span class="muted">▼ latest guess · ▲ average guess</span></span><span><i class="sw" style="background:var(--zero)"></i><span>impossible guess: below a serial already seen</span></span></div>
     <div class="controls">
       <button class="btn primary" id="tfOne">Capture 4 tanks</button>
       <button class="btn" id="tfRun">▶ Keep capturing</button>
@@ -226,12 +234,12 @@ canvas.drag{cursor:grab;touch-action:pan-y}
     <div class="readout" id="tfRead" aria-live="polite"></div>
   </div>
 
-  <p>Watch the rows fill. <strong>Largest</strong> always lands below the truth, because it can only be right if the very last tank happens to be captured; its pile is narrow but sits to the left of the line. <strong>Twice the average</strong> is centered on the truth but spreads wide, because one unusually high or low number moves the average a lot. <strong>Largest + average gap</strong> is centered and narrow. Try capturing more tanks at a time, or a bigger factory.</p>
+  <p>Watch the rows fill. <strong>Largest</strong> never lands above the truth, and it is right only when the very last tank happens to be captured; its pile is narrow but sits to the left of the line. <strong>Twice the average</strong> is centered on the truth but spreads wide, because one unusually high or low number moves the average a lot. It can even guess fewer tanks than a serial number it has already seen, which is plainly impossible: with 4 tanks captured from 100 that happens in about 1 capture in 6, and the readout flags it. <strong>Largest + average gap</strong> is centered and narrow. Try capturing more tanks at a time, or a bigger factory.</p>
   <div class="callout">
     <p><strong>This happened.</strong> During the Second World War, Allied economists estimated German tank production from the serial numbers on captured and destroyed tanks and their parts, using recipes like the ones above. Their estimates of monthly production were far closer to the truth than conventional intelligence (Ruggles and Brodie 1947):</p>
     <div class="table-wrap">
       <table class="summary num">
-        <thead><tr><th>Month</th><th>Statistical estimate</th><th>Intelligence estimate</th><th>German records</th></tr></thead>
+        <thead><tr><th>Month</th><th><span class="lg">Statistical estimate</span><span class="sm">Serial numbers</span></th><th><span class="lg">Intelligence estimate</span><span class="sm">Spies &amp; reports</span></th><th><span class="lg">German records</span><span class="sm">Truth</span></th></tr></thead>
         <tbody>
           <tr><td>June 1940</td><td>169</td><td>1,000</td><td>122</td></tr>
           <tr><td>June 1941</td><td>244</td><td>1,550</td><td>271</td></tr>
@@ -276,6 +284,7 @@ canvas.drag{cursor:grab;touch-action:pan-y}
   </div>
 
   <p>A steady hand doesn’t fix bad aim, and good aim doesn’t fix a shaky hand. In the factory, <strong>Largest</strong> is a steady player aiming low, <strong>Twice the average</strong> aims at the bullseye with a shaky hand, and <strong>Largest + average gap</strong> does both well. A recipe with no bias, whose guesses are right on average, is called <em class="term">unbiased</em>. Notice that “right on average” says nothing about any single throw.</p>
+  <p>One detail in the readout: even a perfectly aimed player shows a small bias², because the center of 20 throws wobbles too. Throw more and it shrinks toward 0.</p>
 </section>
 
 <!-- 3 -->
@@ -334,7 +343,7 @@ canvas.drag{cursor:grab;touch-action:pan-y}
     <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>2,000 samples of 10</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>true center</span></span></div>
   </div>
 
-  <p>With clean, bell-shaped data the mean is the steadiest of the three, and the median wobbles noticeably more. Add even 5% wild values and the order flips: the mean’s spread balloons while the median and trimmed mean hardly notice. The trimmed mean is the usual compromise: nearly as steady as the mean on clean data, nearly as safe as the median on dirty data.</p>
+  <p>With clean, bell-shaped data the mean is the steadiest of the three, and the median wobbles noticeably more. Add even 5% wild values and the order flips: the mean’s spread balloons while the median and trimmed mean hardly notice. The trimmed mean is the usual compromise: nearly as steady as the mean on clean data, nearly as safe as the median on dirty data, unless a large share of the data is wild. Slide to 20% or 30% and the median pulls ahead: the trimmed mean drops only 2 values from each end, and with that many wild values some survive the trim.</p>
 </section>
 
 <!-- 5 -->
@@ -345,11 +354,14 @@ canvas.drag{cursor:grab;touch-action:pan-y}
 
   <div class="widget">
     <p class="widget-title">Typical miss against the number of tanks captured</p>
-    <canvas id="csChart" style="height:260px" role="img" aria-label="Typical miss of four recipes as the number of captured tanks grows from 1 to 48, out of 1,000 tanks"></canvas>
+    <canvas id="csChart" style="height:280px" role="img" aria-label="Typical miss of the recipes, including yours, as the number of captured tanks grows from 1 to 48, out of 1,000 tanks, on logarithmic scales"></canvas>
+    <p class="cap">Both axes are logarithmic: each step doubles. A recipe whose miss shrinks like 1/√<em>k</em> falls as a gentle straight line; one that shrinks like 1/<em>k</em> falls twice as steeply.</p>
     <div class="controls"><button class="btn" id="csGo">Simulate again</button></div>
   </div>
 
-  <p><strong>Largest</strong> is biased but consistent: as more tanks are captured, the largest number creeps up toward the true total and the bias melts away. <strong>Twice the first tank</strong> is unbiased, right on average, yet it never improves, because it throws away everything but one tank. Unbiased is not the same as good. And <strong>Largest + average gap</strong> improves fastest of all: its typical miss shrinks roughly in proportion to 1/<em>k</em>, faster than the 1/√<em>k</em> of averages.</p>
+  <p><strong>Largest</strong> is biased but consistent: as more tanks are captured, the largest number creeps up toward the true total and the bias melts away. <strong>Twice the first tank</strong> is unbiased, right on average, yet it never improves, because it throws away everything but one tank. Unbiased is not the same as good. <strong>Twice the average</strong> falls along the gentle 1/√<em>k</em> slope of any average. And <strong>Largest + average gap</strong> improves fastest of all: its line falls about twice as steeply, so its typical miss shrinks roughly in proportion to 1/<em>k</em>.</p>
+  <p class="callout-lite" id="csYou">Lock in a guess at the top of the page, and your own recipe joins this chart.</p>
+  <p>One general way of building recipes, <em>maximum likelihood</em>, gets its own page later: <a href="likelihood.html">Likelihood</a>.</p>
 </section>
 
 <!-- 6 -->
@@ -576,11 +588,13 @@ function changed(){ listeners.forEach(f => f()); }
 
 /* ---------- 1. the tank factory ---------- */
 const KS = [2, 3, 4, 5, 6, 8, 10, 15, 20];
-const TF = {N: 100, k: 4, caps: 0, maxes: [], est: {max: [], twice: [], gap: []}, last: null};
+const TF = {N: 100, k: 4, caps: 0, maxes: [], est: {max: [], twice: [], gap: []}, imp: [], nImp: 0, last: null};
 function tfAdd(n){
   for (let i = 0; i < n; i++) {
     const a = capture(TF.N, TF.k);
     TF.maxes.push(maxOf(a)); ['max', 'twice', 'gap'].forEach(id => TF.est[id].push(RECIPES.find(r => r.id === id).f(a)));
+    const bad = TF.est.twice[TF.est.twice.length - 1] < TF.maxes[TF.maxes.length - 1] - 1e-9;   // twice the average below a serial already seen
+    TF.imp.push(bad); if (bad) TF.nImp++;
     TF.last = a; TF.caps++;
   }
 }
@@ -591,7 +605,7 @@ function stats(a, N){
   const m = s / n, v = Math.max(0, s2 / n - m * m);
   return {n, mean: m, bias: m - N, sd: Math.sqrt(v), mse: v + (m - N) ** 2};
 }
-function tfClear(){ TF.caps = 0; TF.maxes = []; TF.est = {max: [], twice: [], gap: []}; TF.last = null; }
+function tfClear(){ TF.caps = 0; TF.maxes = []; TF.est = {max: [], twice: [], gap: []}; TF.imp = []; TF.nImp = 0; TF.last = null; }
 (function(){
   const nIn = $('#tfN'), kIn = $('#tfK');
   let timer = null;
@@ -603,11 +617,14 @@ function tfClear(){ TF.caps = 0; TF.maxes = []; TF.est = {max: [], twice: [], ga
     ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textBaseline = 'top';
     ctx.textAlign = 'left'; ctx.fillText('1', X0, Y + 4); ctx.textAlign = 'right'; ctx.fillText(`${TF.N} built`, X1, Y + 4);
     if (!TF.last) return;
-    const many = TF.last.length > 8;
-    TF.last.forEach(v => {
+    const many = TF.last.length > 8, used = [[X0, X0 + ctx.measureText('1').width + 4], [X1 - ctx.measureText(`${TF.N} built`).width - 4, X1]];
+    TF.last.slice().sort((p, q) => p - q).forEach(v => {
       const x = xs(v);
       ctx.fillStyle = C('--accent'); ctx.fillRect(Math.round(x) - 1, Y - 18, 3, 18);
-      if (!many) { ctx.textAlign = 'center'; ctx.fillStyle = C('--accent'); ctx.fillText(v, x, Y + 4); }
+      if (many) return;
+      const tw = ctx.measureText(String(v)).width, a = x - tw / 2 - 2, b = x + tw / 2 + 2;
+      if (used.some(([p, q]) => a < q && b > p)) return;   // a neighbor's label is already there
+      used.push([a, b]); ctx.textAlign = 'center'; ctx.fillStyle = C('--accent'); ctx.fillText(v, x, Y + 4);
     });
   }
   function drawLanes(){
@@ -617,16 +634,21 @@ function tfClear(){ TF.caps = 0; TF.maxes = []; TF.est = {max: [], twice: [], ga
     const X0 = 12, X1 = w - 12, xmax = 2.2 * TF.N, xs = v => X0 + Math.max(0, Math.min(v, xmax)) / xmax * (X1 - X0);
     const B = 66, bw = xmax / B, hists = R.map(r => { const c = new Array(B).fill(0); tfEst(r.id).forEach(v => c[Math.max(0, Math.min(B - 1, Math.floor(v / bw)))]++); return c; });
     let top = 1; hists.forEach(c => c.forEach(v => top = Math.max(top, v)));
+    const names = [];
     R.forEach((r, i) => {
       const y0 = 14 + i * laneH, base = y0 + laneH - 10, col = C(r.color), st = stats(tfEst(r.id), TF.N);
-      ctx.font = '600 12px ' + MONO; ctx.fillStyle = col; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-      ctx.fillText(r.id === 'you' ? youName() : r.name, X0, y0);
+      ctx.font = '600 12px ' + MONO; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+      names.push([r.id === 'you' ? youName() : r.name, col, y0]);   // drawn last, over the truth line
       if (st && st.n >= 20 && w > 470) { ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-2'); ctx.textAlign = 'right'; ctx.fillText(`average ${f1(st.mean)} · typical miss ${f1(Math.sqrt(st.mse))}`, X1, y0); }
       ctx.strokeStyle = C('--line'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, base + .5); ctx.lineTo(X1, base + .5); ctx.stroke();
       const pw = (X1 - X0) / B;
       ctx.globalAlpha = .8;
       hists[i].forEach((c, b) => { if (c) bar(ctx, X0 + b * pw + .5, Math.max(1, pw - 1), base - c / top * (laneH - 30), base, col); });
       ctx.globalAlpha = 1;
+      if (r.id === 'twice' && TF.nImp) {   // the impossible guesses, in red, inside the same bars
+        const c = new Array(B).fill(0); TF.est.twice.forEach((v, j) => { if (TF.imp[j]) c[Math.max(0, Math.min(B - 1, Math.floor(v / bw)))]++; });
+        c.forEach((k, b) => { if (k) bar(ctx, X0 + b * pw + .5, Math.max(1, pw - 1), base - k / top * (laneH - 30), base, C('--zero')); });
+      }
       if (st) {   // average (▲) and latest (▼)
         const xa = xs(st.mean); ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(xa, base + 1); ctx.lineTo(xa - 5, base + 9); ctx.lineTo(xa + 5, base + 9); ctx.closePath(); ctx.fill();
         const a = tfEst(r.id), xl = xs(a[a.length - 1]), yl = base - (laneH - 28);
@@ -636,6 +658,8 @@ function tfClear(){ TF.caps = 0; TF.maxes = []; TF.est = {max: [], twice: [], ga
     const xn = xs(TF.N);
     vline(ctx, xn, 12, h - axisH, C('--ink'), [5, 4], 1.5);
     ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--ink'); ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(`truth: ${TF.N}`, xn, 0);
+    ctx.font = '600 12px ' + MONO; ctx.textAlign = 'left';
+    names.forEach(([nm, col, y0]) => { ctx.fillStyle = C('--surface'); ctx.fillRect(X0 - 2, y0 - 1, ctx.measureText(nm).width + 4, 15); ctx.fillStyle = col; ctx.fillText(nm, X0, y0); });
     xAxis(ctx, X0, X1, h - axisH, 0, xmax);
     if (!TF.caps) emptyNote(ctx, w, h - 10, 'capture some tanks');
   }
@@ -643,8 +667,10 @@ function tfClear(){ TF.caps = 0; TF.maxes = []; TF.est = {max: [], twice: [], ga
     const out = $('#tfRead');
     if (!TF.last) { out.innerHTML = ''; return; }
     const a = TF.last, sorted = a.slice().sort((x, y) => x - y);
+    const bad = r => r.id === 'twice' && r.f(a) < maxOf(a) - 1e-9;
     out.innerHTML = `capture ${comma(TF.caps)}: ${sorted.length <= 10 ? 'serials ' + sorted.join(', ') : sorted.length + ' tanks, largest ' + maxOf(a)} → ` +
-      active().map(r => `<span style="color:var(${r.color})">${r.id === 'you' ? 'yours' : r.name.toLowerCase()} <b>${f1(r.f(a))}</b></span>`).join(' · ');
+      active().map(r => `<span style="color:var(${bad(r) ? '--zero' : r.color})">${r.id === 'you' ? 'yours' : r.name.toLowerCase()} <b>${f1(r.f(a))}</b>${bad(r) ? ` (impossible: tank ${maxOf(a)} was captured)` : ''}</span>`).join(' · ') +
+      (TF.caps >= 20 ? `<br>twice the average guessed fewer tanks than a serial already seen in <b style="color:var(--zero)">${pct(TF.nImp / TF.caps)}</b> of ${comma(TF.caps)} captures` : '');
   }
   function draw(){ drawLine(); drawLanes(); read(); }
   function outs(){ $('#tfNOut').textContent = nIn.value; $('#tfKOut').textContent = KS[+kIn.value]; $('#tfOne').textContent = `Capture ${KS[+kIn.value]} tanks`; }
@@ -713,7 +739,7 @@ function tfClear(){ TF.caps = 0; TF.maxes = []; TF.est = {max: [], twice: [], ga
 /* ---------- 3. mean squared error, from the factory ---------- */
 (function(){
   function draw(){
-    const R = active(), rowH = 46, H = R.length * rowH + 30;
+    const R = active(), wide = $('#mseChart').getBoundingClientRect().width > 520, rowH = wide ? 46 : 60, H = R.length * rowH + 30;
     $('#mseChart').style.height = H + 'px';
     const {ctx, w, h} = fit($('#mseChart'));
     $('#mseNote').textContent = TF.caps ? `${comma(TF.caps)} captures of ${TF.k} tanks from ${TF.N}` : '';
@@ -747,20 +773,21 @@ const median = a => { const b = a.slice().sort((x, y) => x - y), m = b.length >>
 const trimmed = (a, t) => { const b = a.slice().sort((x, y) => x - y).slice(t, a.length - t); return meanOf(b); };
 (function(){
   const cv = $('#rbDots'), tb = $('#rbTypo');
-  let D = SLEEP.slice(), typo = false, drag = -1, range = [-1, 7];
+  let D = SLEEP.slice(), typo = false, drag = -1;
+  const range = [-1, 7];   // fixed, so the typo doesn't squash the other nine; values past 7 sit at the right edge
   const geo = () => { const w = cv.getBoundingClientRect().width; return {X0: 16, X1: w - 16}; };
   function pos(){   // stack equal values
     const seen = {}; return D.map(v => { const k = Math.round(v * 20); seen[k] = (seen[k] || 0) + 1; return seen[k] - 1; });
   }
   function draw(){
-    const {ctx, w, h} = fit(cv), {X0, X1} = geo(), Y0 = h - 24, xs = v => X0 + (v - range[0]) / (range[1] - range[0]) * (X1 - X0);
+    const {ctx, w, h} = fit(cv), {X0, X1} = geo(), Y0 = h - 24, xs = v => X0 + (Math.min(v, range[1] + .06) - range[0]) / (range[1] - range[0]) * (X1 - X0);
     xAxis(ctx, X0, X1, Y0, range[0], range[1], v => v + ' h');
     const m = meanOf(D), md = median(D), tm = trimmed(D, 2);
     [[m, C('--zero'), null, 'mean'], [md, C('--one'), null, 'median'], [tm, C('--ink-2'), [5, 4], 'trimmed']].forEach(([v, col, dash, nm], i) => {
       vline(ctx, xs(v), 8 + i * 15, Y0, col, dash, 2);
     });
     [[m, C('--zero'), 'mean'], [md, C('--one'), 'median'], [tm, C('--ink-2'), 'trimmed']].forEach(([v, col, nm], i) => {
-      const t = `${nm} ${v.toFixed(2)}`, x = xs(v), y = 2 + i * 15;
+      const t = `${nm} ${v.toFixed(2)}${v > range[1] ? ' →' : ''}`, x = xs(v), y = 2 + i * 15;
       ctx.font = '600 11px ' + MONO; const tw = ctx.measureText(t).width, right = x + 6 + tw > X1, tx = right ? x - 6 - tw : x + 6;
       ctx.fillStyle = C('--surface'); ctx.fillRect(tx - 3, y - 1, tw + 6, 14);
       ctx.fillStyle = col; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(t, tx, y);
@@ -768,14 +795,20 @@ const trimmed = (a, t) => { const b = a.slice().sort((x, y) => x - y).slice(t, a
     const st = pos();
     D.forEach((v, i) => { ctx.fillStyle = C('--accent'); ctx.globalAlpha = i === drag ? 1 : .85; dot(ctx, xs(v), Y0 - 8 - st[i] * 13, i === drag ? 7 : 6); });
     ctx.globalAlpha = 1;
+    D.forEach((v, i) => {   // a value past the edge of the scale: say where it really is
+      if (v <= range[1]) return;
+      ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--accent'); ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+      const t = `${fmtN(v)} h, off the scale →`, tw = ctx.measureText(t).width, y = Y0 - 18 - st[i] * 13;
+      ctx.fillStyle = C('--surface'); ctx.fillRect(w - 6 - tw, y - 14, tw + 4, 14);
+      ctx.fillStyle = C('--accent'); ctx.fillText(t, w - 4, y);
+    });
     $('#rbRead').innerHTML = `mean <b style="color:var(--zero)">${m.toFixed(2)}</b> · median <b style="color:var(--one)">${md.toFixed(2)}</b> · trimmed mean <b>${tm.toFixed(2)}</b> hours`;
   }
-  function setRange(){ const hi = Math.max(...D); range = hi > 7 ? [-2, 50] : [-1, 7]; }
   function at(e){ const r = cv.getBoundingClientRect(), {X0, X1} = geo(); return range[0] + (e.clientX - r.left - X0) / (X1 - X0) * (range[1] - range[0]); }
   cv.addEventListener('pointerdown', e => {
     const r = cv.getBoundingClientRect(), {X0, X1} = geo(), st = pos(), h = r.height, Y0 = h - 24;
     let best = -1, bd = 14;
-    D.forEach((v, i) => { const x = X0 + (v - range[0]) / (range[1] - range[0]) * (X1 - X0), y = Y0 - 8 - st[i] * 13, d = Math.hypot(e.clientX - r.left - x, e.clientY - r.top - y); if (d < bd) { bd = d; best = i; } });
+    D.forEach((v, i) => { const x = X0 + (Math.min(v, range[1] + .06) - range[0]) / (range[1] - range[0]) * (X1 - X0), y = Y0 - 8 - st[i] * 13, d = Math.hypot(e.clientX - r.left - x, e.clientY - r.top - y); if (d < bd) { bd = d; best = i; } });
     if (best < 0) return;
     drag = best; try { cv.setPointerCapture(e.pointerId); } catch (err) {} e.preventDefault(); draw();
   });
@@ -786,11 +819,11 @@ const trimmed = (a, t) => { const b = a.slice().sort((x, y) => x - y).slice(t, a
   const end = () => { if (drag >= 0) { drag = -1; draw(); } };
   cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
   tb.addEventListener('click', () => {
-    typo = !typo; D[8] = typo ? 46 : 4.6; setRange();
+    typo = !typo; D[8] = typo ? 46 : 4.6;
     tb.classList.toggle('on', typo); tb.setAttribute('aria-pressed', typo); tb.textContent = typo ? 'Fix the typo: 46 → 4.6' : 'Make a typo: 4.6 → 46';
     draw();
   });
-  $('#rbReset').addEventListener('click', () => { D = SLEEP.slice(); typo = false; setRange(); tb.classList.remove('on'); tb.setAttribute('aria-pressed', 'false'); tb.textContent = 'Make a typo: 4.6 → 46'; draw(); });
+  $('#rbReset').addEventListener('click', () => { D = SLEEP.slice(); typo = false; tb.classList.remove('on'); tb.setAttribute('aria-pressed', 'false'); tb.textContent = 'Make a typo: 4.6 → 46'; draw(); });
   draw(); redraws.push(draw);
 })();
 
@@ -816,7 +849,10 @@ const trimmed = (a, t) => { const b = a.slice().sort((x, y) => x - y).slice(t, a
       hs[j].forEach((c, b) => { if (c) bar(ctx, X0 + b * pw + .5, Math.max(1, pw - 1), Y0 - c / top * (Y0 - 6), Y0, j === best ? C('--accent') : C('--ink-3')); });
       xAxis(ctx, X0, X1, Y0, lo, hi);
       vline(ctx, X0 + (0 - lo) / (hi - lo) * (X1 - X0), 2, Y0, C('--ink'), [4, 3], 1.5);
-      $(id + 'R').innerHTML = `spread ${sds[j].toFixed(2)}${j === best ? ' · <b class="ok">steadiest</b>' : ''}`;
+      let off = 0; res[j].forEach(v => { if (v < lo || v >= hi) off++; });
+      ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textBaseline = 'top';
+      if (off) { ctx.textAlign = 'left'; ctx.fillText('←', X0 - 12, Y0 - 14); ctx.textAlign = 'right'; ctx.fillText('→', X1 + 12, Y0 - 14); }
+      $(id + 'R').innerHTML = `spread ${sds[j].toFixed(2)}${j === best ? ' · <b class="ok">steadiest</b>' : ''}${off / REPS >= .005 ? `<br>${pct(off / REPS)} off the chart` : ''}`;
     });
   }
   const go = () => { $('#rbCOut').textContent = cIn.value + '%'; run(); draw(); };
@@ -831,42 +867,61 @@ const trimmed = (a, t) => { const b = a.slice().sort((x, y) => x - y).slice(t, a
     {name: 'Largest', color: '--accent', f: a => maxOf(a)},
     {name: 'Twice the average', color: '--ink-2', f: a => 2 * meanOf(a) - 1},
     {name: 'Largest + average gap', color: '--one', f: a => { const m = maxOf(a); return m + m / a.length - 1; }},
-    {name: 'Twice the first tank', color: '--zero', f: a => 2 * a[0] - 1, dash: [5, 4]}
+    {name: 'Twice the first tank', color: '--zero', f: a => 2 * a[0] - 1, dash: [5, 4]},
+    {name: 'Your rule', color: '--gold', f: a => maxOf(a) * YOU.c, you: true}
   ];
-  let R = null;
+  let R = null, simC = null;
+  const shown = () => LINES.map((L, j) => j).filter(j => !LINES[j].you || simC);
+  const nameOf = L => L.you ? youName() : L.name;
   function run(){
-    R = LINES.map(() => []);
+    simC = YOU.c; R = LINES.map(() => []);
+    const use = shown();
     KK.forEach(k => {
       const acc = LINES.map(() => 0);
-      for (let t = 0; t < REPS; t++) { const a = capture(N, k); LINES.forEach((L, j) => acc[j] += (L.f(a) - N) ** 2); }
+      for (let t = 0; t < REPS; t++) { const a = capture(N, k); use.forEach(j => acc[j] += (LINES[j].f(a) - N) ** 2); }
       acc.forEach((s, j) => R[j].push(Math.sqrt(s / REPS)));
     });
   }
   function draw(){
-    const {ctx, w, h} = fit($('#csChart'));
-    const X0 = 46, X1 = w - (w > 520 ? 150 : 14), Y0 = h - 40, Y1 = 10, lx = Math.log(KK[KK.length - 1]);
-    const xs = k => X0 + Math.log(k) / lx * (X1 - X0), ymax = 700, ys = v => Y0 - Math.min(v, ymax) / ymax * (Y0 - Y1);
-    yGrid(ctx, X0, X1, ys, [0, 100, 200, 300, 400, 500, 600, 700], v => String(v));
-    ctx.strokeStyle = C('--ink-3'); ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+    const {ctx, w, h} = fit($('#csChart')), use = shown(), wide = w > 520;
+    ctx.font = '600 11px ' + MONO;
+    // narrow screens: the names go in rows under the axis title
+    const rows = []; if (!wide) { let x = 46, row = []; use.forEach(j => { const tw = ctx.measureText(nameOf(LINES[j])).width; if (x + tw > w - 8 && row.length) { rows.push(row); row = []; x = 46; } row.push([j, x]); x += tw + 14; }); rows.push(row); }
+    const X0 = 46, X1 = w - (wide ? 172 : 14), Y0 = h - 40 - rows.length * 15, Y1 = 10, lx = Math.log(KK[KK.length - 1]);
+    let top = 0; use.forEach(j => R[j].forEach(v => top = Math.max(top, v)));
+    const TK = [10, 20, 50, 100, 200, 500, 1000, 2000, 5000], yhi = TK.find(t => t >= Math.max(1000, top * 1.05)) || 5000, ylo = 10;
+    const xs = k => X0 + Math.log(k) / lx * (X1 - X0), ys = v => Y0 - (Math.log(Math.max(ylo, Math.min(v, yhi))) - Math.log(ylo)) / (Math.log(yhi) - Math.log(ylo)) * (Y0 - Y1);
+    yGrid(ctx, X0, X1, ys, TK.filter(t => t <= yhi), v => comma(v));
+    ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
     ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
     [1, 2, 4, 8, 16, 32].forEach(k => ctx.fillText(k, xs(k), Y0 + 6));
     ctx.fillText('tanks captured (out of 1,000)', (X0 + X1) / 2, Y0 + 22);
     ctx.save(); ctx.translate(12, (Y0 + Y1) / 2); ctx.rotate(-Math.PI / 2); ctx.fillText('typical miss', 0, -6); ctx.restore();
-    LINES.forEach((L, j) => {
-      ctx.strokeStyle = C(L.color); ctx.lineWidth = 2; ctx.setLineDash(L.dash || []);
+    use.forEach(j => {
+      const L = LINES[j];
+      ctx.strokeStyle = C(L.color); ctx.lineWidth = L.you ? 2.5 : 2; ctx.setLineDash(L.dash || []);
       ctx.beginPath(); KK.forEach((k, i) => { const x = xs(k), y = ys(R[j][i]); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.stroke(); ctx.setLineDash([]);
       ctx.fillStyle = C(L.color); KK.forEach((k, i) => dot(ctx, xs(k), ys(R[j][i]), 2.5));
     });
-    // labels: at the right end on wide screens, as a legend row on narrow ones
+    // labels: at the right end on wide screens, as legend rows on narrow ones
     ctx.font = '600 11px ' + MONO; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
-    if (w > 520) {
-      const ys0 = LINES.map((L, j) => ys(R[j][KK.length - 1])), order = ys0.map((y, j) => j).sort((a, b) => ys0[a] - ys0[b]);
-      let last = -99; order.forEach(j => { const y = Math.max(ys0[j], last + 14); last = y; ctx.fillStyle = C(LINES[j].color); ctx.fillText(LINES[j].name, X1 + 8, y); });
-    } else {
-      let x = X0, y = Y1 + 4; LINES.forEach(L => { const t = L.name, tw = ctx.measureText(t).width; if (x + tw > w - 8) { x = X0; y += 14; } ctx.fillStyle = C(L.color); ctx.fillText(t, x, y); x += tw + 14; });
-    }
+    if (wide) {
+      const ys0 = use.map(j => ys(R[j][KK.length - 1])), order = use.map((j, i) => i).sort((a, b) => ys0[a] - ys0[b]);
+      let last = -99; order.forEach(i => { const y = Math.max(ys0[i], last + 14); last = y; ctx.fillStyle = C(LINES[use[i]].color); ctx.fillText(nameOf(LINES[use[i]]), X1 + 8, y); });
+    } else rows.forEach((row, r) => row.forEach(([j, x]) => { ctx.fillStyle = C(LINES[j].color); ctx.fillText(nameOf(LINES[j]), x, h - rows.length * 15 + r * 15 + 6); }));
+    text();
+  }
+  function text(){
+    const el = $('#csYou'), c = simC;
+    if (!c) { el.innerHTML = 'Lock in a guess at the top of the page, and your own recipe joins this chart.'; return; }
+    if (Math.abs(c - 1) < 1e-9) { el.innerHTML = 'Your guess, 60, is the same recipe as <strong>Largest</strong>: it aims low, but it is consistent.'; return; }
+    const J = LINES.findIndex(L => L.you), a = R[J][KK.indexOf(4)], b = R[J][KK.length - 1], cs = c.toFixed(2);
+    el.innerHTML = `<b>Your rule</b>, largest × ${cs}, misses by about <b>${comma(Math.round(a))}</b> tanks with 4 captured and <b>${comma(Math.round(b))}</b> with 48${b > a * 1.03 ? ': it gets <em>worse</em> with more data' : ''}. ` +
+      `As more tanks are captured, the largest number closes in on 1,000, so your rule closes in on about ${comma(Math.round(1000 * c))}, and its typical miss heads for about ${comma(Math.round(1000 * (c - 1)))}, not 0. ` +
+      `Your rule is biased <em>and</em> not consistent. A good multiplier has to shrink as more tanks are captured, which is what <strong>Largest + average gap</strong> does: it is largest × (1 + 1/<em>k</em>), minus 1.`;
   }
   $('#csGo').addEventListener('click', () => { run(); draw(); });
+  listeners.push(() => { if (YOU.c !== simC) { run(); draw(); } });
   run(); draw(); redraws.push(draw);
 })();
 
@@ -878,7 +933,7 @@ const trimmed = (a, t) => { const b = a.slice().sort((x, y) => x - y).slice(t, a
      e: 'It falls from about 20 tanks to about 9. This recipe sharpens roughly in proportion to 1/k, faster than the 1/√k you’d expect from an average.'},
     {s: 'Serial numbers 19, 40, 42 and 60. What does “largest + average gap” estimate?',
      o: ['60', '74', '80'], a: 1,
-     e: 'The average gap is 60 ÷ 4 = 15, so 60 + 15 − 1 = 74.'},
+     e: 'Below 60 there are 56 uncaptured numbers in 4 gaps, 14 wide on average, so 60 + 14 = 74. (The formula: 60 + 60 ÷ 4 − 1.)'},
     {s: 'Recipe A is unbiased but its guesses scatter widely. Recipe B is a little off on average but very steady. Which is better?',
      o: ['A, because unbiased always wins', 'B, because steady always wins', 'It depends: compare their mean squared errors'], a: 2,
      e: 'Mean squared error = bias² + variance. A small bias can be worth paying for a big drop in variance, as “Largest” showed against “Twice the average”, but not always.'},

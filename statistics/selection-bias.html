@@ -200,7 +200,7 @@ table.summary.num th{font-size:11px;white-space:normal}
   <div class="secnum">01</div>
   <h2>The planes that didn’t come back</h2>
   <p>The holes you can count are on the planes that came back. That makes them a sample of all the hits, but not a random one: every hole on a returning plane is a hit that the plane survived. A part of the plane can look clean for only two reasons. Either it is rarely hit, or a hit there brings the plane down, so the planes hit there aren’t around to be inspected.</p>
-  <p>In this toy squadron the bullets land evenly all over the plane, which rules out the first reason. How deadly a hit is in each part is set in advance and kept hidden. To compare parts of different sizes fairly, count holes per square foot:</p>
+  <p>In this toy squadron the bullets land evenly all over the plane, which rules out the first reason. How deadly a hit is in each part is set in advance and kept hidden. It is a harsh squadron too: about a third of its planes are lost on every mission, far more than the few percent typical of real bombing raids, so that the pattern shows up quickly. To compare parts of different sizes fairly, count holes per square foot:</p>
 
   <div class="widget">
     <p class="widget-title">Holes per 100 square feet, by part of the plane</p>
@@ -227,8 +227,7 @@ table.summary.num th{font-size:11px;white-space:normal}
   <div class="secnum">02</div>
   <h2>Bigger doesn’t help</h2>
   <p>On the <a href="sampling-distributions.html">previous page</a> a bigger sample always helped. The wobble of an average shrinks like σ/√<em>n</em>, so with enough data the estimate homes in on the truth. That promise came with a condition: the sample has to be random. A sample that passes through a filter also homes in as it grows, but on the wrong value.</p>
-  <p>The most famous demonstration is the US presidential election of 1936. The <em>Literary Digest</em>, a popular magazine that had called the winner of every election since 1916, mailed mock ballots to 10 million people. The addresses came mainly from telephone directories, car registrations and its own subscriber lists. Nearly 2.4 million ballots came back, and the final count was 1,293,669 for the Republican, Alf Landon, against 972,897 for President Franklin Roosevelt: 57% for Landon.</p>
-  <p>In November Roosevelt won 60.8% of the vote and every state except Maine and Vermont. Of the votes for the two men, he took 62.5%; the <em>Digest</em>’s ballots gave him 42.9%. George Gallup, with about 50,000 interviews, correctly called Roosevelt’s win.</p>
+  <p>The most famous demonstration is the US presidential election of 1936. The <em>Literary Digest</em>, a popular magazine that had called the winner of every election since 1916, mailed mock ballots to 10 million people. The addresses came mainly from telephone directories, car registrations and its own subscriber lists. Nearly 2.4 million ballots came back. Before seeing what they said, make a call.</p>
 
   <div class="widget">
     <p class="widget-title">A biased sample against a random one, as both grow</p>
@@ -239,9 +238,16 @@ table.summary.num th{font-size:11px;white-space:normal}
       <button class="btn" data-g="same">They’re about as good</button>
     </div>
     <canvas id="dgChart" style="height:260px" role="img" aria-label="Estimated Roosevelt share against sample size on a log scale, for random samples and for samples that over-count Landon voters, each with its 95% margin of error, next to the true share and the Literary Digest's result"></canvas>
-    <div class="legend"><span><i class="sw dot" style="background:var(--one)"></i><span>random sample</span></span><span><i class="sw dot" style="background:var(--zero)"></i><span><em>Digest</em>-style sample</span></span><span><i class="sw" style="border:2px solid var(--accent);width:9px;height:9px;transform:rotate(45deg)"></i><span>the <em>Digest</em>’s real result</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>Roosevelt’s true share</span></span></div>
+    <div class="legend"><span><i class="sw dot" style="background:var(--ink-3)"></i><span>random sample (simulated)</span></span><span><i class="sw dot" style="background:transparent;border:2px solid var(--ink-2)"></i><span><em>Digest</em>-style sample (simulated)</span></span><span><i class="sw" style="border:2px solid var(--accent);width:9px;height:9px;transform:rotate(45deg)"></i><span>the <em>Digest</em>’s real result</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>Roosevelt’s true share</span></span></div>
     <div class="controls">
       <label class="ctrl">a Landon voter is <input type="range" id="dgK" min="1" max="4" step="0.1" value="2.2"><output id="dgKOut" style="min-width:0"></output> as likely to be counted</label>
+    </div>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Bias presets">
+        <button class="btn" data-k="2.2">the <em>Digest</em>’s bias: 2.2×</button>
+        <button class="btn" data-k="1.1">a small bias: 1.1×</button>
+        <button class="btn" data-k="1">no bias: 1×</button>
+      </div>
     </div>
     <div class="controls">
       <button class="btn primary" id="dgGo" disabled>▶ Grow the samples</button>
@@ -251,9 +257,10 @@ table.summary.num th{font-size:11px;white-space:normal}
     <p class="msg" id="dgMsg" aria-live="polite"></p>
   </div>
 
+  <p>That is what happened in 1936. The <em>Digest</em>’s final count was 1,293,669 for the Republican, Alf Landon, against 972,897 for President Franklin Roosevelt: 57% for Landon. In November Roosevelt won 60.8% of the vote and every state except Maine and Vermont. Of the votes for the two men, he took 62.5%; the <em>Digest</em>’s ballots gave him 42.9%. George Gallup, with about 50,000 interviews, correctly called Roosevelt’s win.</p>
   <p>Both kinds of sample settle down as they grow, and their error bars shrink in the same way. The random sample settles on the truth. The biased one settles on 43%, with an error bar so narrow it hides behind the dot. Its margin of error is honest about chance and blind to bias, because the formula assumes the sample is random.</p>
   <div class="callout">
-    <p><strong>Error = bias + wobble.</strong> More data shrinks only the wobble. The bias, how far the sample’s target sits from the truth, stays exactly where it is, however large the sample. Slide the bias to 1 and the two samples behave identically.</p>
+    <p><strong>Error = bias + wobble.</strong> More data shrinks only the wobble. The bias, how far the sample’s target sits from the truth, stays exactly where it is, however large the sample. Slide the bias to 1 and the two samples behave identically. Then try <strong>a small bias: 1.1×</strong>, a Landon voter just 10% likelier to be counted. The 2.3 million ballots still miss by about 2.3 points, as far as a random sample of about 460 voters typically misses.</p>
   </div>
   <p>Why the over-count? In the middle of the Great Depression, people with telephones and cars were better off than average and leaned Republican. On top of that, the people who bothered to mail a ballot back leaned toward Landon. Studies of the poll disagree about how to split the blame between the mailing list and the response (Squire 1988; Lusinchi 2012; Lohr and Brick 2017), but agree that both played a part. Comparing the <em>Digest</em>’s split with the real one, a Landon voter was about <strong>2.2 times</strong> as likely as a Roosevelt voter to end up in the count. That is the default on the slider.</p>
 </section>
@@ -262,7 +269,7 @@ table.summary.num th{font-size:11px;white-space:normal}
 <section id="kinds">
   <div class="secnum">03</div>
   <h2>Kinds of missing</h2>
-  <p>Bombers and ballots are two cases of one problem: whether a value reaches you depends on the value itself. It turns up anywhere people or things can drop out before they are counted. Pick an example below and change how strongly the value decides who is seen.</p>
+  <p>Bombers and ballots are two cases of one problem: whether a value reaches you depends on the value itself. It turns up anywhere people or things can drop out before they are counted. Pick an example below. Each starts with no filter at all, so everyone is seen; guess which way the filter will push the average, then slide to change how strongly the value decides who is seen.</p>
 
   <div class="widget">
     <p class="widget-title">Who gets seen</p>
@@ -274,10 +281,15 @@ table.summary.num th{font-size:11px;white-space:normal}
       </div>
     </div>
     <p class="cap" id="kmCap"></p>
+    <p style="margin:6px 0 8px" id="kmQ"></p>
+    <div class="controls" style="margin-top:0">
+      <div class="seg" role="group" aria-label="Your guess" id="kmGuess"></div>
+      <button class="linkbtn" id="kmSkip">skip the guess</button>
+    </div>
     <canvas id="kmChart" style="height:220px" role="img" aria-label="Histogram of the whole population, split into the part that is seen and the part that is missing, with the averages of everyone and of those seen"></canvas>
     <div class="legend"><span><i class="sw" style="background:var(--accent)"></i><span>seen</span></span><span><i class="sw" style="background:var(--zero-soft);border:1px solid var(--zero)"></i><span>missing</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>average of everyone</span></span><span><i class="sw line" style="border-top:2px solid var(--accent)"></i><span>average of those seen</span></span></div>
     <div class="controls">
-      <label class="ctrl">how much the value decides who is seen <input type="range" id="kmS" min="0" max="1" step="0.05" value="0.7"><output id="kmSOut"></output></label>
+      <label class="ctrl">how much the value decides who is seen <input type="range" id="kmS" min="0" max="1" step="0.05" value="0" disabled><output id="kmSOut"></output></label>
     </div>
     <div class="readout" id="kmRead" aria-live="polite"></div>
   </div>
@@ -294,7 +306,7 @@ table.summary.num th{font-size:11px;white-space:normal}
 <section id="cure">
   <div class="secnum">04</div>
   <h2>Random sampling is the cure</h2>
-  <p>There is one reliable way to stop the values from deciding who gets into the sample: let chance decide. In a <em class="term">random sample</em> everyone has the same chance of being picked, whatever their vote, height or bank balance. The sample can still be unlucky, but only by chance, and chance is exactly what the previous page learned to measure: its size is the standard error, and it shrinks as the sample grows. Random sampling turns an error you can’t measure (bias) into one you can (wobble).</p>
+  <p>There is one reliable way to stop the values from deciding who gets into the sample: let chance decide. In a <em class="term">random sample</em> everyone has the same chance of being picked, whatever their vote, height or bank balance. The sample can still be unlucky, but only by chance, and chance is exactly what the <a href="sampling-distributions.html#wobble">previous page</a> learned to measure: its size is the standard error, and it shrinks as the sample grows. Random sampling turns an error you can’t measure (bias) into one you can (wobble).</p>
   <p>That is why 1,000 people picked at random beat 2.3 million who came through a filter.</p>
   <p>The catch is that you can choose people at random, but you can’t make them answer. Pew Research Center’s telephone surveys had a response rate of 36% in 1997 and 6% in 2018. Every modern poll is a random sample passed through a second, non-random filter, and pollsters fight back as best they can:</p>
   <div class="table-wrap">
@@ -308,7 +320,7 @@ table.summary.num th{font-size:11px;white-space:normal}
       </tbody>
     </table>
   </div>
-  <p>The same cure works for comparisons. When a coin decides which visitors see the orange button, or which patients get the new drug, nothing about the people can sneak into the comparison. That is <em>random assignment</em>, and the 1954 polio vaccine trial at the end of this part of the series shows what it buys.</p>
+  <p>The same cure works for comparisons. When a coin decides which visitors see the orange button, or which patients get the new drug, nothing about the people can sneak into the comparison. That is <em>random assignment</em>, and <a href="polio-trial.html">the 1954 polio vaccine trial</a> at the end of this part of the series shows what it buys.</p>
 </section>
 
 <!-- 5 -->
@@ -330,7 +342,7 @@ table.summary.num th{font-size:11px;white-space:normal}
     <div class="readout" id="quizScore" style="margin-top:10px" aria-live="polite"></div>
   </div>
 
-  <p>This page was about bias that comes from the data, from who made it into the sample. Bias can also come from the formula you apply to a perfectly random sample, as with the sample maximum on the previous page. How to judge an estimate by its bias and its wobble together is the next page, <a href="estimation.html"><strong>What Makes a Good Guess</strong></a>.</p>
+  <p>This page was about bias that comes from the data, from who made it into the sample. Bias can also come from the formula you apply to a perfectly random sample, as with the <a href="sampling-distributions.html#others">sample maximum</a> on the previous page. How to judge an estimate by its bias and its wobble together is the next page, <a href="estimation.html"><strong>What Makes a Good Guess</strong></a>.</p>
 </section>
 
 </main>
@@ -711,7 +723,7 @@ function drawPlane(ctx, ox, oy, s, o){
 (function(){
   const R = 27752648 / (27752648 + 16681862), NDIG = 972897 + 1293669, DIG = 972897 / NDIG;   // Roosevelt's two-party share; the Digest's
   const SIZES = [100, 300, 1000, 3000, 10000, 30000, 100000, 300000, 1000000, NDIG];
-  let pts = [], timer = null, guess = null, open = false, done = false;
+  let pts = [], timer = null, guess = null, open = false, done = false, running = false;
   const kIn = $('#dgK'), msg = $('#dgMsg');
   const pB = () => { const k = +kIn.value; return R / (R + k * (1 - R)); };
   const sample = (n, p) => n <= 3000 ? binom(n, p) / n : Math.min(1, Math.max(0, p + Math.sqrt(p * (1 - p) / n) * gauss()));
@@ -725,19 +737,21 @@ function drawPlane(ctx, ox, oy, s, o){
     ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
     ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
     [100, 1000, 1e4, 1e5, 1e6].forEach(n => ctx.fillText(n === 100 ? '100' : n === 1000 ? '1,000' : big(n), xs(n), Y0 + 6));
-    if (w >= 420) { ctx.textAlign = 'right'; ctx.fillText('sample size →', X1, Y0 + 6); }
+    if (w >= 420) { ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillText('sample size (log scale) →', X1, Y0 - 4); }
     ctx.save(); ctx.strokeStyle = C('--ink'); ctx.lineWidth = 1.5; ctx.setLineDash([5, 4]);
     ctx.beginPath(); ctx.moveTo(X0, Math.round(ys(R)) + .5); ctx.lineTo(X1, Math.round(ys(R)) + .5); ctx.stroke(); ctx.restore();
-    ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--ink'); ctx.textAlign = 'right'; ctx.textBaseline = 'top';
-    ctx.fillText('Roosevelt’s true share 62.5%', X1, ys(R) + 6);
+    ctx.font = '600 11px ' + MONO; ctx.fillStyle = C('--ink'); ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+    ctx.fillText('Roosevelt’s true share 62.5%', X1, ys(R) - 7);   // above the line, clear of the settled dots
     pts.forEach(p => {
-      [[p.r, -5, C('--one')], [p.b, 5, C('--zero')]].forEach(([v, dx, col]) => {
+      [[p.r, -5, C('--ink-3'), true], [p.b, 5, C('--ink-2'), false]].forEach(([v, dx, col, filled]) => {
         const x = Math.round(xs(p.n) + dx) + .5, m = moe(v, p.n), a = ys(Math.min(hi, v + m)), b = ys(Math.max(lo, v - m));
         ctx.strokeStyle = col; ctx.lineWidth = 1.5;
         ctx.beginPath(); ctx.moveTo(x, a); ctx.lineTo(x, b); ctx.moveTo(x - 3, a); ctx.lineTo(x + 3, a); ctx.moveTo(x - 3, b); ctx.lineTo(x + 3, b); ctx.stroke();
-        ctx.fillStyle = col; dot(ctx, x, ys(v), 3.5);
+        if (filled) { ctx.fillStyle = col; dot(ctx, x, ys(v), 3.5); }
+        else { ctx.fillStyle = C('--surface'); dot(ctx, x, ys(v), 3.8); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, ys(v), 3.5, 0, TAU); ctx.stroke(); }
       });
     });
+    if (!done) return;   // the Digest's real result stays hidden until the samples have grown
     const dx = xs(NDIG) + 5, dy = ys(DIG);
     ctx.strokeStyle = C('--accent'); ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(dx, dy - 8); ctx.lineTo(dx + 8, dy); ctx.lineTo(dx, dy + 8); ctx.lineTo(dx - 8, dy); ctx.closePath(); ctx.stroke();
@@ -762,16 +776,21 @@ function drawPlane(ctx, ox, oy, s, o){
     $$('#dgPred .btn').forEach(b => { b.classList.remove('right', 'wrong'); if (b.dataset.g === guess) b.classList.add(guess === 'small' ? 'right' : 'wrong'); });
     const r1 = pts.find(p => p.n === 1000), last = pts[pts.length - 1], k = +kIn.value;
     if (k < 1.05) { msg.innerHTML = 'With the bias set to 1, the big sample really is better: both kinds home in on the truth, and more data means a narrower margin. Slide the bias back up.'; return; }
-    const lead = guess === 'small' ? '<b>Right.</b> ' : guess ? '<b>The small random sample wins.</b> ' : '';
+    if (k < 1.15) {
+      const b = pB() - R, neq = Math.round(R * (1 - R) / (b * b) / 10) * 10;
+      msg.innerHTML = `<b>Even a small tilt adds up.</b> With a Landon voter just ${Math.round(100 * (k - 1))}% likelier to be counted, the ${comma(NDIG)} ballots gave ${(100 * last.b).toFixed(1)}%, about ${Math.abs(100 * b).toFixed(1)} points off: as far as a random sample of about ${comma(neq)} voters typically misses. (The 1,000 random voters gave ${(100 * r1.r).toFixed(1)}%.) Size shrinks the wobble, not the bias.`;
+      return;
+    }
+    const lead = guess === 'small' ? '<b>Right:</b> you trusted the 1,000 random voters, and they win. ' : guess === 'big' ? '<b>You trusted the 2.3 million ballots, but the small random sample wins.</b> ' : guess === 'same' ? '<b>You called them about even, but the small random sample wins.</b> ' : '';
     msg.innerHTML = lead + `The 1,000 random voters gave ${(100 * r1.r).toFixed(1)}%, within a few points of the truth. The ${comma(NDIG)} biased ballots gave ${(100 * last.b).toFixed(1)}%, ${Math.abs(100 * (last.b - R)).toFixed(0)} points off, with a margin of error under a tenth of a point. Size shrinks the wobble, not the bias.`;
   }
   function run(animate){
-    clearTimeout(timer); pts = []; done = false; let i = 0;
+    clearTimeout(timer); pts = []; done = false; running = true; let i = 0;
     const step = () => {
       pts.push({n: SIZES[i], r: sample(SIZES[i], R), b: sample(SIZES[i], pB())}); i++;
       if (i < SIZES.length && animate) { draw(); read(); timer = setTimeout(step, 260); return; }
       if (i < SIZES.length) return step();
-      done = true; draw(); read(); verdict(); $('#dgGo').textContent = 'Run again';
+      done = true; running = false; draw(); read(); verdict(); $('#dgGo').textContent = 'Run again';
     };
     step();
   }
@@ -782,8 +801,11 @@ function drawPlane(ctx, ox, oy, s, o){
   }));
   $('#dgSkip').addEventListener('click', setOpen);
   $('#dgGo').addEventListener('click', () => run(!RM));
-  kIn.addEventListener('input', () => { $('#dgKOut').textContent = (+kIn.value).toFixed(1) + '×'; if (done) run(false); });
-  $('#dgKOut').textContent = (+kIn.value).toFixed(1) + '×';
+  const showK = () => { $('#dgKOut').textContent = (+kIn.value).toFixed(1) + '×'; $$('[data-k]').forEach(b => { const on = Math.abs(+b.dataset.k - +kIn.value) < .01; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }); };
+  const setK = () => { showK(); if (done || running) run(false); };   // a change mid-run restarts it, so one run never mixes two settings
+  kIn.addEventListener('input', setK);
+  $$('[data-k]').forEach(b => b.addEventListener('click', () => { kIn.value = b.dataset.k; setK(); }));
+  showK();
   draw(); redraws.push(draw);
 })();
 
@@ -792,12 +814,12 @@ function drawPlane(ctx, ox, oy, s, o){
   const logistic = z => 1 / (1 + Math.exp(-z));
   const S = {
     survey: {cap: 'A political survey asks “How interested are you in politics, from 0 to 10?” People who care about politics are more willing to spend fifteen minutes answering questions about it.',
-      lo: -.5, hi: 10.5, bw: 1, fmt: v => v.toFixed(1), draw: () => binom(10, .2 + .55 * Math.random()), keep: (v, s) => Math.min(1, .25 * Math.exp(.4 * s * (v - 5))), unit: 'interest in politics'},
+      lo: -.5, hi: 10.5, bw: 1, fmt: v => v.toFixed(1), draw: () => binom(10, .2 + .55 * Math.random()), keep: (v, s) => Math.min(1, .25 * Math.exp(.4 * s * (v - 5))), unit: 'interest in politics', pre: 'A political survey asks “How interested are you in politics, from 0 to 10?” Only the people who agree to answer the survey are counted.', q: 'Will the people who answer be more or less interested in politics, on average, than everyone?', opts: ['More interested', 'Less interested', 'About the same']},
     study: {cap: 'A six-month diet program weighs everyone at the end. The people who aren’t losing weight are the most likely to stop coming, so they miss the final weigh-in. (Negative means weight lost.)',
-      lo: -16, hi: 12, bw: 1, fmt: v => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(1) + ' kg', draw: () => -2 + 4 * gauss(), keep: (v, s) => logistic(Math.log(7 / 3) - .6 * s * (v + 2)), unit: 'change in weight (kg)'},
+      lo: -16, hi: 12, bw: 1, fmt: v => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(1) + ' kg', draw: () => -2 + 4 * gauss(), keep: (v, s) => logistic(Math.log(7 / 3) - .6 * s * (v + 2)), unit: 'change in weight (kg)', pre: 'A six-month diet program holds a final weigh-in. Only the people who are still coming at the end get weighed. (Negative means weight lost.)', q: 'Will the people at the final weigh-in show more or less weight lost, on average, than everyone who started?', opts: ['More weight lost', 'Less weight lost', 'About the same']},
     funds: {cap: 'Average yearly return of investment funds over ten years. Funds that do badly are closed or merged away; a database of the funds open today only averages the ones still standing.',
-      lo: -6, hi: 18, bw: 1, fmt: v => v.toFixed(1) + '%', draw: () => 6 + 3 * gauss(), keep: (v, s) => logistic(Math.log(1.5) + 1.2 * s * (v - 6)), unit: 'yearly return (%)'}
-  };
+      lo: -6, hi: 18, bw: 1, fmt: v => v.toFixed(1) + '%', draw: () => 6 + 3 * gauss(), keep: (v, s) => logistic(Math.log(1.5) + 1.2 * s * (v - 6)), unit: 'yearly return (%)', pre: 'Average yearly return of investment funds over ten years. A database of the funds open today averages only the funds that are still open.', q: 'Will the funds still open today average a higher or lower return than all the funds that were launched?', opts: ['Higher', 'Lower', 'About the same']}
+  };   // in every example the first option is right
   const N = 20000, cache = {};
   function values(key){
     if (cache[key]) return cache[key];
@@ -831,16 +853,31 @@ function drawPlane(ctx, ox, oy, s, o){
     vline(ctx, xs(mS), 18, Y0, C('--accent'), null, 2);
     label(ctx, xs(mA), 4, 'everyone ' + P.fmt(mA), C('--ink'), X0, X1);
     label(ctx, xs(mS), 18, 'seen ' + P.fmt(mS), C('--accent'), X0, X1);
-    $('#kmRead').innerHTML = `${P.unit} · everyone: <b>${P.fmt(mA)}</b> · those seen: <b>${P.fmt(mS)}</b> · <b>${Math.round(100 * wS / N)}%</b> of the population is seen`;
+    let r = `${P.unit} · everyone: <b>${P.fmt(mA)}</b> · those seen: <b>${P.fmt(mS)}</b> · <b>${Math.round(100 * wS / N)}%</b> of the population is seen`;
+    if (guess == null && sIn.disabled) r += '<br>Make a guess to unlock the slider.';
+    else if (guess != null && s === 0) r += '<br>Now slide to the right and watch who goes missing.';
+    else if (guess != null) r += `<br>you guessed <span class="gd">${P.opts[guess].toLowerCase()}</span> · those seen average <b>${P.fmt(mS)}</b> against <b>${P.fmt(mA)}</b> for everyone: ` + (guess === 0 ? '<span class="ok">right</span>' : 'the filter pushes the average the other way');
+    $('#kmRead').innerHTML = r;
     $('#kmSOut').textContent = word(s);
+  }
+  let guess = null;
+  function ask(){   // a new example starts unfiltered and asks for a guess
+    const P = S[cur]; guess = null; sIn.value = 0; sIn.disabled = true; $('#kmSkip').hidden = false;
+    $('#kmCap').textContent = P.pre; $('#kmQ').textContent = P.q;   // the neutral caption; the mechanism is revealed after the guess
+    $('#kmGuess').innerHTML = P.opts.map((t, i) => `<button class="btn" data-i="${i}">${t}</button>`).join('');
+    $$('#kmGuess .btn').forEach(b => b.addEventListener('click', () => {
+      guess = +b.dataset.i; $$('#kmGuess .btn').forEach(x => x.classList.toggle('guess', x === b));
+      sIn.disabled = false; $('#kmSkip').hidden = true; $('#kmCap').textContent = S[cur].cap; draw();
+    }));
+    draw();
   }
   $$('[data-km]').forEach(b => b.addEventListener('click', () => {
     cur = b.dataset.km; $$('[data-km]').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); });
-    $('#kmCap').textContent = S[cur].cap; draw();
+    ask();
   }));
   sIn.addEventListener('input', draw);
-  $('#kmCap').textContent = S[cur].cap;
-  draw(); redraws.push(draw);
+  $('#kmSkip').addEventListener('click', () => { sIn.disabled = false; $('#kmSkip').hidden = true; $('#kmCap').textContent = S[cur].cap; draw(); });
+  ask(); redraws.push(draw);
 })();
 
 /* ---------- 5. quiz ---------- */
