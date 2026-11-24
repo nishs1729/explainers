@@ -162,7 +162,7 @@ window.EXPLAINERS = {
           "id": "learning-from-data",
           "title": "Learning from data",
           "blurb": "Could chance alone have done this? Starting from line-ups and coin streaks, the series builds the tools for answering that question: sampling, estimation, resampling, tests, intervals and power, ending with the 1954 polio vaccine trial.",
-          "topics": ["is-it-real", "sampling-distributions", "selection-bias", "estimation", "bootstrap", "permutation-tests", "p-values", "confidence-intervals", "errors", "power", "student-t", "chi-square-tests", "anova", "forking-paths"]
+          "topics": ["is-it-real", "sampling-distributions", "selection-bias", "estimation", "bootstrap", "permutation-tests", "p-values", "confidence-intervals", "errors", "power", "student-t", "chi-square-tests", "anova", "forking-paths", "polio-trial"]
         }
       ],
       "topics": [
@@ -289,6 +289,15 @@ window.EXPLAINERS = {
           "path": "statistics/forking-paths.html",
           "summary": "How a Beatles song “made” students younger at p = .040: 20 tests on noise, Bonferroni and false discovery rates, peeking until it works, and a p-hacking sandbox with 486 paths whose discoveries vanish on fresh data.",
           "tags": ["p-hacking", "multiple testing", "false discovery rate", "pre-registration", "replication"],
+          "preview": { "select": "#heroPlay", "click": ["#heroSkip", "#heroGo"] }
+        },
+        {
+          "id": "polio-trial",
+          "title": "The 1954 polio vaccine trial",
+          "short": "Polio trial",
+          "path": "statistics/polio-trial.html",
+          "summary": "A case study of the 1.8-million-child Salk vaccine trial: why vaccinating volunteers understated the effect (29 vs 42 cases prevented per 100,000), a trial simulator, the shuffle test, intervals and why rare outcomes need enormous trials.",
+          "tags": ["randomized trial", "case study", "selection bias", "placebo", "Salk"],
           "preview": { "select": "#heroPlay", "click": ["#heroSkip", "#heroGo"] }
         }
       ]

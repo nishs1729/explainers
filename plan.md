@@ -35,7 +35,7 @@ See [Statistics: how every page works](#statistics-conventions) first.
 - [x] [12. Chi-square tests](https://nishs1729.github.io/explainers/statistics/chi-square-tests.html)
 - [x] [13. ANOVA](https://nishs1729.github.io/explainers/statistics/anova.html)
 - [x] [14. ⚠ The garden of forking paths](https://nishs1729.github.io/explainers/statistics/forking-paths.html)
-- [ ] [15. 📖 The 1954 polio vaccine trial](#polio-trial)
+- [x] [15. 📖 The 1954 polio vaccine trial](https://nishs1729.github.io/explainers/statistics/polio-trial.html)
 
 ### [Bridge](#bridge)
 - [ ] [16. Likelihood](#likelihood)
@@ -568,6 +568,8 @@ Assumes the probability series, especially Normal (CLT, √n law) and Chi-square
 > **Data:** rates per 100,000 from Freedman, Pisani & Purves, *Statistics*, ch. 1 (randomised: ~28 vaccinated vs ~71 placebo; verify before use). Francis report (1955).
 >
 > **Links:** recaps pages 3, 6–10.
+>
+> **Built:** data verified from Meier's Table 1 (adapted from Francis 1955; rows sum to the printed totals): randomized areas vaccine 57/200,745 (28 per 100,000), placebo 142/201,229 (71), refused 157/338,778 (46); observed-control areas grade 2 vaccinated 56/221,998 (25), grades 1 and 3 391/725,173 (54), grade 2 refused 54/123,605 (44); paralytic 33 vs 115 and 38 vs 330; 1,829,916 children in all. The hero asks which design shows the bigger effect and reveals both as bar panels (42 vs 29 fewer per 100,000). Section 1 draws 100,000 children with 71 or 28 cases. Section 2 is the ★ simulator, a labeled model (better-off 85 vs less well-off 35 per 100,000; consent 55/55, 75/35 or 90/20%; true effect 0–90%), running both designs with a strip of repeated estimates in cases prevented against the truth (default: randomized ≈ 41, volunteers ≈ 33; a useless vaccine looks harmful in the volunteer design), plus the real table. Section 3 shuffles the 199 cases (expected 99.4 ± 7.0 in the vaccine group vs 57; z = 6.0, p ≈ 2 × 10⁻⁹; paralytic toggle). Section 4 plots intervals for cases prevented (randomized 42 (28–56), paralytic 41 (29–53); observed 29 (20–37), 28 (21–36)) and efficacy 60% (45–70%), paralytic 71% (58–81%). Section 5 is a power slider for halving 71 per 100,000 (10,000 per group 19%; 80% at ~67,000, 90% at ~89,000) with 100 simulated trials. Section 6 maps the trial to pages 3 and 6–10 and 14; the closing leads to Likelihood.
 
 ---
 

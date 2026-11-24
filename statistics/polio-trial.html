@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The 1954 polio vaccine trial — a case study</title>
+<style>
+:root{
+  --bg:#faf8f4; --surface:#ffffff; --surface-2:#f2efe8; --ink:#1c1c1e; --ink-2:#4c4e55; --ink-3:#8b8d93; --line:#e3dfd5;
+  --one:#16917c; --one-soft:rgba(22,145,124,.15);
+  --zero:#d9573a; --zero-soft:rgba(217,87,58,.15);
+  --accent:#3654c9; --accent-soft:rgba(54,84,201,.11);
+  --gold:#b98317; --gold-soft:rgba(185,131,23,.22);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+    --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+    --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+    --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+    --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+  --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+  --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+  --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+  --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.68 var(--sans);-webkit-font-smoothing:antialiased}
+main{max-width:820px;margin:0 auto;padding:0 20px 80px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;letter-spacing:-.01em}
+h1{font-size:clamp(2.2rem,6vw,3.4rem);margin:.2em 0 .3em}
+h2{font-size:clamp(1.6rem,4vw,2.1rem);margin:0 0 .5em}
+h3{font-size:1.2rem;margin:1.6em 0 .4em}
+p{margin:0 0 1em}
+a{color:var(--accent)}
+strong{font-weight:650}
+em.term{font-style:normal;font-weight:650;color:var(--accent)}
+.muted{color:var(--ink-2)}
+small,.small{font-size:14px}
+
+/* hero */
+.hero{text-align:center;padding:64px 0 24px}
+.kicker{text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--ink-3);margin:0}
+.lede{font-size:1.2rem;color:var(--ink-2);max-width:620px;margin:0 auto}
+.hero-play{max-width:640px;margin:30px auto 0;text-align:left}
+.hero-play .controls{justify-content:center}
+.hint{font-size:15px;color:var(--ink-2);min-height:3.2em;margin:10px 0 0;text-align:center}
+.ask{font-family:var(--serif);font-size:1.25rem;text-align:center;margin:0 0 12px}
+
+.toc{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;margin:28px 0 8px}
+.toc ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 20px;counter-reset:t}
+.toc li{counter-increment:t;font-size:15px}
+.toc li::before{content:counter(t,decimal-leading-zero);font-family:var(--mono);color:var(--ink-3);margin-right:10px;font-size:13px}
+.toc a{color:var(--ink);text-decoration:none}
+.toc a:hover{color:var(--accent)}
+
+section{padding-top:56px}
+.secnum{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.08em;margin-bottom:4px}
+
+.widget{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin:26px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.widget-title{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);margin:0 0 12px;font-weight:600}
+.controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:12px 0}
+.ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:15px}
+.ctrl output{font-family:var(--mono);font-size:14px;min-width:5.5em;color:var(--ink)}
+input[type=range]{accent-color:var(--accent);width:170px;max-width:100%}
+.btn{font:inherit;font-size:14px;line-height:1.2;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;transition:background .15s,transform .1s}
+.btn:hover{border-color:var(--ink-3)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn.guess{background:var(--gold-soft);border-color:var(--gold);color:var(--ink)}
+.btn.right{background:var(--one-soft);border-color:var(--one);color:var(--one)}
+.btn.wrong{background:var(--zero-soft);border-color:var(--zero);color:var(--zero)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:6px}
+.readout{font-family:var(--mono);font-size:14px;color:var(--ink-2);line-height:1.6}
+.readout b{color:var(--ink);font-weight:600}
+.readout .ok{color:var(--one);font-weight:600}
+.readout .warn{color:var(--zero);font-weight:600}
+.readout .gd{color:var(--gold);font-weight:600}
+.msg{font-size:15px;color:var(--ink-2);min-height:3.4em;margin:10px 0 0}
+.msg b{color:var(--ink)}
+canvas{display:block;width:100%}
+.cap{font-size:13px;color:var(--ink-3);margin:2px 0 6px}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:20px 0}
+.callout p:last-child{margin-bottom:0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin-top:8px}
+.legend > span{display:inline-block}
+.legend .sw{vertical-align:middle;margin:0 6px 2px 0}
+.sw{display:inline-block;width:16px;height:10px;border-radius:2px}
+.sw.dot{width:8px;height:8px;border-radius:50%}
+.sw.line{height:0;border-top:2px solid var(--ink)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+@media (max-width:640px){.pair{grid-template-columns:1fr}}
+.mcap{font-size:13px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+
+/* cast */
+.cast-q{font-family:var(--serif);font-size:1.08rem;margin:0 0 10px}
+.datarow{font-family:var(--mono);font-size:14px;color:var(--ink-2);margin:0 0 6px}
+.datarow b{color:var(--ink)}
+
+/* recipe */
+.facts{counter-reset:f;list-style:none;padding:0;margin:18px 0}
+.facts li{counter-increment:f;position:relative;padding:12px 0 12px 44px;border-bottom:1px solid var(--line)}
+.facts li::before{content:counter(f);position:absolute;left:0;top:12px;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:600 13px var(--mono)}
+.facts li strong{display:block}
+.table-wrap{overflow-x:auto}
+table.summary{border-collapse:collapse;width:100%;font-size:15px;margin:14px 0}
+table.summary td,table.summary th{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3)}
+@media (max-width:480px){table.summary td,table.summary th{padding:8px 5px}}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:18px 0}
+.card{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
+.card h4{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+.card p{font-size:15px;margin:0;color:var(--ink-2)}
+
+/* quiz */
+.quiz{display:grid;gap:10px}
+.qitem{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg)}
+.qitem p{margin:0 0 8px;font-size:16px}
+.qbtns{display:flex;flex-wrap:wrap;gap:8px}
+.qexp{font-size:15px;color:var(--ink-2);margin:10px 0 0!important}
+
+@media (max-width:480px){
+  main{padding:0 16px 80px}
+  .widget{padding:14px}
+  input[type=range]{width:150px}
+}
+/* page 15 */
+.linkbtn{all:unset;cursor:pointer;font-size:14px;color:var(--accent);text-decoration:underline}
+.linkbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.linkbtn[hidden],.btn[hidden]{display:none}
+.legend > span[hidden]{display:none}
+table.summary.num{font-size:14px}
+table.summary.num td,table.summary.num th{text-align:right;white-space:nowrap}
+table.summary.num td:first-child,table.summary.num th:first-child{text-align:left;white-space:normal}
+table.summary tr.grp td{font-weight:600;color:var(--ink);background:var(--surface-2);text-align:left}
+table.summary td:first-child a{white-space:nowrap}
+</style>
+<script>try{var t=localStorage.getItem('xp-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/catalog.js" defer></script>
+<script src="../assets/site.js" defer></script>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <p class="kicker">A case study</p>
+  <h1>The 1954 polio vaccine trial</h1>
+  <p class="lede">In 1954 about 1.8 million American schoolchildren took part in the biggest public-health experiment ever run, to find out whether Jonas Salk’s polio vaccine worked. Everything in this series so far was needed to get the answer right.</p>
+  <div class="hero-play" id="heroPlay">
+    <p class="ask">Polio struck only a few dozen children per 100,000 in a year. How do you tell if a vaccine works?</p>
+    <p class="hint" style="min-height:0;margin:0 0 10px">The trial ran two designs side by side. In some areas, second-graders whose parents agreed got the vaccine, and first- and third-graders were watched for comparison. In others, children whose parents agreed got either the vaccine or an injection of salt water, chosen at random, with nobody told which. Which design showed the bigger effect of the vaccine?</p>
+    <div class="controls" id="heroPred">
+      <button class="btn" data-g="0">The random, salt-water design</button>
+      <button class="btn" data-g="1">The vaccinate-the-volunteers design</button>
+      <button class="btn" data-g="2">About the same</button>
+    </div>
+    <canvas id="heroChart" style="height:280px" role="img" aria-label="Polio cases per 100,000 children in each group of the two trial designs"></canvas>
+    <div class="controls">
+      <button class="btn primary" id="heroGo" disabled>Show the results</button>
+      <button class="linkbtn" id="heroSkip">skip the guess</button>
+    </div>
+    <p class="hint" id="heroHint" aria-live="polite">Make your guess, then see the results.</p>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#problem">The problem</a></li>
+    <li><a href="#designs">Two designs, side by side</a></li>
+    <li><a href="#chance">Is the difference chance?</a></li>
+    <li><a href="#howbig">How sure, how big?</a></li>
+    <li><a href="#size">Why it had to be so big</a></li>
+    <li><a href="#lessons">What it teaches</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<section id="problem">
+  <div class="secnum">01</div>
+  <h2>The problem</h2>
+  <p>Polio epidemics came every summer, crippling and sometimes killing children, and parents dreaded them. It struck hardest, oddly, among the better-off: children raised in cleaner homes met the virus later in life, when it did more damage. By 1954 Jonas Salk had a vaccine made from killed virus, and the National Foundation for Infantile Paralysis, the charity behind the March of Dimes, decided to test it on a vast scale. The evaluation was run independently by Thomas Francis Jr. at the University of Michigan.</p>
+  <p>The difficulty was rarity. Even in the groups that got salt water, about 71 children in 100,000 caught polio that year. Here is what that looks like.</p>
+
+  <div class="widget">
+    <p class="widget-title">100,000 children, one year</p>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Group">
+        <button class="btn on" data-rg="0" aria-pressed="true">Salt-water group: 71 cases</button>
+        <button class="btn" data-rg="1" aria-pressed="false">Vaccinated group: 28 cases</button>
+      </div>
+    </div>
+    <canvas id="rareChart" style="height:260px" role="img" aria-label="A grid of 100,000 dots, one per child, with the polio cases marked in red"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--line)"></i><span>a child</span></span><span><i class="sw dot" style="background:var(--zero)"></i><span>a case of polio</span></span></div>
+  </div>
+  <p>A test on 1,000 children would expect less than one case in either group. To see a difference between 71 and 28 per 100,000 at all, the trial needed hundreds of thousands of children in each group, and section 5 shows why. It also needed a design that nobody could argue with, because whatever it found would decide whether millions more children were vaccinated.</p>
+</section>
+
+<!-- 2 -->
+<section id="designs">
+  <div class="secnum">02</div>
+  <h2>Two designs, side by side</h2>
+  <p>The Foundation’s first plan was the <strong>observed-control</strong> design: offer the vaccine to second-graders and compare them with the first and third grades, who got nothing. It was simple and needed no fake injections. Critics pointed to two flaws. Doctors diagnosing a borderline case would know whether the child had been vaccinated. And only children whose parents volunteered got the vaccine, while the comparison grades included everyone. Volunteers, Paul Meier noted in his account of the trial, tend to be better educated and better off, and polio hit the better-off harder.</p>
+  <p>So about half the areas used the <strong>randomized, double-blind</strong> design instead: among children whose parents consented, a random half got the vaccine and the rest got salt water from identical-looking vials, and neither the families nor the diagnosing doctors knew which. Below is a model of the hidden problem, not the real data. Families are better-off or less well-off; the better-off are more likely to consent and more likely to catch polio. Choose how strongly consent follows income and how well the vaccine really works, and run both designs.</p>
+
+  <div class="widget">
+    <p class="widget-title">★ The trial simulator (a model)</p>
+    <div class="controls">
+      <span class="ctrl">consent follows income</span>
+      <div class="seg" role="group" aria-label="How much consent depends on income">
+        <button class="btn" data-cg="0" aria-pressed="false">not at all</button>
+        <button class="btn on" data-cg="1" aria-pressed="true">strongly</button>
+        <button class="btn" data-cg="2" aria-pressed="false">very strongly</button>
+      </div>
+    </div>
+    <div class="controls">
+      <span class="ctrl">the vaccine really prevents</span>
+      <div class="seg" role="group" aria-label="True vaccine effect">
+        <button class="btn" data-ve="0" aria-pressed="false">nothing</button>
+        <button class="btn" data-ve="30" aria-pressed="false">30%</button>
+        <button class="btn on" data-ve="60" aria-pressed="true">60%</button>
+        <button class="btn" data-ve="90" aria-pressed="false">90%</button>
+      </div>
+    </div>
+    <canvas id="simChart" style="height:260px" role="img" aria-label="Cases per 100,000 in each group of the two simulated designs, with the apparent effect of the vaccine in each"></canvas>
+    <div class="mcap" style="margin-top:6px">Apparent effect in repeated trials: cases prevented per 100,000</div>
+    <canvas id="simStrip" style="height:150px" role="img" aria-label="The apparent percentage of cases prevented in many simulated trials of each design, against the true value"></canvas>
+    <div class="legend"><span><i class="sw dot" style="background:var(--accent)"></i><span>randomized trials</span></span><span><i class="sw dot" style="background:var(--ink-3)"></i><span>volunteer-design trials</span></span><span><i class="sw line" style="border-top:2px solid var(--gold)"></i><span>the truth you set</span></span></div>
+    <div class="controls">
+      <button class="btn primary" id="simRun">Run both trials</button>
+      <button class="btn" id="simMany">Run 100 of each</button>
+      <button class="btn" id="simClear">Clear</button>
+    </div>
+    <div class="readout" id="simRead" aria-live="polite"></div>
+  </div>
+
+  <p>When consent doesn’t depend on income, both designs land on the truth. When it does, the volunteer design compares higher-risk volunteers with a mixed comparison group, and its estimate shrinks. If the vaccine did nothing at all, the volunteers would get <em>more</em> polio than the comparison grades, and the vaccine would look harmful. The randomized design is right in every setting, because the coin decides who gets the vaccine, so the two groups match in income and in everything else, measured or not. This is the selection problem from <a href="selection-bias.html">Who’s missing?</a>, and randomization is its cure.</p>
+  <p>The real results show the same signature. Children whose parents refused had lower rates than the salt-water group in both designs (46 and 44 per 100,000, against 71 for salt water), because refusing families were on average less well-off. And the observed-control design understated the vaccine’s effect: 29 cases prevented per 100,000 against 42.</p>
+  <div class="table-wrap">
+    <table class="summary num">
+      <thead><tr><th>Group (all polio cases)</th><th>Children</th><th>Cases</th><th>Per 100,000</th></tr></thead>
+      <tbody>
+        <tr class="grp"><td colspan="4">Randomized, double-blind areas</td></tr>
+        <tr><td>Vaccine</td><td>200,745</td><td>57</td><td>28</td></tr>
+        <tr><td>Salt water (placebo)</td><td>201,229</td><td>142</td><td>71</td></tr>
+        <tr><td>Parents refused</td><td>338,778</td><td>157</td><td>46</td></tr>
+        <tr class="grp"><td colspan="4">Observed-control areas</td></tr>
+        <tr><td>Grade 2, vaccinated</td><td>221,998</td><td>56</td><td>25</td></tr>
+        <tr><td>Grades 1 and 3 (controls)</td><td>725,173</td><td>391</td><td>54</td></tr>
+        <tr><td>Grade 2, parents refused</td><td>123,605</td><td>54</td><td>44</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="small muted">From Francis et al. (1955) as summarized in Meier’s Table 1, which also lists paralytic cases and children who received incomplete courses.</p>
+</section>
+
+<!-- 3 -->
+<section id="chance">
+  <div class="secnum">03</div>
+  <h2>Is the difference chance?</h2>
+  <p>In the randomized areas, 199 children caught polio: 57 who had the vaccine and 142 who had salt water. Could a useless vaccine produce a split that lopsided? Ask it the way <a href="permutation-tests.html">Shuffling to Test</a> did: if the vaccine does nothing, the 199 cases would have struck whoever they struck regardless, and the vials were assigned at random. So deal the 199 cases out at random among the 401,974 children and count how many land in the vaccine group.</p>
+
+  <div class="widget">
+    <p class="widget-title">Shuffling the cases</p>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Which cases">
+        <button class="btn on" data-sc="0" aria-pressed="true">All polio (57 vs 142)</button>
+        <button class="btn" data-sc="1" aria-pressed="false">Paralytic only (33 vs 115)</button>
+      </div>
+    </div>
+    <canvas id="shChart" style="height:220px" role="img" aria-label="Histogram of the number of cases falling in the vaccine group when the cases are dealt out at random, with the real number marked far to the left"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>shuffles</span></span><span><i class="sw line" style="border-top:2px solid var(--accent)"></i><span>the real trial</span></span></div>
+    <div class="controls">
+      <button class="btn primary" id="shRun">Shuffle 10,000 times</button>
+      <button class="btn" id="shClear">Clear</button>
+    </div>
+    <div class="readout" id="shRead" aria-live="polite"></div>
+  </div>
+  <p>Shuffled, the vaccine group gets about 99 of the 199 cases, give or take 7. The real trial had 57, six standard deviations below. No shuffle comes close, and the formula puts the <a href="p-values.html">p-value</a> at about 2 in a billion. Chance is not the explanation.</p>
+</section>
+
+<!-- 4 -->
+<section id="howbig">
+  <div class="secnum">04</div>
+  <h2>How sure, how big?</h2>
+  <p>A tiny p-value says the effect is real, not how large it is. For that, a <a href="confidence-intervals.html">confidence interval</a> for the difference in rates: 70.6 − 28.4 = 42 cases prevented per 100,000 children, give or take about 14. As a share, the vaccine prevented about 60% of polio cases (95% interval 45% to 70%) and about 71% of paralytic cases (58% to 81%).</p>
+
+  <div class="widget">
+    <p class="widget-title">Cases prevented per 100,000, with 95% intervals</p>
+    <canvas id="ciChart" style="height:230px" role="img" aria-label="Estimates and 95% intervals for cases prevented per 100,000 children in the randomized and observed-control designs, for all polio and for paralytic polio"></canvas>
+    <div class="legend"><span><i class="sw dot" style="background:var(--accent)"></i><span>randomized design</span></span><span><i class="sw dot" style="background:var(--ink-3)"></i><span>observed-control design</span></span></div>
+  </div>
+  <p>The observed-control design gives an interval just as narrow, 20 to 37, and it doesn’t reach the randomized estimate of 42. An interval measures how much an estimate wobbles from chance. It says nothing about bias: a biased design gives a precise answer to the wrong question. Only the design can fix that.</p>
+</section>
+
+<!-- 5 -->
+<section id="size">
+  <div class="secnum">05</div>
+  <h2>Why it had to be so big</h2>
+  <p>Before the trial, nobody knew how bad the 1954 season would be or how well the vaccine would work. Suppose it halved a placebo rate of 71 per 100,000. How many children per group would a trial need to detect that? This is the <a href="power.html">power</a> calculation, with a very rare outcome.</p>
+
+  <div class="widget">
+    <p class="widget-title">Trial size and power</p>
+    <div class="controls">
+      <label class="ctrl">children per group <input type="range" id="szN" min="0" max="20" step="1" value="6"><output id="szNOut"></output></label>
+    </div>
+    <canvas id="szChart" style="height:220px" role="img" aria-label="Power to detect a halving of polio as a function of children per group, on a log scale, with the chosen size marked"></canvas>
+    <div class="mcap" style="margin-top:8px">100 simulated trials of this size (green = effect detected)</div>
+    <canvas id="szTiles" style="height:70px" role="img" aria-label="One hundred simulated trials as tiles, green where the trial found the effect"></canvas>
+    <div class="controls"><button class="btn primary" id="szRun">Run 100 trials</button></div>
+    <div class="readout" id="szRead" aria-live="polite"></div>
+  </div>
+  <p>With 10,000 children per group, the salt-water group expects about 7 cases and the vaccine group 3 or 4, and the trial finds a real halving only about 1 time in 5. Reaching 80% power takes about 67,000 per group, and 90% about 89,000. The real trial used about 200,000 per group in the randomized areas, enough to give a clear answer even in a mild polio year.</p>
+</section>
+
+<!-- 6 -->
+<section id="lessons">
+  <div class="secnum">06</div>
+  <h2>What it teaches</h2>
+  <p>On April 12, 1955, Francis announced the results: the vaccine was safe and effective, and mass vaccination began. Polio cases in the United States fell steeply over the following years. The trial used nearly every idea in this series:</p>
+  <div class="table-wrap">
+    <table class="summary">
+      <thead><tr><th>Idea</th><th>In the trial</th></tr></thead>
+      <tbody>
+        <tr><td><a href="selection-bias.html">Who’s missing?</a></td><td>Volunteers differ from refusers; the observed-control design compared unlike groups.</td></tr>
+        <tr><td><a href="permutation-tests.html">Shuffling to test</a></td><td>Random assignment is what makes the shuffle a fair picture of “no effect”.</td></tr>
+        <tr><td><a href="p-values.html">p-values</a></td><td>57 vs 142 cases: about 2 in a billion if the vaccine did nothing.</td></tr>
+        <tr><td><a href="confidence-intervals.html">Confidence intervals</a></td><td>42 cases prevented per 100,000, give or take 14; precision is not the same as freedom from bias.</td></tr>
+        <tr><td><a href="errors.html">Errors and decisions</a></td><td>A false “works” would have vaccinated millions with a useless product; a false “doesn’t” would have abandoned a good one.</td></tr>
+        <tr><td><a href="power.html">Power</a></td><td>A rare outcome needs enormous groups; tens of thousands per group would have risked missing the effect.</td></tr>
+        <tr><td><a href="forking-paths.html">Forking paths</a></td><td>The outcome, the diagnosis rules and the analysis were fixed in advance, and diagnosis was blind.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Check yourself</h3>
+  <div class="widget">
+    <div class="quiz" id="quiz"></div>
+    <div class="readout" id="quizScore" style="margin-top:10px" aria-live="polite"></div>
+  </div>
+
+  <p>This ends the first part of the series. Every method so far asked how surprising the data would be if some fixed claim were true. The next part asks the reverse question, how plausible each possible truth is given the data, starting from the idea that connects the two: <strong>Likelihood</strong> (coming soon).</p>
+</section>
+</main>
+
+<script>
+(function(){
+'use strict';
+/* ---------- helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const root = document.documentElement;
+const C = n => getComputedStyle(root).getPropertyValue(n).trim();
+const f2 = x => x.toFixed(2);
+const fmtN = x => Math.abs(x - Math.round(x)) < 1e-9 ? String(Math.round(x)) : String(+x.toFixed(2));
+const pct = x => (100 * x).toFixed(1) + '%';
+const MONO = 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
+const TAU = Math.PI * 2;
+const comma = n => n.toLocaleString('en-US');
+
+function fit(c){
+  const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+  if (c.width !== w*dpr || c.height !== h*dpr) { c.width = w*dpr; c.height = h*dpr; }
+  const ctx = c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  return {ctx, w, h};
+}
+const redraws = [];
+function redrawAll(){ redraws.forEach(f => f()); }
+let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(redrawAll, 80); });
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+if (mq.addEventListener) mq.addEventListener('change', redrawAll);
+new MutationObserver(redrawAll).observe(root, {attributes:true, attributeFilter:['data-theme']});
+
+function niceTicks(max, count){
+  const raw = max / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const step = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag;
+  const t = []; for (let v = 0; v <= max + 1e-9; v += step) t.push(v); return t;
+}
+function stepFmt(ticks){ const st = ticks.length > 1 ? ticks[1] - ticks[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9)); return v => v.toFixed(d); }
+function yGrid(ctx, X0, X1, ys, ticks, fmt){
+  ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ticks.forEach(v => {
+    const y = Math.round(ys(v)) + .5;
+    ctx.strokeStyle = C('--line'); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X0, y); ctx.lineTo(X1, y); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.fillText(fmt(v), X0 - 6, y);
+  });
+}
+function intStep(px, minPx){
+  for (const s of [1,2,5,10,20,25,50,100]) if (s * px >= minPx) return s;
+  return 100;
+}
+function roundRect(ctx, x, y, w, h, r){
+  r = Math.max(0, Math.min(r, w/2, Math.abs(h)/2));
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+function dot(ctx, x, y, r){ ctx.beginPath(); ctx.arc(x, y, Math.max(0.5, r), 0, TAU); ctx.fill(); }
+function vline(ctx, x, y0, y1, color, dash, lw){
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw || 1.5; if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(Math.round(x) + .5, y0); ctx.lineTo(Math.round(x) + .5, y1); ctx.stroke(); ctx.restore();
+}
+/* integer-valued bar charts: bars at k = lo..hi */
+function frame(ctx, w, h, o){
+  const X0 = o.left != null ? o.left : 40, X1 = w - 10, Y0 = h - 24, Y1 = o.top != null ? o.top : 12;
+  const span = o.hi - o.lo + 1, bw = (X1 - X0) / span;
+  const xc = k => X0 + bw * (k - o.lo + .5), ys = v => Y0 - (v / o.ymax) * (Y0 - Y1);
+  const t = niceTicks(o.ymax, 3).filter(v => v <= o.ymax * 1.0001); yGrid(ctx, X0, X1, ys, t, o.yfmt || stepFmt(t));
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  const st = o.step || intStep(bw, 24);
+  for (let k = Math.ceil(o.lo / st) * st; k <= o.hi; k += st) ctx.fillText(o.lab ? o.lab(k) : k, xc(k), Y0 + 6);
+  return {X0, X1, Y0, Y1, bw, xc, ys};
+}
+function drawBars(ctx, F, lo, hi, val, color, frac){
+  const bwid = Math.max(1, F.bw * (frac == null ? .8 : frac));
+  for (let k = lo; k <= hi; k++) {
+    const v = val(k); if (!(v > 0)) continue;
+    const y = F.ys(v), hh = F.Y0 - y; if (hh < 0.2) continue;
+    const x = F.xc(k) - bwid / 2;
+    ctx.fillStyle = typeof color === 'function' ? color(k) : color;
+    if (bwid >= 6 && hh >= 3) { roundRect(ctx, x, y, bwid, hh, Math.min(3, bwid / 4)); ctx.fill(); }
+    else ctx.fillRect(x, y, bwid, hh);
+  }
+}
+function emptyNote(ctx, w, h, text){
+  ctx.fillStyle = C('--ink-3'); ctx.font = '13px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(text, w / 2, h / 2 - 8);
+}
+
+/* randomness */
+let spare = null;
+function gauss(){
+  if (spare != null) { const s = spare; spare = null; return s; }
+  let u = 0, v = 0; while (u === 0) u = Math.random(); v = Math.random();
+  const r = Math.sqrt(-2 * Math.log(u)); spare = r * Math.sin(TAU * v); return r * Math.cos(TAU * v);
+}
+function shuffled(a){ const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; }
+function corr(x, y){
+  const n = x.length; let mx = 0, my = 0; for (let i = 0; i < n; i++) { mx += x[i]; my += y[i]; } mx /= n; my /= n;
+  let sxy = 0, sxx = 0, syy = 0; for (let i = 0; i < n; i++) { const a = x[i] - mx, b = y[i] - my; sxy += a * b; sxx += a * a; syy += b * b; }
+  return sxy / Math.sqrt(sxx * syy);
+}
+function binom(n, p){ let k = 0; for (let i = 0; i < n; i++) if (Math.random() < p) k++; return k; }
+function flips(n){ const a = new Array(n); for (let i = 0; i < n; i++) a[i] = Math.random() < .5 ? 1 : 0; return a; }
+function longestRun(a){
+  let best = 1, cur = 1, start = 0, bs = 0;
+  for (let i = 1; i < a.length; i++) { if (a[i] === a[i-1]) cur++; else { cur = 1; start = i; } if (cur > best) { best = cur; bs = start; } }
+  return {len: best, start: bs};
+}
+function switches(a){ let s = 0; for (let i = 1; i < a.length; i++) if (a[i] !== a[i-1]) s++; return s; }
+const RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+function ticksIn(lo, hi, count){
+  const raw = (hi - lo) / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const st = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag, t = [];
+  for (let v = Math.ceil(lo / st - 1e-9) * st; v <= hi + 1e-9; v += st) t.push(+v.toFixed(10));
+  return t;
+}
+function xAxis(ctx, X0, X1, Y0, lo, hi, fmt){
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  const t = ticksIn(lo, hi, Math.max(2, Math.floor((X1 - X0) / 60)));
+  const st = t.length > 1 ? t[1] - t[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9));
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  t.forEach(v => ctx.fillText(fmt ? fmt(v) : v.toFixed(d), X0 + (v - lo) / (hi - lo) * (X1 - X0), Y0 + 5));
+}
+function label(ctx, x, y, text, color, X0, X1){
+  ctx.font = '600 11px ' + MONO; ctx.fillStyle = color; ctx.textBaseline = 'top';
+  const right = x > (X0 + X1) / 2; ctx.textAlign = right ? 'right' : 'left';
+  ctx.fillText(text, x + (right ? -5 : 5), y);
+}
+
+function bar(ctx, x, w, y, Y0, color){
+  const hh = Y0 - y; if (!(hh > .2)) return;
+  ctx.fillStyle = color;
+  if (w >= 6 && hh >= 3) { roundRect(ctx, x, y, w, hh, Math.min(3, w / 4)); ctx.fill(); } else ctx.fillRect(x, y, w, hh);
+}
+
+/* ---------- shared ---------- */
+function setH(cv, wide, narrow){ const want = (cv.getBoundingClientRect().width < 560 ? narrow : wide) + 'px'; if (cv.style.height !== want) cv.style.height = want; }
+function erfc(x){
+  const z = Math.abs(x), t = 1 / (1 + .5 * z);
+  const r = t * Math.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (.37409196 + t * (.09678418 + t * (-.18628806 + t * (.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-.82215223 + t * .17087277)))))))));
+  return x >= 0 ? r : 2 - r;
+}
+const Phi = z => .5 * erfc(-z / Math.SQRT2);
+function poisson(l){
+  if (l < 30) { const L = Math.exp(-l); let k = 0, p = 1; do { k++; p *= Math.random(); } while (p > L); return k - 1; }
+  return Math.max(0, Math.round(l + Math.sqrt(l) * gauss()));
+}
+function pressSeg(sel, attr, v){ $$(sel).forEach(b => { const on = b.dataset[attr] === String(v); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }); }
+function tag(ctx, text, x, y, color, align){
+  ctx.font = '600 11px ' + MONO; const tw = ctx.measureText(text).width;
+  const x0 = align === 'right' ? x - tw - 4 : align === 'center' ? x - tw / 2 - 2 : x - 2;
+  ctx.fillStyle = C('--surface'); ctx.globalAlpha = .9; ctx.fillRect(x0, y - 1, tw + 6, 15); ctx.globalAlpha = 1;
+  ctx.fillStyle = color; ctx.textBaseline = 'top'; ctx.textAlign = 'left'; ctx.fillText(text, x0 + 2, y + 1);
+}
+const pc = (x, d) => (x < 0 ? '−' : '') + Math.abs(100 * x).toFixed(d == null ? 0 : d) + '%';
+/* two groups: x1 of n1 (vaccine) vs x2 of n2 (control); difference per 100,000 with 95% CI */
+function diffCI(x1, n1, x2, n2){
+  const p1 = x1 / n1, p2 = x2 / n2, se = Math.sqrt(p1 * (1 - p1) / n1 + p2 * (1 - p2) / n2);
+  return {d: (p2 - p1) * 1e5, lo: (p2 - p1 - 1.96 * se) * 1e5, hi: (p2 - p1 + 1.96 * se) * 1e5};
+}
+function zTest(x1, n1, x2, n2){
+  const p = (x1 + x2) / (n1 + n2), se = Math.sqrt(p * (1 - p) * (1 / n1 + 1 / n2));
+  return se > 0 ? (x2 / n2 - x1 / n1) / se : 0;
+}
+/* rate-bar panel: groups [{lab, n, x, col}] */
+function ratePanel(ctx, x0, y0, w, h, title, groups, o){
+  const X0 = x0 + 34, X1 = x0 + w - 6, Y1 = y0 + 30, Y0 = y0 + h - 40, ymax = o.ymax;
+  const ys = v => Y0 - v / ymax * (Y0 - Y1);
+  ctx.font = '600 13px ' + 'system-ui,sans-serif'; ctx.fillStyle = C('--ink'); ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(title, x0 + 4, y0 + 4);
+  const t = niceTicks(ymax, 3).filter(v => v <= ymax); yGrid(ctx, X0, X1, ys, t, v => v.toFixed(0));
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  const cw = (X1 - X0) / groups.length, bw = Math.min(64, cw * .55), xc = i => X0 + cw * (i + .5);
+  groups.forEach((g, i) => {
+    const r = g.x / g.n * 1e5, show = o.frac == null ? 1 : o.frac;
+    if (o.hidden) {
+      ctx.save(); ctx.strokeStyle = C('--ink-3'); ctx.setLineDash([4, 3]); ctx.lineWidth = 1.2; ctx.strokeRect(xc(i) - bw / 2, ys(ymax * .6), bw, Y0 - ys(ymax * .6)); ctx.restore();
+      ctx.fillStyle = C('--ink-3'); ctx.font = '600 16px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('?', xc(i), ys(ymax * .3));
+    } else {
+      bar(ctx, xc(i) - bw / 2, bw, ys(r * show), Y0, g.col);
+      if (show >= 1) { ctx.fillStyle = C('--ink'); ctx.font = '700 12px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillText(r.toFixed(0), xc(i), ys(r) - 3); }
+    }
+    ctx.fillStyle = C('--ink-2'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    g.lab.split('\n').forEach((l, k) => ctx.fillText(l, xc(i), Y0 + 6 + k * 13));
+  });
+  return {xc, ys, X0, X1, Y0, Y1, bw};
+}
+function bracket(ctx, x, yTop, yBot, text, color){
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x + 4, yTop); ctx.lineTo(x, yTop); ctx.lineTo(x, yBot); ctx.lineTo(x + 4, yBot); ctx.stroke(); ctx.restore();
+  tag(ctx, text, x - 5, (yTop + yBot) / 2 - 7, color, 'right');
+}
+
+/* the real counts (Francis et al. 1955, via Meier's Table 1): all polio cases */
+const RCT = {vac: {n: 200745, x: 57, par: 33}, pla: {n: 201229, x: 142, par: 115}, ref: {n: 338778, x: 157, par: 121}};
+const OBS = {vac: {n: 221998, x: 56, par: 38}, con: {n: 725173, x: 391, par: 330}, ref: {n: 123605, x: 54, par: 43}};
+
+/* ---------- hero: the two designs ---------- */
+(function(){
+  const cv = $('#heroChart'), hint = $('#heroHint');
+  let guess = null, frac = null, timer = null;
+  function draw(){
+    setH(cv, 280, 470);
+    const {ctx, w, h} = fit(cv), two = w >= 560, pw = two ? w / 2 : w, ph = two ? h : h / 2;
+    const hidden = frac == null, o = {ymax: 80, hidden, frac};
+    const A = ratePanel(ctx, 0, 0, pw - (two ? 8 : 0), ph, 'Randomized, double-blind', [
+      {lab: 'vaccine', ...RCT.vac, col: C('--accent')}, {lab: 'salt water', ...RCT.pla, col: C('--accent')}, {lab: 'parents\nrefused', ...RCT.ref, col: C('--ink-3')}], o);
+    const B = ratePanel(ctx, two ? pw + 8 : 0, two ? 0 : ph, pw - (two ? 8 : 0), ph, 'Vaccinate the volunteers', [
+      {lab: 'grade 2\nvaccinated', ...OBS.vac, col: C('--accent')}, {lab: 'grades 1, 3', ...OBS.con, col: C('--accent')}, {lab: 'grade 2\nrefused', ...OBS.ref, col: C('--ink-3')}], o);
+    if (frac === 1) {
+      const ra = RCT.vac.x / RCT.vac.n * 1e5, rb = RCT.pla.x / RCT.pla.n * 1e5, oa = OBS.vac.x / OBS.vac.n * 1e5, ob = OBS.con.x / OBS.con.n * 1e5;
+      bracket(ctx, A.xc(1) - A.bw / 2 - 6, A.ys(rb), A.ys(ra), `${(rb - ra).toFixed(0)} fewer`, C('--one'));
+      bracket(ctx, B.xc(1) - B.bw / 2 - 6, B.ys(ob), B.ys(oa), `${(ob - oa).toFixed(0)} fewer`, C('--one'));
+    }
+    { ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'right'; ctx.textBaseline = 'top'; ctx.fillText('cases per 100,000', w - 4, 4); }
+  }
+  function message(){
+    $$('#heroPred .btn').forEach(b => { b.classList.remove('right', 'wrong'); if (guess != null && +b.dataset.g === guess) b.classList.add(guess === 0 ? 'right' : 'wrong'); });
+    hint.innerHTML = `The randomized design showed <b>42 fewer cases per 100,000</b>; the volunteer design only <b>29 fewer</b>${guess === 0 ? ', as you guessed' : ''}. ` +
+      `The clue is the grey bars: children whose parents refused got polio <em>less</em> often than the salt-water group. Consenting families were on average better off, and polio struck the better-off harder. ` +
+      `The volunteer design compared those higher-risk volunteers with whole grades of children, and the vaccine looked weaker than it was. Randomizing among volunteers compared like with like.`;
+  }
+  function open(){ $('#heroGo').disabled = false; $('#heroSkip').hidden = true; }
+  $$('#heroPred .btn').forEach(b => b.addEventListener('click', () => { guess = +b.dataset.g; $$('#heroPred .btn').forEach(x => x.classList.toggle('guess', x === b)); open(); if (frac === 1) message(); }));
+  $('#heroSkip').addEventListener('click', open);
+  $('#heroGo').addEventListener('click', () => {
+    clearInterval(timer);
+    if (RM) { frac = 1; draw(); message(); return; }
+    frac = 0; let t = 0;
+    timer = setInterval(() => { t++; frac = Math.min(1, t / 30); draw(); if (frac >= 1) { clearInterval(timer); timer = null; message(); $('#heroGo').hidden = true; } }, 25);
+  });
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 1. 100,000 children ---------- */
+(function(){
+  const cv = $('#rareChart'), COLS = 500, ROWS = 200;
+  const spots = Array.from({length: 71}, () => Math.floor(Math.random() * COLS * ROWS));
+  let grp = 0;
+  function draw(){
+    const wpx = cv.getBoundingClientRect().width, cell = wpx / COLS, want = Math.round(ROWS * cell) + 'px';
+    if (cv.style.height !== want) cv.style.height = want;
+    const {ctx, w, h} = fit(cv);
+    ctx.fillStyle = C('--line');
+    if (cell >= 1.3) { for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) ctx.fillRect(c * cell, r * cell, cell * .7, cell * .7); }
+    else { ctx.globalAlpha = .7; ctx.fillRect(0, 0, w, h); ctx.globalAlpha = 1; }
+    const n = grp ? 28 : 71;
+    ctx.fillStyle = C('--zero');
+    spots.slice(0, n).forEach(s => { const c = s % COLS, r = Math.floor(s / COLS); dot(ctx, (c + .5) * cell, (r + .5) * cell, Math.max(2.5, cell * 1.6)); });
+  }
+  $$('[data-rg]').forEach(b => b.addEventListener('click', () => { grp = +b.dataset.rg; pressSeg('[data-rg]', 'rg', grp); draw(); }));
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 2. the trial simulator (a model) ---------- */
+(function(){
+  const N = 1000000, RISK = {B: 85, L: 35}, CONSENT = [{B: .55, L: .55}, {B: .75, L: .35}, {B: .9, L: .2}];
+  let cg = 1, ve = 60, last = null, runs = [];
+  const truth = () => { const c = CONSENT[cg]; return ve / 100 * (c.B * RISK.B + c.L * RISK.L) / (c.B + c.L); };
+  function trial(){
+    const c = CONSENT[cg], e = ve / 100, out = {};
+    const cases = (n, r) => poisson(n * r / 1e5);
+    // randomized: consenters split in half; refusers observed
+    let rv = {n: 0, x: 0}, rp = {n: 0, x: 0}, rr = {n: 0, x: 0};
+    ['B', 'L'].forEach(k => {
+      const pop = N / 2, con = pop * c[k], half = con / 2, ref = pop - con;
+      rv.n += half; rv.x += cases(half, RISK[k] * (1 - e));
+      rp.n += half; rp.x += cases(half, RISK[k]);
+      rr.n += ref; rr.x += cases(ref, RISK[k]);
+    });
+    // volunteer design: grade 2 (a third of children) consenters vaccinated; grades 1 and 3 all observed
+    let ov = {n: 0, x: 0}, oc = {n: 0, x: 0}, orf = {n: 0, x: 0};
+    ['B', 'L'].forEach(k => {
+      const pop = N / 2, g2 = pop / 3, con = g2 * c[k], ref = g2 - con, ctl = pop * 2 / 3;
+      ov.n += con; ov.x += cases(con, RISK[k] * (1 - e));
+      orf.n += ref; orf.x += cases(ref, RISK[k]);
+      oc.n += ctl; oc.x += cases(ctl, RISK[k]);
+    });
+    const r = g => g.x / g.n * 1e5;
+    return {rv, rp, rr, ov, oc, orf, effR: r(rp) - r(rv), effO: r(oc) - r(ov), pctR: 1 - r(rv) / r(rp), pctO: 1 - r(ov) / r(oc)};
+  }
+  function drawBars(){
+    const cv = $('#simChart'); setH(cv, 260, 450); const {ctx, w, h} = fit(cv);
+    if (!last) { emptyNote(ctx, w, h, 'press “Run both trials”'); return; }
+    const two = w >= 560, pw = two ? w / 2 : w, ph = two ? h : h / 2, T = last;
+    const ymax = Math.max(80, ...[T.rv, T.rp, T.rr, T.ov, T.oc, T.orf].map(g => g.x / g.n * 1e5)) * 1.12;
+    const A = ratePanel(ctx, 0, 0, pw - (two ? 8 : 0), ph, 'Randomized', [
+      {lab: 'vaccine', ...T.rv, col: C('--accent')}, {lab: 'salt water', ...T.rp, col: C('--accent')}, {lab: 'refused', ...T.rr, col: C('--ink-3')}], {ymax});
+    const B = ratePanel(ctx, two ? pw + 8 : 0, two ? 0 : ph, pw - (two ? 8 : 0), ph, 'Vaccinate the volunteers', [
+      {lab: 'volunteers\nvaccinated', ...T.ov, col: C('--accent')}, {lab: 'grades 1, 3', ...T.oc, col: C('--accent')}, {lab: 'refused', ...T.orf, col: C('--ink-3')}], {ymax});
+    const r = g => g.x / g.n * 1e5;
+    [[A, T.rv, T.rp, T.effR], [B, T.ov, T.oc, T.effO]].forEach(([P, v, c, eff]) => {
+      const a = r(v), b = r(c), col = eff >= 0 ? C('--one') : C('--zero');
+      bracket(ctx, P.xc(1) - P.bw / 2 - 6, P.ys(Math.max(a, b)), P.ys(Math.min(a, b)), (eff >= 0 ? `${eff.toFixed(0)} fewer` : `${(-eff).toFixed(0)} more`), col);
+    });
+  }
+  function drawStrip(){
+    const {ctx, w, h} = fit($('#simStrip')), X0 = w < 560 ? 84 : 110, X1 = w - 14, LO = -40, HI = 80;
+    const xs = v => X0 + (v - LO) / (HI - LO) * (X1 - X0), rows = [{lab: 'randomized', k: 'effR', col: C('--accent')}, {lab: 'volunteers', k: 'effO', col: C('--ink-3')}];
+    const Y0 = h - 22; xAxis(ctx, X0, X1, Y0, LO, HI, v => String(v));
+    vline(ctx, xs(0), 6, Y0, C('--line'), null, 1);
+    rows.forEach((rw, i) => {
+      const y = 22 + i * ((Y0 - 30) / 2) + 14;
+      ctx.font = '12px ' + MONO; ctx.fillStyle = C('--ink-2'); ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText(rw.lab, X0 - 10, y);
+      ctx.fillStyle = rw.col; ctx.globalAlpha = .55;
+      runs.forEach(t => dot(ctx, xs(Math.max(LO, Math.min(HI, t[rw.k]))), y + (Math.random() - .5) * 14, 3));
+      ctx.globalAlpha = 1;
+    });
+    const T = truth(); vline(ctx, xs(T), 6, Y0, C('--gold'), null, 2.5);
+    tag(ctx, `truth ${T.toFixed(0)}`, xs(T) + (T > 50 ? -6 : 6), 0, C('--gold'), T > 50 ? 'right' : 'left');
+  }
+  function read(){
+    if (!last) { $('#simRead').innerHTML = ''; return; }
+    const mean = k => runs.reduce((s, t) => s + t[k], 0) / runs.length;
+    const f = v => (v < 0 ? '−' : '') + Math.abs(v).toFixed(0);
+    $('#simRead').innerHTML = `cases prevented per 100,000 in this run: randomized <b>${f(last.effR)}</b> (${pc(last.pctR)} of cases) · volunteer design <b>${f(last.effO)}</b> (${pc(last.pctO)}) · truth <b>${truth().toFixed(0)}</b> (${ve}%)` +
+      (runs.length > 1 ? `<br>average over ${runs.length} runs: randomized ${f(mean('effR'))}, volunteers ${f(mean('effO'))}` : '');
+  }
+  function all(){ drawBars(); drawStrip(); read(); }
+  $('#simRun').addEventListener('click', () => { last = trial(); runs.push(last); all(); });
+  $('#simMany').addEventListener('click', () => { for (let i = 0; i < 100; i++) { last = trial(); runs.push(last); } all(); });
+  $('#simClear').addEventListener('click', () => { runs = []; last = null; all(); });
+  $$('[data-cg]').forEach(b => b.addEventListener('click', () => { cg = +b.dataset.cg; pressSeg('[data-cg]', 'cg', cg); runs = []; last = trial(); runs.push(last); all(); }));
+  $$('[data-ve]').forEach(b => b.addEventListener('click', () => { ve = +b.dataset.ve; pressSeg('[data-ve]', 've', ve); runs = []; last = trial(); runs.push(last); all(); }));
+  all(); redraws.push(() => { drawBars(); drawStrip(); });
+})();
+
+/* ---------- 3. shuffling the cases ---------- */
+(function(){
+  let which = 0, vals = [], timer = null;
+  const spec = () => which === 0 ? {a: RCT.vac.x, b: RCT.pla.x} : {a: RCT.vac.par, b: RCT.pla.par};
+  function shuffle(K){
+    let n1 = RCT.vac.n, tot = RCT.vac.n + RCT.pla.n, k = 0;
+    for (let i = 0; i < K; i++) { if (Math.random() * tot < n1) { k++; n1--; } tot--; }
+    return k;
+  }
+  function draw(){
+    const {ctx, w, h} = fit($('#shChart')), S = spec(), K = S.a + S.b, mid = Math.round(K * RCT.vac.n / (RCT.vac.n + RCT.pla.n));
+    const lo = Math.max(0, Math.min(S.a - 8, mid - 50)), hi = mid + 40, counts = new Array(hi - lo + 1).fill(0);
+    vals.forEach(v => { if (v >= lo && v <= hi) counts[v - lo]++; });
+    const F = frame(ctx, w, h, {lo, hi, ymax: Math.max(10, ...counts) * 1.15, left: 44});
+    drawBars(ctx, F, lo, hi, k => counts[k - lo], C('--ink-3'), .9);
+    vline(ctx, F.xc(S.a), F.Y1, F.Y0, C('--accent'), null, 2);
+    tag(ctx, `real trial: ${S.a} of ${K} cases in the vaccine group`, F.xc(S.a) + 6, F.Y1 + 2, C('--accent'), 'left');
+    if (!vals.length) { ctx.fillStyle = C('--ink-3'); ctx.font = '13px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('press Shuffle to deal the cases at random', F.xc(mid), (F.Y0 + F.Y1) / 2 + 10); }
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'right'; ctx.textBaseline = 'top'; ctx.fillText('cases landing in the vaccine group', F.X1, F.Y1 + 22);
+  }
+  function read(){
+    const S = spec(), K = S.a + S.b, n = vals.length, k = vals.filter(v => v <= S.a).length;
+    const m = n ? vals.reduce((s, v) => s + v, 0) / n : 0, sd = n > 1 ? Math.sqrt(vals.reduce((s, v) => s + (v - m) ** 2, 0) / (n - 1)) : 0;
+    const z = zTest(S.a, RCT.vac.n, S.b, RCT.pla.n), p = erfc(Math.abs(z) / Math.SQRT2);
+    $('#shRead').innerHTML = `${K} cases among ${(RCT.vac.n + RCT.pla.n).toLocaleString('en-US')} children; the vaccine group got <b>${S.a}</b>` +
+      (n ? `<br>shuffles: average <b>${m.toFixed(1)}</b> in the vaccine group, give or take ${sd.toFixed(1)} · shuffles with ${S.a} or fewer: <b>${k.toLocaleString('en-US')} of ${n.toLocaleString('en-US')}</b>` : '') +
+      `<br>formula: z = ${z.toFixed(1)}, p ≈ ${p.toExponential(0).replace('e-', ' × 10^-')}`.replace(/10\^-(\d+)/, (s, d) => '10<sup>−' + d + '</sup>');
+  }
+  $('#shRun').addEventListener('click', () => {
+    clearInterval(timer); const target = vals.length + 10000, K = spec().a + spec().b;
+    const go = () => { const m = Math.min(target - vals.length, RM ? 10000 : 500); for (let i = 0; i < m; i++) vals.push(shuffle(K)); draw(); read(); if (vals.length >= target) { clearInterval(timer); timer = null; } };
+    if (RM) go(); else timer = setInterval(go, 25);
+  });
+  $('#shClear').addEventListener('click', () => { clearInterval(timer); timer = null; vals = []; draw(); read(); });
+  $$('[data-sc]').forEach(b => b.addEventListener('click', () => { clearInterval(timer); timer = null; which = +b.dataset.sc; pressSeg('[data-sc]', 'sc', which); vals = []; draw(); read(); }));
+  draw(); read(); redraws.push(draw);
+})();
+
+/* ---------- 4. intervals ---------- */
+(function(){
+  const rows = [
+    {lab: 'Randomized · all polio', ...diffCI(RCT.vac.x, RCT.vac.n, RCT.pla.x, RCT.pla.n), col: '--accent'},
+    {lab: 'Randomized · paralytic', ...diffCI(RCT.vac.par, RCT.vac.n, RCT.pla.par, RCT.pla.n), col: '--accent'},
+    {lab: 'Observed-control · all polio', ...diffCI(OBS.vac.x, OBS.vac.n, OBS.con.x, OBS.con.n), col: '--ink-3'},
+    {lab: 'Observed-control · paralytic', ...diffCI(OBS.vac.par, OBS.vac.n, OBS.con.par, OBS.con.n), col: '--ink-3'}
+  ];
+  function draw(){
+    const {ctx, w, h} = fit($('#ciChart')), narrow = w < 560, X0 = narrow ? 12 : 220, X1 = w - 16, Y0 = h - 24, LO = 0, HI = 70;
+    const xs = v => X0 + (v - LO) / (HI - LO) * (X1 - X0), rh = (Y0 - 8) / rows.length;
+    xAxis(ctx, X0, X1, Y0, LO, HI);
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillText('cases prevented per 100,000', X1, Y0 - 3);
+    vline(ctx, xs(rows[0].d), 4, Y0, C('--accent'), [3, 4], 1);
+    rows.forEach((r, i) => {
+      const y = 8 + rh * (i + .5) + (narrow ? 6 : 0), col = C(r.col);
+      ctx.font = '12px ' + MONO; ctx.fillStyle = C('--ink-2'); ctx.textBaseline = 'middle';
+      if (narrow) { ctx.textAlign = 'left'; ctx.fillText(r.lab, X0, y - 15); } else { ctx.textAlign = 'right'; ctx.fillText(r.lab, X0 - 12, y); }
+      ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(xs(r.lo), y); ctx.lineTo(xs(r.hi), y); ctx.stroke();
+      ctx.fillStyle = col; dot(ctx, xs(r.d), y, 6);
+      tag(ctx, `${r.d.toFixed(0)} (${r.lo.toFixed(0)}–${r.hi.toFixed(0)})`, xs(r.hi) + 8, y - 7, C('--ink'), 'left');
+    });
+  }
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 5. trial size and power ---------- */
+(function(){
+  const NS = [1000, 1500, 2000, 3000, 5000, 7000, 10000, 15000, 20000, 30000, 40000, 50000, 67000, 80000, 100000, 150000, 200000, 300000, 400000, 600000, 1000000];
+  const P2 = 71e-5, P1 = 35.5e-5;
+  let tiles = null;
+  const power = n => { const p = (P1 + P2) / 2, se0 = Math.sqrt(2 * p * (1 - p) / n), se1 = Math.sqrt(P1 * (1 - P1) / n + P2 * (1 - P2) / n); return Phi(((P2 - P1) - 1.96 * se0) / se1); };
+  const n = () => NS[+$('#szN').value];
+  function drawCurve(){
+    const {ctx, w, h} = fit($('#szChart')), X0 = 44, X1 = w - 14, Y0 = h - 24, Y1 = 10, L0 = 3, L1 = 6;
+    const xs = v => X0 + (Math.log10(v) - L0) / (L1 - L0) * (X1 - X0), ys = v => Y0 - v * (Y0 - Y1);
+    yGrid(ctx, X0, X1, ys, [0, .2, .4, .6, .8, 1], v => (100 * v).toFixed(0) + '%');
+    ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    [[1e3, '1,000'], [1e4, '10,000'], [1e5, '100,000'], [1e6, '1,000,000']].forEach(([v, l], i) => { ctx.textAlign = i === 0 ? 'left' : i === 3 ? 'right' : 'center'; ctx.fillText(l, xs(v), Y0 + 6); });
+    ctx.save(); ctx.strokeStyle = C('--one'); ctx.lineWidth = 2.5; ctx.beginPath();
+    for (let i = 0; i <= 200; i++) { const v = Math.pow(10, L0 + (L1 - L0) * i / 200); i ? ctx.lineTo(xs(v), ys(power(v))) : ctx.moveTo(xs(v), ys(power(v))); }
+    ctx.stroke(); ctx.restore();
+    ctx.save(); ctx.setLineDash([4, 4]); ctx.strokeStyle = C('--ink-3'); ctx.beginPath(); ctx.moveTo(X0, ys(.8)); ctx.lineTo(X1, ys(.8)); ctx.stroke(); ctx.restore();
+    const N = n(), pw = power(N);
+    vline(ctx, xs(N), Y1, Y0, C('--gold'), null, 2); ctx.fillStyle = C('--gold'); dot(ctx, xs(N), ys(pw), 6);
+    tag(ctx, `${N.toLocaleString('en-US')} per group: ${pc(pw)}`, xs(N) + (xs(N) > (X0 + X1) * .6 ? -8 : 8), ys(pw) + (pw > .5 ? 6 : -20), C('--ink'), xs(N) > (X0 + X1) * .6 ? 'right' : 'left');
+    tag(ctx, 'about 200,000 per group in 1954', xs(200000) - 4, Y0 - 40, C('--ink-3'), 'right');
+    vline(ctx, xs(200000), Y0 - 26, Y0, C('--ink-3'), [2, 3], 1);
+  }
+  function drawTiles(){
+    const {ctx, w, h} = fit($('#szTiles')), per = 50, tw = w / per, th = h / 2;
+    for (let i = 0; i < 100; i++) {
+      const x = (i % per) * tw, y = Math.floor(i / per) * th;
+      ctx.fillStyle = !tiles ? C('--surface-2') : tiles[i] ? C('--one') : C('--ink-3');
+      if (tiles) ctx.globalAlpha = tiles[i] ? 1 : .45;
+      roundRect(ctx, x + 1, y + 2, tw - 2, th - 4, 2); ctx.fill(); ctx.globalAlpha = 1;
+    }
+  }
+  function simulate(){
+    const N = n(); tiles = [];
+    for (let i = 0; i < 100; i++) { const a = poisson(N * P1), b = poisson(N * P2), z = zTest(a, N, b, N); tiles.push(z > 1.96); }
+  }
+  function read(){
+    const N = n(), found = tiles ? tiles.filter(Boolean).length : null;
+    $('#szNOut').textContent = N.toLocaleString('en-US');
+    $('#szRead').innerHTML = `${N.toLocaleString('en-US')} children per group: expected cases <b>${(N * P2).toFixed(N * P2 < 100 ? 1 : 0)}</b> with salt water and <b>${(N * P1).toFixed(N * P1 < 100 ? 1 : 0)}</b> with the vaccine · power to detect the halving: <b>${pc(power(N))}</b>` +
+      (found != null ? ` · simulated trials that found it: <b>${found} of 100</b>` : '');
+  }
+  $('#szN').addEventListener('input', () => { tiles = null; drawCurve(); drawTiles(); read(); });
+  $('#szRun').addEventListener('click', () => { simulate(); drawTiles(); read(); });
+  drawCurve(); drawTiles(); read(); redraws.push(() => { drawCurve(); drawTiles(); });
+})();
+
+/* ---------- 6. quiz ---------- */
+(function(){
+  const Q = [
+    {s: 'Predict: which design showed the bigger effect of the vaccine?',
+     o: ['The randomized, double-blind design', 'The vaccinate-the-volunteers design'], a: 0,
+     e: '42 fewer cases per 100,000 against 29. The volunteer design compared higher-risk volunteers with whole grades, which hid part of the effect.'},
+    {s: 'Why did children whose parents refused get polio less often than the salt-water group?',
+     o: ['Refusing families were on average less well-off, and polio struck the better-off harder', 'The salt-water injection caused polio'], a: 0,
+     e: 'Consent was not random. That is exactly why the comparison had to be made within consenting families, by randomization.'},
+    {s: 'If the vaccine did nothing, about 99 of the 199 cases would land in the vaccine group. It had 57. What follows?',
+     o: ['A split this lopsided is far beyond what chance produces', 'The vaccine prevented 57% of cases'], a: 0,
+     e: 'Six standard deviations from the shuffled average; no shuffle comes close, and p is about 2 in a billion.'},
+    {s: 'Which reading is <em>wrong</em>?',
+     o: ['Randomization balances even the things nobody measured', 'A narrow confidence interval shows the estimate is free of bias', 'Blind diagnosis keeps doctors from judging cases differently by group'], a: 1,
+     e: 'The observed-control interval (20 to 37) was as narrow as the randomized one and missed it. Intervals measure chance, not bias.'},
+    {s: 'Why did the trial need hundreds of thousands of children per group?',
+     o: ['Polio was rare, so even large groups produce few cases', 'To make the vaccine safer'], a: 0,
+     e: 'With 10,000 per group, the salt-water group expects about 7 cases, and a real halving is detected only about 1 time in 5.'},
+    {s: 'Why give the comparison group salt-water injections at all?',
+     o: ['So nobody, including the diagnosing doctors, knew who was vaccinated', 'Salt water protects against polio'], a: 0,
+     e: 'Blinding removes the chance that knowing a child was vaccinated tips a borderline diagnosis.'},
+    {s: 'In the simulator, if the vaccine does nothing and consent follows income, the volunteer design shows…',
+     o: ['the vaccine as harmful', 'no effect, correctly'], a: 0,
+     e: 'The higher-risk volunteers get more polio than the mixed comparison grades, so a useless vaccine looks harmful.'}
+  ];
+  const box = $('#quiz'); let answered = 0, right = 0;
+  Q.forEach(qq => {
+    const d = document.createElement('div'); d.className = 'qitem';
+    d.innerHTML = `<p>${qq.s}</p><div class="qbtns">${qq.o.map((t, i) => `<button class="btn" data-i="${i}">${t}</button>`).join('')}</div><p class="qexp" hidden></p>`;
+    const exp = d.querySelector('.qexp');
+    d.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      const ok = +b.dataset.i === qq.a;
+      if (!d.dataset.done) { d.dataset.done = '1'; answered++; if (ok) right++; }
+      d.querySelectorAll('button').forEach(x => x.classList.remove('right', 'wrong'));
+      b.classList.add(ok ? 'right' : 'wrong');
+      exp.hidden = false; exp.innerHTML = `<b>${ok ? '✓ Right.' : '✗ Not quite.'}</b> ${qq.e}`;
+      $('#quizScore').textContent = `${answered} of ${Q.length} answered · ${right} right on the first try`;
+    }));
+    box.appendChild(d);
+  });
+})();
+})();
+</script>
+</body>
+</html>
