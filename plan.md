@@ -38,7 +38,7 @@ See [Statistics: how every page works](#statistics-conventions) first.
 - [x] [15. 📖 The 1954 polio vaccine trial](https://nishs1729.github.io/explainers/statistics/polio-trial.html)
 
 ### [Bridge](#bridge)
-- [ ] [16. Likelihood](#likelihood)
+- [x] [16. Likelihood](https://nishs1729.github.io/explainers/statistics/likelihood.html)
 
 ### [Bayesian inference](#bayesian-inference)
 - [ ] [17. Bayes' theorem](#bayes-theorem)
@@ -598,6 +598,8 @@ Assumes the probability series, especially Normal (CLT, √n law) and Chi-square
 >   - Poisson λ version using the horse-kick counts
 >
 > **Links:** builds on Bernoulli, Binomial, Poisson ("Going backwards: what is λ?"), What makes a good guess. Leads to Bayes' theorem, Logistic regression.
+>
+> **Built:** the hero shows 7 heads in 10, takes the reader's guess for the peak (gold) and sweeps every coin to trace P(7 of 10 | p): peak 0.70 → 0.267, fair coin 0.117 (44%). Section 1 is a p × k table of binomial probabilities (n = 10); a column becomes bars that sum to 1, a row becomes the likelihood curve with area 1/11. Fisher's 1922 definition is quoted (p. 310, via Aldrich 1997, Statistical Science 12: 1912 absolute criterion as an undergraduate, "likelihood" in 1921, "maximum likelihood" in 1922). Section 2 is the ★ explorer: a secret coin's 1,000-flip stream with +1/+10/+100 and a flips slider, or the reader's own flips (gold rings); each visible flip shows its score at a draggable candidate; product shown as m × 10ⁿ with its log; sweep button; likelihood/log toggle; reveal. Section 3 plots log-likelihood vs the curvature parabola with the 1.92 cut (7/10: likelihood interval 0.394–0.915 vs 0.416–0.984; 0/10: 0–0.175) and 1,000 repeats whose SD matches 1/√curvature. Section 4: horse kicks (109/65/22/3/1; λ̂ = 0.61, SE 0.055, interval 0.51–0.72; λ = 1 is 2 × 10⁻⁸ of the peak) with a "climb to the peak" slider; tanks 19, 40, 42, 60 (likelihood 1/C(N,4), peak 60; 74 → 0.42, 100 → 0.12) and 1,000 captures from 100 (largest averages 80.8, largest + gap 100), plus the n vs n − 1 note. Section 5 shows both roads: likelihood ratio (7/10: 2.28, 2 ln = 1.65, p = 0.20 vs exact 0.34; Wilks 1938) and posterior with a flat or Beta(20, 20) prior (P(p > 0.5) 89% vs 72%). Closing leads to Bayes' theorem.
 
 ---
 

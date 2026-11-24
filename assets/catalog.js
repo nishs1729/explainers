@@ -163,6 +163,12 @@ window.EXPLAINERS = {
           "title": "Learning from data",
           "blurb": "Could chance alone have done this? Starting from line-ups and coin streaks, the series builds the tools for answering that question: sampling, estimation, resampling, tests, intervals and power, ending with the 1954 polio vaccine trial.",
           "topics": ["is-it-real", "sampling-distributions", "selection-bias", "estimation", "bootstrap", "permutation-tests", "p-values", "confidence-intervals", "errors", "power", "student-t", "chi-square-tests", "anova", "forking-paths", "polio-trial"]
+        },
+        {
+          "id": "bayesian-inference",
+          "title": "Bayesian inference",
+          "blurb": "Probability as a degree of belief, updated by data. It starts from likelihood, the idea the classical tests and Bayesian methods share.",
+          "topics": ["likelihood"]
         }
       ],
       "topics": [
@@ -298,6 +304,15 @@ window.EXPLAINERS = {
           "path": "statistics/polio-trial.html",
           "summary": "A case study of the 1.8-million-child Salk vaccine trial: why vaccinating volunteers understated the effect (29 vs 42 cases prevented per 100,000), a trial simulator, the shuffle test, intervals and why rare outcomes need enormous trials.",
           "tags": ["randomized trial", "case study", "selection bias", "placebo", "Salk"],
+          "preview": { "select": "#heroPlay", "click": ["#heroSkip", "#heroGo"] }
+        },
+        {
+          "id": "likelihood",
+          "title": "Likelihood",
+          "short": "Likelihood",
+          "path": "statistics/likelihood.html",
+          "summary": "The probability formula read backwards: fix the data and score every possible coin. Build the likelihood curve flip by flip, see its width become the standard error, fit the horse kicks, find why the tank estimate runs low, and follow the two roads to likelihood-ratio tests and Bayes.",
+          "tags": ["maximum likelihood", "MLE", "Fisher information", "likelihood ratio", "Fisher"],
           "preview": { "select": "#heroPlay", "click": ["#heroSkip", "#heroGo"] }
         }
       ]

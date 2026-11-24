@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Likelihood — a visual introduction</title>
+<style>
+:root{
+  --bg:#faf8f4; --surface:#ffffff; --surface-2:#f2efe8; --ink:#1c1c1e; --ink-2:#4c4e55; --ink-3:#8b8d93; --line:#e3dfd5;
+  --one:#16917c; --one-soft:rgba(22,145,124,.15);
+  --zero:#d9573a; --zero-soft:rgba(217,87,58,.15);
+  --accent:#3654c9; --accent-soft:rgba(54,84,201,.11);
+  --gold:#b98317; --gold-soft:rgba(185,131,23,.22);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+    --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+    --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+    --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+    --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+  --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+  --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+  --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+  --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.68 var(--sans);-webkit-font-smoothing:antialiased}
+main{max-width:820px;margin:0 auto;padding:0 20px 80px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;letter-spacing:-.01em}
+h1{font-size:clamp(2.2rem,6vw,3.4rem);margin:.2em 0 .3em}
+h2{font-size:clamp(1.6rem,4vw,2.1rem);margin:0 0 .5em}
+h3{font-size:1.2rem;margin:1.6em 0 .4em}
+p{margin:0 0 1em}
+a{color:var(--accent)}
+strong{font-weight:650}
+em.term{font-style:normal;font-weight:650;color:var(--accent)}
+.muted{color:var(--ink-2)}
+small,.small{font-size:14px}
+
+/* hero */
+.hero{text-align:center;padding:64px 0 24px}
+.kicker{text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--ink-3);margin:0}
+.lede{font-size:1.2rem;color:var(--ink-2);max-width:620px;margin:0 auto}
+.hero-play{max-width:640px;margin:30px auto 0;text-align:left}
+.hero-play .controls{justify-content:center}
+.hint{font-size:15px;color:var(--ink-2);min-height:3.2em;margin:10px 0 0;text-align:center}
+.ask{font-family:var(--serif);font-size:1.25rem;text-align:center;margin:0 0 12px}
+
+.toc{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;margin:28px 0 8px}
+.toc ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 20px;counter-reset:t}
+.toc li{counter-increment:t;font-size:15px}
+.toc li::before{content:counter(t,decimal-leading-zero);font-family:var(--mono);color:var(--ink-3);margin-right:10px;font-size:13px}
+.toc a{color:var(--ink);text-decoration:none}
+.toc a:hover{color:var(--accent)}
+
+section{padding-top:56px}
+.secnum{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.08em;margin-bottom:4px}
+
+.widget{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin:26px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.widget-title{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);margin:0 0 12px;font-weight:600}
+.controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:12px 0}
+.ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:15px}
+.ctrl output{font-family:var(--mono);font-size:14px;min-width:5.5em;color:var(--ink)}
+input[type=range]{accent-color:var(--accent);width:170px;max-width:100%}
+.btn{font:inherit;font-size:14px;line-height:1.2;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;transition:background .15s,transform .1s}
+.btn:hover{border-color:var(--ink-3)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn.guess{background:var(--gold-soft);border-color:var(--gold);color:var(--ink)}
+.btn.right{background:var(--one-soft);border-color:var(--one);color:var(--one)}
+.btn.wrong{background:var(--zero-soft);border-color:var(--zero);color:var(--zero)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:6px}
+.readout{font-family:var(--mono);font-size:14px;color:var(--ink-2);line-height:1.6}
+.readout b{color:var(--ink);font-weight:600}
+.readout .ok{color:var(--one);font-weight:600}
+.readout .warn{color:var(--zero);font-weight:600}
+.readout .gd{color:var(--gold);font-weight:600}
+.msg{font-size:15px;color:var(--ink-2);min-height:3.4em;margin:10px 0 0}
+.msg b{color:var(--ink)}
+canvas{display:block;width:100%}
+.cap{font-size:13px;color:var(--ink-3);margin:2px 0 6px}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:20px 0}
+.callout p:last-child{margin-bottom:0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin-top:8px}
+.legend > span{display:inline-block}
+.legend .sw{vertical-align:middle;margin:0 6px 2px 0}
+.sw{display:inline-block;width:16px;height:10px;border-radius:2px}
+.sw.dot{width:8px;height:8px;border-radius:50%}
+.sw.line{height:0;border-top:2px solid var(--ink)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+@media (max-width:640px){.pair{grid-template-columns:1fr}}
+.mcap{font-size:13px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+
+/* cast */
+.cast-q{font-family:var(--serif);font-size:1.08rem;margin:0 0 10px}
+.datarow{font-family:var(--mono);font-size:14px;color:var(--ink-2);margin:0 0 6px}
+.datarow b{color:var(--ink)}
+
+/* recipe */
+.facts{counter-reset:f;list-style:none;padding:0;margin:18px 0}
+.facts li{counter-increment:f;position:relative;padding:12px 0 12px 44px;border-bottom:1px solid var(--line)}
+.facts li::before{content:counter(f);position:absolute;left:0;top:12px;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:600 13px var(--mono)}
+.facts li strong{display:block}
+.table-wrap{overflow-x:auto}
+table.summary{border-collapse:collapse;width:100%;font-size:15px;margin:14px 0}
+table.summary td,table.summary th{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3)}
+@media (max-width:480px){table.summary td,table.summary th{padding:8px 5px}}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:18px 0}
+.card{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
+.card h4{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+.card p{font-size:15px;margin:0;color:var(--ink-2)}
+
+/* quiz */
+.quiz{display:grid;gap:10px}
+.qitem{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg)}
+.qitem p{margin:0 0 8px;font-size:16px}
+.qbtns{display:flex;flex-wrap:wrap;gap:8px}
+.qexp{font-size:15px;color:var(--ink-2);margin:10px 0 0!important}
+
+@media (max-width:480px){
+  main{padding:0 16px 80px}
+  .widget{padding:14px}
+  input[type=range]{width:150px}
+}
+/* page 16 */
+.linkbtn{all:unset;cursor:pointer;font-size:14px;color:var(--accent);text-decoration:underline}
+.linkbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.linkbtn[hidden],.btn[hidden]{display:none}
+.controls[hidden]{display:none}
+.legend > span[hidden]{display:none}
+.sw.dash{height:0;border-top:2px dashed var(--ink)}
+canvas.drag{cursor:grab;touch-action:pan-y}
+.eq{font-family:var(--serif);font-size:1.15rem;text-align:center;margin:14px 0;color:var(--ink)}
+.quote{margin:18px auto;max-width:640px;font-family:var(--serif);font-size:17px;line-height:1.5;color:var(--ink);border-left:3px solid var(--accent);background:var(--surface);padding:12px 16px;border-radius:0 10px 10px 0}
+.quote cite{display:block;margin-top:6px;font-family:var(--sans);font-style:normal;font-size:13px;color:var(--ink-3)}
+</style>
+<script>try{var t=localStorage.getItem('xp-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/catalog.js" defer></script>
+<script src="../assets/site.js" defer></script>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <p class="kicker">The bridge</p>
+  <h1>Likelihood</h1>
+  <p class="lede">Probability runs forward, from a coin to the flips it might produce. Likelihood runs backward, from the flips you saw to the coins that might have made them. Almost every method in statistics, the classical tests and the Bayesian ones alike, is built on it.</p>
+  <div class="hero-play" id="heroPlay">
+    <p class="ask">Seven heads in ten flips. Which coin, out of all possible coins, most likely made this?</p>
+    <canvas id="heroChart" class="drag" style="height:300px" role="img" aria-label="Ten coin flips, seven heads, above an axis of possible coins from always tails to always heads; the chance of seven heads is traced for each coin"></canvas>
+    <div class="controls">
+      <button class="btn primary" id="heroGo" disabled>Try every coin</button>
+      <button class="linkbtn" id="heroSkip">skip the guess</button>
+    </div>
+    <p class="hint" id="heroHint" aria-live="polite">Drag along the axis to where you think the curve will peak, then try every coin.</p>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#backwards">Same formula, read backwards</a></li>
+    <li><a href="#curve">The likelihood curve</a></li>
+    <li><a href="#sharper">More data, sharper peak</a></li>
+    <li><a href="#elsewhere">Horse kicks and tanks</a></li>
+    <li><a href="#next">Where it goes next</a></li>
+    <li><a href="#uses">Where you will meet it</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<section id="backwards">
+  <div class="secnum">01</div>
+  <h2>Same formula, read backwards</h2>
+  <p>The <a href="../probability/binomial.html">binomial formula</a> gives the chance of <i>k</i> heads in <i>n</i> flips of a coin that lands heads with probability <i>p</i>:</p>
+  <p class="eq">P(<i>k</i> heads | <i>p</i>) = C(<i>n</i>, <i>k</i>) · <i>p</i><sup><i>k</i></sup> · (1 − <i>p</i>)<sup><i>n</i> − <i>k</i></sup></p>
+  <p>It has two inputs, the coin and the result, and you can hold either one still. Hold the coin still and vary the result, and you get the chances of every possible result: a probability distribution. Hold the result still, the seven heads you actually saw, and vary the coin, and you get a score for every possible coin. That score is the <strong>likelihood</strong>. The numbers are the same; only the question changes.</p>
+
+  <div class="widget">
+    <p class="widget-title">One table, two readings</p>
+    <div class="controls">
+      <label class="ctrl">coin <i>p</i> <input type="range" id="tbP" min="0" max="1" step="0.01" value="0.5"><output id="tbPOut"></output></label>
+      <label class="ctrl">heads <i>k</i> <input type="range" id="tbK" min="0" max="10" step="1" value="7"><output id="tbKOut"></output></label>
+    </div>
+    <canvas id="tbMap" class="drag" style="height:190px" role="img" aria-label="A table of the chance of each number of heads, from 0 to 10, for every coin from p = 0 to 1, shaded by size; one column and one row are highlighted"></canvas>
+    <canvas id="tbPair" style="height:220px" role="img" aria-label="Left: the highlighted column as bars, the chance of each result for the chosen coin. Right: the highlighted row as a curve, the likelihood of each coin for the chosen result"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>fix the coin: chance of each result</span></span><span><i class="sw line" style="border-color:var(--accent)"></i><span>fix the result: likelihood of each coin</span></span></div>
+    <div class="readout" id="tbRead" style="margin-top:8px"></div>
+  </div>
+  <p>Click anywhere in the table. A column, read down, is a probability distribution: its 11 bars always add up to 1, because the coin must produce some result. A row, read across, is a likelihood curve, and its area is never 1. For ten flips it is 1/11 for every row. The likelihood is <em>not</em> a probability that the coin is this or that. It says how well each coin explains what happened, and only comparisons between coins mean anything: <i>p</i> = 0.7 makes seven heads 0.267 likely and <i>p</i> = 0.5 makes it 0.117 likely, so the first explains the data 2.3 times as well.</p>
+  <p>Ronald Fisher drew this distinction as a young statistician. He presented the method of picking the best-explaining value in 1912, as a third-year undergraduate, named the score “likelihood” in 1921, and gave the method its name, <strong>maximum likelihood</strong>, in 1922. His definition:</p>
+  <blockquote class="quote">“The likelihood that any parameter (or set of parameters) should have any assigned value (or set of values) is proportional to the probability that if this were so, the totality of observations should be that observed.”<cite>R. A. Fisher, “On the mathematical foundations of theoretical statistics”, 1922, p. 310, as quoted by J. Aldrich in <em>Statistical Science</em>, 1997</cite></blockquote>
+  <p>“Proportional to” matters. Multiply a likelihood curve by any constant and nothing changes, which is why from here on the curves are scaled so the peak is 1, the <strong>relative likelihood</strong>.</p>
+</section>
+
+<!-- 2 -->
+<section id="curve">
+  <div class="secnum">02</div>
+  <h2>The likelihood curve</h2>
+  <p>Here is how the curve is made, one flip at a time. Pick a candidate coin, say <i>p</i> = 0.4. Each head you saw scores 0.4, the chance that coin gives a head, and each tail scores 0.6. Multiply the scores together, since the flips are independent. That product is the likelihood of <i>p</i> = 0.4. Now slide the candidate across every value from 0 to 1 and plot the product each time.</p>
+
+  <div class="widget">
+    <p class="widget-title">★ Likelihood explorer</p>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Flips">
+        <button class="btn on" data-lx="0" aria-pressed="true">A secret coin</button>
+        <button class="btn" data-lx="1" aria-pressed="false">My own flips</button>
+      </div>
+    </div>
+    <div class="controls" id="lxSecret">
+      <button class="btn" id="lx1">+1 flip</button>
+      <button class="btn" id="lx10">+10</button>
+      <button class="btn" id="lx100">+100</button>
+      <label class="ctrl">flips <input type="range" id="lxN" min="0" max="100" step="any" value="0"><output id="lxNOut"></output></label>
+    </div>
+    <div class="controls" id="lxOwn" hidden>
+      <button class="btn" id="lxH">I got heads</button>
+      <button class="btn" id="lxT">I got tails</button>
+      <button class="btn" id="lxUndo">Undo</button>
+    </div>
+    <canvas id="lxFlips" style="height:96px" role="img" aria-label="The most recent flips as coins, each with the score the candidate coin gives it"></canvas>
+    <canvas id="lxChart" class="drag" style="height:250px" role="img" aria-label="The likelihood curve over every coin p from 0 to 1, with its peak and the draggable candidate coin marked"></canvas>
+    <div class="legend"><span><i class="sw line" style="border-color:var(--accent)"></i><span id="lxLeg">likelihood (peak scaled to 1)</span></span><span><i class="sw dot" style="background:var(--ink)"></i><span>candidate coin (drag it)</span></span><span id="lxTrueLeg" hidden><i class="sw dash" style="border-color:var(--ink)"></i><span>the secret coin</span></span></div>
+    <div class="controls">
+      <button class="btn primary" id="lxSweep">Sweep the candidate</button>
+      <div class="seg" role="group" aria-label="Scale">
+        <button class="btn on" data-ls="0" aria-pressed="true">likelihood</button>
+        <button class="btn" data-ls="1" aria-pressed="false">log-likelihood</button>
+      </div>
+      <button class="btn" id="lxReveal">Reveal the secret coin</button>
+      <button class="btn" id="lxNew">New secret coin</button>
+    </div>
+    <div class="readout" id="lxRead" aria-live="polite"></div>
+  </div>
+  <p>Add flips and watch the raw product. After 100 flips it is around 10<sup>−30</sup>; after 1,000 it is around 10<sup>−300</sup>, near the smallest number a computer can store, and a poorer candidate falls below even that. Taking logarithms fixes both problems: the product of scores becomes a sum of log-scores, and since the logarithm only rises, the peak stays in the same place. Statisticians nearly always work with the <strong>log-likelihood</strong>.</p>
+  <p>The peak, the coin that explains the data best, is the <strong>maximum likelihood estimate</strong>, written <i>p̂</i>. For coin flips it is exactly the fraction of heads, <i>p̂</i> = <i>k</i>/<i>n</i> (setting the slope of the log-likelihood to zero gives it in two lines; the <a href="../probability/bernoulli.html#est">Bernoulli page</a> does the algebra). That is what anyone would have guessed. The machinery earns its keep when the answer is not obvious, as in section 4, and because the curve says more than its peak.</p>
+</section>
+
+<!-- 3 -->
+<section id="sharper">
+  <div class="secnum">03</div>
+  <h2>More data, sharper peak</h2>
+  <p>Ten flips with seven heads and 1,000 flips with 700 heads peak in the same place, at 0.7. They do not say the same thing. The second curve is far narrower: it rules out every coin outside a thin band. How wide the peak is tells you how precise the estimate is.</p>
+
+  <div class="widget">
+    <p class="widget-title">The width of the peak</p>
+    <div class="controls">
+      <label class="ctrl">flips <i>n</i> <input type="range" id="shN" min="0" max="7" step="1" value="1"><output id="shNOut"></output></label>
+      <label class="ctrl">share of heads <input type="range" id="shF" min="0" max="1" step="0.05" value="0.7"><output id="shFOut"></output></label>
+    </div>
+    <canvas id="shChart" style="height:250px" role="img" aria-label="The log-likelihood curve relative to its peak, the parabola that matches its curvature at the peak, and the cut-off 1.92 below the peak"></canvas>
+    <div class="legend"><span><i class="sw line" style="border-color:var(--accent)"></i><span>log-likelihood</span></span><span><i class="sw line" style="border-color:var(--one)"></i><span>parabola with the same curvature</span></span><span><i class="sw" style="background:var(--accent-soft);border:1px solid var(--accent)"></i><span>within 1.92 of the peak</span></span></div>
+    <div class="readout" id="shRead" style="margin-top:8px"></div>
+    <div class="controls"><button class="btn primary" id="shRun">Repeat the experiment 1,000 times</button></div>
+    <canvas id="shHist" style="height:180px" role="img" aria-label="Histogram of the estimates from 1,000 repeats of the experiment, with the bell curve whose width comes from the curvature of a single likelihood curve"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>estimates from 1,000 repeats</span></span><span><i class="sw line" style="border-color:var(--one)"></i><span>predicted from one curve’s curvature</span></span></div>
+    <div class="readout" id="shSimRead" style="margin-top:8px"></div>
+  </div>
+  <p>Near its peak, any smooth log-likelihood looks like an upside-down parabola. How sharply it bends, its <strong>curvature</strong>, measures how much the data pin the answer down; statisticians call it the <strong>Fisher information</strong>. For coin flips it is <i>n</i> / (<i>p̂</i>(1 − <i>p̂</i>)), and one over its square root is</p>
+  <p class="eq">SE = √(<i>p̂</i>(1 − <i>p̂</i>) / <i>n</i>)</p>
+  <p>the same standard error that set the width of every poll interval on the <a href="confidence-intervals.html">confidence intervals</a> page. Repeat the experiment and the 1,000 estimates spread out by just this much: a single curve, from a single dataset, predicts how much its own peak would wobble from sample to sample. Since curvature grows like <i>n</i>, the width shrinks like 1/√<i>n</i>, the √<i>n</i> law again.</p>
+  <p>The shaded band, every coin whose log-likelihood is within 1.92 of the peak, is a <strong>likelihood interval</strong>; section 5 explains the 1.92. With many flips it matches <i>p̂</i> ± 1.96 SE. With few flips, or a share near 0 or 1, the curve is lopsided and the two disagree. Set the share to 0: no heads in 10 flips. The parabola has infinite curvature there, and the shortcut claims <i>p</i> is exactly 0, give or take nothing. The curve itself says any coin up to about 0.17 still explains the data reasonably well.</p>
+</section>
+
+<!-- 4 -->
+<section id="elsewhere">
+  <div class="secnum">04</div>
+  <h2>Horse kicks and tanks</h2>
+  <p>The recipe never changes: write down the chance of the data for each possible setting, then find the setting that makes it largest. It works for any model, not just coins.</p>
+  <h3>Horse kicks</h3>
+  <p>Bortkiewicz’s 1898 count, from the <a href="../probability/poisson.html#data">Poisson page</a>: 10 Prussian army corps watched for 20 years, 200 corps-years, with 109 having no deaths from horse kicks, 65 one, 22 two, 3 three and 1 four, 122 deaths in all. If deaths come at random at some rate λ per corps-year, the Poisson formula gives the chance of each count, and the likelihood of λ is the product of those chances over all 200 corps-years.</p>
+
+  <div class="widget">
+    <p class="widget-title">Fit a rate to the horse kicks</p>
+    <div class="controls">
+      <label class="ctrl">rate λ <input type="range" id="hkL" min="0.2" max="1.2" step="0.01" value="1"><output id="hkLOut"></output></label>
+      <button class="btn primary" id="hkFit">Climb to the peak</button>
+    </div>
+    <canvas id="hkChart" style="height:250px" role="img" aria-label="Left: corps-years with 0 to 4 deaths, observed as bars and expected at the chosen rate as dashed marks. Right: the log-likelihood of each rate with the chosen rate marked"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i><span>observed corps-years</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>expected at this λ</span></span><span><i class="sw line" style="border-color:var(--accent)"></i><span>log-likelihood</span></span></div>
+    <div class="readout" id="hkRead" style="margin-top:8px"></div>
+  </div>
+  <p>The peak is at λ̂ = 0.61, which is 122 deaths over 200 corps-years: the plain average again. The curvature gives a standard error of √(0.61/200) = 0.055, and the likelihood interval runs from 0.51 to 0.72. Away from the peak the fit gets visibly worse: at λ = 1 the model expects 74 empty corps-years instead of 109, and the likelihood has fallen to 2 in 100 million of its peak.</p>
+
+  <h3>Tanks</h3>
+  <p>The <a href="estimation.html">German tank problem</a> from page 4: four captured tanks carry serial numbers 19, 40, 42 and 60. If the enemy made <i>N</i> tanks, numbered 1 to <i>N</i>, every set of four serial numbers is equally likely to be captured, so the chance of exactly this set is one over the number of possible sets. That is zero if <i>N</i> is below 60, since tank 60 exists, and shrinks steadily as <i>N</i> grows above 60.</p>
+
+  <div class="widget">
+    <p class="widget-title">The likelihood of every factory size</p>
+    <canvas id="tkLik" style="height:190px" role="img" aria-label="The likelihood of each number of tanks N given serial numbers 19, 40, 42 and 60: zero below 60, highest at 60, falling after"></canvas>
+    <div class="readout" id="tkLikRead" style="margin-top:8px"></div>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Recipe">
+        <button class="btn on" data-tk="0" aria-pressed="true">Maximum likelihood (largest)</button>
+        <button class="btn" data-tk="1" aria-pressed="false">Largest + gap</button>
+      </div>
+      <button class="btn primary" id="tkRun">Capture 4 tanks from 100, 1,000 times</button>
+    </div>
+    <canvas id="tkHist" style="height:190px" role="img" aria-label="Histogram of the chosen estimate from 1,000 captures of 4 tanks from a factory of 100, with the true 100 and the average estimate marked"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--ink-3)"></i><span>estimates from 1,000 captures</span></span><span><i class="sw dash" style="border-color:var(--ink)"></i><span>true number, 100</span></span><span>▲ <span>average estimate</span></span></div>
+    <div class="readout" id="tkRead" style="margin-top:8px"></div>
+  </div>
+  <p>The likelihood peaks at <i>N</i> = 60, the largest serial number seen. That is the maximum likelihood estimate, and it is clearly too low: the largest of four captured tanks is almost never the last one made. From a factory of 100 it averages 80.8. Maximum likelihood picks the setting that makes <em>this</em> sample most probable, which is not the same as a setting that is right on average. The “largest + gap” recipe from page 4 adds the average gap between serial numbers, giving 74 here, and averages exactly 100.</p>
+  <div class="callout">
+    <p><strong>Where maximum likelihood goes wrong.</strong> It can be biased in small samples, as with the tanks. The same happens with the spread of a normal distribution: the maximum likelihood estimate of the variance divides by <i>n</i>, and on average comes out too small by a factor (<i>n</i> − 1)/<i>n</i>, which is why the usual <i>s</i> divides by <i>n</i> − 1 (the <a href="../probability/chi-square.html#variance">Chi-square page</a> shows why). The bias fades as samples grow. A deeper limit is that the likelihood only ranks settings <em>inside the model you chose</em>. If the horse-kick rate differed from corps to corps, the Poisson curve would still have a peak, but its width would understate the uncertainty, and nothing in the curve would warn you. Checking the model, as the χ² test did for the horse kicks, is a separate job.</p>
+  </div>
+</section>
+
+<!-- 5 -->
+<section id="next">
+  <div class="secnum">05</div>
+  <h2>Where it goes next</h2>
+  <p>The likelihood curve is where the two big schools of statistics part ways. Both start from it.</p>
+  <p><strong>Road one: compare two settings.</strong> To test whether the coin is fair, compare the best coin with the fair one. The ratio of their likelihoods, L(<i>p̂</i>) / L(0.5), is the <strong>likelihood ratio</strong>. In 1938 Samuel Wilks showed that, when the fair coin is the truth, twice the log of this ratio follows, in large samples, the <a href="../probability/chi-square.html">chi-square distribution</a> with 1 degree of freedom (one for each setting the claim fixes). So the ratio becomes a p-value: the <strong>likelihood ratio test</strong>. The 1.92 of section 3 is half of 3.84, the chi-square cut-off for 5%; the likelihood interval is every coin this test would not reject.</p>
+  <p><strong>Road two: weigh every setting.</strong> Bayesian statistics treats the coin itself as uncertain. Start with a <strong>prior</strong>, how plausible each coin seemed before the flips, multiply it point by point by the likelihood, and rescale so the area is 1. The result is the <strong>posterior</strong>, how plausible each coin is now. A flat prior gives back the likelihood curve itself, now with area 1, so it can be read as probabilities.</p>
+
+  <div class="widget">
+    <p class="widget-title">Two roads from one curve</p>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Data">
+        <button class="btn on" data-rd="0" aria-pressed="true">7 of 10 heads</button>
+        <button class="btn" data-rd="1" aria-pressed="false">14 of 20</button>
+        <button class="btn" data-rd="2" aria-pressed="false">70 of 100</button>
+      </div>
+      <div class="seg" role="group" aria-label="Prior">
+        <button class="btn on" data-rp="0" aria-pressed="true">flat prior</button>
+        <button class="btn" data-rp="1" aria-pressed="false">prior: most coins are close to fair</button>
+      </div>
+    </div>
+    <canvas id="rdChart" style="height:300px" role="img" aria-label="Left: the likelihood curve with the best coin and the fair coin marked and their ratio. Right: the prior, the likelihood and the posterior for the chosen prior"></canvas>
+    <div class="legend"><span><i class="sw line" style="border-color:var(--accent)"></i><span>likelihood</span></span><span><i class="sw dash" style="border-color:var(--ink-3)"></i><span>prior</span></span><span><i class="sw line" style="border-color:var(--ink)"></i><span>posterior</span></span></div>
+    <div class="readout" id="rdRead" style="margin-top:8px"></div>
+  </div>
+  <p>With 7 heads in 10, the best coin explains the data 2.3 times as well as a fair one. Wilks’s curve turns that into p = 0.20 (the exact binomial test, better for 10 flips, gives 0.34): no evidence against fairness. A flat prior puts 89% of the posterior above 0.5; a prior that expects coins to be near fair pulls the posterior toward 0.5 and gives 72%. With 70 heads in 100, every route agrees the coin is biased. Both roads also lead further: likelihood ratios to comparing whole models, posteriors to the whole Bayesian half of this series.</p>
+</section>
+
+<!-- 6 -->
+<section id="uses">
+  <div class="secnum">06</div>
+  <h2>Where you will meet it</h2>
+  <div class="cards">
+    <div class="card"><h4>Machine learning</h4><p>Training a classifier by minimizing “cross-entropy loss” is maximizing a log-likelihood. The loss is the negative log-likelihood of the labels.</p></div>
+    <div class="card"><h4>Regression for yes/no outcomes</h4><p>Logistic regression has no least-squares shortcut; its S-shaped curve is fitted by climbing the likelihood, as the horse-kick widget did.</p></div>
+    <div class="card"><h4>Survival studies</h4><p>Patients still alive when a study ends contribute “survived at least this long” to the likelihood, so nobody’s data is thrown away.</p></div>
+    <div class="card"><h4>Genetics</h4><p>Linkage studies report LOD scores, the base-10 log of a likelihood ratio, and evolutionary trees are routinely chosen by maximum likelihood.</p></div>
+    <div class="card"><h4>Physics</h4><p>Particle discoveries are declared from likelihood ratio tests comparing “signal plus background” with “background only”.</p></div>
+    <div class="card"><h4>Bayesian inference</h4><p>Every posterior is a prior times a likelihood. The next pages build it up from there.</p></div>
+  </div>
+
+  <h3>Check yourself</h3>
+  <div class="widget">
+    <div class="quiz" id="quiz"></div>
+    <div class="readout" id="quizScore" style="margin-top:10px" aria-live="polite"></div>
+  </div>
+
+  <p>Sources: Fisher’s definitions and dates follow J. Aldrich, “R. A. Fisher and the making of maximum likelihood 1912–1922”, <i>Statistical Science</i> 12 (1997); the test is from S. S. Wilks, “The large-sample distribution of the likelihood ratio for testing composite hypotheses”, <i>Annals of Mathematical Statistics</i> 9 (1938); the horse kicks are from L. von Bortkiewicz, <i>Das Gesetz der kleinen Zahlen</i> (1898).</p>
+  <p>Next, the second road: how a prior and a likelihood combine, starting with the simplest case, a single test result. <strong>Bayes’ theorem</strong> (coming soon).</p>
+</section>
+</main>
+
+<script>
+(function(){
+'use strict';
+/* ---------- helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const root = document.documentElement;
+const C = n => getComputedStyle(root).getPropertyValue(n).trim();
+const f2 = x => x.toFixed(2);
+const fmtN = x => Math.abs(x - Math.round(x)) < 1e-9 ? String(Math.round(x)) : String(+x.toFixed(2));
+const pct = x => (100 * x).toFixed(1) + '%';
+const MONO = 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
+const TAU = Math.PI * 2;
+const comma = n => n.toLocaleString('en-US');
+
+function fit(c){
+  const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+  if (c.width !== w*dpr || c.height !== h*dpr) { c.width = w*dpr; c.height = h*dpr; }
+  const ctx = c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  return {ctx, w, h};
+}
+const redraws = [];
+function redrawAll(){ redraws.forEach(f => f()); }
+let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(redrawAll, 80); });
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+if (mq.addEventListener) mq.addEventListener('change', redrawAll);
+new MutationObserver(redrawAll).observe(root, {attributes:true, attributeFilter:['data-theme']});
+
+function niceTicks(max, count){
+  const raw = max / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const step = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag;
+  const t = []; for (let v = 0; v <= max + 1e-9; v += step) t.push(v); return t;
+}
+function stepFmt(ticks){ const st = ticks.length > 1 ? ticks[1] - ticks[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9)); return v => v.toFixed(d); }
+function yGrid(ctx, X0, X1, ys, ticks, fmt){
+  ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ticks.forEach(v => {
+    const y = Math.round(ys(v)) + .5;
+    ctx.strokeStyle = C('--line'); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X0, y); ctx.lineTo(X1, y); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.fillText(fmt(v), X0 - 6, y);
+  });
+}
+function intStep(px, minPx){
+  for (const s of [1,2,5,10,20,25,50,100]) if (s * px >= minPx) return s;
+  return 100;
+}
+function roundRect(ctx, x, y, w, h, r){
+  r = Math.max(0, Math.min(r, w/2, Math.abs(h)/2));
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+function dot(ctx, x, y, r){ ctx.beginPath(); ctx.arc(x, y, Math.max(0.5, r), 0, TAU); ctx.fill(); }
+function vline(ctx, x, y0, y1, color, dash, lw){
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw || 1.5; if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(Math.round(x) + .5, y0); ctx.lineTo(Math.round(x) + .5, y1); ctx.stroke(); ctx.restore();
+}
+/* integer-valued bar charts: bars at k = lo..hi */
+function frame(ctx, w, h, o){
+  const X0 = o.left != null ? o.left : 40, X1 = w - 10, Y0 = h - 24, Y1 = o.top != null ? o.top : 12;
+  const span = o.hi - o.lo + 1, bw = (X1 - X0) / span;
+  const xc = k => X0 + bw * (k - o.lo + .5), ys = v => Y0 - (v / o.ymax) * (Y0 - Y1);
+  const t = niceTicks(o.ymax, 3).filter(v => v <= o.ymax * 1.0001); yGrid(ctx, X0, X1, ys, t, o.yfmt || stepFmt(t));
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  const st = o.step || intStep(bw, 24);
+  for (let k = Math.ceil(o.lo / st) * st; k <= o.hi; k += st) ctx.fillText(o.lab ? o.lab(k) : k, xc(k), Y0 + 6);
+  return {X0, X1, Y0, Y1, bw, xc, ys};
+}
+function drawBars(ctx, F, lo, hi, val, color, frac){
+  const bwid = Math.max(1, F.bw * (frac == null ? .8 : frac));
+  for (let k = lo; k <= hi; k++) {
+    const v = val(k); if (!(v > 0)) continue;
+    const y = F.ys(v), hh = F.Y0 - y; if (hh < 0.2) continue;
+    const x = F.xc(k) - bwid / 2;
+    ctx.fillStyle = typeof color === 'function' ? color(k) : color;
+    if (bwid >= 6 && hh >= 3) { roundRect(ctx, x, y, bwid, hh, Math.min(3, bwid / 4)); ctx.fill(); }
+    else ctx.fillRect(x, y, bwid, hh);
+  }
+}
+function emptyNote(ctx, w, h, text){
+  ctx.fillStyle = C('--ink-3'); ctx.font = '13px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(text, w / 2, h / 2 - 8);
+}
+
+/* randomness */
+let spare = null;
+function gauss(){
+  if (spare != null) { const s = spare; spare = null; return s; }
+  let u = 0, v = 0; while (u === 0) u = Math.random(); v = Math.random();
+  const r = Math.sqrt(-2 * Math.log(u)); spare = r * Math.sin(TAU * v); return r * Math.cos(TAU * v);
+}
+function shuffled(a){ const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; }
+function corr(x, y){
+  const n = x.length; let mx = 0, my = 0; for (let i = 0; i < n; i++) { mx += x[i]; my += y[i]; } mx /= n; my /= n;
+  let sxy = 0, sxx = 0, syy = 0; for (let i = 0; i < n; i++) { const a = x[i] - mx, b = y[i] - my; sxy += a * b; sxx += a * a; syy += b * b; }
+  return sxy / Math.sqrt(sxx * syy);
+}
+function binom(n, p){ let k = 0; for (let i = 0; i < n; i++) if (Math.random() < p) k++; return k; }
+function flips(n){ const a = new Array(n); for (let i = 0; i < n; i++) a[i] = Math.random() < .5 ? 1 : 0; return a; }
+function longestRun(a){
+  let best = 1, cur = 1, start = 0, bs = 0;
+  for (let i = 1; i < a.length; i++) { if (a[i] === a[i-1]) cur++; else { cur = 1; start = i; } if (cur > best) { best = cur; bs = start; } }
+  return {len: best, start: bs};
+}
+function switches(a){ let s = 0; for (let i = 1; i < a.length; i++) if (a[i] !== a[i-1]) s++; return s; }
+const RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+function ticksIn(lo, hi, count){
+  const raw = (hi - lo) / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const st = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag, t = [];
+  for (let v = Math.ceil(lo / st - 1e-9) * st; v <= hi + 1e-9; v += st) t.push(+v.toFixed(10));
+  return t;
+}
+function xAxis(ctx, X0, X1, Y0, lo, hi, fmt){
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  const t = ticksIn(lo, hi, Math.max(2, Math.floor((X1 - X0) / 60)));
+  const st = t.length > 1 ? t[1] - t[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9));
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  t.forEach(v => ctx.fillText(fmt ? fmt(v) : v.toFixed(d), X0 + (v - lo) / (hi - lo) * (X1 - X0), Y0 + 5));
+}
+function label(ctx, x, y, text, color, X0, X1){
+  ctx.font = '600 11px ' + MONO; ctx.fillStyle = color; ctx.textBaseline = 'top';
+  const right = x > (X0 + X1) / 2; ctx.textAlign = right ? 'right' : 'left';
+  ctx.fillText(text, x + (right ? -5 : 5), y);
+}
+
+function bar(ctx, x, w, y, Y0, color){
+  const hh = Y0 - y; if (!(hh > .2)) return;
+  ctx.fillStyle = color;
+  if (w >= 6 && hh >= 3) { roundRect(ctx, x, y, w, hh, Math.min(3, w / 4)); ctx.fill(); } else ctx.fillRect(x, y, w, hh);
+}
+
+/* ---------- shared ---------- */
+function setH(cv, wide, narrow){ const want = (cv.getBoundingClientRect().width < 560 ? narrow : wide) + 'px'; if (cv.style.height !== want) cv.style.height = want; }
+function erfc(x){
+  const z = Math.abs(x), t = 1 / (1 + .5 * z);
+  const r = t * Math.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (.37409196 + t * (.09678418 + t * (-.18628806 + t * (.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-.82215223 + t * .17087277)))))))));
+  return x >= 0 ? r : 2 - r;
+}
+function pressSeg(sel, attr, v){ $$(sel).forEach(b => { const on = b.dataset[attr] === String(v); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }); }
+function tag(ctx, text, x, y, color, align){
+  ctx.font = '600 11px ' + MONO; const tw = ctx.measureText(text).width;
+  const x0 = align === 'right' ? x - tw - 4 : align === 'center' ? x - tw / 2 - 2 : x - 2;
+  ctx.fillStyle = C('--surface'); ctx.globalAlpha = .9; ctx.fillRect(x0, y - 1, tw + 6, 15); ctx.globalAlpha = 1;
+  ctx.fillStyle = color; ctx.textBaseline = 'top'; ctx.textAlign = 'left'; ctx.fillText(text, x0 + 2, y + 1);
+}
+/* a tag kept inside [X0, X1]: left of x if it would overflow on the right */
+function tagAt(ctx, text, x, y, color, X0, X1){
+  ctx.font = '600 11px ' + MONO; const tw = ctx.measureText(text).width;
+  if (x + 6 + tw > X1) tag(ctx, text, Math.max(X0 + tw + 4, x - 6), y, color, 'right'); else tag(ctx, text, Math.max(X0 + 2, x + 6), y, color);
+}
+function lgam(x){
+  const c = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+  if (x < .5) return Math.log(Math.PI / Math.abs(Math.sin(Math.PI * x))) - lgam(1 - x);
+  x -= 1; let a = c[0]; const t = x + 7.5; for (let i = 1; i < 9; i++) a += c[i] / (x + i);
+  return .5 * Math.log(TAU) + (x + .5) * Math.log(t) - t + Math.log(a);
+}
+const lchoose = (n, k) => lgam(n + 1) - lgam(k + 1) - lgam(n - k + 1);
+/* log of p^k (1-p)^(n-k), with 0·log 0 = 0 */
+function llBin(k, n, p){
+  let s = 0;
+  if (k > 0) s += p > 0 ? k * Math.log(p) : -Infinity;
+  if (n - k > 0) s += p < 1 ? (n - k) * Math.log(1 - p) : -Infinity;
+  return s;
+}
+const binP = (k, n, p) => { const l = llBin(k, n, p); return l === -Infinity ? 0 : Math.exp(lchoose(n, k) + l); };
+const chi1p = x => erfc(Math.sqrt(Math.max(0, x) / 2));
+const SUP = {'-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹'};
+/* a number given by its log10, written plainly or as m × 10ⁿ */
+function sci10(l10){
+  if (l10 === -Infinity) return '0';
+  if (l10 > -3) return String(+Math.pow(10, l10).toPrecision(3));
+  let e = Math.floor(l10), m = Math.pow(10, l10 - e);
+  if (m >= 9.995) { m = 1; e++; }
+  return `${m.toFixed(1)} × 10${String(e).split('').map(ch => SUP[ch]).join('')}`;
+}
+const mn = x => (x < 0 ? '−' : '') + Math.abs(x);
+const fx = (x, d) => (x < -1e-12 ? '−' : '') + Math.abs(x).toFixed(d);
+/* draw f over [lo, hi] inside a clip box; values below ymin vanish */
+function curve(ctx, f, lo, hi, xs, ys, box, color, lw, dash, N){
+  N = N || 400;
+  ctx.save(); ctx.beginPath(); ctx.rect(box.X0, box.Y1 - 3, box.X1 - box.X0, box.Y0 - box.Y1 + 3); ctx.clip();
+  ctx.strokeStyle = color; ctx.lineWidth = lw || 2.5; ctx.lineJoin = 'round'; if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); let pen = false;
+  for (let i = 0; i <= N; i++) {
+    const x = lo + (hi - lo) * i / N, v = f(x);
+    if (!isFinite(v)) { pen = false; continue; }
+    const yy = Math.min(ys(v), box.Y0 + 40);
+    if (pen) ctx.lineTo(xs(x), yy); else { ctx.moveTo(xs(x), yy); pen = true; }
+  }
+  ctx.stroke(); ctx.restore();
+}
+function coin(ctx, x, y, r, head, ring){
+  ctx.fillStyle = C(head ? '--one' : '--zero'); dot(ctx, x, y, r);
+  if (ring) { ctx.save(); ctx.strokeStyle = C('--gold'); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, r + 2.5, 0, TAU); ctx.stroke(); ctx.restore(); }
+  if (r >= 7) { ctx.fillStyle = C('--surface'); ctx.font = `700 ${Math.round(r * 1.1)}px ` + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(head ? 'H' : 'T', x, y + .5); }
+}
+function axisTitle(ctx, text, x, y, align){
+  ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = align || 'left'; ctx.textBaseline = 'top'; ctx.fillText(text, x, y);
+}
+function panelTitle(ctx, text, x, y){
+  ctx.font = '600 13px system-ui,sans-serif'; ctx.fillStyle = C('--ink'); ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(text, x, y);
+}
+
+/* ---------- hero: seven heads, every coin ---------- */
+(function(){
+  const cv = $('#heroChart'), hint = $('#heroHint'), SEQ = [1,1,0,1,1,1,0,1,1,0], K = 7, N = 10;
+  let guess = null, prog = null, timer = null, drag = false;
+  const val = p => binP(K, N, p);
+  function geo(){ const r = cv.getBoundingClientRect(); return {X0: 44, X1: r.width - 14, Y1: 70, Y0: r.height - 40}; }
+  function draw(){
+    const {ctx, w, h} = fit(cv), G = geo(), {X0, X1, Y0, Y1} = G;
+    const xs = p => X0 + p * (X1 - X0), YM = .3, ys = v => Y0 - v / YM * (Y0 - Y1);
+    const r = Math.min(13, (w - 40) / 26), gap = r * 2.5, sx = w / 2 - gap * 4.5;
+    SEQ.forEach((s, i) => coin(ctx, sx + gap * i, 24, r, s));
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText('7 heads, 3 tails', w / 2, 24 + r + 6);
+    yGrid(ctx, X0, X1, ys, [0, .1, .2, .3], v => v.toFixed(1));
+    xAxis(ctx, X0, X1, Y0, 0, 1);
+    axisTitle(ctx, 'the coin: chance of heads p', (X0 + X1) / 2, Y0 + 20, 'center');
+    axisTitle(ctx, 'chance of 7 heads in 10', X0 - 38, Y1 - 16);
+    if (prog != null) {
+      const upto = Math.min(1, prog);
+      ctx.save(); ctx.fillStyle = C('--accent-soft'); ctx.beginPath(); ctx.moveTo(xs(0), Y0);
+      for (let i = 0; i <= 300 * upto; i++) { const p = i / 300; ctx.lineTo(xs(p), ys(val(p))); }
+      ctx.lineTo(xs(upto), Y0); ctx.closePath(); ctx.fill(); ctx.restore();
+      curve(ctx, val, 0, upto, xs, ys, G, C('--accent'), 2.5, null, Math.max(2, Math.round(300 * upto)));
+      if (prog < 1) {
+        const p = upto, y = ys(val(p));
+        vline(ctx, xs(p), y, Y0, C('--ink-3'), [3, 3], 1);
+        ctx.fillStyle = C('--ink'); dot(ctx, xs(p), y, 4.5);
+        tagAt(ctx, `coin p = ${p.toFixed(2)} → ${val(p).toFixed(3)}`, xs(p), Math.min(y - 20, Y0 - 30), C('--ink'), X0, X1);
+      } else {
+        const yp = ys(val(.7)), yf = ys(val(.5));
+        vline(ctx, xs(.7), yp, Y0, C('--accent'), null, 1.5);
+        ctx.fillStyle = C('--accent'); dot(ctx, xs(.7), yp, 5);
+        tagAt(ctx, 'best coin 0.70 → 0.267', xs(.7) + 2, yp - 8, C('--accent'), X0, X1);
+        vline(ctx, xs(.5), yf, Y0, C('--ink-2'), [4, 3], 1.2);
+        ctx.fillStyle = C('--ink-2'); dot(ctx, xs(.5), yf, 4);
+        tag(ctx, 'fair coin 0.50 → 0.117', xs(.5) - 8, yf - 8, C('--ink-2'), 'right');
+      }
+    }
+    if (guess != null) {
+      ctx.fillStyle = C('--gold');
+      ctx.beginPath(); ctx.moveTo(xs(guess), Y0 - 1); ctx.lineTo(xs(guess) - 7, Y0 + 11); ctx.lineTo(xs(guess) + 7, Y0 + 11); ctx.closePath(); ctx.fill();
+      if (prog != null && prog >= 1) { dot(ctx, xs(guess), ys(val(guess)), 5.5); }
+      else { vline(ctx, xs(guess), Y1, Y0, C('--gold'), [5, 4], 1.5); tagAt(ctx, `your guess ${guess.toFixed(2)}`, xs(guess), Y1 - 4, C('--gold'), X0, X1); }
+    }
+    if (prog == null && guess == null) emptyNote(ctx, w, (Y0 + Y1) + 10, 'drag along the axis: where will the curve peak?');
+  }
+  function message(){
+    let s = `The curve peaks at <b>p = 0.7</b>, the share of heads you saw.`;
+    if (guess != null) {
+      const v = val(guess), rel = v / val(.7);
+      s += ` Your guess, ${guess.toFixed(2)}, makes seven heads ${v.toFixed(3)} likely, <b>${Math.round(100 * rel)}%</b> as well as the best coin.`;
+    }
+    s += ` But the top is broad: a fair coin makes seven heads 0.117 likely, 44% as well as the best. Ten flips cannot tell these coins apart. This curve, the binomial formula read backwards, is the <strong>likelihood</strong>.`;
+    hint.innerHTML = s;
+  }
+  const toP = e => { const r = cv.getBoundingClientRect(), G = geo(); return Math.max(0, Math.min(1, Math.round((e.clientX - r.left - G.X0) / (G.X1 - G.X0) * 100) / 100)); };
+  function setGuess(e){ guess = toP(e); $('#heroGo').disabled = false; $('#heroSkip').hidden = true; draw(); if (prog != null && prog >= 1) message(); }
+  cv.addEventListener('pointerdown', e => { if (prog != null && prog < 1) return; drag = true; setGuess(e); try { cv.setPointerCapture(e.pointerId); } catch (_) {} });
+  cv.addEventListener('pointermove', e => { if (drag) setGuess(e); });
+  cv.addEventListener('pointerup', () => drag = false); cv.addEventListener('pointercancel', () => drag = false);
+  $('#heroSkip').addEventListener('click', () => { $('#heroGo').disabled = false; $('#heroSkip').hidden = true; });
+  $('#heroGo').addEventListener('click', () => {
+    clearInterval(timer);
+    if (RM) { prog = 1; draw(); message(); return; }
+    prog = 0; hint.textContent = 'Trying every coin from p = 0 to p = 1 and scoring seven heads in ten…';
+    timer = setInterval(() => { prog = Math.min(1, prog + 1 / 90); draw(); if (prog >= 1) { clearInterval(timer); timer = null; message(); $('#heroGo').textContent = 'Sweep again'; } }, 25);
+  });
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 1. one table, two readings ---------- */
+(function(){
+  const N = 10, pIn = $('#tbP'), kIn = $('#tbK'), map = $('#tbMap'), pair = $('#tbPair');
+  let drag = false;
+  const P = () => +pIn.value, K = () => +kIn.value;
+  function mgeo(){ const r = map.getBoundingClientRect(); return {X0: 40, X1: r.width - 10, Y1: 6, Y0: r.height - 34}; }
+  function drawMap(){
+    const {ctx, w, h} = fit(map), {X0, X1, Y0, Y1} = mgeo(), cw = (X1 - X0) / 101, rh = (Y0 - Y1) / 11;
+    const p = P(), k = K();
+    ctx.fillStyle = C('--surface-2'); ctx.fillRect(X0, Y1, X1 - X0, Y0 - Y1);
+    ctx.fillStyle = C('--ink-2');
+    for (let j = 0; j <= 100; j++) for (let i = 0; i <= N; i++) {
+      const v = binP(i, N, j / 100); if (v < 1e-4) continue;
+      ctx.globalAlpha = .85 * Math.min(1, Math.sqrt(v / .45)); ctx.fillRect(X0 + j * cw, Y0 - (i + 1) * rh, cw + .6, rh + .4);
+    }
+    ctx.globalAlpha = 1;
+    const cx = X0 + Math.round(p * 100) * cw, ry = Y0 - (k + 1) * rh;
+    ctx.save(); ctx.lineWidth = 2;
+    ctx.strokeStyle = C('--ink'); ctx.strokeRect(cx - 1, Y1, cw + 2, Y0 - Y1);
+    ctx.strokeStyle = C('--accent'); ctx.lineWidth = 3; ctx.strokeRect(X0, ry, X1 - X0, rh);
+    ctx.fillStyle = C('--ink'); ctx.fillRect(cx - 2, ry - 2, cw + 4, rh + 4);
+    ctx.restore();
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    for (let i = 0; i <= N; i += rh < 12 ? 2 : 1) ctx.fillText(i, X0 - 6, Y0 - (i + .5) * rh);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    for (let j = 0; j <= 10; j += (X1 - X0) < 400 ? 2 : 1) ctx.fillText((j / 10).toFixed(1), X0 + (j * 10 + .5) * cw, Y0 + 4);
+    axisTitle(ctx, '↑ heads k', 2, Y0 + 18); axisTitle(ctx, 'coin p →', X1, Y0 + 18, 'right');
+  }
+  function drawPair(){
+    setH(pair, 220, 400);
+    const {ctx, w, h} = fit(pair), two = w >= 560, pw = two ? w / 2 : w, ph = two ? h : h / 2;
+    const p = P(), k = K(), v = binP(k, N, p);
+    let cmax = 0; for (let i = 0; i <= N; i++) cmax = Math.max(cmax, binP(i, N, p));
+    const rmax = binP(k, N, k / N), ymax = Math.max(.15, Math.max(cmax, rmax) * 1.15);
+    /* left: the column */
+    {
+      const ox = 0, oy = 0;
+      ctx.save(); ctx.translate(ox, oy);
+      panelTitle(ctx, `Fix the coin at p = ${p.toFixed(2)}: each result k`, 4, 2);
+      const F = frame(ctx, pw - (two ? 10 : 0), ph, {lo: 0, hi: N, ymax, top: 30, left: 40});
+      drawBars(ctx, F, 0, N, i => binP(i, N, p), i => i === k ? C('--ink') : C('--ink-3'), .72);
+      if (v > 0) tag(ctx, v.toFixed(3), F.xc(k), F.ys(v) - 18, C('--ink'), 'center');
+      ctx.restore();
+    }
+    /* right: the row */
+    {
+      const ox = two ? pw + 10 : 0, oy = two ? 0 : ph, W = pw - (two ? 10 : 0);
+      ctx.save(); ctx.translate(ox, oy);
+      panelTitle(ctx, `Fix the result at k = ${k}: each coin p`, 4, 2);
+      const G = {X0: 40, X1: W - 10, Y1: 30, Y0: ph - 24}, xs = q => G.X0 + q * (G.X1 - G.X0), ys = u => G.Y0 - u / ymax * (G.Y0 - G.Y1);
+      const t = niceTicks(ymax, 3).filter(u => u <= ymax); yGrid(ctx, G.X0, G.X1, ys, t, stepFmt(t));
+      ctx.fillStyle = C('--accent-soft'); ctx.beginPath(); ctx.moveTo(xs(0), G.Y0);
+      for (let i = 0; i <= 200; i++) ctx.lineTo(xs(i / 200), ys(binP(k, N, i / 200)));
+      ctx.lineTo(xs(1), G.Y0); ctx.closePath(); ctx.fill();
+      xAxis(ctx, G.X0, G.X1, G.Y0, 0, 1);
+      curve(ctx, q => binP(k, N, q), 0, 1, xs, ys, G, C('--accent'), 2.5);
+      vline(ctx, xs(p), ys(v), G.Y0, C('--ink-3'), [3, 3], 1);
+      ctx.fillStyle = C('--ink'); dot(ctx, xs(p), ys(v), 5);
+      tagAt(ctx, v.toFixed(3), xs(p), ys(v) - 18, C('--ink'), G.X0, G.X1);
+      ctx.restore();
+    }
+    const area = 1 / (N + 1), rel = rmax > 0 ? v / rmax : 0;
+    $('#tbRead').innerHTML = `Column p = ${p.toFixed(2)}: the 11 bars add up to <b>1.000</b>, a probability distribution over results.<br>` +
+      `Row k = ${k}: the area under the curve is <b>${area.toFixed(3)}</b> (1/11), not 1, so it is not a distribution over coins.<br>` +
+      `The highlighted cell, <b>${v.toFixed(3)}</b>, appears in both. The coin that explains ${k} heads best is p = ${(k / N).toFixed(1)}; ` +
+      `p = ${p.toFixed(2)} explains it <b>${rel >= .995 ? 'just as well' : Math.round(100 * rel) + '%'}</b>${rel >= .995 ? '' : ' as well'}.`;
+  }
+  function draw(){ $('#tbPOut').textContent = P().toFixed(2); $('#tbKOut').textContent = K(); drawMap(); drawPair(); }
+  function pick(e){
+    const r = map.getBoundingClientRect(), G = mgeo(), cw = (G.X1 - G.X0) / 101, rh = (G.Y0 - G.Y1) / 11;
+    const j = Math.max(0, Math.min(100, Math.floor((e.clientX - r.left - G.X0) / cw))), i = Math.max(0, Math.min(N, Math.floor((G.Y0 - (e.clientY - r.top)) / rh)));
+    pIn.value = j / 100; kIn.value = i; draw();
+  }
+  map.addEventListener('pointerdown', e => { drag = true; pick(e); try { map.setPointerCapture(e.pointerId); } catch (_) {} });
+  map.addEventListener('pointermove', e => { if (drag) pick(e); });
+  map.addEventListener('pointerup', () => drag = false); map.addEventListener('pointercancel', () => drag = false);
+  pIn.addEventListener('input', draw); kIn.addEventListener('input', draw);
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 2. likelihood explorer ---------- */
+(function(){
+  const fl = $('#lxFlips'), cv = $('#lxChart'), nIn = $('#lxN'), MAXN = 1000;
+  let mode = 0, trueP, stream, nS = 0, own = [], cand = .4, logv = 0, sweep = null, timer = null, revealed = false, drag = false;
+  function newCoin(){ trueP = Math.round((.15 + .7 * Math.random()) * 100) / 100; stream = new Array(MAXN); for (let i = 0; i < MAXN; i++) stream[i] = Math.random() < trueP ? 1 : 0; nS = 0; revealed = false; }
+  newCoin();
+  const data = () => mode ? own : stream.slice(0, nS);
+  function setN(n){ nS = Math.max(0, Math.min(MAXN, n)); nIn.value = Math.sqrt(10 * nS); draw(); }
+  function geo(){ const r = cv.getBoundingClientRect(); return {X0: 44, X1: r.width - 12, Y1: 14, Y0: r.height - 38}; }
+  function drawFlips(d, k){
+    const {ctx, w, h} = fit(fl), n = d.length;
+    if (!n) { emptyNote(ctx, w, h + 16, mode ? 'flip a real coin and enter the results' : 'no flips yet: add some'); return; }
+    const gap = 26, M = Math.max(4, Math.min(40, Math.floor((w - 70) / gap))), show = d.slice(-M), x0 = w - 12 - gap * show.length + gap / 2;
+    const Yb = h - 6, BH = 40;
+    if (n > show.length) { ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(`+${comma(n - show.length)}`, 4, 20); ctx.fillText('earlier', 4, 34); }
+    show.forEach((s, i) => {
+      const x = x0 + gap * i; coin(ctx, x, 18, 9, s, mode === 1);
+      const sc = s ? cand : 1 - cand;
+      ctx.fillStyle = C('--line'); ctx.fillRect(x - 6, Yb - BH, 12, BH);
+      bar(ctx, x - 6, 12, Yb - sc * BH, Yb, C('--ink-3'));
+    });
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+    if (n <= show.length) ctx.fillText('score', 4, Yb);
+  }
+  function draw(){
+    const d = data(), n = d.length, k = d.reduce((a, b) => a + b, 0), hat = n ? k / n : null, lmax = n ? llBin(k, n, hat) : 0;
+    $('#lxNOut').textContent = comma(nS);
+    drawFlips(d, k);
+    const {ctx, w, h} = fit(cv), G = geo(), {X0, X1, Y0, Y1} = G, xs = p => X0 + p * (X1 - X0);
+    const lo = logv ? -12 : 0, hi = logv ? .8 : 1.08, ys = v => Y0 - (v - lo) / (hi - lo) * (Y0 - Y1);
+    const f = p => { const l = llBin(k, n, p) - lmax; return logv ? l : Math.exp(l); };
+    const t = logv ? [-12, -9, -6, -3, 0] : [0, .25, .5, .75, 1];
+    yGrid(ctx, X0, X1, ys, t, v => logv ? mn(v) : v.toFixed(2));
+    xAxis(ctx, X0, X1, Y0, 0, 1);
+    axisTitle(ctx, 'candidate coin p', (X0 + X1) / 2, Y0 + 20, 'center');
+    const upto = sweep == null ? 1 : sweep;
+    curve(ctx, f, 0, upto, xs, ys, G, C('--accent'), 2.5, null, Math.max(2, Math.round(400 * upto)));
+    if (revealed && mode === 0) { vline(ctx, xs(trueP), Y1, Y0, C('--ink'), [5, 4], 1.5); tagAt(ctx, `secret coin ${trueP.toFixed(2)}`, xs(trueP), Y0 - 18, C('--ink'), X0, X1); }
+    if (n && sweep == null) {
+      const yp = ys(logv ? 0 : 1);
+      ctx.fillStyle = C('--accent'); dot(ctx, xs(hat), yp, 4.5);
+      tagAt(ctx, `peak p̂ = ${k}/${n} = ${hat.toFixed(2)}`, xs(hat), Y1 - 2, C('--accent'), X0, X1);
+    }
+    const c = sweep == null ? cand : sweep, fc = f(c);
+    if (isFinite(fc)) {
+      const yc = Math.min(Y0, ys(fc));
+      vline(ctx, xs(c), yc, Y0, C('--ink-3'), [3, 3], 1);
+      ctx.fillStyle = C('--ink'); dot(ctx, xs(c), yc, 6);
+    } else { ctx.fillStyle = C('--ink'); dot(ctx, xs(c), Y0, 6); }
+    /* readout */
+    const R = $('#lxRead');
+    if (!n) { R.innerHTML = mode ? 'Flip a real coin and press the buttons. With no flips yet, every coin explains the (empty) data equally well, so the curve is flat.' : 'No flips yet. Every coin explains nothing equally well, so the curve is flat. Add some flips.'; return; }
+    const lc = llBin(k, n, c), l10 = lc / Math.LN10, rel = lc === -Infinity ? 0 : Math.exp(lc - lmax);
+    const prod = `${c.toFixed(2)}<sup>${k}</sup> × ${(1 - c).toFixed(2)}<sup>${n - k}</sup>`;
+    let s = `<b>${comma(n)}</b> flip${n > 1 ? 's' : ''}, <b>${comma(k)}</b> head${k === 1 ? '' : 's'} · peak at <b>p̂ = ${hat.toFixed(3)}</b><br>` +
+      `candidate p = ${c.toFixed(2)}: product of the ${comma(n)} scores = ${prod} = <b>${sci10(l10)}</b>` +
+      (lc === -Infinity ? ' (this coin cannot produce what you saw)' : ` · log: ${fx(lc, 2)} · <b>${rel >= .9995 ? 'the peak' : rel >= .001 ? (rel * 100).toPrecision(2).replace(/\.?0+$/, '') + '% of the peak' : sci10((lc - lmax) / Math.LN10) + ' of the peak'}</b>`);
+    if (l10 < -300) s += '<br><span class="warn">That product is smaller than a computer can store (about 10⁻³⁰⁸); only its log survives.</span>';
+    if (revealed && mode === 0) s += `<br>The secret coin was <b>${trueP.toFixed(2)}</b>; the estimate is off by ${Math.abs(hat - trueP).toFixed(3)}.`;
+    R.innerHTML = s;
+  }
+  function add(m){ if (mode) return; stopSweep(); setN(nS + m); }
+  function stopSweep(){ if (timer) { clearInterval(timer); timer = null; } sweep = null; }
+  $('#lx1').addEventListener('click', () => add(1));
+  $('#lx10').addEventListener('click', () => add(10));
+  $('#lx100').addEventListener('click', () => add(100));
+  nIn.addEventListener('input', () => { stopSweep(); nS = Math.round(Math.pow(+nIn.value, 2) / 10); draw(); });
+  $('#lxH').addEventListener('click', () => { stopSweep(); own.push(1); draw(); });
+  $('#lxT').addEventListener('click', () => { stopSweep(); own.push(0); draw(); });
+  $('#lxUndo').addEventListener('click', () => { stopSweep(); own.pop(); draw(); });
+  $('#lxReveal').addEventListener('click', () => { revealed = !revealed; $('#lxReveal').textContent = revealed ? 'Hide the secret coin' : 'Reveal the secret coin'; $('#lxTrueLeg').hidden = !revealed; draw(); });
+  $('#lxNew').addEventListener('click', () => { stopSweep(); newCoin(); $('#lxReveal').textContent = 'Reveal the secret coin'; $('#lxTrueLeg').hidden = true; setN(0); });
+  $$('[data-ls]').forEach(b => b.addEventListener('click', () => { logv = +b.dataset.ls; pressSeg('[data-ls]', 'ls', logv); $('#lxLeg').textContent = logv ? 'log-likelihood (peak set to 0)' : 'likelihood (peak scaled to 1)'; draw(); }));
+  $$('[data-lx]').forEach(b => b.addEventListener('click', () => {
+    stopSweep(); mode = +b.dataset.lx; pressSeg('[data-lx]', 'lx', mode);
+    $('#lxSecret').hidden = mode === 1; $('#lxOwn').hidden = mode === 0; $('#lxReveal').hidden = mode === 1; $('#lxNew').hidden = mode === 1;
+    $('#lxTrueLeg').hidden = !(revealed && mode === 0); draw();
+  }));
+  $('#lxSweep').addEventListener('click', () => {
+    stopSweep(); if (!data().length) { if (mode) return; setN(10); }
+    if (RM) { const d = data(); cand = d.reduce((a, b) => a + b, 0) / d.length; draw(); return; }
+    sweep = 0;
+    timer = setInterval(() => { sweep = Math.min(1, sweep + 1 / 80); if (sweep >= 1) { stopSweep(); const d = data(); cand = Math.round(100 * d.reduce((a, b) => a + b, 0) / d.length) / 100; } draw(); }, 25);
+  });
+  const toP = e => { const r = cv.getBoundingClientRect(), G = geo(); return Math.max(0, Math.min(1, Math.round((e.clientX - r.left - G.X0) / (G.X1 - G.X0) * 100) / 100)); };
+  cv.addEventListener('pointerdown', e => { stopSweep(); drag = true; cand = toP(e); try { cv.setPointerCapture(e.pointerId); } catch (_) {} draw(); });
+  cv.addEventListener('pointermove', e => { if (drag) { cand = toP(e); draw(); } });
+  cv.addEventListener('pointerup', () => drag = false); cv.addEventListener('pointercancel', () => drag = false);
+  setN(0); redraws.push(draw);
+})();
+
+/* ---------- 3. width of the peak ---------- */
+function likInterval(k, n){
+  const hat = k / n, m = llBin(k, n, hat), g = p => llBin(k, n, p) - m + 1.92;
+  function root(a, b){ for (let i = 0; i < 80; i++) { const c = (a + b) / 2; if ((g(c) >= 0) === (g(a) >= 0)) a = c; else b = c; } return (a + b) / 2; }
+  return [k === 0 ? 0 : root(1e-12, hat), k === n ? 1 : root(hat, 1 - 1e-12)];
+}
+(function(){
+  const NS = [5, 10, 20, 50, 100, 200, 500, 1000], nIn = $('#shN'), fIn = $('#shF'), cv = $('#shChart'), hc = $('#shHist');
+  let sims = null, timer = null;
+  const n = () => NS[+nIn.value], k = () => Math.round(+fIn.value * n());
+  function draw(){
+    const N = n(), K = k(), hat = K / N, lmax = llBin(K, N, hat), edge = K === 0 || K === N;
+    $('#shNOut').textContent = comma(N); $('#shFOut').textContent = `${K} of ${comma(N)}`;
+    const {ctx, w, h} = fit(cv), G = {X0: 44, X1: w - 12, Y1: 14, Y0: h - 38}, {X0, X1, Y0, Y1} = G, xs = p => X0 + p * (X1 - X0);
+    const lo = -6, hi = .4, ys = v => Y0 - (v - lo) / (hi - lo) * (Y0 - Y1);
+    yGrid(ctx, X0, X1, ys, [-6, -4, -2, 0], v => mn(v));
+    const [a, b] = likInterval(K, N), I = edge ? Infinity : N / (hat * (1 - hat)), se = edge ? 0 : 1 / Math.sqrt(I);
+    /* shaded: under the curve, above the cut */
+    ctx.save(); ctx.fillStyle = C('--accent-soft'); ctx.beginPath(); ctx.moveTo(xs(a), ys(-1.92));
+    for (let i = 0; i <= 200; i++) { const p = a + (b - a) * i / 200; ctx.lineTo(xs(p), ys(Math.max(-1.92, llBin(K, N, p) - lmax))); }
+    ctx.lineTo(xs(b), ys(-1.92)); ctx.closePath(); ctx.fill(); ctx.restore();
+    ctx.save(); ctx.strokeStyle = C('--ink-3'); ctx.setLineDash([5, 4]); ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(X0, ys(-1.92)); ctx.lineTo(X1, ys(-1.92)); ctx.stroke(); ctx.restore();
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textBaseline = 'bottom'; ctx.textAlign = hat >= .5 ? 'left' : 'right';
+    ctx.fillText('1.92 below the peak', hat >= .5 ? X0 + 4 : X1 - 4, ys(-1.92) - 3);
+    xAxis(ctx, X0, X1, Y0, 0, 1);
+    axisTitle(ctx, 'coin p', (X0 + X1) / 2, Y0 + 20, 'center');
+    axisTitle(ctx, 'log-likelihood − peak', X0 - 38, 0);
+    if (!edge) curve(ctx, p => -.5 * I * (p - hat) * (p - hat), 0, 1, xs, ys, G, C('--one'), 2, null, 600);
+    curve(ctx, p => llBin(K, N, p) - lmax, 0, 1, xs, ys, G, C('--accent'), 2.5, null, 800);
+    [a, b].forEach(v => vline(ctx, xs(v), ys(-1.92), Y0, C('--accent'), null, 1.2));
+    if (!edge) [hat - 1.96 * se, hat + 1.96 * se].forEach(v => { if (v >= 0 && v <= 1) { ctx.fillStyle = C('--one'); dot(ctx, xs(v), ys(-1.92), 3.5); } });
+    ctx.fillStyle = C('--accent'); dot(ctx, xs(hat), ys(0), 4.5);
+    tagAt(ctx, `p̂ = ${hat.toFixed(2)}`, xs(hat), ys(0) - 14, C('--accent'), X0, X1);
+    const f3 = v => v.toFixed(3);
+    $('#shRead').innerHTML = edge
+      ? `${K} heads in ${comma(N)} flips · p̂ = ${hat} · the curve is still rising at the edge, so its curvature there is infinite and the shortcut gives SE = 0 and the interval <b>${hat} to ${hat}</b><br>likelihood interval: <b>${f3(a)} to ${f3(b)}</b>, an honest range`
+      : `${K} heads in ${comma(N)} flips · p̂ = ${f3(hat)} · curvature at the peak n / (p̂(1 − p̂)) = <b>${I.toFixed(1)}</b> → SE = 1/√${I.toFixed(1)} = <b>${f3(se)}</b><br>` +
+        `likelihood interval <b>${f3(a)} to ${f3(b)}</b> · shortcut p̂ ± 1.96 SE: <b>${fx(hat - 1.96 * se, 3)} to ${f3(hat + 1.96 * se)}</b>`;
+    drawHist();
+  }
+  function drawHist(){
+    const {ctx, w, h} = fit(hc), G = {X0: 44, X1: w - 12, Y1: 12, Y0: h - 22}, {X0, X1, Y0, Y1} = G, xs = p => X0 + p * (X1 - X0);
+    const N = n(), K = k(), hat = K / N, se = Math.sqrt(hat * (1 - hat) / N);
+    if (!sims) { xAxis(ctx, X0, X1, Y0, 0, 1); emptyNote(ctx, w, h - 10, 'repeat the experiment to see how the peak wobbles'); $('#shSimRead').innerHTML = ''; return; }
+    const bw = Math.max(1 / N, .004), nb = Math.ceil(1 / bw) + 1, cnt = new Array(nb).fill(0);
+    sims.forEach(v => cnt[Math.min(nb - 1, Math.round(v / bw))]++);
+    const dens = se > 0 ? x => sims.length * bw * Math.exp(-.5 * ((x - hat) / se) ** 2) / (se * Math.sqrt(TAU)) : () => 0;
+    const ymax = Math.max(Math.max(...cnt), se > 0 ? dens(hat) : 0) * 1.12, ys = v => Y0 - v / ymax * (Y0 - Y1);
+    const t = niceTicks(ymax, 3).filter(v => v <= ymax); yGrid(ctx, X0, X1, ys, t, v => v.toFixed(0));
+    const pw = Math.max(1.5, bw * (X1 - X0) * .8);
+    cnt.forEach((c, i) => { if (c) bar(ctx, Math.max(X0, Math.min(X1 - pw, xs(i * bw) - pw / 2)), pw, ys(c), Y0, C('--ink-3')); });
+    xAxis(ctx, X0, X1, Y0, 0, 1);
+    if (se > 0) curve(ctx, dens, Math.max(0, hat - 5 * se), Math.min(1, hat + 5 * se), xs, ys, G, C('--one'), 2.5, null, 300);
+    const m = sims.reduce((a, b) => a + b, 0) / sims.length, sd = Math.sqrt(sims.reduce((a, b) => a + (b - m) ** 2, 0) / (sims.length - 1));
+    $('#shSimRead').innerHTML = `${comma(sims.length)} repeats of ${comma(N)} flips of a coin with p = ${hat.toFixed(2)} · spread (SD) of the estimates: <b>${sd.toFixed(3)}</b> · predicted from one curve’s curvature: <b>${se.toFixed(3)}</b>` +
+      (se === 0 ? '<br>A coin with p = 0 never wobbles, but that is the one case the data cannot single out: coins up to 0.17 fit nearly as well.' : '');
+  }
+  function run(){
+    clearInterval(timer); sims = []; const N = n(), p = k() / N;
+    const step = () => { for (let i = 0; i < 50 && sims.length < 1000; i++) sims.push(binom(N, p) / N); drawHist(); if (sims.length >= 1000) { clearInterval(timer); timer = null; } };
+    if (RM) { while (sims.length < 1000) sims.push(binom(N, p) / N); drawHist(); return; }
+    step(); timer = setInterval(step, 30);
+  }
+  $('#shRun').addEventListener('click', run);
+  [nIn, fIn].forEach(el => el.addEventListener('input', () => { clearInterval(timer); timer = null; sims = null; draw(); }));
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 4a. horse kicks ---------- */
+(function(){
+  const OBS = [109, 65, 22, 3, 1], NY = 200, S = 122, HAT = S / NY, lIn = $('#hkL'), cv = $('#hkChart');
+  let timer = null;
+  const ll = l => S * Math.log(l) - NY * l, rel = l => ll(l) - ll(HAT);
+  function expected(l){ const e = []; let p = Math.exp(-l), cum = 0; for (let i = 0; i < 4; i++) { e.push(NY * p); cum += p; p *= l / (i + 1); } e.push(NY * (1 - cum)); return e; }
+  function draw(){
+    setH(cv, 250, 440);
+    const l = +lIn.value, E = expected(l);
+    $('#hkLOut').textContent = l.toFixed(2);
+    const {ctx, w, h} = fit(cv), two = w >= 560, pw = two ? w / 2 : w, ph = two ? h : h / 2;
+    /* left: observed vs expected */
+    {
+      const W = pw - (two ? 10 : 0);
+      ctx.save();
+      panelTitle(ctx, 'Corps-years by deaths', 4, 2);
+      const F = frame(ctx, W, ph, {lo: 0, hi: 4, ymax: 140, top: 30, left: 40, lab: i => i === 4 ? '4+' : i});
+      drawBars(ctx, F, 0, 4, i => OBS[i], C('--accent'), .55);
+      ctx.strokeStyle = C('--ink'); ctx.lineWidth = 2; ctx.setLineDash([5, 3]);
+      E.forEach((e, i) => { const y = Math.max(F.Y1, F.ys(Math.min(140, e))); ctx.beginPath(); ctx.moveTo(F.xc(i) - F.bw * .4, y); ctx.lineTo(F.xc(i) + F.bw * .4, y); ctx.stroke(); });
+      ctx.setLineDash([]);
+      ctx.restore();
+    }
+    /* right: log-likelihood */
+    {
+      const ox = two ? pw + 10 : 0, oy = two ? 0 : ph, W = pw - (two ? 10 : 0);
+      ctx.save(); ctx.translate(ox, oy);
+      panelTitle(ctx, 'Log-likelihood of each rate', 4, 2);
+      const G = {X0: 40, X1: W - 10, Y1: 30, Y0: ph - 38}, lo = .2, hi = 1.2, xs = v => G.X0 + (v - lo) / (hi - lo) * (G.X1 - G.X0);
+      const ymin = -20, ys = v => G.Y0 - (v - ymin) / (1 - ymin) * (G.Y0 - G.Y1);
+      yGrid(ctx, G.X0, G.X1, ys, [-20, -15, -10, -5, 0], v => mn(v));
+      ctx.save(); ctx.strokeStyle = C('--ink-3'); ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(G.X0, ys(-1.92)); ctx.lineTo(G.X1, ys(-1.92)); ctx.stroke(); ctx.restore();
+      xAxis(ctx, G.X0, G.X1, G.Y0, lo, hi);
+      axisTitle(ctx, 'deaths per corps-year λ', (G.X0 + G.X1) / 2, G.Y0 + 20, 'center');
+      curve(ctx, rel, lo, hi, xs, ys, G, C('--accent'), 2.5);
+      ctx.fillStyle = C('--accent'); dot(ctx, xs(HAT), ys(0), 4);
+      const yc = rel(l) < ymin ? G.Y0 : ys(rel(l));
+      vline(ctx, xs(l), yc, G.Y0, C('--ink-3'), [3, 3], 1);
+      ctx.fillStyle = C('--ink'); dot(ctx, xs(l), yc, 6);
+      tagAt(ctx, `${fx(rel(l), 1)}`, xs(l), Math.min(G.Y0 - 34, yc - 20), C('--ink'), G.X0, G.X1);
+      ctx.restore();
+    }
+    const r = rel(l), at = Math.abs(l - HAT) < .005;
+    $('#hkRead').innerHTML = `λ = ${l.toFixed(2)} · expected corps-years with 0, 1, 2, 3, 4+ deaths: ${E.map(e => e.toFixed(1)).join(', ')} (observed 109, 65, 22, 3, 1)<br>` +
+      (at ? `<b>The peak:</b> λ = 122/200 = <b>0.61</b>, the average number of deaths per corps-year · SE from the curvature √(0.61/200) = 0.055`
+          : `log-likelihood <b>${fx(r, 2)}</b> below the peak → this rate explains the data <b>${sci10(r / Math.LN10)}</b> times as well as the best rate, 0.61`);
+  }
+  lIn.addEventListener('input', () => { clearInterval(timer); timer = null; draw(); });
+  $('#hkFit').addEventListener('click', () => {
+    clearInterval(timer);
+    if (RM) { lIn.value = HAT; draw(); return; }
+    let t = 0;
+    timer = setInterval(() => { t++; let l = +lIn.value; l += (HAT - l) * .14; if (Math.abs(l - HAT) < .004 || t > 60) { l = HAT; clearInterval(timer); timer = null; } lIn.value = l; draw(); }, 30);
+  });
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 4b. tanks ---------- */
+(function(){
+  const SER = [19, 40, 42, 60], M = 60, lc = N => lchoose(N, 4), lo = 40, hi = 200;
+  const lik = N => N < M ? 0 : Math.exp(lc(M) - lc(N));
+  function drawLik(){
+    const cv = $('#tkLik'), {ctx, w, h} = fit(cv), G = {X0: 44, X1: w - 12, Y1: 14, Y0: h - 38}, {X0, X1, Y0, Y1} = G;
+    const xs = N => X0 + (N - lo) / (hi - lo) * (X1 - X0), ys = v => Y0 - v / 1.1 * (Y0 - Y1);
+    yGrid(ctx, X0, X1, ys, [0, .5, 1], v => v.toFixed(1));
+    const bwid = Math.max(1, (X1 - X0) / (hi - lo + 1) * .7);
+    for (let N = lo; N <= hi; N++) { const v = lik(N); if (v > 0) bar(ctx, xs(N) - bwid / 2, bwid, ys(v), Y0, C('--accent')); }
+    xAxis(ctx, X0, X1, Y0, lo, hi);
+    axisTitle(ctx, 'number of tanks N', (X0 + X1) / 2, Y0 + 20, 'center');
+    axisTitle(ctx, 'relative likelihood', X0 - 38, 0);
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--zero'); ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    if (xs(M - 1) - xs(lo) > 76) ctx.fillText('impossible', (xs(lo) + xs(M - 1)) / 2, Y0 - 4);
+    tag(ctx, 'peak N = 60', xs(M) + 6, ys(1) - 2, C('--accent'));
+    [[74, 'largest + gap: 74'], [100, '100']].forEach(([N, s]) => { const v = lik(N); tag(ctx, `${s} → ${v.toFixed(2)}`, xs(N) + 4, ys(v) - 18, C('--ink-2')); });
+    $('#tkLikRead').innerHTML = `serial numbers ${SER.join(', ')} · below N = 60 the likelihood is zero (tank 60 exists) · at N = 60 the chance of capturing exactly this set is 1 in ${comma(Math.round(Math.exp(lc(60))))}; at N = 100 it is 1 in ${comma(Math.round(Math.exp(lc(100))))}, <b>0.12 times</b> as likely`;
+  }
+  let rec = 0, est = null, timer = null;
+  function capture(){ const s = new Set(); while (s.size < 4) s.add(1 + Math.floor(Math.random() * 100)); const m = Math.max(...s); return [m, m + m / 4 - 1]; }
+  function drawHist(){
+    const cv = $('#tkHist'), {ctx, w, h} = fit(cv), G = {X0: 44, X1: w - 12, Y1: 14, Y0: h - 38}, {X0, X1, Y0, Y1} = G;
+    const L = 20, H = 130, xs = v => X0 + (v - L) / (H - L) * (X1 - X0);
+    if (!est || !est.length) { xAxis(ctx, X0, X1, Y0, L, H); emptyNote(ctx, w, h - 30, 'run the captures'); $('#tkRead').innerHTML = ''; return; }
+    const vals = est.map(e => e[rec]), BW = 2, nb = Math.ceil((H - L) / BW), cnt = new Array(nb).fill(0);
+    vals.forEach(v => { const i = Math.floor((v - L) / BW); if (i >= 0 && i < nb) cnt[i]++; });
+    const ymax = Math.max(60, Math.max(...cnt) * 1.15), ys = v => Y0 - v / ymax * (Y0 - Y1);
+    const t = niceTicks(ymax, 3).filter(v => v <= ymax); yGrid(ctx, X0, X1, ys, t, v => v.toFixed(0));
+    const pw = (X1 - X0) / nb * .85;
+    cnt.forEach((c, i) => { if (c) bar(ctx, xs(L + i * BW) + ((X1 - X0) / nb - pw) / 2, pw, ys(c), Y0, C('--ink-3')); });
+    xAxis(ctx, X0, X1, Y0, L, H);
+    axisTitle(ctx, rec ? 'estimate: largest + gap' : 'estimate: largest serial (maximum likelihood)', (X0 + X1) / 2, Y0 + 20, 'center');
+    vline(ctx, xs(100), Y1, Y0, C('--ink'), [5, 4], 1.5);
+    const m = vals.reduce((a, b) => a + b, 0) / vals.length;
+    ctx.fillStyle = C('--ink'); ctx.beginPath(); ctx.moveTo(xs(m), Y0 - 1); ctx.lineTo(xs(m) - 7, Y0 + 11); ctx.lineTo(xs(m) + 7, Y0 + 11); ctx.closePath(); ctx.fill();
+    tag(ctx, `average ${m.toFixed(1)}`, xs(m) - 8, Y1, C('--ink'), 'right');
+    tag(ctx, 'truth 100', xs(100) + 6, Y1, C('--ink'));
+    const over = vals.filter(v => v > 100).length;
+    $('#tkRead').innerHTML = `${comma(vals.length)} captures of 4 tanks from 100 · average estimate <b>${m.toFixed(1)}</b>` +
+      (rec ? ` · above 100 in ${pct(over / vals.length)} of captures, below in the rest: right on average`
+           : ` · too low by <b>${(100 - m).toFixed(1)}</b> on average · above 100: <b>never</b>; the likelihood cannot point past the largest tank it saw`);
+  }
+  $$('[data-tk]').forEach(b => b.addEventListener('click', () => { rec = +b.dataset.tk; pressSeg('[data-tk]', 'tk', rec); drawHist(); }));
+  $('#tkRun').addEventListener('click', () => {
+    clearInterval(timer); est = [];
+    if (RM) { while (est.length < 1000) est.push(capture()); drawHist(); return; }
+    timer = setInterval(() => { for (let i = 0; i < 50; i++) est.push(capture()); drawHist(); if (est.length >= 1000) { clearInterval(timer); timer = null; } }, 30);
+  });
+  function draw(){ drawLik(); drawHist(); }
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 5. two roads ---------- */
+(function(){
+  const DATA = [[7, 10], [14, 20], [70, 100]], PRI = [[1, 1], [20, 20]], cv = $('#rdChart');
+  let di = 0, pi = 0;
+  const pctP = x => x > .999 ? 'above 99.9%' : Math.round(100 * x) + '%';
+  const lbeta = (a, b) => lgam(a) + lgam(b) - lgam(a + b);
+  const bpdf = (x, a, b) => (x <= 0 || x >= 1) ? ((x <= 0 && a === 1) || (x >= 1 && b === 1) ? Math.exp(-lbeta(a, b)) : 0) : Math.exp((a - 1) * Math.log(x) + (b - 1) * Math.log(1 - x) - lbeta(a, b));
+  function above(a, b){ let s = 0, t = 0; const M = 4000; for (let i = 0; i <= M; i++) { const x = i / M, v = bpdf(x, a, b) * (i === 0 || i === M ? .5 : 1); t += v; if (x > .5) s += v; else if (i === M / 2) s += v / 2; } return s / t; }
+  function draw(){
+    setH(cv, 300, 540);
+    const [k, n] = DATA[di], [a0, b0] = PRI[pi], hat = k / n, lmax = llBin(k, n, hat);
+    const {ctx, w, h} = fit(cv), two = w >= 560, pw = two ? w / 2 : w, ph = two ? h : h / 2;
+    const rel = p => Math.exp(llBin(k, n, p) - lmax), r5 = rel(.5), lr = 1 / r5, stat = 2 * Math.log(lr), pv = chi1p(stat);
+    /* road 1 */
+    {
+      const W = pw - (two ? 10 : 0);
+      panelTitle(ctx, 'Road 1: compare two coins', 4, 2);
+      const G = {X0: 40, X1: W - 10, Y1: 34, Y0: ph - 38}, xs = p => G.X0 + p * (G.X1 - G.X0), ys = v => G.Y0 - v / 1.1 * (G.Y0 - G.Y1);
+      yGrid(ctx, G.X0, G.X1, ys, [0, .5, 1], v => v.toFixed(1));
+      xAxis(ctx, G.X0, G.X1, G.Y0, 0, 1);
+      axisTitle(ctx, 'coin p · relative likelihood', (G.X0 + G.X1) / 2, G.Y0 + 20, 'center');
+      curve(ctx, rel, 0, 1, xs, ys, G, C('--accent'), 2.5, null, 500);
+      vline(ctx, xs(hat), ys(1), G.Y0, C('--accent'), null, 1.5);
+      vline(ctx, xs(.5), ys(r5), G.Y0, C('--ink-2'), [4, 3], 1.5);
+      ctx.fillStyle = C('--accent'); dot(ctx, xs(hat), ys(1), 4.5); ctx.fillStyle = C('--ink-2'); dot(ctx, xs(.5), ys(r5), 4.5);
+      tag(ctx, `best ${hat.toFixed(2)}`, xs(hat) + 6, ys(1) - 6, C('--accent'));
+      tag(ctx, `fair → ${r5 < .001 ? sci10(Math.log10(r5)) : r5.toFixed(2)}`, xs(.5) - 6, Math.min(G.Y0 - 34, ys(r5) - 18), C('--ink-2'), 'right');
+    }
+    /* road 2 */
+    {
+      const ox = two ? pw + 10 : 0, oy = two ? 0 : ph, W = pw - (two ? 10 : 0);
+      ctx.save(); ctx.translate(ox, oy);
+      panelTitle(ctx, 'Road 2: prior × likelihood', 4, 2);
+      const G = {X0: 40, X1: W - 10, Y1: 34, Y0: ph - 38}, xs = p => G.X0 + p * (G.X1 - G.X0);
+      const pri = p => bpdf(p, a0, b0), lk = p => bpdf(p, k + 1, n - k + 1), post = p => bpdf(p, k + a0, n - k + b0);
+      let ymax = 0; for (let i = 1; i < 200; i++) { const p = i / 200; ymax = Math.max(ymax, pri(p), lk(p), post(p)); }
+      ymax *= 1.12; const ys = v => G.Y0 - v / ymax * (G.Y0 - G.Y1);
+      const t = niceTicks(ymax, 3).filter(v => v <= ymax); yGrid(ctx, G.X0, G.X1, ys, t, stepFmt(t));
+      ctx.save(); ctx.globalAlpha = .12; ctx.fillStyle = C('--ink'); ctx.beginPath(); ctx.moveTo(xs(.5), G.Y0);
+      for (let i = 0; i <= 200; i++) { const p = .5 + .5 * i / 200; ctx.lineTo(xs(p), ys(post(Math.min(p, .99999)))); }
+      ctx.lineTo(xs(1), G.Y0); ctx.closePath(); ctx.fill(); ctx.restore();
+      xAxis(ctx, G.X0, G.X1, G.Y0, 0, 1);
+      axisTitle(ctx, 'coin p · plausibility (area 1)', (G.X0 + G.X1) / 2, G.Y0 + 20, 'center');
+      curve(ctx, pri, .001, .999, xs, ys, G, C('--ink-3'), 2, [6, 4], 400);
+      curve(ctx, lk, .001, .999, xs, ys, G, C('--accent'), 2, null, 500);
+      curve(ctx, post, .001, .999, xs, ys, G, C('--ink'), 2.5, null, 500);
+      const pa = above(k + a0, n - k + b0);
+      if (!pi) tagAt(ctx, 'posterior = likelihood', xs(Math.min(.97, hat + .08)), ys(post(hat)) + 10, C('--ink'), G.X0, G.X1);
+      tag(ctx, `P(p > 0.5) = ${pctP(pa)}`, G.X0 + 4, G.Y1 - 4, C('--ink'));
+      ctx.restore();
+    }
+    const pa = above(k + a0, n - k + b0), pm = (k + a0) / (n + a0 + b0);
+    const lrs = lr >= 1e6 ? sci10(Math.log10(lr)) : lr >= 100 ? comma(Math.round(lr)) : lr.toFixed(2);
+    const pvs = pv < .001 ? sci10(Math.log10(pv)) : pv.toFixed(2);
+    $('#rdRead').innerHTML = `<b>Road 1:</b> the best coin, ${hat.toFixed(2)}, explains ${k} heads in ${n} <b>${lrs} times</b> as well as a fair coin · 2 ln(ratio) = ${stat.toFixed(2)} → p = <b>${pvs}</b> (chi-square, 1 degree of freedom)<br>` +
+      `<b>Road 2:</b> ${pi ? 'a prior centered on fair coins (as if 38 earlier flips had split 19–19)' : 'a flat prior, every coin equally plausible beforehand'} · posterior average ${pm.toFixed(2)} · chance the coin favors heads, P(p > 0.5) = <b>${pctP(pa)}</b>`;
+  }
+  $$('[data-rd]').forEach(b => b.addEventListener('click', () => { di = +b.dataset.rd; pressSeg('[data-rd]', 'rd', di); draw(); }));
+  $$('[data-rp]').forEach(b => b.addEventListener('click', () => { pi = +b.dataset.rp; pressSeg('[data-rp]', 'rp', pi); draw(); }));
+  draw(); redraws.push(draw);
+})();
+
+/* ---------- 6. quiz ---------- */
+(function(){
+  const Q = [
+    {s: 'Predict: you see 2 heads in 10 flips. Where does the likelihood curve peak?',
+     o: ['p = 0.2', 'p = 0.5', 'p = 0.8'], a: 0,
+     e: 'The maximum likelihood estimate for coin flips is the share of heads, 2/10.'},
+    {s: 'Seven heads in ten flips. Which reading is <em>wrong</em>?',
+     o: ['The likelihood of p = 0.7 is 0.27, so there is a 27% chance the coin’s p is 0.7', 'p = 0.7 explains seven heads about 2.3 times as well as p = 0.5', 'The likelihood curve is the binomial formula with the data held fixed'], a: 0,
+     e: 'A likelihood is not a probability of the coin. Its area is 1/11, not 1, and only ratios between coins mean anything.'},
+    {s: 'You flip 100 times instead of 10, with the same share of heads. The likelihood curve becomes…',
+     o: ['about √10 ≈ 3 times narrower', '10 times narrower', 'no narrower; the peak is in the same place'], a: 0,
+     e: 'Curvature grows like n, so the width, one over its square root, shrinks like 1/√n.'},
+    {s: '200 corps-years, 122 horse-kick deaths. What is the maximum likelihood rate?',
+     o: ['0.61 deaths per corps-year, the average', '0, because most corps-years had no deaths', '1 death per corps-year'], a: 0,
+     e: 'For Poisson counts the likelihood peaks at the average, 122/200.'},
+    {s: 'Captured tanks are numbered 19, 40, 42 and 60. What is the maximum likelihood estimate of the number of tanks, and is it fair?',
+     o: ['60, and it is too low on average', '74, and it is right on average', '60, and it is right on average'], a: 0,
+     e: 'The likelihood is highest at the largest serial seen, but the largest of a few captured tanks is almost never the last one made. From 100 tanks it averages 80.8.'},
+    {s: 'Why do statisticians work with the log of the likelihood?',
+     o: ['Products of many small scores underflow; logs turn them into sums and leave the peak where it was', 'The log moves the peak to a less biased estimate'], a: 0,
+     e: 'The logarithm only rises, so whatever maximizes the likelihood maximizes its log.'},
+    {s: 'No heads in 10 flips. The shortcut p̂ ± 1.96 SE gives 0 to 0. What does the likelihood curve say?',
+     o: ['Coins up to about 0.17 still explain the data reasonably well', 'The coin can never land heads'], a: 0,
+     e: 'The curve, (1 − p)¹⁰, falls 1.92 below its peak only at p ≈ 0.175. The shortcut fails at the edge because the curve is not a parabola there.'}
+  ];
+  const box = $('#quiz'); let answered = 0, right = 0;
+  Q.forEach(qq => {
+    const d = document.createElement('div'); d.className = 'qitem';
+    d.innerHTML = `<p>${qq.s}</p><div class="qbtns">${qq.o.map((t, i) => `<button class="btn" data-i="${i}">${t}</button>`).join('')}</div><p class="qexp" hidden></p>`;
+    const exp = d.querySelector('.qexp');
+    d.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      const ok = +b.dataset.i === qq.a;
+      if (!d.dataset.done) { d.dataset.done = '1'; answered++; if (ok) right++; }
+      d.querySelectorAll('button').forEach(x => x.classList.remove('right', 'wrong'));
+      b.classList.add(ok ? 'right' : 'wrong');
+      exp.hidden = false; exp.innerHTML = `<b>${ok ? '✓ Right.' : '✗ Not quite.'}</b> ${qq.e}`;
+      $('#quizScore').textContent = `${answered} of ${Q.length} answered · ${right} right on the first try`;
+    }));
+    box.appendChild(d);
+  });
+})();
+})();
+</script>
+</body>
+</html>
