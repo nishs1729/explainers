@@ -34,7 +34,7 @@ See [Statistics: how every page works](#statistics-conventions) first.
 - [x] [11. Student's t](https://nishs1729.github.io/explainers/statistics/student-t.html)
 - [x] [12. Chi-square tests](https://nishs1729.github.io/explainers/statistics/chi-square-tests.html)
 - [x] [13. ANOVA](https://nishs1729.github.io/explainers/statistics/anova.html)
-- [ ] [14. ⚠ The garden of forking paths](#forking-paths)
+- [x] [14. ⚠ The garden of forking paths](https://nishs1729.github.io/explainers/statistics/forking-paths.html)
 - [ ] [15. 📖 The 1954 polio vaccine trial](#polio-trial)
 
 ### [Bridge](#bridge)
@@ -541,6 +541,8 @@ Assumes the probability series, especially Normal (CLT, √n law) and Chi-square
 >   - Many-tests machine: 20 tests on noise, with Bonferroni and FDR toggles
 >
 > **Links:** builds on p-values, ANOVA, Errors and decisions. Returns in Overfitting.
+>
+> **Built:** the hero quotes Simmons, Nelson & Simonsohn's (2011) Study 2 verbatim (adjusted 20.1 vs 21.5 years, F(1, 17) = 4.92, p = .040; without father's age p = .33), asks how many pure-noise studies until p < 0.05 (5 / 20 / 100 / never; answer ~20, median 14), shows one researcher's studies as p-value tiles and a histogram for 200 researchers. Section 1 is the many-tests machine: 20 z-tests, all noise or 5 real (shift 3), sorted p on a log axis with the 0.05, Bonferroni and Benjamini–Hochberg staircase thresholds, and a tally (noise: 64% / 4.9% / 5%; 5 real: 4.3 / 2.5 / 3.3 found, FDR ~4%). Section 2 covers Gelman & Loken (2013), the paper's Table 1 (9.5/7.7/11.7/12.6/14.4/30.9/60.7%) and a peeking widget (start at 10 per group, test every pair to 50: ~22%, paper 22.1%). Section 3 is the ★ sandbox modeled on Study 2: 3 songs × 30 students of noise, 6 forks (outcome, comparison, covariate, outliers, subgroup, +10 per song) = 486 paths, live p, forks-tried counter, Publish (replays the path on 1,000 fresh datasets), Search all paths, and a garden test (~90% of noise studies have a significant path); it notes that per-group 2 SD trimming alone gives ~10% (2.5 SD ~6.5%). Section 4 lists fixes (pre-registration and registered reports, corrections, replication with OSC 2015's 97% vs 36%, disclosure with the paper's six requirements quoted, explore then confirm).
 
 <a id="polio-trial"></a>
 ### **15. 📖 The 1954 polio vaccine trial**

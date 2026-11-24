@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The garden of forking paths — a visual introduction</title>
+<style>
+:root{
+  --bg:#faf8f4; --surface:#ffffff; --surface-2:#f2efe8; --ink:#1c1c1e; --ink-2:#4c4e55; --ink-3:#8b8d93; --line:#e3dfd5;
+  --one:#16917c; --one-soft:rgba(22,145,124,.15);
+  --zero:#d9573a; --zero-soft:rgba(217,87,58,.15);
+  --accent:#3654c9; --accent-soft:rgba(54,84,201,.11);
+  --gold:#b98317; --gold-soft:rgba(185,131,23,.22);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+    --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+    --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+    --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+    --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121316; --surface:#1a1b1f; --surface-2:#24262b; --ink:#ececee; --ink-2:#b6b7bd; --ink-3:#7f8188; --line:#2f3137;
+  --one:#3cc4ad; --one-soft:rgba(60,196,173,.18);
+  --zero:#ff7f5e; --zero-soft:rgba(255,127,94,.18);
+  --accent:#8095ff; --accent-soft:rgba(128,149,255,.14);
+  --gold:#e2b04a; --gold-soft:rgba(226,176,74,.24);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.68 var(--sans);-webkit-font-smoothing:antialiased}
+main{max-width:820px;margin:0 auto;padding:0 20px 80px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;letter-spacing:-.01em}
+h1{font-size:clamp(2.2rem,6vw,3.4rem);margin:.2em 0 .3em}
+h2{font-size:clamp(1.6rem,4vw,2.1rem);margin:0 0 .5em}
+h3{font-size:1.2rem;margin:1.6em 0 .4em}
+p{margin:0 0 1em}
+a{color:var(--accent)}
+strong{font-weight:650}
+em.term{font-style:normal;font-weight:650;color:var(--accent)}
+.muted{color:var(--ink-2)}
+small,.small{font-size:14px}
+
+/* hero */
+.hero{text-align:center;padding:64px 0 24px}
+.kicker{text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--ink-3);margin:0}
+.lede{font-size:1.2rem;color:var(--ink-2);max-width:620px;margin:0 auto}
+.hero-play{max-width:640px;margin:30px auto 0;text-align:left}
+.hero-play .controls{justify-content:center}
+.hint{font-size:15px;color:var(--ink-2);min-height:3.2em;margin:10px 0 0;text-align:center}
+.ask{font-family:var(--serif);font-size:1.25rem;text-align:center;margin:0 0 12px}
+
+.toc{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;margin:28px 0 8px}
+.toc ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 20px;counter-reset:t}
+.toc li{counter-increment:t;font-size:15px}
+.toc li::before{content:counter(t,decimal-leading-zero);font-family:var(--mono);color:var(--ink-3);margin-right:10px;font-size:13px}
+.toc a{color:var(--ink);text-decoration:none}
+.toc a:hover{color:var(--accent)}
+
+section{padding-top:56px}
+.secnum{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.08em;margin-bottom:4px}
+
+.widget{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin:26px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.widget-title{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);margin:0 0 12px;font-weight:600}
+.controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:12px 0}
+.ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:15px}
+.ctrl output{font-family:var(--mono);font-size:14px;min-width:5.5em;color:var(--ink)}
+input[type=range]{accent-color:var(--accent);width:170px;max-width:100%}
+.btn{font:inherit;font-size:14px;line-height:1.2;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;transition:background .15s,transform .1s}
+.btn:hover{border-color:var(--ink-3)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn.guess{background:var(--gold-soft);border-color:var(--gold);color:var(--ink)}
+.btn.right{background:var(--one-soft);border-color:var(--one);color:var(--one)}
+.btn.wrong{background:var(--zero-soft);border-color:var(--zero);color:var(--zero)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:6px}
+.readout{font-family:var(--mono);font-size:14px;color:var(--ink-2);line-height:1.6}
+.readout b{color:var(--ink);font-weight:600}
+.readout .ok{color:var(--one);font-weight:600}
+.readout .warn{color:var(--zero);font-weight:600}
+.readout .gd{color:var(--gold);font-weight:600}
+.msg{font-size:15px;color:var(--ink-2);min-height:3.4em;margin:10px 0 0}
+.msg b{color:var(--ink)}
+canvas{display:block;width:100%}
+.cap{font-size:13px;color:var(--ink-3);margin:2px 0 6px}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:20px 0}
+.callout p:last-child{margin-bottom:0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin-top:8px}
+.legend > span{display:inline-block}
+.legend .sw{vertical-align:middle;margin:0 6px 2px 0}
+.sw{display:inline-block;width:16px;height:10px;border-radius:2px}
+.sw.dot{width:8px;height:8px;border-radius:50%}
+.sw.line{height:0;border-top:2px solid var(--ink)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+@media (max-width:640px){.pair{grid-template-columns:1fr}}
+.mcap{font-size:13px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+
+/* cast */
+.cast-q{font-family:var(--serif);font-size:1.08rem;margin:0 0 10px}
+.datarow{font-family:var(--mono);font-size:14px;color:var(--ink-2);margin:0 0 6px}
+.datarow b{color:var(--ink)}
+
+/* recipe */
+.facts{counter-reset:f;list-style:none;padding:0;margin:18px 0}
+.facts li{counter-increment:f;position:relative;padding:12px 0 12px 44px;border-bottom:1px solid var(--line)}
+.facts li::before{content:counter(f);position:absolute;left:0;top:12px;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:600 13px var(--mono)}
+.facts li strong{display:block}
+.table-wrap{overflow-x:auto}
+table.summary{border-collapse:collapse;width:100%;font-size:15px;margin:14px 0}
+table.summary td,table.summary th{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+table.summary th{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3)}
+@media (max-width:480px){table.summary td,table.summary th{padding:8px 5px}}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:18px 0}
+.card{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
+.card h4{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+.card p{font-size:15px;margin:0;color:var(--ink-2)}
+
+/* quiz */
+.quiz{display:grid;gap:10px}
+.qitem{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg)}
+.qitem p{margin:0 0 8px;font-size:16px}
+.qbtns{display:flex;flex-wrap:wrap;gap:8px}
+.qexp{font-size:15px;color:var(--ink-2);margin:10px 0 0!important}
+
+@media (max-width:480px){
+  main{padding:0 16px 80px}
+  .widget{padding:14px}
+  input[type=range]{width:150px}
+}
+/* page 14 */
+.linkbtn{all:unset;cursor:pointer;font-size:14px;color:var(--accent);text-decoration:underline}
+.linkbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.linkbtn[hidden],.btn[hidden]{display:none}
+.legend > span[hidden]{display:none}
+table.summary.num{font-size:14px}
+table.summary.num td,table.summary.num th{text-align:right;white-space:nowrap}
+table.summary.num td:first-child,table.summary.num th:first-child{text-align:left;white-space:normal}
+table.summary tr.cur td{background:var(--accent-soft)}
+table.fixes td:first-child{white-space:nowrap;padding-right:16px}
+#mtTable td:first-child{white-space:nowrap}
+.btn.sm{padding:3px 10px;font-size:14px}
+.claim{margin:0 auto 14px;max-width:620px;font-family:var(--serif);font-size:17px;line-height:1.5;color:var(--ink);border-left:3px solid var(--zero);background:var(--surface);padding:12px 16px;border-radius:0 10px 10px 0;text-align:left}
+.claim cite{display:block;margin-top:6px;font-family:var(--sans);font-style:normal;font-size:13px;color:var(--ink-3)}
+.forkrows{display:grid;gap:8px;margin-bottom:10px}
+.forkrow{display:grid;grid-template-columns:110px 1fr;gap:8px;align-items:center}
+.forklab{font-size:13px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+@media (max-width:560px){.forkrow{grid-template-columns:1fr;gap:4px}}
+.pbig{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--ink);margin:6px 0 2px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.pbig .hot{color:var(--zero)}
+.pbig small{font-size:14px;font-weight:500;color:var(--ink-2)}
+</style>
+<script>try{var t=localStorage.getItem('xp-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/catalog.js" defer></script>
+<script src="../assets/site.js" defer></script>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <p class="kicker">A visual introduction</p>
+  <h1>The garden of forking paths</h1>
+  <p class="lede">A p-value promises that noise looks this impressive only 1 time in 20. The promise holds for one test, planned in advance. Run enough tests, or analyze one dataset enough ways, and pure noise will always hand you a “discovery”.</p>
+  <div class="hero-play" id="heroPlay">
+    <blockquote class="claim">“According to their birth dates, people were nearly a year-and-a-half younger after listening to ‘When I’m Sixty-Four’ (adjusted M = 20.1 years) rather than to ‘Kalimba’ (adjusted M = 21.5 years), <em>F</em>(1, 17) = 4.92, <em>p</em> = .040.”<cite>Simmons, Nelson &amp; Simonsohn, <em>Psychological Science</em>, 2011</cite></blockquote>
+    <p class="ask">Listening to a Beatles song can’t change your birth date. The authors produced this result on purpose, from real data, to show how easy it is. Start with the bluntest way: if every study you run is pure noise, how many studies until one gives p &lt; 0.05?</p>
+    <div class="controls" id="heroPred">
+      <button class="btn" data-g="0">About 5</button>
+      <button class="btn" data-g="1">About 20</button>
+      <button class="btn" data-g="2">About 100</button>
+      <button class="btn" data-g="3">It can’t happen</button>
+    </div>
+    <canvas id="heroTiles" style="height:96px" role="img" aria-label="One researcher's studies of pure noise as tiles with their p-values, ending at the first with p below 0.05"></canvas>
+    <canvas id="heroHist" style="height:170px" role="img" aria-label="Histogram of how many studies 200 researchers needed before one gave p below 0.05"></canvas>
+    <div class="controls">
+      <button class="btn primary" id="heroGo" disabled>Run studies until one “works”</button>
+      <button class="linkbtn" id="heroSkip">skip the guess</button>
+    </div>
+    <p class="hint" id="heroHint" aria-live="polite">Make your guess, then run the studies.</p>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#manytests">20 tests, one “discovery”</a></li>
+    <li><a href="#forks">The forking paths</a></li>
+    <li><a href="#sandbox">The p-hacking sandbox</a></li>
+    <li><a href="#fixes">The fixes</a></li>
+    <li><a href="#uses">Where you will meet it</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<section id="manytests">
+  <div class="secnum">01</div>
+  <h2>20 tests, one “discovery”</h2>
+  <p>Nobody needs 20 separate studies. One study that measures 20 things will do: 20 foods checked against heart disease, 20 genes against a trait, 20 page designs against sign-ups. If none of them matters, each test still has a 5% chance of a false alarm, and the chance that at least one of the 20 fires is 1 − 0.95²⁰ = <strong>64%</strong>. Report that one and stay quiet about the other 19, and you have a headline.</p>
+
+  <div class="widget">
+    <p class="widget-title">The many-tests machine</p>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="What is true">
+        <button class="btn on" data-mr="0" aria-pressed="true">All 20 are noise</button>
+        <button class="btn" data-mr="5" aria-pressed="false">5 real effects among 20</button>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Correction">
+        <button class="btn on" data-mm="0" aria-pressed="true">No correction</button>
+        <button class="btn" data-mm="1" aria-pressed="false">Bonferroni</button>
+        <button class="btn" data-mm="2" aria-pressed="false">False discovery rate</button>
+      </div>
+    </div>
+    <canvas id="mtChart" style="height:250px" role="img" aria-label="The 20 p-values sorted from smallest to largest on a log scale, with the threshold for the chosen correction; discoveries are colored"></canvas>
+    <div class="legend"><span><i class="sw dot" style="background:var(--zero)"></i><span>false discovery</span></span><span><i class="sw dot" style="background:var(--one)"></i><span>true discovery</span></span><span><i class="sw dot" style="background:var(--ink-3)"></i><span>not called</span></span><span><i class="sw dot" style="background:transparent;border:2px solid var(--one)"></i><span>a real effect</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink)"></i><span>threshold</span></span></div>
+    <div class="controls">
+      <button class="btn primary" id="mtNew">New batch of 20 tests</button>
+      <button class="btn" id="mtMany">Run 1,000 batches</button>
+      <button class="btn" id="mtReset">Reset tally</button>
+    </div>
+    <div class="readout" id="mtRead" aria-live="polite"></div>
+    <div class="table-wrap"><table class="summary num" id="mtTable"></table></div>
+  </div>
+
+  <p>The two corrections answer different worries. <strong>Bonferroni</strong> divides the threshold by the number of tests (0.05 / 20 = 0.0025), so the chance of even one false alarm in the whole batch stays at 5%. It is safe and blunt: with 5 real effects it finds only about half of them. The <strong>false discovery rate</strong> method of Benjamini and Hochberg (1995) sorts the p-values and compares the smallest with 0.05 × 1/20, the next with 0.05 × 2/20, and so on, the rising staircase in the chart. It promises instead that, on average, no more than 5% of the things you call discoveries are false. It finds more of the real effects (about 3.3 of 5 against 2.5) and is the standard when thousands of genes or variants are tested at once.</p>
+</section>
+
+<!-- 2 -->
+<section id="forks">
+  <div class="secnum">02</div>
+  <h2>The forking paths</h2>
+  <p>Multiple testing is easy to spot when someone runs 20 tests. Andrew Gelman and Eric Loken (2013) pointed out that it happens just as surely when a researcher runs one test, but chose it after seeing the data. Which outcome to analyze, which participants count as outliers, whether to adjust for age, whether to look at men and women separately, when to stop collecting: each choice is a fork. Each one is defensible on its own, and taken in light of the data, the path that leads to p &lt; 0.05 looks like the obvious one in hindsight. They called it the <em class="term">garden of forking paths</em>, after a Borges story. No dishonesty is required.</p>
+  <p>Simmons, Nelson and Simonsohn measured the damage by simulation: two groups of 20, pure noise, and a researcher allowed a few common choices.</p>
+  <div class="table-wrap">
+    <table class="summary num">
+      <thead><tr><th>Freedom the researcher allows themselves</th><th>False positives (promised 5%)</th></tr></thead>
+      <tbody>
+        <tr><td>Two related outcomes: test either one or their average</td><td>9.5%</td></tr>
+        <tr><td>Test at 20 per group; if not significant, add 10 more and test again</td><td>7.7%</td></tr>
+        <tr><td>Adjust for gender, or for its interaction with treatment</td><td>11.7%</td></tr>
+        <tr><td>Three conditions: report any two, or all three</td><td>12.6%</td></tr>
+        <tr><td>Outcomes + sample size</td><td>14.4%</td></tr>
+        <tr><td>Outcomes + sample size + gender</td><td>30.9%</td></tr>
+        <tr><td><strong>All four</strong></td><td><strong>60.7%</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Four ordinary choices, and a false finding becomes more likely than not. The most innocent-looking fork is peeking: checking the p-value as data come in and stopping once it dips below 0.05. Here is one researcher who starts with 10 per group and tests after every new pair, up to 50.</p>
+
+  <div class="widget">
+    <p class="widget-title">Peeking until it works</p>
+    <canvas id="pkChart" style="height:230px" role="img" aria-label="The p-value of one researcher's study after each new pair of participants, on a log scale, with the 0.05 line; the researcher stops at the first dip below it"></canvas>
+    <div class="legend"><span><i class="sw line" style="border-top:2px solid var(--ink-2)"></i><span>p as the data come in</span></span><span><i class="sw dot" style="background:var(--zero)"></i><span>stops and reports</span></span><span><i class="sw line" style="border-top:2px dashed var(--ink-3)"></i><span>where p would have gone</span></span></div>
+    <div class="controls">
+      <button class="btn primary" id="pkNew">New researcher</button>
+      <button class="btn" id="pkMany">Run 1,000 researchers</button>
+      <button class="btn" id="pkReset">Reset tally</button>
+    </div>
+    <div class="readout" id="pkRead" aria-live="polite"></div>
+  </div>
+  <p>About 22% of noise studies “work” this way (the paper found 22.1%), even though only 5% are significant at the end. A p-value wanders as data arrive, and stopping at a low point locks in the luck. Peeking is fine if it is planned: sequential designs used in clinical trials and some A/B testing tools set stricter thresholds for each look in advance.</p>
+</section>
+
+<!-- 3 -->
+<section id="sandbox">
+  <div class="secnum">03</div>
+  <h2>The p-hacking sandbox</h2>
+  <p>Your turn. This study is modeled on the Beatles one. Twenty students per song listened to “When I’m Sixty-Four”, “Kalimba” (the control) or “Hot Potato”, then gave their birth date, how old they feel, their father’s age and their gender. Nothing here can make anyone younger: every number is noise. Your job is to find p &lt; 0.05 anyway. Every switch is a choice a real researcher could defend.</p>
+
+  <div class="widget">
+    <p class="widget-title">★ The p-hacking sandbox</p>
+    <div class="forkrows" id="sbForks"></div>
+    <canvas id="sbChart" style="height:230px" role="img" aria-label="The two compared groups' values on the chosen outcome as dot strips, with excluded outliers hollow and the group averages marked"></canvas>
+    <div class="pbig" id="sbP" aria-live="polite"></div>
+    <div class="readout" id="sbRead"></div>
+    <div class="controls">
+      <button class="btn primary" id="sbPublish">Publish this result</button>
+      <button class="btn" id="sbSearch">Search all 486 paths</button>
+      <button class="btn" id="sbNew">New study (fresh noise)</button>
+    </div>
+    <p class="msg" id="sbMsg" aria-live="polite"></p>
+    <div class="controls"><button class="btn" id="sbGarden">How often does the garden pay off? (200 studies)</button></div>
+    <div class="readout" id="sbGardenRead" aria-live="polite"></div>
+  </div>
+
+  <p>The sandbox has 6 forks and 486 paths. On a typical dataset of pure noise a few dozen of them are “significant”, and in about 9 studies out of 10 at least one is. You only need to find one. Then press <em>Publish</em>: the same path, run on fresh data from the same noise, is significant only rarely. The path was fitted to the accidents of one dataset, and accidents don’t replicate.</p>
+  <p>One fork is worse than the others even when taken alone. Dropping “outliers” group by group, relative to each group’s own spread, makes both groups look tidier than they are, and the t-test then overstates the evidence. In this sandbox a single, pre-planned analysis that drops values beyond 2 SD is significant about 10% of the time on pure noise (beyond 2.5 SD, about 6.5%). Removing outliers should be decided in advance, for a reason other than the outcome, and reported both ways.</p>
+  <p>The real paper did all of this. Study 2 measured many more things than it reported, checked the result after about every 10 participants, quietly dropped the third song, and adjusted for father’s age. Without that adjustment, the “effect” had p = .33.</p>
+</section>
+
+<!-- 4 -->
+<section id="fixes">
+  <div class="secnum">04</div>
+  <h2>The fixes</h2>
+  <p>None of the fixes is a cleverer formula. Each one restores the condition the p-value needs: that the test was chosen before the data could influence it, or that every test run is counted.</p>
+  <div class="table-wrap">
+    <table class="summary fixes">
+      <thead><tr><th>Fix</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Pre-registration</strong></td><td>Write down the outcome, sample size, exclusions and analysis before collecting data, with a timestamp. The garden collapses to one path. <em>Registered reports</em> go further: the journal accepts the study on its plan, before the results exist.</td></tr>
+        <tr><td><strong>Corrections</strong></td><td>When many tests are planned, count them: Bonferroni to protect against any false alarm, the false discovery rate to keep the share of false discoveries low.</td></tr>
+        <tr><td><strong>Replication</strong></td><td>Run the same analysis on fresh data, as the sandbox’s Publish button does. When 100 psychology studies were repeated in 2015, 97% of the originals had been significant and 36% of the repeats were.</td></tr>
+        <tr><td><strong>Disclosure</strong></td><td>Report every variable, condition and exclusion, and the results with and without covariates, so readers can see the garden. Simmons and colleagues’ six requirements for authors are listed below.</td></tr>
+        <tr><td><strong>Explore, then confirm</strong></td><td>Exploring is fine; it is how ideas are found. Split the data, explore one half and test the chosen path once on the other, or call the result a hypothesis rather than a finding.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>The six requirements from the 2011 paper are short enough to quote: decide the rule for ending data collection in advance and report it; collect at least 20 observations per cell; list all variables collected; report all conditions, including failed manipulations; if observations are dropped, also report the results with them; if a covariate is used, also report the results without it. The Beatles study, reported this way, would have been “all but impossible to publish”, which was the point.</p>
+</section>
+
+<!-- 5 -->
+<section id="uses">
+  <div class="secnum">05</div>
+  <h2>Where you will meet it</h2>
+  <div class="cards">
+    <div class="card"><h4>Genomics</h4><p>Scans test hundreds of thousands of genetic variants at once, so they use far stricter thresholds or false-discovery-rate control as a matter of course.</p></div>
+    <div class="card"><h4>Nutrition headlines</h4><p>Food questionnaires × dozens of health outcomes × subgroups is a vast garden. A single surprising link from such data is a hypothesis.</p></div>
+    <div class="card"><h4>A/B testing</h4><p>Watching a dashboard and stopping when the test “wins” is peeking. Fixed sample sizes or sequential methods keep the 5% honest.</p></div>
+    <div class="card"><h4>Clinical trials</h4><p>Trials register their primary outcome in advance; switching to a secondary outcome that happened to work is a known warning sign.</p></div>
+    <div class="card"><h4>Finance</h4><p>Backtest enough trading rules on past prices and one will look brilliant. It was fitted to the accidents of the past.</p></div>
+    <div class="card"><h4>Your own analyses</h4><p>Notice the forks you take after seeing the data, and count them, or test the chosen path on data you haven’t looked at.</p></div>
+  </div>
+
+  <h3>Check yourself</h3>
+  <div class="widget">
+    <div class="quiz" id="quiz"></div>
+    <div class="readout" id="quizScore" style="margin-top:10px" aria-live="polite"></div>
+  </div>
+
+  <p>The cure for chance findings is to plan the analysis before the data arrive, and to let chance, not the researcher, decide who gets the treatment. The largest experiment of the twentieth century did both: the next page, <strong>📖 The 1954 polio vaccine trial</strong> (coming soon).</p>
+</section>
+</main>
+
+<script>
+(function(){
+'use strict';
+/* ---------- helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const root = document.documentElement;
+const C = n => getComputedStyle(root).getPropertyValue(n).trim();
+const f2 = x => x.toFixed(2);
+const fmtN = x => Math.abs(x - Math.round(x)) < 1e-9 ? String(Math.round(x)) : String(+x.toFixed(2));
+const pct = x => (100 * x).toFixed(1) + '%';
+const MONO = 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
+const TAU = Math.PI * 2;
+const comma = n => n.toLocaleString('en-US');
+
+function fit(c){
+  const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+  if (c.width !== w*dpr || c.height !== h*dpr) { c.width = w*dpr; c.height = h*dpr; }
+  const ctx = c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  return {ctx, w, h};
+}
+const redraws = [];
+function redrawAll(){ redraws.forEach(f => f()); }
+let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(redrawAll, 80); });
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+if (mq.addEventListener) mq.addEventListener('change', redrawAll);
+new MutationObserver(redrawAll).observe(root, {attributes:true, attributeFilter:['data-theme']});
+
+function niceTicks(max, count){
+  const raw = max / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const step = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag;
+  const t = []; for (let v = 0; v <= max + 1e-9; v += step) t.push(v); return t;
+}
+function stepFmt(ticks){ const st = ticks.length > 1 ? ticks[1] - ticks[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9)); return v => v.toFixed(d); }
+function yGrid(ctx, X0, X1, ys, ticks, fmt){
+  ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ticks.forEach(v => {
+    const y = Math.round(ys(v)) + .5;
+    ctx.strokeStyle = C('--line'); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X0, y); ctx.lineTo(X1, y); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.fillText(fmt(v), X0 - 6, y);
+  });
+}
+function intStep(px, minPx){
+  for (const s of [1,2,5,10,20,25,50,100]) if (s * px >= minPx) return s;
+  return 100;
+}
+function roundRect(ctx, x, y, w, h, r){
+  r = Math.max(0, Math.min(r, w/2, Math.abs(h)/2));
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+function dot(ctx, x, y, r){ ctx.beginPath(); ctx.arc(x, y, Math.max(0.5, r), 0, TAU); ctx.fill(); }
+function vline(ctx, x, y0, y1, color, dash, lw){
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw || 1.5; if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(Math.round(x) + .5, y0); ctx.lineTo(Math.round(x) + .5, y1); ctx.stroke(); ctx.restore();
+}
+/* integer-valued bar charts: bars at k = lo..hi */
+function frame(ctx, w, h, o){
+  const X0 = o.left != null ? o.left : 40, X1 = w - 10, Y0 = h - 24, Y1 = o.top != null ? o.top : 12;
+  const span = o.hi - o.lo + 1, bw = (X1 - X0) / span;
+  const xc = k => X0 + bw * (k - o.lo + .5), ys = v => Y0 - (v / o.ymax) * (Y0 - Y1);
+  const t = niceTicks(o.ymax, 3).filter(v => v <= o.ymax * 1.0001); yGrid(ctx, X0, X1, ys, t, o.yfmt || stepFmt(t));
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  const st = o.step || intStep(bw, 24);
+  for (let k = Math.ceil(o.lo / st) * st; k <= o.hi; k += st) ctx.fillText(o.lab ? o.lab(k) : k, xc(k), Y0 + 6);
+  return {X0, X1, Y0, Y1, bw, xc, ys};
+}
+function drawBars(ctx, F, lo, hi, val, color, frac){
+  const bwid = Math.max(1, F.bw * (frac == null ? .8 : frac));
+  for (let k = lo; k <= hi; k++) {
+    const v = val(k); if (!(v > 0)) continue;
+    const y = F.ys(v), hh = F.Y0 - y; if (hh < 0.2) continue;
+    const x = F.xc(k) - bwid / 2;
+    ctx.fillStyle = typeof color === 'function' ? color(k) : color;
+    if (bwid >= 6 && hh >= 3) { roundRect(ctx, x, y, bwid, hh, Math.min(3, bwid / 4)); ctx.fill(); }
+    else ctx.fillRect(x, y, bwid, hh);
+  }
+}
+function emptyNote(ctx, w, h, text){
+  ctx.fillStyle = C('--ink-3'); ctx.font = '13px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(text, w / 2, h / 2 - 8);
+}
+
+/* randomness */
+let spare = null;
+function gauss(){
+  if (spare != null) { const s = spare; spare = null; return s; }
+  let u = 0, v = 0; while (u === 0) u = Math.random(); v = Math.random();
+  const r = Math.sqrt(-2 * Math.log(u)); spare = r * Math.sin(TAU * v); return r * Math.cos(TAU * v);
+}
+function shuffled(a){ const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; }
+function corr(x, y){
+  const n = x.length; let mx = 0, my = 0; for (let i = 0; i < n; i++) { mx += x[i]; my += y[i]; } mx /= n; my /= n;
+  let sxy = 0, sxx = 0, syy = 0; for (let i = 0; i < n; i++) { const a = x[i] - mx, b = y[i] - my; sxy += a * b; sxx += a * a; syy += b * b; }
+  return sxy / Math.sqrt(sxx * syy);
+}
+function binom(n, p){ let k = 0; for (let i = 0; i < n; i++) if (Math.random() < p) k++; return k; }
+function flips(n){ const a = new Array(n); for (let i = 0; i < n; i++) a[i] = Math.random() < .5 ? 1 : 0; return a; }
+function longestRun(a){
+  let best = 1, cur = 1, start = 0, bs = 0;
+  for (let i = 1; i < a.length; i++) { if (a[i] === a[i-1]) cur++; else { cur = 1; start = i; } if (cur > best) { best = cur; bs = start; } }
+  return {len: best, start: bs};
+}
+function switches(a){ let s = 0; for (let i = 1; i < a.length; i++) if (a[i] !== a[i-1]) s++; return s; }
+const RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+function ticksIn(lo, hi, count){
+  const raw = (hi - lo) / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const st = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag, t = [];
+  for (let v = Math.ceil(lo / st - 1e-9) * st; v <= hi + 1e-9; v += st) t.push(+v.toFixed(10));
+  return t;
+}
+function xAxis(ctx, X0, X1, Y0, lo, hi, fmt){
+  ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, Y0 + .5); ctx.lineTo(X1, Y0 + .5); ctx.stroke();
+  const t = ticksIn(lo, hi, Math.max(2, Math.floor((X1 - X0) / 60)));
+  const st = t.length > 1 ? t[1] - t[0] : 1, d = Math.max(0, Math.ceil(-Math.log10(st) - 1e-9));
+  ctx.fillStyle = C('--ink-3'); ctx.font = '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  t.forEach(v => ctx.fillText(fmt ? fmt(v) : v.toFixed(d), X0 + (v - lo) / (hi - lo) * (X1 - X0), Y0 + 5));
+}
+function label(ctx, x, y, text, color, X0, X1){
+  ctx.font = '600 11px ' + MONO; ctx.fillStyle = color; ctx.textBaseline = 'top';
+  const right = x > (X0 + X1) / 2; ctx.textAlign = right ? 'right' : 'left';
+  ctx.fillText(text, x + (right ? -5 : 5), y);
+}
+
+function bar(ctx, x, w, y, Y0, color){
+  const hh = Y0 - y; if (!(hh > .2)) return;
+  ctx.fillStyle = color;
+  if (w >= 6 && hh >= 3) { roundRect(ctx, x, y, w, hh, Math.min(3, w / 4)); ctx.fill(); } else ctx.fillRect(x, y, w, hh);
+}
+
+/* ---------- shared: t-test ---------- */
+function gammaln(x){
+  const c = [76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155, .1208650973866179e-2, -.5395239384953e-5];
+  let y = x, t = x + 5.5; t -= (x + .5) * Math.log(t); let s = 1.000000000190015;
+  for (let j = 0; j < 6; j++) s += c[j] / ++y;
+  return -t + Math.log(2.5066282746310005 * s / x);
+}
+function betacf(a, b, x){
+  const FP = 1e-300; let qab = a + b, qap = a + 1, qam = a - 1, c = 1, d = 1 - qab * x / qap;
+  if (Math.abs(d) < FP) d = FP; d = 1 / d; let h = d;
+  for (let m = 1; m <= 200; m++) {
+    const m2 = 2 * m; let aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+    d = 1 + aa * d; if (Math.abs(d) < FP) d = FP; c = 1 + aa / c; if (Math.abs(c) < FP) c = FP; d = 1 / d; h *= d * c;
+    aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+    d = 1 + aa * d; if (Math.abs(d) < FP) d = FP; c = 1 + aa / c; if (Math.abs(c) < FP) c = FP; d = 1 / d;
+    const del = d * c; h *= del; if (Math.abs(del - 1) < 3e-14) break;
+  }
+  return h;
+}
+function ibeta(a, b, x){
+  if (x <= 0) return 0; if (x >= 1) return 1;
+  const bt = Math.exp(gammaln(a + b) - gammaln(a) - gammaln(b) + a * Math.log(x) + b * Math.log(1 - x));
+  return x < (a + 1) / (a + b + 2) ? bt * betacf(a, b, x) / a : 1 - bt * betacf(b, a, 1 - x) / b;
+}
+const tTwo = (t, df) => !isFinite(t) ? 0 : ibeta(df / 2, .5, df / (df + t * t));
+function erfc(x){
+  const z = Math.abs(x), t = 1 / (1 + .5 * z);
+  const r = t * Math.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (.37409196 + t * (.09678418 + t * (-.18628806 + t * (.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-.82215223 + t * .17087277)))))))));
+  return x >= 0 ? r : 2 - r;
+}
+const zTwo = z => erfc(Math.abs(z) / Math.SQRT2);
+const sum = a => a.reduce((s, v) => s + v, 0);
+const mean = a => sum(a) / a.length;
+function ttest(a, b){
+  const na = a.length, nb = b.length; if (na < 2 || nb < 2) return 1;
+  const ma = mean(a), mb = mean(b); let ss = 0; for (const v of a) ss += (v - ma) ** 2; for (const v of b) ss += (v - mb) ** 2;
+  const df = na + nb - 2; if (!(ss > 0)) return 1;
+  return tTwo((mb - ma) / Math.sqrt(ss / df * (1 / na + 1 / nb)), df);
+}
+function pfmt(p){ return p >= .1 ? p.toFixed(2) : p >= .001 ? p.toFixed(3) : '< 0.001'; }
+const pEq = p => p < .001 ? 'p < 0.001' : 'p = ' + pfmt(p);
+const pc = (x, d) => (100 * x).toFixed(d == null ? 1 : d) + '%';
+function pressSeg(sel, attr, v){ $$(sel).forEach(b => { const on = b.dataset[attr] === String(v); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }); }
+function dashH(ctx, x0, x1, y, color, lw){ ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw || 1.5; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(x0, Math.round(y) + .5); ctx.lineTo(x1, Math.round(y) + .5); ctx.stroke(); ctx.restore(); }
+function tag(ctx, text, x, y, color, align){
+  ctx.font = '600 11px ' + MONO; const tw = ctx.measureText(text).width;
+  const x0 = align === 'right' ? x - tw - 4 : align === 'center' ? x - tw / 2 - 2 : x - 2;
+  ctx.fillStyle = C('--surface'); ctx.globalAlpha = .9; ctx.fillRect(x0, y - 1, tw + 6, 15); ctx.globalAlpha = 1;
+  ctx.fillStyle = color; ctx.textBaseline = 'top'; ctx.textAlign = 'left'; ctx.fillText(text, x0 + 2, y + 1);
+}
+/* log-p axis: y = -log10 p from 0 (p = 1) to top */
+function logPAxis(ctx, X0, X1, Y0, Y1, top){
+  const ys = p => Y0 - Math.min(top, -Math.log10(Math.max(p, 1e-12))) / top * (Y0 - Y1);
+  ctx.font = '11px ' + MONO; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  for (let e = 0; e <= top; e++) {
+    const p = Math.pow(10, -e), y = Math.round(ys(p)) + .5;
+    ctx.strokeStyle = C('--line'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X0, y); ctx.lineTo(X1, y); ctx.stroke();
+    ctx.fillStyle = C('--ink-3'); ctx.fillText(e === 0 ? '1' : e <= 3 ? p.toFixed(e) : '1e−' + e, X0 - 6, y);
+  }
+  return ys;
+}
+
+/* ---------- hero: studies of noise until one works ---------- */
+(function(){
+  const cvT = $('#heroTiles'), cvH = $('#heroHist'), hint = $('#heroHint'), GV = [5, 20, 100, null];
+  let guess = null, tries = [], researchers = [], timer = null, done = false;
+  const study = () => ttest(Array.from({length: 20}, gauss), Array.from({length: 20}, gauss));
+  function drawTiles(){
+    const {ctx, w, h} = fit(cvT), tw = 40, th = 24, gap = 4, per = Math.max(1, Math.floor((w + gap) / (tw + gap))), rows = Math.floor((h + gap) / (th + gap)), cap = per * rows;
+    const show = tries.slice(-cap), skipped = tries.length - show.length;
+    show.forEach((p, i) => {
+      const x = (i % per) * (tw + gap), y = Math.floor(i / per) * (th + gap), hit = p < .05;
+      ctx.fillStyle = hit ? C('--zero') : C('--surface-2'); roundRect(ctx, x, y, tw, th, 5); ctx.fill();
+      ctx.fillStyle = hit ? C('--surface') : C('--ink-3'); ctx.font = (hit ? '700 ' : '') + '11px ' + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText((p < .1 ? p.toFixed(3) : p.toFixed(2)).replace(/^0/, ''), x + tw / 2, y + th / 2 + .5);
+    });
+    if (!tries.length) emptyNote(ctx, w, h + 16, 'each tile will be one study of pure noise, with its p-value');
+    if (skipped) { ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillText(`+${skipped} earlier studies`, w, h); }
+  }
+  function drawHist(){
+    const {ctx, w, h} = fit(cvH), BW = 5, NB = 20, counts = new Array(NB).fill(0);
+    researchers.forEach(k => { counts[Math.min(NB - 1, Math.floor((k - 1) / BW))]++; });
+    const F = frame(ctx, w, h, {lo: 0, hi: NB - 1, ymax: Math.max(10, ...counts) * 1.15, left: 36, lab: k => k % 2 ? '' : String(k * BW + 1) + (k === NB - 1 ? '+' : ''), step: 1});
+    drawBars(ctx, F, 0, NB - 1, k => counts[k], C('--ink-3'), .85);
+    const xv = v => F.X0 + (v - 1) / BW * F.bw;
+    if (guess != null && GV[guess] != null) { vline(ctx, Math.min(F.X1, xv(GV[guess])), F.Y1, F.Y0, C('--gold'), [4, 3], 2); tag(ctx, 'your guess', Math.min(F.X1, xv(GV[guess])) + 4, F.Y1 + 18, C('--gold'), 'left'); }
+    if (researchers.length) {
+      const m = mean(researchers); vline(ctx, xv(m), F.Y1, F.Y0, C('--ink'), null, 2); tag(ctx, 'average ' + m.toFixed(0), xv(m) + 4, F.Y1, C('--ink'), 'left');
+    } else emptyNote(ctx, w, h, 'studies needed, for 200 researchers');
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'right'; ctx.textBaseline = 'top'; ctx.fillText('studies needed before p < 0.05', F.X1, F.Y1);
+  }
+  function message(){
+    const n = researchers.length, m = mean(researchers), srt = researchers.slice().sort((a, b) => a - b), med = srt[Math.floor(n / 2)], five = researchers.filter(k => k <= 5).length;
+    $$('#heroPred .btn').forEach(b => { b.classList.remove('right', 'wrong'); if (guess != null && +b.dataset.g === guess) b.classList.add(guess === 1 ? 'right' : 'wrong'); });
+    hint.innerHTML = `This researcher needed <b>${tries.length}</b> ${tries.length === 1 ? 'study' : 'studies'}. Across ${n} researchers the average was <b>${m.toFixed(0)}</b>, half needed ${med} or fewer, and ${five} got there within 5. ` +
+      `About 20 is built into the definition: p &lt; 0.05 means noise does this 1 time in 20. ` +
+      `And nobody needs 20 separate studies. One dataset, analyzed 20 different ways, does the same job, which is how the Beatles study was made.`;
+  }
+  function open(){ $('#heroGo').disabled = false; $('#heroSkip').hidden = true; }
+  $$('#heroPred .btn').forEach(b => b.addEventListener('click', () => { guess = +b.dataset.g; $$('#heroPred .btn').forEach(x => x.classList.toggle('guess', x === b)); open(); drawHist(); if (done) message(); }));
+  $('#heroSkip').addEventListener('click', open);
+  function oneResearcher(){ let k = 0; while (true) { k++; if (study() < .05) return k; } }
+  $('#heroGo').addEventListener('click', () => {
+    clearInterval(timer); tries = []; researchers = []; done = false; hint.textContent = 'Running studies…';
+    const finish = () => { done = true; drawTiles(); drawHist(); message(); $('#heroGo').textContent = 'Try again with new researchers'; };
+    if (RM) { let p; do { p = study(); tries.push(p); } while (p >= .05); researchers.push(tries.length); while (researchers.length < 200) researchers.push(oneResearcher()); return finish(); }
+    let phase = 0;
+    timer = setInterval(() => {
+      if (phase === 0) { const p = study(); tries.push(p); drawTiles(); if (p < .05) { phase = 1; researchers.push(tries.length); } }
+      else { for (let i = 0; i < 8 && researchers.length < 200; i++) researchers.push(oneResearcher()); drawHist(); if (researchers.length >= 200) { clearInterval(timer); timer = null; finish(); } }
+    }, 45);
+  });
+  drawTiles(); drawHist(); redraws.push(() => { drawTiles(); drawHist(); });
+})();
+
+/* ---------- 1. the many-tests machine ---------- */
+(function(){
+  const MU = 3, M = 20;
+  let nreal = 0, method = 0, batch, tally, timer = null;
+  const reset = () => { tally = {n: 0, anyF: [0, 0, 0], T: [0, 0, 0], F: [0, 0, 0], fdp: [0, 0, 0]}; };
+  function newBatch(){
+    const tests = Array.from({length: M}, (_, i) => { const real = i < nreal; return {real, p: zTwo(gauss() + (real ? MU : 0))}; });
+    tests.sort((a, b) => a.p - b.p);
+    let k = 0; tests.forEach((t, i) => { if (t.p <= (i + 1) / M * .05) k = i + 1; });
+    tests.forEach((t, i) => { t.call = [t.p < .05, t.p < .05 / M, i < k]; });
+    return tests;
+  }
+  function record(b){
+    tally.n++;
+    for (let m = 0; m < 3; m++) {
+      const d = b.filter(t => t.call[m]), f = d.filter(t => !t.real).length;
+      if (f) tally.anyF[m]++; tally.T[m] += d.length - f; tally.F[m] += f; tally.fdp[m] += d.length ? f / d.length : 0;
+    }
+  }
+  function draw(){
+    const {ctx, w, h} = fit($('#mtChart')), X0 = 52, X1 = w - 12, Y0 = h - 26, Y1 = 10, TOP = 5;
+    const ys = logPAxis(ctx, X0, X1, Y0, Y1, TOP), cw = (X1 - X0) / M, xc = i => X0 + cw * (i + .5);
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    for (let i = 0; i < M; i += (cw < 22 ? 4 : 1)) ctx.fillText(i + 1, xc(i), Y0 + 6);
+    ctx.textAlign = 'right'; ctx.fillText('20 tests, smallest p first', X1, Y1);
+    // threshold
+    ctx.save(); ctx.strokeStyle = C('--ink'); ctx.lineWidth = 1.8; ctx.setLineDash([5, 4]); ctx.beginPath();
+    if (method === 0) { ctx.moveTo(X0, ys(.05)); ctx.lineTo(X1, ys(.05)); }
+    else if (method === 1) { ctx.moveTo(X0, ys(.05 / M)); ctx.lineTo(X1, ys(.05 / M)); }
+    else { for (let i = 0; i < M; i++) { const y = ys((i + 1) / M * .05); if (i === 0) ctx.moveTo(X0 + cw * i, y); else ctx.lineTo(X0 + cw * i, y); ctx.lineTo(X0 + cw * (i + 1), y); } }
+    ctx.stroke(); ctx.restore();
+    const lab = ['0.05', '0.05 ÷ 20 = 0.0025', 'staircase: 0.05 × rank ÷ 20'][method];
+    tag(ctx, lab, X1 - 4, (method === 2 ? ys(.05) : ys([.05, .0025][method])) - 18, C('--ink'), 'right');
+    batch.forEach((t, i) => {
+      const x = xc(i), y = ys(t.p), on = t.call[method];
+      ctx.fillStyle = on ? (t.real ? C('--one') : C('--zero')) : C('--ink-3'); dot(ctx, x, y, 5);
+      if (t.real) { ctx.strokeStyle = C('--one'); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, 8, 0, TAU); ctx.stroke(); }
+    });
+  }
+  function read(){
+    const d = batch.filter(t => t.call[method]), f = d.filter(t => !t.real).length;
+    $('#mtRead').innerHTML = `this batch: <b>${d.length}</b> discover${d.length === 1 ? 'y' : 'ies'}` + (d.length ? `, <b>${f}</b> of them false` : '') + (nreal ? ` · real effects found: ${d.length - f} of ${nreal}` : '');
+    const N = tally.n, names = ['No correction', 'Bonferroni', 'False discovery rate'];
+    $('#mtTable').innerHTML = N ? `<thead><tr><th>${N.toLocaleString('en-US')} batches</th><th>Any false discovery</th>${nreal ? '<th>Real found</th>' : ''}<th>False per batch</th>${nreal ? '<th>Share false</th>' : ''}</tr></thead><tbody>` +
+      names.map((nm, m) => `<tr${m === method ? ' class="cur"' : ''}><td>${nm}</td><td>${pc(tally.anyF[m] / N)}</td>${nreal ? `<td>${(tally.T[m] / N).toFixed(2)} of ${nreal}</td>` : ''}<td>${(tally.F[m] / N).toFixed(2)}</td>${nreal ? `<td>${pc(tally.fdp[m] / N)}</td>` : ''}</tr>`).join('') + '</tbody>' : '';
+  }
+  function all(){ draw(); read(); }
+  $('#mtNew').addEventListener('click', () => { batch = newBatch(); record(batch); all(); });
+  $('#mtMany').addEventListener('click', () => {
+    clearInterval(timer); let left = 1000;
+    const go = () => { const m = Math.min(left, RM ? 1000 : 50); for (let i = 0; i < m; i++) { batch = newBatch(); record(batch); } left -= m; all(); if (left <= 0) { clearInterval(timer); timer = null; } };
+    if (RM) go(); else timer = setInterval(go, 25);
+  });
+  $('#mtReset').addEventListener('click', () => { clearInterval(timer); timer = null; reset(); read(); });
+  $$('[data-mr]').forEach(b => b.addEventListener('click', () => { clearInterval(timer); timer = null; nreal = +b.dataset.mr; pressSeg('[data-mr]', 'mr', nreal); reset(); batch = newBatch(); record(batch); all(); }));
+  $$('[data-mm]').forEach(b => b.addEventListener('click', () => { method = +b.dataset.mm; pressSeg('[data-mm]', 'mm', method); all(); }));
+  reset(); batch = newBatch(); record(batch); all(); redraws.push(draw);
+})();
+
+/* ---------- 2. peeking ---------- */
+(function(){
+  const N0 = 10, NMAX = 50;
+  let path, tally = {n: 0, stopped: 0, endSig: 0}, timer = null;
+  function researcher(){
+    let na = 0, sa = 0, qa = 0, sb = 0, qb = 0; const ps = [];
+    const add = () => { const a = gauss(), b = gauss(); na++; sa += a; qa += a * a; sb += b; qb += b * b; };
+    for (let i = 0; i < N0; i++) add();
+    while (true) {
+      const ma = sa / na, mb = sb / na, ss = (qa - na * ma * ma) + (qb - na * mb * mb), df = 2 * na - 2;
+      ps.push(tTwo((mb - ma) / Math.sqrt(ss / df * 2 / na), df));
+      if (na >= NMAX) break; add();
+    }
+    const stop = ps.findIndex(p => p <= .05);
+    return {ps, stop};
+  }
+  function record(r){ tally.n++; if (r.stop >= 0) tally.stopped++; if (r.ps[r.ps.length - 1] <= .05) tally.endSig++; }
+  function draw(){
+    const {ctx, w, h} = fit($('#pkChart')), X0 = 52, X1 = w - 12, Y0 = h - 26, Y1 = 10, TOP = 3;
+    const ys = logPAxis(ctx, X0, X1, Y0, Y1, TOP), xs = n => X0 + (n - N0) / (NMAX - N0) * (X1 - X0);
+    xAxis(ctx, X0, X1, Y0, N0, NMAX);
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillText('participants per group', X1, Y0 - 4);
+    dashH(ctx, X0, X1, ys(.05), C('--zero'), 1.2); tag(ctx, 'p = 0.05', X0 + 4, ys(.05) - 17, C('--zero'), 'left');
+    const end = path.stop >= 0 ? path.stop : path.ps.length - 1;
+    ctx.save(); ctx.strokeStyle = C('--ink-2'); ctx.lineWidth = 2; ctx.beginPath();
+    for (let i = 0; i <= end; i++) { const x = xs(N0 + i), y = ys(path.ps[i]); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.stroke(); ctx.restore();
+    if (path.stop >= 0) {
+      ctx.save(); ctx.strokeStyle = C('--ink-3'); ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]); ctx.beginPath();
+      for (let i = end; i < path.ps.length; i++) { const x = xs(N0 + i), y = ys(path.ps[i]); i === end ? ctx.moveTo(x, y) : ctx.lineTo(x, y); }
+      ctx.stroke(); ctx.restore();
+      ctx.fillStyle = C('--zero'); dot(ctx, xs(N0 + end), ys(path.ps[end]), 6);
+      const right = xs(N0 + end) > (X0 + X1) * .6;
+      tag(ctx, `stop at ${N0 + end}: ${pEq(path.ps[end])}`, xs(N0 + end) + (right ? -8 : 8), ys(path.ps[end]) - 6, C('--zero'), right ? 'right' : 'left');
+    }
+  }
+  function read(){
+    const r = path, endP = r.ps[r.ps.length - 1];
+    $('#pkRead').innerHTML = (r.stop >= 0 ? `this researcher stopped at <b>${N0 + r.stop}</b> per group with ${pEq(r.ps[r.stop])} and reported a finding; at 50 per group, p would have been ${pfmt(endP)}` : `this researcher never dipped below 0.05 and reported nothing (final p = ${pfmt(endP)})`) +
+      (tally.n ? `<br>researchers who stopped on a “finding”: <b>${tally.stopped.toLocaleString('en-US')} of ${tally.n.toLocaleString('en-US')}</b> (${pc(tally.stopped / tally.n)}) · significant if they had waited until 50: ${pc(tally.endSig / tally.n)}` : '');
+  }
+  $('#pkNew').addEventListener('click', () => { path = researcher(); record(path); draw(); read(); });
+  $('#pkMany').addEventListener('click', () => {
+    clearInterval(timer); let left = 1000;
+    const go = () => { const m = Math.min(left, RM ? 1000 : 40); for (let i = 0; i < m; i++) { path = researcher(); record(path); } left -= m; draw(); read(); if (left <= 0) { clearInterval(timer); timer = null; } };
+    if (RM) go(); else timer = setInterval(go, 25);
+  });
+  $('#pkReset').addEventListener('click', () => { clearInterval(timer); timer = null; tally = {n: 0, stopped: 0, endSig: 0}; read(); });
+  do { path = researcher(); } while (path.stop < 6 || path.stop > 28 || path.ps[path.ps.length - 1] < .3);
+  draw(); read(); redraws.push(draw);
+})();
+
+/* ---------- 3. the p-hacking sandbox ---------- */
+(function(){
+  const SONGS = ['Kalimba', 'When I’m Sixty-Four', 'Hot Potato'];
+  const PAIRS = [[1, 0], [2, 0], [1, 2]];
+  const FORKS = [
+    {key: 'dv', label: 'Outcome', opts: ['age by birth date', 'how old you feel', 'both combined']},
+    {key: 'pair', label: 'Compare', opts: ['Sixty-Four vs Kalimba', 'Hot Potato vs Kalimba', 'Sixty-Four vs Hot Potato']},
+    {key: 'cov', label: 'Adjust for', opts: ['nothing', 'father’s age', 'gender']},
+    {key: 'excl', label: 'Drop outliers', opts: ['none', 'beyond 2.5 SD', 'beyond 2 SD']},
+    {key: 'sub', label: 'Who', opts: ['everyone', 'women only', 'men only']},
+    {key: 'n', label: 'Sample', opts: ['20 per song', 'collect 10 more']}
+  ];
+  const TOTAL = FORKS.reduce((s, f) => s * f.opts.length, 1);
+  let D, cfg = {dv: 0, pair: 0, cov: 0, excl: 0, sub: 0, n: 0}, visited = new Set(), sigFound = new Set(), gardenTimer = null, best = null;
+  function person(song, wave){
+    const zf = gauss(), z2 = gauss(), z3 = gauss(), za = .6 * zf + .8 * z2;
+    return {song, wave, female: Math.random() < .5, father: 50 + 5 * zf, age: 21 + za, feel: 3 + .9 * (.5 * za + Math.sqrt(.75) * z3)};
+  }
+  function dataset(){ const d = []; for (let s = 0; s < 3; s++) for (let i = 0; i < 30; i++) d.push(person(s, i < 20 ? 0 : 1)); return d; }
+  function regP(y, g, c){
+    // y ~ 1 + g + c: two-sided p for g; falls back to a t-test if c is constant
+    const n = y.length; if (n < 5) return 1;
+    let S = [[0, 0, 0], [0, 0, 0], [0, 0, 0]], b = [0, 0, 0];
+    for (let i = 0; i < n; i++) { const x = [1, g[i], c[i]]; for (let r = 0; r < 3; r++) { b[r] += x[r] * y[i]; for (let q = 0; q < 3; q++) S[r][q] += x[r] * x[q]; } }
+    const [[a, bb, cc], [d, e, f], [gg, hh, ii]] = S;
+    const det = a * (e * ii - f * hh) - bb * (d * ii - f * gg) + cc * (d * hh - e * gg);
+    if (Math.abs(det) < 1e-9 * Math.max(1, Math.abs(a * e * ii))) return null;
+    const inv = [[e * ii - f * hh, cc * hh - bb * ii, bb * f - cc * e], [f * gg - d * ii, a * ii - cc * gg, cc * d - a * f], [d * hh - e * gg, bb * gg - a * hh, a * e - bb * d]].map(r => r.map(v => v / det));
+    const beta = inv.map(r => r[0] * b[0] + r[1] * b[1] + r[2] * b[2]);
+    let rss = 0; for (let i = 0; i < n; i++) { const r = y[i] - beta[0] - beta[1] * g[i] - beta[2] * c[i]; rss += r * r; }
+    const df = n - 3, se = Math.sqrt(rss / df * inv[1][1]);
+    return se > 0 ? tTwo(beta[1] / se, df) : 1;
+  }
+  function analyse(data, c){
+    const pair = PAIRS[c.pair];
+    let rows = data.filter(d => (d.song === pair[0] || d.song === pair[1]) && (c.n === 1 || d.wave === 0));
+    if (c.sub === 1) rows = rows.filter(d => d.female); else if (c.sub === 2) rows = rows.filter(d => !d.female);
+    let ys;
+    if (c.dv === 2) {
+      const za = z(rows.map(d => d.age)), zf = z(rows.map(d => d.feel)); ys = za.map((v, i) => (v + zf[i]) / 2);
+    } else ys = rows.map(d => c.dv === 0 ? d.age : d.feel);
+    const keep = rows.map(() => true);
+    if (c.excl) {
+      const k = [0, 2.5, 2][c.excl];
+      pair.forEach(s => {
+        const idx = rows.map((d, i) => d.song === s ? i : -1).filter(i => i >= 0), v = idx.map(i => ys[i]);
+        if (v.length < 2) return; const m = mean(v), sd = Math.sqrt(v.reduce((q, x) => q + (x - m) ** 2, 0) / (v.length - 1));
+        idx.forEach(i => { if (Math.abs(ys[i] - m) > k * sd) keep[i] = false; });
+      });
+    }
+    const y = [], g = [], cv = [];
+    rows.forEach((d, i) => { if (!keep[i]) return; y.push(ys[i]); g.push(d.song === pair[0] ? 1 : 0); cv.push(c.cov === 1 ? d.father : d.female ? 1 : 0); });
+    let p = null;
+    if (c.cov) p = regP(y, g, cv);
+    if (p == null) p = ttest(y.filter((_, i) => !g[i]), y.filter((_, i) => g[i]));
+    return {p, rows, ys, keep, pair};
+  }
+  function z(a){ const m = mean(a), sd = Math.sqrt(a.reduce((q, x) => q + (x - m) ** 2, 0) / Math.max(1, a.length - 1)) || 1; return a.map(v => (v - m) / sd); }
+  const keyOf = c => FORKS.map(f => c[f.key]).join('');
+  function* allCfgs(){
+    for (let dv = 0; dv < 3; dv++) for (let pair = 0; pair < 3; pair++) for (let cov = 0; cov < 3; cov++) for (let excl = 0; excl < 3; excl++) for (let sub = 0; sub < 3; sub++) for (let n = 0; n < 2; n++) yield {dv, pair, cov, excl, sub, n};
+  }
+  const describe = c => FORKS.map(f => f.opts[c[f.key]]).join(' · ');
+  // build fork controls
+  $('#sbForks').innerHTML = FORKS.map(f => `<div class="forkrow"><span class="forklab">${f.label}</span><div class="seg" role="group" aria-label="${f.label}">${f.opts.map((o, i) => `<button class="btn sm${i === 0 ? ' on' : ''}" data-fk="${f.key}" data-v="${i}" aria-pressed="${i === 0}">${o}</button>`).join('')}</div></div>`).join('');
+  function syncButtons(){ FORKS.forEach(f => $$(`[data-fk="${f.key}"]`).forEach(b => { const on = +b.dataset.v === cfg[f.key]; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); })); }
+  function draw(){
+    const R = analyse(D, cfg), {ctx, w, h} = fit($('#sbChart'));
+    const vals = R.ys, lo0 = Math.min(...vals), hi0 = Math.max(...vals), pad = (hi0 - lo0) * .08 || 1;
+    const X0 = 52, X1 = w - 10, Y0 = h - 24, Y1 = 10, lo = lo0 - pad, hi = hi0 + pad;
+    const yv = v => Y0 - (v - lo) / (hi - lo) * (Y0 - Y1), t = ticksIn(lo, hi, 4);
+    yGrid(ctx, X0, X1, yv, t, stepFmt(t));
+    const xc = j => X0 + (X1 - X0) * (j + .5) / 2, spread = Math.min(160, (X1 - X0) * .32);
+    ctx.font = '11px ' + MONO; ctx.fillStyle = C('--ink-3'); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    R.pair.forEach((s, j) => ctx.fillText(SONGS[s], xc(j), Y0 + 6));
+    ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(['age (years)', 'how old you feel (1–5)', 'combined score'][cfg.dv], X0 + 4, 0);
+    R.pair.forEach((s, j) => {
+      const idx = R.rows.map((d, i) => d.song === s ? i : -1).filter(i => i >= 0);
+      idx.forEach((i, q) => {
+        const x = xc(j) + (idx.length > 1 ? (q / (idx.length - 1) - .5) * spread : 0), y = yv(R.ys[i]);
+        if (R.keep[i]) { ctx.fillStyle = C('--accent'); ctx.globalAlpha = .85; dot(ctx, x, y, 4); ctx.globalAlpha = 1; }
+        else { ctx.strokeStyle = C('--zero'); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(x, y, 4, 0, TAU); ctx.stroke(); }
+      });
+      const kept = idx.filter(i => R.keep[i]).map(i => R.ys[i]);
+      if (kept.length) { const m = mean(kept); ctx.fillStyle = C('--ink'); ctx.fillRect(xc(j) - spread / 2 - 10, Math.round(yv(m)) - 1, spread + 20, 2.5); }
+    });
+    return R;
+  }
+  function update(){
+    const R = draw(), k = keyOf(cfg); visited.add(k); if (R.p < .05) sigFound.add(k);
+    const sig = R.p < .05;
+    $('#sbP').innerHTML = `<span class="${sig ? 'hot' : ''}">${pEq(R.p)}</span>${sig ? '<small>“significant”. Publishable!</small>' : '<small>not significant. Keep exploring?</small>'}`;
+    const nKept = R.keep.filter(Boolean).length;
+    $('#sbRead').innerHTML = `${nKept} participants analyzed${R.keep.length - nKept ? ` (${R.keep.length - nKept} dropped as outliers)` : ''}<br>forks tried: <b>${visited.size} of ${TOTAL}</b> · significant paths you’ve found: <b>${sigFound.size}</b>`;
+  }
+  $('#sbForks').addEventListener('click', e => { const b = e.target.closest('button[data-fk]'); if (!b) return; cfg[b.dataset.fk] = +b.dataset.v; syncButtons(); update(); });
+  $('#sbPublish').addEventListener('click', () => {
+    const p0 = analyse(D, cfg).p; let k = 0, R = 1000; const one = analyse(dataset(), cfg).p;
+    for (let i = 0; i < R; i++) if (analyse(dataset(), cfg).p < .05) k++;
+    $('#sbMsg').innerHTML = `${p0 < .05 ? `You publish: <b>${pEq(p0)}</b>.` : `You publish anyway, at ${pEq(p0)}.`} A lab repeats your exact analysis on new students and gets ${pEq(one)}. ` +
+      `Run on 1,000 fresh studies, this path is significant in <b>${k}</b> (${pc(k / R)}). ` + (k / R > .075 ? 'That is more than the 5% noise should give: dropping outliers group by group biases even a single test (see below). ' : 'That is the 5% noise always gives. ') + 'The “effect” lived in the accidents of one dataset.';
+  });
+  $('#sbSearch').addEventListener('click', () => {
+    let k = 0, bp = 2; best = null;
+    for (const c of allCfgs()) { const p = analyse(D, c).p; if (p < .05) { k++; sigFound.add(keyOf(c)); } if (p < bp) { bp = p; best = c; } visited.add(keyOf(c)); }
+    $('#sbMsg').innerHTML = `On this dataset, <b>${k} of ${TOTAL}</b> paths give p &lt; 0.05. The best: <em>${describe(best)}</em>, ${pEq(bp)}. <button class="linkbtn" id="sbBest">take that path</button>`;
+    $('#sbBest').addEventListener('click', () => { cfg = Object.assign({}, best); syncButtons(); update(); });
+    update();
+  });
+  $('#sbNew').addEventListener('click', () => { D = dataset(); visited = new Set(); sigFound = new Set(); $('#sbMsg').innerHTML = ''; update(); });
+  $('#sbGarden').addEventListener('click', () => {
+    clearInterval(gardenTimer); let done = 0, any = 0, paths = 0; const R = 200, cfgs = [...allCfgs()];
+    const step = () => {
+      const m = Math.min(R - done, RM ? R : 4);
+      for (let i = 0; i < m; i++) { const d = dataset(); let k = 0; for (const c of cfgs) if (analyse(d, c).p < .05) k++; paths += k; if (k) any++; done++; }
+      $('#sbGardenRead').innerHTML = `${done} studies of pure noise: at least one of the ${TOTAL} paths significant in <b>${any}</b> (${pc(any / done)}) · on average ${(paths / done).toFixed(0)} significant paths per study`;
+      if (done >= R) { clearInterval(gardenTimer); gardenTimer = null; }
+    };
+    if (RM) step(); else gardenTimer = setInterval(step, 20);
+  });
+  do { D = dataset(); } while (analyse(D, cfg).p < .3);
+  update(); redraws.push(draw);
+})();
+
+/* ---------- 5. quiz ---------- */
+(function(){
+  const Q = [
+    {s: 'Predict: 20 tests on pure noise at the 5% level. What is the chance at least one is “significant”?',
+     o: ['About 5%', 'About 2 in 3'], a: 1,
+     e: '1 − 0.95²⁰ = 64%. Each test is a fresh 1-in-20 chance.'},
+    {s: 'A researcher checks the p-value after every new pair of participants, from 10 up to 50 per group, and stops at p < 0.05. How often does pure noise “work”?',
+     o: ['About 5%', 'About 22%'], a: 1,
+     e: 'The p-value wanders as data arrive; stopping at a dip locks in the luck. Only 5% would be significant at the planned end.'},
+    {s: 'Which reading is <em>wrong</em>?',
+     o: ['p < 0.05 after trying many analyses still means only a 5% chance of a fluke', 'Forks can be taken without any intention to cheat', 'A pre-registered analysis keeps its 5% false-alarm rate'], a: 0,
+     e: 'The 5% applies to one analysis chosen in advance. After many tries the real false-alarm rate can exceed 50%.'},
+    {s: 'With Bonferroni’s correction for 20 tests, what threshold does each test have to beat?',
+     o: ['0.05', '0.0025', '0.01'], a: 1,
+     e: '0.05 ÷ 20 = 0.0025, which keeps the chance of any false alarm across all 20 at about 5%.'},
+    {s: 'What does the false discovery rate method control?',
+     o: ['The share of your discoveries that are false, on average', 'The chance of any false alarm at all'], a: 0,
+     e: 'That is why it finds more real effects than Bonferroni: it accepts an occasional false discovery among many true ones.'},
+    {s: 'Why does a p-hacked result usually vanish on fresh data?',
+     o: ['The chosen path was fitted to the noise in the first dataset', 'Fresh data are always larger'], a: 0,
+     e: 'The new noise doesn’t share the old accidents, so the path gives p < 0.05 only about 5% of the time.'},
+    {s: 'In the Beatles study, what was p without the adjustment for father’s age?',
+     o: ['0.04', '0.33'], a: 1,
+     e: 'F(1, 18) = 1.01, p = .33. The “effect” depended on a covariate chosen from many measured ones.'}
+  ];
+  const box = $('#quiz'); let answered = 0, right = 0;
+  Q.forEach(qq => {
+    const d = document.createElement('div'); d.className = 'qitem';
+    d.innerHTML = `<p>${qq.s}</p><div class="qbtns">${qq.o.map((t, i) => `<button class="btn" data-i="${i}">${t}</button>`).join('')}</div><p class="qexp" hidden></p>`;
+    const exp = d.querySelector('.qexp');
+    d.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      const ok = +b.dataset.i === qq.a;
+      if (!d.dataset.done) { d.dataset.done = '1'; answered++; if (ok) right++; }
+      d.querySelectorAll('button').forEach(x => x.classList.remove('right', 'wrong'));
+      b.classList.add(ok ? 'right' : 'wrong');
+      exp.hidden = false; exp.innerHTML = `<b>${ok ? '✓ Right.' : '✗ Not quite.'}</b> ${qq.e}`;
+      $('#quizScore').textContent = `${answered} of ${Q.length} answered · ${right} right on the first try`;
+    }));
+    box.appendChild(d);
+  });
+})();
+})();
+</script>
+</body>
+</html>

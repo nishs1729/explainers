@@ -162,7 +162,7 @@ window.EXPLAINERS = {
           "id": "learning-from-data",
           "title": "Learning from data",
           "blurb": "Could chance alone have done this? Starting from line-ups and coin streaks, the series builds the tools for answering that question: sampling, estimation, resampling, tests, intervals and power, ending with the 1954 polio vaccine trial.",
-          "topics": ["is-it-real", "sampling-distributions", "selection-bias", "estimation", "bootstrap", "permutation-tests", "p-values", "confidence-intervals", "errors", "power", "student-t", "chi-square-tests", "anova"]
+          "topics": ["is-it-real", "sampling-distributions", "selection-bias", "estimation", "bootstrap", "permutation-tests", "p-values", "confidence-intervals", "errors", "power", "student-t", "chi-square-tests", "anova", "forking-paths"]
         }
       ],
       "topics": [
@@ -280,6 +280,15 @@ window.EXPLAINERS = {
           "path": "statistics/anova.html",
           "summary": "Five fertilizers, five plots each: why ten t-tests on pure noise cry wolf 29% of the time, F as between-group over within-group spread with a drag-the-averages spreader, PlantGrowth checked against the shuffle, and which groups really differ.",
           "tags": ["ANOVA", "F distribution", "multiple comparisons", "Tukey", "Fisher"],
+          "preview": { "select": "#heroPlay", "click": ["#heroSkip", "#heroGo"] }
+        },
+        {
+          "id": "forking-paths",
+          "title": "The garden of forking paths",
+          "short": "Forking paths",
+          "path": "statistics/forking-paths.html",
+          "summary": "How a Beatles song “made” students younger at p = .040: 20 tests on noise, Bonferroni and false discovery rates, peeking until it works, and a p-hacking sandbox with 486 paths whose discoveries vanish on fresh data.",
+          "tags": ["p-hacking", "multiple testing", "false discovery rate", "pre-registration", "replication"],
           "preview": { "select": "#heroPlay", "click": ["#heroSkip", "#heroGo"] }
         }
       ]
